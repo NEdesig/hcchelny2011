@@ -16,7 +16,7 @@
 body{
     background:#06132f;
     color:#fff;
-    font-family:Arial, sans-serif;
+    font-family:Arial,sans-serif;
     padding-bottom:80px;
 }
 
@@ -54,8 +54,6 @@ main{
     padding:16px;
 }
 
-/* СТРАНИЦЫ */
-
 .page{
     display:none;
 }
@@ -63,8 +61,6 @@ main{
 .page.active{
     display:block;
 }
-
-/* ГЛАВНАЯ */
 
 .hero{
     background:linear-gradient(135deg,#0b2b69,#07183c);
@@ -94,8 +90,6 @@ main{
 .card h3{
     margin-bottom:12px;
 }
-
-/* МАТЧ */
 
 .match{
     background:#081b46;
@@ -127,8 +121,6 @@ main{
     font-weight:bold;
 }
 
-/* СОСТАВ */
-
 .position-title{
     font-size:18px;
     margin:22px 0 8px;
@@ -155,6 +147,7 @@ main{
     align-items:center;
     justify-content:center;
     font-weight:bold;
+    flex-shrink:0;
 }
 
 .player-name{
@@ -168,7 +161,20 @@ main{
     margin-top:3px;
 }
 
-/* НИЖНЕЕ МЕНЮ */
+.loading{
+    text-align:center;
+    color:#9fb1d5;
+    padding:25px 0;
+}
+
+.error{
+    background:#5b1825;
+    border:1px solid #a52b40;
+    border-radius:12px;
+    padding:15px;
+    color:#fff;
+    line-height:1.5;
+}
 
 .bottom-nav{
     position:fixed;
@@ -199,20 +205,6 @@ main{
 .bottom-nav button.active{
     color:#ffcd00;
 }
-
-/* АДМИНКА */
-
-.admin-button{
-    display:block;
-    text-align:center;
-    background:#ffcd00;
-    color:#06132f;
-    text-decoration:none;
-    font-weight:bold;
-    padding:13px;
-    border-radius:10px;
-    margin-top:10px;
-}
 </style>
 </head>
 
@@ -241,13 +233,11 @@ main{
 <h2>ХК Челны 2011</h2>
 
 <p>
-Добро пожаловать на официальный сайт команды.
-Здесь можно найти состав, матчи, результаты,
-таблицу и последние новости.
+Официальный сайт команды.
+Матчи, состав, результаты и новости.
 </p>
 
 </div>
-
 
 <div class="card">
 
@@ -256,7 +246,7 @@ main{
 <div class="match">
 
 <div class="match-date">
-Дата матча
+Предстоящий матч
 </div>
 
 <div class="teams">
@@ -279,13 +269,12 @@ VS
 
 </div>
 
-
 <div class="card">
 
-<h3>📢 Последняя новость</h3>
+<h3>📢 Новости</h3>
 
-<p style="color:#b9c8e8;">
-Здесь будет отображаться последняя новость команды.
+<p style="color:#9fb1d5;">
+Новости команды скоро появятся здесь.
 </p>
 
 </div>
@@ -340,209 +329,8 @@ VS
 
 <h2>👥 Состав команды</h2>
 
-
-<!-- ВРАТАРИ -->
-
-<h3 class="position-title">
-🥅 Вратари
-</h3>
-
-<div class="player">
-<div class="number">#1</div>
-<div>
-<div class="player-name">Антонов Артемий</div>
-<div class="player-position">Вратарь</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#20</div>
-<div>
-<div class="player-name">Гилязев Алмаз</div>
-<div class="player-position">Вратарь</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#22</div>
-<div>
-<div class="player-name">Созинов Илья</div>
-<div class="player-position">Вратарь</div>
-</div>
-</div>
-
-
-<!-- ЗАЩИТНИКИ -->
-
-<h3 class="position-title">
-🛡️ Защитники
-</h3>
-
-<div class="player">
-<div class="number">#14</div>
-<div>
-<div class="player-name">Валеев Марсель</div>
-<div class="player-position">Защитник</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#9</div>
-<div>
-<div class="player-name">Иманбаев Роберт</div>
-<div class="player-position">Защитник</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#77</div>
-<div>
-<div class="player-name">Кондратьев Эрик</div>
-<div class="player-position">Защитник</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#16</div>
-<div>
-<div class="player-name">Мокринский Кирилл</div>
-<div class="player-position">Защитник</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#18</div>
-<div>
-<div class="player-name">Норов Амир</div>
-<div class="player-position">Защитник</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#78</div>
-<div>
-<div class="player-name">Семёнов Никита</div>
-<div class="player-position">Защитник</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#75</div>
-<div>
-<div class="player-name">Хазрятов Демид</div>
-<div class="player-position">Защитник</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#5</div>
-<div>
-<div class="player-name">Хузин Саид</div>
-<div class="player-position">Защитник</div>
-</div>
-</div>
-
-
-<!-- НАПАДАЮЩИЕ -->
-
-<h3 class="position-title">
-🎯 Нападающие
-</h3>
-
-<div class="player">
-<div class="number">#55</div>
-<div>
-<div class="player-name">Шарафутдинов Эльман</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#88</div>
-<div>
-<div class="player-name">Ахунов Динар</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#81</div>
-<div>
-<div class="player-name">Болсуновский Кирилл</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#10</div>
-<div>
-<div class="player-name">Галиуллин Самат</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#86</div>
-<div>
-<div class="player-name">Данилов Дамир</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#17</div>
-<div>
-<div class="player-name">Лазарев Егор</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#29</div>
-<div>
-<div class="player-name">Лозин Андрей</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#83</div>
-<div>
-<div class="player-name">Набиев Карим</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#90</div>
-<div>
-<div class="player-name">Осипов Альберт</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#26</div>
-<div>
-<div class="player-name">Шарифуллин Амир</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#30</div>
-<div>
-<div class="player-name">Шарифуллин Данис</div>
-<div class="player-position">Нападающий</div>
-</div>
-</div>
-
-<div class="player">
-<div class="number">#12</div>
-<div>
-<div class="player-name">Шаяхов Рустам</div>
-<div class="player-position">Нападающий</div>
-</div>
+<div id="rosterList" class="loading">
+Загрузка состава...
 </div>
 
 </div>
@@ -561,7 +349,7 @@ VS
 <br>
 
 <p style="color:#9fb1d5;">
-Таблица будет добавлена сюда.
+Турнирная таблица будет добавлена позже.
 </p>
 
 </div>
@@ -580,7 +368,7 @@ VS
 <br>
 
 <p style="color:#9fb1d5;">
-Новости команды появятся здесь.
+Новости команды будут отображаться здесь.
 </p>
 
 </div>
@@ -624,26 +412,253 @@ VS
 
 <script>
 
-function openPage(pageId, button){
+/* =========================================
+   SUPABASE
+========================================= */
 
-document.querySelectorAll('.page').forEach(function(page){
-    page.classList.remove('active');
-});
+const SUPABASE_URL =
+"https://jxlbojosxaaqnyuzohnw.supabase.co";
 
-document.getElementById(pageId).classList.add('active');
+const SUPABASE_KEY =
+"sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
 
-document.querySelectorAll('.bottom-nav button').forEach(function(btn){
-    btn.classList.remove('active');
-});
 
-button.classList.add('active');
+/* =========================================
+   ЗАГРУЗКА СОСТАВА
+========================================= */
 
-window.scrollTo({
-    top:0,
-    behavior:'smooth'
-});
+async function loadRoster(){
+
+    const rosterList =
+        document.getElementById("rosterList");
+
+    try{
+
+        const response = await fetch(
+            SUPABASE_URL +
+            "/rest/v1/players?select=*&order=number.asc",
+            {
+                method:"GET",
+
+                headers:{
+                    "apikey":SUPABASE_KEY,
+                    "Authorization":
+                    "Bearer " + SUPABASE_KEY
+                }
+            }
+        );
+
+        if(!response.ok){
+
+            throw new Error(
+                "Ошибка Supabase: " +
+                response.status
+            );
+
+        }
+
+        const players = await response.json();
+
+        if(players.length === 0){
+
+            rosterList.innerHTML =
+                '<p class="loading">Состав пока пуст.</p>';
+
+            return;
+        }
+
+        const goalies =
+            players.filter(
+                player =>
+                player.position === "Вратарь"
+            );
+
+        const defenders =
+            players.filter(
+                player =>
+                player.position === "Защитник"
+            );
+
+        const forwards =
+            players.filter(
+                player =>
+                player.position === "Нападающий"
+            );
+
+
+        let html = "";
+
+
+        /* ВРАТАРИ */
+
+        if(goalies.length > 0){
+
+            html += `
+                <h3 class="position-title">
+                    🥅 Вратари
+                </h3>
+            `;
+
+            goalies.forEach(player => {
+
+                html += createPlayer(player);
+
+            });
+
+        }
+
+
+        /* ЗАЩИТНИКИ */
+
+        if(defenders.length > 0){
+
+            html += `
+                <h3 class="position-title">
+                    🛡️ Защитники
+                </h3>
+            `;
+
+            defenders.forEach(player => {
+
+                html += createPlayer(player);
+
+            });
+
+        }
+
+
+        /* НАПАДАЮЩИЕ */
+
+        if(forwards.length > 0){
+
+            html += `
+                <h3 class="position-title">
+                    🎯 Нападающие
+                </h3>
+            `;
+
+            forwards.forEach(player => {
+
+                html += createPlayer(player);
+
+            });
+
+        }
+
+
+        rosterList.innerHTML = html;
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        rosterList.innerHTML = `
+            <div class="error">
+                Не удалось загрузить состав.
+                <br><br>
+                Проверь подключение к Supabase.
+            </div>
+        `;
+
+    }
 
 }
+
+
+/* =========================================
+   КАРТОЧКА ИГРОКА
+========================================= */
+
+function createPlayer(player){
+
+    return `
+        <div class="player">
+
+            <div class="number">
+                #${player.number}
+            </div>
+
+            <div>
+
+                <div class="player-name">
+                    ${escapeHTML(player.name)}
+                </div>
+
+                <div class="player-position">
+                    ${escapeHTML(player.position)}
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+/* =========================================
+   ЗАЩИТА ОТ HTML В ИМЕНАХ
+========================================= */
+
+function escapeHTML(text){
+
+    return String(text)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
+
+/* =========================================
+   НАВИГАЦИЯ
+========================================= */
+
+function openPage(pageId,button){
+
+    document
+        .querySelectorAll(".page")
+        .forEach(page => {
+
+            page.classList.remove("active");
+
+        });
+
+
+    document
+        .getElementById(pageId)
+        .classList.add("active");
+
+
+    document
+        .querySelectorAll(".bottom-nav button")
+        .forEach(btn => {
+
+            btn.classList.remove("active");
+
+        });
+
+
+    button.classList.add("active");
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+}
+
+
+/* =========================================
+   ЗАПУСК
+========================================= */
+
+loadRoster();
 
 </script>
 
