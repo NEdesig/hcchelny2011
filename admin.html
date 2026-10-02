@@ -857,10 +857,206 @@ select:focus{
 
 
     /* =========================================================
-   PLAYER STATS — ИСПРАВЛЕННАЯ ВЕРСИЯ
+   <!-- PLAYERS -->
+<section id="players" class="panel">
+
+  <div class="card">
+
+    <h2>👥 Добавить игрока</h2>
+
+    <div class="grid">
+
+      <div class="field">
+        <label>Номер</label>
+        <input id="playerNumber" type="number">
+      </div>
+
+      <div class="field">
+        <label>Имя и фамилия</label>
+        <input id="playerName">
+      </div>
+
+    </div>
+
+    <div class="field">
+      <label>Позиция</label>
+
+      <select id="playerPosition">
+        <option value="Вратарь">Вратарь</option>
+        <option value="Защитник">Защитник</option>
+        <option value="Нападающий">Нападающий</option>
+      </select>
+    </div>
+
+    <div class="field">
+
+      <label>Фото игрока</label>
+
+      <input
+        id="playerImage"
+        class="file"
+        type="file"
+        accept="image/*"
+        onchange="previewFile(this,'playerPreview')"
+      >
+
+      <img
+        id="playerPreview"
+        class="preview"
+      >
+
+    </div>
+
+    <button
+      class="btn"
+      onclick="addPlayer()"
+    >
+      ДОБАВИТЬ ИГРОКА
+    </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>Состав</h2>
+
+    <div
+      id="playersList"
+      class="list"
+    ></div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     PLAYER STATS
+========================================================= -->
+
+<section
+  id="playerStats"
+  class="panel"
+>
+
+  <div class="card">
+
+    <h2>⭐ ТОП игроков</h2>
+
+    <div class="notice">
+
+      Здесь можно вручную выбрать игроков
+      для четырёх категорий.
+
+      <br>
+
+      В каждой категории —
+      до 3 мест.
+
+    </div>
+
+
+    <!-- =====================================================
+         БОМБАРДИРЫ
+    ====================================================== -->
+
+    <div class="stat-category">
+
+      <div class="stat-title">
+        🏆 Бомбардиры
+      </div>
+
+      <div id="scorersRows"></div>
+
+      <button
+        class="btn"
+        onclick="savePlayerStatsCategory('scorers')"
+      >
+        СОХРАНИТЬ БОМБАРДИРОВ
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         СНАЙПЕРЫ
+    ====================================================== -->
+
+    <div class="stat-category">
+
+      <div class="stat-title">
+        🎯 Снайперы
+      </div>
+
+      <div id="snipersRows"></div>
+
+      <button
+        class="btn"
+        onclick="savePlayerStatsCategory('snipers')"
+      >
+        СОХРАНИТЬ СНАЙПЕРОВ
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         ПЛЮС / МИНУС
+    ====================================================== -->
+
+    <div class="stat-category">
+
+      <div class="stat-title">
+        ➕➖ Плюс / минус
+      </div>
+
+      <div id="plus_minusRows"></div>
+
+      <button
+        class="btn"
+        onclick="savePlayerStatsCategory('plus_minus')"
+      >
+        СОХРАНИТЬ ПЛЮС / МИНУС
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         БОМБАРДИРЫ-ЗАЩИТНИКИ
+    ====================================================== -->
+
+    <div class="stat-category">
+
+      <div class="stat-title">
+        🛡 Бомбардиры-защитники
+      </div>
+
+      <div id="defense_scorersRows"></div>
+
+      <button
+        class="btn"
+        onclick="savePlayerStatsCategory('defense_scorers')"
+      >
+        СОХРАНИТЬ ЗАЩИТНИКОВ
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<script>
+
+/* =========================================================
+   PLAYER STATS
 ========================================================= */
 
 const PLAYER_CATEGORIES = {
+
   scorers: {
     title: "Бомбардиры"
   },
@@ -876,14 +1072,19 @@ const PLAYER_CATEGORIES = {
   defense_scorers: {
     title: "Бомбардиры-защитники"
   }
+
 };
 
 
-/* ---------------------------------------------------------
-   Создание одной строки игрока
---------------------------------------------------------- */
+/* =========================================================
+   СОЗДАНИЕ ОДНОЙ СТРОКИ
+========================================================= */
 
-function playerStatRow(category, rank, current = null){
+function playerStatRow(
+  category,
+  rank,
+  current = null
+){
 
   const selected =
     current?.player_id != null
@@ -896,30 +1097,46 @@ function playerStatRow(category, rank, current = null){
   const photo =
     current?.photo_url || "";
 
+
   let playerOptions = `
-    <option value="">— Не выбран —</option>
+    <option value="">
+      — Не выбран —
+    </option>
   `;
 
-  playersCache.forEach(player => {
 
-    const playerId =
-      String(player.id);
+  if(Array.isArray(playersCache)){
 
-    const isSelected =
-      playerId === selected
-        ? "selected"
-        : "";
+    playersCache.forEach(player => {
 
-    playerOptions += `
-      <option value="${escapeAttr(playerId)}" ${isSelected}>
-        #${escapeHtml(player.number ?? "")}
-        ${escapeHtml(player.name ?? "")}
-      </option>
-    `;
-  });
+      const playerId =
+        String(player.id);
+
+      const isSelected =
+        playerId === selected
+          ? "selected"
+          : "";
+
+
+      playerOptions += `
+
+        <option
+          value="${escapeAttr(playerId)}"
+          ${isSelected}
+        >
+          #${escapeHtml(player.number ?? "")}
+          ${escapeHtml(player.name ?? "")}
+        </option>
+
+      `;
+
+    });
+
+  }
 
 
   return `
+
     <div class="stat-row">
 
       <div class="stat-head">
@@ -939,8 +1156,12 @@ function playerStatRow(category, rank, current = null){
 
         <label>Игрок</label>
 
-        <select id="${category}_${rank}_player">
+        <select
+          id="${category}_${rank}_player"
+        >
+
           ${playerOptions}
+
         </select>
 
       </div>
@@ -962,25 +1183,31 @@ function playerStatRow(category, rank, current = null){
 
       <div class="field">
 
-        <label>Фото для блока ТОП</label>
+        <label>
+          Фото для блока ТОП
+        </label>
 
         <input
           id="${category}_${rank}_file"
           class="file"
           type="file"
           accept="image/*"
-          onchange="previewFile(
-            this,
-            '${category}_${rank}_preview'
-          )"
+          onchange="
+            previewFile(
+              this,
+              '${category}_${rank}_preview'
+            )
+          "
         >
+
 
         <img
           id="${category}_${rank}_preview"
           class="stat-preview"
           ${
             photo
-              ? `src="${escapeAttr(photo)}" style="display:block"`
+              ? `src="${escapeAttr(photo)}"
+                 style="display:block"`
               : ""
           }
         >
@@ -995,38 +1222,52 @@ function playerStatRow(category, rank, current = null){
       >
 
     </div>
+
   `;
+
 }
 
 
-/* ---------------------------------------------------------
-   Создание всех строк
---------------------------------------------------------- */
+/* =========================================================
+   СОЗДАНИЕ ВСЕХ СТРОК
+========================================================= */
 
 function renderPlayerStatsRows(){
 
-  Object.keys(PLAYER_CATEGORIES).forEach(category => {
+  Object.keys(
+    PLAYER_CATEGORIES
+  ).forEach(category => {
 
     const box =
       document.getElementById(
         `${category}Rows`
       );
 
+
     if(!box){
+
       console.warn(
         `Не найден контейнер ${category}Rows`
       );
+
       return;
+
     }
 
 
     const rows = [];
 
 
-    for(let rank = 1; rank <= 3; rank++){
+    for(
+      let rank = 1;
+      rank <= 3;
+      rank++
+    ){
 
       const current =
-        playerStatsCache?.[category]?.[rank] || null;
+        playerStatsCache?.[category]?.[rank]
+        || null;
+
 
       rows.push(
         playerStatRow(
@@ -1035,6 +1276,7 @@ function renderPlayerStatsRows(){
           current
         )
       );
+
     }
 
 
@@ -1042,30 +1284,36 @@ function renderPlayerStatsRows(){
       rows.join("");
 
   });
+
 }
 
 
-/* ---------------------------------------------------------
-   Загрузка статистики
---------------------------------------------------------- */
+/* =========================================================
+   ЗАГРУЗКА СТАТИСТИКИ
+========================================================= */
 
 async function loadPlayerStatsAdmin(){
 
   try{
 
     /*
-      ВАЖНО:
-      Сначала гарантированно загружаем игроков.
-      Нельзя одновременно запускать loadPlayers()
-      и loadPlayerStatsAdmin().
+      Если игроков ещё нет в памяти —
+      сначала загружаем состав.
     */
 
-    if(!Array.isArray(playersCache) ||
-       playersCache.length === 0){
+    if(
+      !Array.isArray(playersCache) ||
+      playersCache.length === 0
+    ){
 
       await loadPlayers();
+
     }
 
+
+    /*
+      Загружаем ТОП игроков из Supabase.
+    */
 
     const data =
       await request(
@@ -1080,14 +1328,20 @@ async function loadPlayerStatsAdmin(){
 
       data.forEach(item => {
 
-        if(!playerStatsCache[item.category]){
+        if(
+          !playerStatsCache[item.category]
+        ){
 
-          playerStatsCache[item.category] = {};
+          playerStatsCache[
+            item.category
+          ] = {};
 
         }
 
 
-        playerStatsCache[item.category][
+        playerStatsCache[
+          item.category
+        ][
           Number(item.rank)
         ] = item;
 
@@ -1095,10 +1349,6 @@ async function loadPlayerStatsAdmin(){
 
     }
 
-
-    /*
-      Теперь HTML-строки игроков создаются гарантированно.
-    */
 
     renderPlayerStatsRows();
 
@@ -1120,12 +1370,17 @@ async function loadPlayerStatsAdmin(){
           `${category}Rows`
         );
 
+
       if(box){
 
         box.innerHTML = `
+
           <div class="small">
+
             Не удалось загрузить игроков.
+
           </div>
+
         `;
 
       }
@@ -1134,7 +1389,11 @@ async function loadPlayerStatsAdmin(){
 
 
     const message =
-      String(e?.message || e || "");
+      String(
+        e?.message ||
+        e ||
+        ""
+      );
 
 
     if(
@@ -1150,7 +1409,8 @@ async function loadPlayerStatsAdmin(){
     }else{
 
       status(
-        message || "Ошибка загрузки ТОП игроков.",
+        message ||
+        "Ошибка загрузки ТОП игроков.",
         "bad"
       );
 
@@ -1161,19 +1421,19 @@ async function loadPlayerStatsAdmin(){
 }
 
 
-/* ---------------------------------------------------------
-   Сохранение категории
---------------------------------------------------------- */
+/* =========================================================
+   СОХРАНЕНИЕ КАТЕГОРИИ
+========================================================= */
 
-async function savePlayerStatsCategory(category){
+async function savePlayerStatsCategory(
+  category
+){
 
   try{
 
-    /*
-      Проверяем существование категории.
-    */
-
-    if(!PLAYER_CATEGORIES[category]){
+    if(
+      !PLAYER_CATEGORIES[category]
+    ){
 
       status(
         "Неизвестная категория игроков.",
@@ -1181,12 +1441,12 @@ async function savePlayerStatsCategory(category){
       );
 
       return;
+
     }
 
 
     /*
-      Если строки ещё не созданы —
-      сначала загружаем их.
+      Проверяем, созданы ли строки.
     */
 
     const firstElement =
@@ -1202,12 +1462,6 @@ async function savePlayerStatsCategory(category){
     }
 
 
-    /*
-      Проверяем ещё раз.
-      Это полностью убирает ошибку
-      "null is not an object".
-    */
-
     if(
       !document.getElementById(
         `${category}_1_player`
@@ -1220,11 +1474,16 @@ async function savePlayerStatsCategory(category){
       );
 
       return;
+
     }
 
 
     const rows = [];
 
+
+    /*
+      Собираем 3 места.
+    */
 
     for(
       let rank = 1;
@@ -1237,25 +1496,24 @@ async function savePlayerStatsCategory(category){
           `${category}_${rank}_player`
         );
 
+
       const statElement =
         document.getElementById(
           `${category}_${rank}_stat`
         );
+
 
       const fileElement =
         document.getElementById(
           `${category}_${rank}_file`
         );
 
+
       const oldPhotoElement =
         document.getElementById(
           `${category}_${rank}_old_photo`
         );
 
-
-      /*
-        Дополнительная защита.
-      */
 
       if(
         !playerElement ||
@@ -1269,6 +1527,7 @@ async function savePlayerStatsCategory(category){
         );
 
         continue;
+
       }
 
 
@@ -1289,14 +1548,21 @@ async function savePlayerStatsCategory(category){
 
 
       /*
-        Пустая строка = место не используется.
+        Если игрок не выбран —
+        место остаётся пустым.
       */
 
       if(!player){
 
         continue;
+
       }
 
+
+      /*
+        Оставляем старое фото,
+        если новое не выбрано.
+      */
 
       let photo_url =
         oldPhoto || null;
@@ -1304,7 +1570,7 @@ async function savePlayerStatsCategory(category){
 
       /*
         Если выбрано новое фото —
-        загружаем его.
+        загружаем его в Storage.
       */
 
       if(file){
@@ -1335,26 +1601,33 @@ async function savePlayerStatsCategory(category){
 
 
     /*
-      Удаляем старые записи этой категории.
+      Сначала удаляем старую
+      информацию этой категории.
     */
 
     await request(
+
       `/rest/v1/player_stats?category=eq.${encodeURIComponent(category)}`,
+
       {
         method:"DELETE"
       }
+
     );
 
 
     /*
-      Добавляем новые записи.
+      Добавляем новые данные.
     */
 
     if(rows.length > 0){
 
       await request(
+
         "/rest/v1/player_stats",
+
         {
+
           method:"POST",
 
           headers:{
@@ -1363,7 +1636,9 @@ async function savePlayerStatsCategory(category){
 
           body:
             JSON.stringify(rows)
+
         }
+
       );
 
     }
@@ -1375,8 +1650,8 @@ async function savePlayerStatsCategory(category){
 
 
     /*
-      После сохранения снова загружаем данные,
-      чтобы интерфейс показывал актуальную информацию.
+      Перезагружаем данные,
+      чтобы админка сразу показала результат.
     */
 
     await loadPlayerStatsAdmin();
@@ -1401,9 +1676,9 @@ async function savePlayerStatsCategory(category){
 }
 
 
-/* ---------------------------------------------------------
-   Безопасная загрузка ТОП при открытии вкладки
---------------------------------------------------------- */
+/* =========================================================
+   ОТКРЫТИЕ ВКЛАДКИ ТОП
+========================================================= */
 
 async function openPlayerStats(){
 
@@ -1412,9 +1687,11 @@ async function openPlayerStats(){
       "playerStats"
     );
 
+
   if(!panel){
 
     return;
+
   }
 
 
@@ -1424,284 +1701,27 @@ async function openPlayerStats(){
   await loadPlayerStatsAdmin();
 
 }
-    <!-- STANDINGS -->
-    <section id="standings" class="panel">
 
-      <div class="card">
+</script>
 
-        <h2>📊 Добавить команду в таблицу</h2>
 
-        <div class="field">
-          <label>Команда</label>
-          <input id="standingTeam">
-        </div>
+<!-- STANDINGS -->
+<section
+  id="standings"
+  class="panel"
+>
 
-        <div class="grid3">
+  <div class="card">
 
-          <div class="field">
-            <label>И</label>
-            <input id="standingGames" type="number">
-          </div>
+    <h2>📊 Добавить команду в таблицу</h2>
 
-          <div class="field">
-            <label>О</label>
-            <input id="standingPoints" type="number">
-          </div>
+    <div class="field">
 
-          <div class="field">
-            <label>Место</label>
-            <input id="standingPosition" type="number">
-          </div>
+      <label>Команда</label>
 
-        </div>
+      <input id="standingTeam">
 
-        <button class="btn" onclick="addStanding()">
-          ДОБАВИТЬ
-        </button>
-
-      </div>
-
-      <div class="card">
-        <h2>Таблица</h2>
-        <div id="standingsList" class="list"></div>
-      </div>
-
-    </section>
-
-
-    <!-- SHOP -->
-    <section id="shop" class="panel">
-
-      <div class="card">
-
-        <h2>🛍 Добавить товар</h2>
-
-        <div class="field">
-          <label>Название</label>
-          <input id="productName">
-        </div>
-
-        <div class="field">
-          <label>Описание</label>
-          <textarea id="productDescription"></textarea>
-        </div>
-
-        <div class="field">
-          <label>Цена, ₽</label>
-          <input id="productPrice" type="number">
-        </div>
-
-        <div class="field">
-          <label>Категория</label>
-          <input id="productCategory"
-                 placeholder="Форма / Аксессуары / Другое">
-        </div>
-
-        <div class="field">
-          <label>Фото</label>
-          <input id="productImage"
-                 class="file"
-                 type="file"
-                 accept="image/*"
-                 onchange="previewFile(this,'productPreview')">
-
-          <img id="productPreview" class="preview">
-        </div>
-
-        <div class="field">
-          <label>Контакт продавца</label>
-          <input id="productContact"
-                 placeholder="@telegram или телефон">
-        </div>
-
-        <button class="btn" onclick="addProduct()">
-          ДОБАВИТЬ ТОВАР
-        </button>
-
-      </div>
-
-      <div class="card">
-        <h2>Товары</h2>
-        <div id="productsList" class="list"></div>
-      </div>
-
-    </section>
-
-
-    <!-- DESIGN -->
-    <section id="design" class="panel">
-
-      <div class="card">
-
-        <h2>🎨 Дизайн сайта</h2>
-
-        <div class="field">
-          <label>Название сайта</label>
-          <input id="designSiteName">
-        </div>
-
-        <div class="field">
-          <label>Логотип</label>
-
-          <input id="designLogo"
-                 class="file"
-                 type="file"
-                 accept="image/*"
-                 onchange="previewFile(this,'designLogoPreview')">
-
-          <img id="designLogoPreview" class="preview">
-        </div>
-
-        <div class="field">
-          <label>Основной цвет</label>
-          <div class="color-row">
-            <input id="primaryColor" type="text">
-            <input id="primaryColorPicker" type="color">
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Вторичный цвет</label>
-          <div class="color-row">
-            <input id="secondaryColor" type="text">
-            <input id="secondaryColorPicker" type="color">
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Фон</label>
-          <div class="color-row">
-            <input id="backgroundColor" type="text">
-            <input id="backgroundColorPicker" type="color">
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Цвет карточек</label>
-          <div class="color-row">
-            <input id="cardColor" type="text">
-            <input id="cardColorPicker" type="color">
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Цвет текста</label>
-          <div class="color-row">
-            <input id="textColor" type="text">
-            <input id="textColorPicker" type="color">
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Приглушённый текст</label>
-          <div class="color-row">
-            <input id="mutedTextColor" type="text">
-            <input id="mutedTextColorPicker" type="color">
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Цвет кнопок</label>
-          <div class="color-row">
-            <input id="buttonColor" type="text">
-            <input id="buttonColorPicker" type="color">
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Цвет границ</label>
-          <div class="color-row">
-            <input id="borderColor" type="text">
-            <input id="borderColorPicker" type="color">
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Скругление карточек</label>
-          <input id="borderRadius" type="number">
-        </div>
-
-        <div class="field">
-          <label>Основной шрифт</label>
-          <input id="fontMain" type="file" class="file" accept=".ttf,.otf,.woff,.woff2"
-                 onchange="previewFont(this,'fontMainPreview')">
-          <div id="fontMainPreview" class="font-preview">
-            Stapel / основной шрифт
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Заголовочный шрифт</label>
-          <input id="fontHeading" type="file" class="file" accept=".ttf,.otf,.woff,.woff2"
-                 onchange="previewFont(this,'fontHeadingPreview')">
-          <div id="fontHeadingPreview" class="font-preview">
-            Stengazeta / заголовки
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Дополнительный шрифт</label>
-          <input id="fontSecondary" type="file" class="file" accept=".ttf,.otf,.woff,.woff2"
-                 onchange="previewFont(this,'fontSecondaryPreview')">
-          <div id="fontSecondaryPreview" class="font-preview">
-            Christopher / дополнительный
-          </div>
-        </div>
-
-        <h3>Иконки нижнего меню</h3>
-
-        <div class="grid">
-
-          <div class="field">
-            <label>Главная</label>
-            <input id="homeIcon">
-          </div>
-
-          <div class="field">
-            <label>Матчи</label>
-            <input id="matchesIcon">
-          </div>
-
-          <div class="field">
-            <label>Состав</label>
-            <input id="rosterIcon">
-          </div>
-
-          <div class="field">
-            <label>Таблица</label>
-            <input id="tableIcon">
-          </div>
-
-          <div class="field">
-            <label>Новости</label>
-            <input id="newsIcon">
-          </div>
-
-        </div>
-
-        <div class="actions">
-
-          <button class="btn" onclick="saveDesign()">
-            СОХРАНИТЬ ДИЗАЙН
-          </button>
-
-          <button class="btn secondary" onclick="loadDesign()">
-            ОБНОВИТЬ
-          </button>
-
-        </div>
-
-      </div>
-
-    </section>
-
-  </div>
-</div>
-
-
-<div id="status" class="status"></div>
-
-
+    </div>
 <script>
 
 /* =========================================================
