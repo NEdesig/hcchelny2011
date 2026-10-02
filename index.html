@@ -3617,275 +3617,341 @@ init();
 
 <script>
 
-/* =========================================
-   СЕРИЯ БУЛЛИТОВ — JAVASCRIPT
-========================================= */
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Прогноз матча — ХК Челны 2011</title>
 
-(function () {
+<style>
+* {
+    box-sizing: border-box;
+}
 
-    const cells =
-        document.querySelectorAll(".goal-cell");
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #050b25;
+    color: white;
+}
 
-    const result =
-        document.getElementById("shootoutResult");
+.container {
+    max-width: 700px;
+    margin: auto;
+    padding: 20px;
+}
 
-    const resetButton =
-        document.getElementById("shootoutReset");
+.back {
+    display: inline-block;
+    color: #ffcd00;
+    text-decoration: none;
+    margin-bottom: 20px;
+}
 
-    const goalsCounter =
-        document.getElementById("shootoutGoals");
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+}
 
-    const puck =
-        document.querySelector(".puck");
+.card {
+    background: #0c1640;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 18px;
+    border: 1px solid #1c2b65;
+}
 
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
 
-    let goalCells = [];
+select,
+input {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    background: #172354;
+    color: white;
+    font-size: 16px;
+    outline: none;
+}
 
-    let goals = 0;
+.teams {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    text-align: center;
+    margin: 20px 0;
+}
 
-    let shotInProgress = false;
+.team {
+    flex: 1;
+    font-size: 18px;
+    font-weight: bold;
+}
 
+.vs {
+    color: #ffcd00;
+    font-weight: bold;
+}
 
-    /* =========================================
-       ВЫБИРАЕМ 3 СЛУЧАЙНЫЕ КЛЕТКИ
-    ========================================= */
+.score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-    function generateGoalCells() {
+.score input {
+    text-align: center;
+}
 
-        const numbers = [];
+.score span {
+    font-size: 22px;
+}
 
-        while (numbers.length < 3) {
+.options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
 
-            const random =
-                Math.floor(Math.random() * 9);
+.option {
+    background: #172354;
+    border: 2px solid transparent;
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+}
 
-            if (!numbers.includes(random)) {
-                numbers.push(random);
-            }
+.option.active {
+    border-color: #ffcd00;
+    background: #202f68;
+}
 
-        }
+button {
+    width: 100%;
+    border: none;
+    background: #ffcd00;
+    color: #050b25;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
 
-        goalCells = numbers;
+button:hover {
+    opacity: .9;
+}
 
+.result {
+    display: none;
+    margin-top: 18px;
+    padding: 18px;
+    background: #101d4c;
+    border-radius: 14px;
+    text-align: center;
+}
+
+@media(max-width:500px) {
+    .teams {
+        gap: 8px;
     }
 
-
-    /* =========================================
-       НОВЫЙ БРОСОК
-    ========================================= */
-
-    function newShot() {
-
-        shotInProgress = false;
-
-        cells.forEach(cell => {
-
-            cell.classList.remove("goal");
-            cell.classList.remove("save");
-
-            cell.disabled = false;
-
-        });
-
-        result.textContent =
-            "ВЫБЕРИ КЛЕТКУ";
-
-        result.className =
-            "shootout-result";
-
-        puck.classList.remove("shoot");
-
-        generateGoalCells();
-
+    .team {
+        font-size: 15px;
     }
+}
+</style>
+</head>
 
+<body>
 
-    /* =========================================
-       БРОСОК
-    ========================================= */
+<div class="container">
 
-    function shoot(cell) {
+<a href="index.html" class="back">← На главную</a>
 
-        if (shotInProgress) {
-            return;
-        }
+<h1>🏒 Прогноз матча</h1>
 
-        shotInProgress = true;
+<div class="card">
+    <label>Выберите матч</label>
 
-        cells.forEach(item => {
-            item.disabled = true;
-        });
+    <select id="match">
+        <option value="chelny-akbars">
+            ХК Челны 2011 — Ак Барс 2011
+        </option>
 
+        <option value="chelny-neft">
+            ХК Челны 2011 — Нефтяник 2011
+        </option>
 
-        const cellNumber =
-            Number(cell.dataset.cell);
+        <option value="chelny-izstal">
+            ХК Челны 2011 — Ижсталь 2011
+        </option>
+    </select>
 
+    <div class="teams">
+        <div class="team" id="homeTeam">ХК Челны 2011</div>
+        <div class="vs">VS</div>
+        <div class="team" id="awayTeam">Ак Барс 2011</div>
+    </div>
+</div>
 
-        /* Анимация шайбы */
+<div class="card">
 
-        puck.classList.add("shoot");
+    <label>Кто победит?</label>
 
+    <div class="options">
+        <div class="option" onclick="chooseWinner(this, 'home')">
+            🏒 ХК Челны 2011
+        </div>
 
-        setTimeout(function () {
+        <div class="option" onclick="chooseWinner(this, 'away')">
+            🏒 Соперник
+        </div>
+    </div>
 
-            /* =================================
-               ГОЛ
-            ================================= */
+</div>
 
-            if (goalCells.includes(cellNumber)) {
+<div class="card">
 
-                cell.classList.add("goal");
+    <label>Счёт матча</label>
 
-                result.textContent =
-                    "ГОООООЛ! 🏒🥅";
+    <div class="score">
+        <input type="number" id="homeScore" min="0" max="99" placeholder="0">
+        <span>:</span>
+        <input type="number" id="awayScore" min="0" max="99" placeholder="0">
+    </div>
 
-                result.className =
-                    "shootout-result goal-text";
+</div>
 
-                goals++;
+<div class="card">
 
-                goalsCounter.textContent =
-                    goals;
+    <label>Кто забьёт за ХК Челны 2011?</label>
 
-            }
+    <select id="scorer">
 
-            /* =================================
-               СЕЙВ
-            ================================= */
+        <option value="">Выберите игрока</option>
 
-            else {
+        <option>Амир Шарифуллин #26</option>
+        <option>Саид Хузин #5</option>
+        <option>Данис Шарифуллин #11</option>
+        <option>Амир Норов #18</option>
+        <option>Альберт Осипов #90</option>
+        <option>Кирилл Большуновский #81</option>
 
-                cell.classList.add("save");
+    </select>
 
-                result.textContent =
-                    "СЕЙВ! 🧤";
+</div>
 
-                result.className =
-                    "shootout-result save-text";
+<button onclick="makePrediction()">
+    Сделать прогноз
+</button>
 
-            }
+<div class="result" id="result"></div>
 
-        }, 300);
+</div>
 
+<script>
 
-        /* =================================
-           ПОСЛЕ БРОСКА СРАЗУ НОВАЯ ПОПЫТКА
-        ================================= */
+let winner = "";
 
-        setTimeout(function () {
+const matches = {
+    "chelny-akbars": "Ак Барс 2011",
+    "chelny-neft": "Нефтяник 2011",
+    "chelny-izstal": "Ижсталь 2011"
+};
 
-            newShot();
+document.getElementById("match").addEventListener("change", function() {
+    document.getElementById("awayTeam").textContent = matches[this.value];
 
-        }, 1300);
+    winner = "";
 
-    }
+    document.querySelectorAll(".option").forEach(el => {
+        el.classList.remove("active");
+    });
+});
 
+function chooseWinner(element, value) {
 
-    /* =========================================
-       НАЖАТИЕ НА КЛЕТКУ
-    ========================================= */
+    winner = value;
 
-    cells.forEach(cell => {
-
-        cell.addEventListener(
-            "click",
-            function () {
-
-                shoot(this);
-
-            }
-        );
-
+    document.querySelectorAll(".option").forEach(el => {
+        el.classList.remove("active");
     });
 
+    element.classList.add("active");
+}
 
-    /* =========================================
-       КНОПКА НОВОГО БРОСКА
-    ========================================= */
+function makePrediction() {
 
-    resetButton.addEventListener(
-        "click",
-        function () {
+    const match = document.getElementById("match");
+    const opponent = matches[match.value];
 
-            newShot();
+    const homeScore = document.getElementById("homeScore").value;
+    const awayScore = document.getElementById("awayScore").value;
 
-        }
-    );
+    const scorer = document.getElementById("scorer").value;
 
+    if (winner === "") {
+        alert("Выберите победителя");
+        return;
+    }
 
-    /* =========================================
-       ПЕРВЫЙ ЗАПУСК
-    ========================================= */
+    if (homeScore === "" || awayScore === "") {
+        alert("Укажите счёт");
+        return;
+    }
 
-    newShot();
+    if (scorer === "") {
+        alert("Выберите автора гола");
+        return;
+    }
 
-})();
+    const winnerName =
+        winner === "home"
+        ? "ХК Челны 2011"
+        : opponent;
+
+    const result = document.getElementById("result");
+
+    result.style.display = "block";
+
+    result.innerHTML = `
+        <h2>Прогноз принят! 🏒</h2>
+
+        <p>
+            <b>Матч:</b><br>
+            ХК Челны 2011 — ${opponent}
+        </p>
+
+        <p>
+            <b>Победитель:</b><br>
+            ${winnerName}
+        </p>
+
+        <p>
+            <b>Счёт:</b><br>
+            ${homeScore}:${awayScore}
+        </p>
+
+        <p>
+            <b>Автор гола:</b><br>
+            ${scorer}
+        </p>
+    `;
+}
 
 </script>
 
-<a href="shootout.html" class="shootout-button">
-    🏒 СЕРИЯ БУЛЛИТОВ
-</a>
-
-<style>
-.shootout-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 14px 24px;
-
-    background: #07183f;
-    color: white;
-
-    border-radius: 12px;
-
-    text-decoration: none;
-
-    font-size: 14px;
-    font-weight: 900;
-
-    transition: .2s;
-}
-
-.shootout-button:hover {
-    transform: translateY(-2px);
-    background: #0b2d6d;
-    box-shadow: 0 8px 25px rgba(0,0,0,.2);
-}
-</style>
-
-  <a href="prediction.html" class="prediction-button">
-    🎯 ПРОГНОЗ МАТЧА
-</a>
-
-<style>
-.prediction-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 14px 24px;
-    margin: 10px;
-
-    background: #07183f;
-    color: white;
-
-    border-radius: 12px;
-
-    text-decoration: none;
-
-    font-size: 14px;
-    font-weight: 900;
-
-    transition: .2s;
-}
-
-.prediction-button:hover {
-    transform: translateY(-2px);
-    background: #0b2d6d;
-}
-</style> 
+</body>
+</html>
    
 </body>
 </html>
