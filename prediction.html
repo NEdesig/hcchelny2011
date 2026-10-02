@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Прогноз матча — ХК Челны 2011</title>
 
 <style>
@@ -13,860 +12,322 @@
 
 body {
     margin: 0;
-    min-height: 100vh;
     font-family: Arial, sans-serif;
-
-    background:
-        radial-gradient(circle at top, #16458f 0%, #071a3d 50%, #020817 100%);
-
+    background: #050b25;
     color: white;
-    padding: 20px;
 }
 
-.page {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
+.container {
+    max-width: 700px;
+    margin: auto;
+    padding: 20px;
 }
 
 .back {
     display: inline-block;
-    margin: 10px 0 25px;
-
-    color: white;
+    color: #ffcd00;
     text-decoration: none;
-    opacity: .7;
-
-    font-weight: 700;
-}
-
-.back:hover {
-    opacity: 1;
-}
-
-.header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.label {
-    font-size: 12px;
-    letter-spacing: 3px;
-    font-weight: 900;
-    opacity: .55;
+    margin-bottom: 20px;
 }
 
 h1 {
-    margin: 8px 0;
-
-    font-size: clamp(34px, 7vw, 58px);
-    font-weight: 1000;
-}
-
-.subtitle {
-    margin: 0;
-    opacity: .65;
-}
-
-
-/* МАТЧ */
-
-.match {
-    padding: 25px;
-
-    background: rgba(255,255,255,.07);
-
-    border: 1px solid rgba(255,255,255,.1);
-
-    border-radius: 22px;
-
     text-align: center;
-
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
-.match-title {
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    opacity: .55;
-    margin-bottom: 20px;
+.card {
+    background: #0c1640;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 18px;
+    border: 1px solid #1c2b65;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+select,
+input {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    background: #172354;
+    color: white;
+    font-size: 16px;
+    outline: none;
 }
 
 .teams {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-
+    display: flex;
     align-items: center;
-
+    justify-content: space-between;
     gap: 15px;
+    text-align: center;
+    margin: 20px 0;
 }
 
 .team {
-    padding: 20px;
-
-    background: rgba(255,255,255,.06);
-
-    border-radius: 16px;
-}
-
-.team-name {
-    font-size: clamp(20px, 4vw, 30px);
-    font-weight: 1000;
-}
-
-.team-sub {
-    margin-top: 5px;
-    font-size: 12px;
-    opacity: .5;
+    flex: 1;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .vs {
-    font-size: 18px;
-    font-weight: 1000;
-    opacity: .5;
+    color: #ffcd00;
+    font-weight: bold;
 }
 
-
-/* БЛОК */
-
-.block {
-    padding: 25px;
-    margin-bottom: 18px;
-
-    background: rgba(255,255,255,.07);
-
-    border: 1px solid rgba(255,255,255,.1);
-
-    border-radius: 20px;
+.score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.block-title {
-    margin-bottom: 17px;
-
-    font-size: 17px;
-    font-weight: 1000;
+.score input {
+    text-align: center;
 }
 
-
-/* ВЫБОР */
+.score span {
+    font-size: 22px;
+}
 
 .options {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
 }
 
 .option {
-    position: relative;
-}
-
-.option input {
-    position: absolute;
-    opacity: 0;
-}
-
-.option label {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    min-height: 55px;
-    padding: 12px;
-
-    background: rgba(255,255,255,.06);
-
-    border: 1px solid rgba(255,255,255,.1);
-
-    border-radius: 13px;
-
+    background: #172354;
+    border: 2px solid transparent;
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
     cursor: pointer;
-
-    text-align: center;
-
-    font-weight: 800;
-
-    transition: .2s;
 }
 
-.option label:hover {
-    background: rgba(255,255,255,.12);
+.option.active {
+    border-color: #ffcd00;
+    background: #202f68;
 }
 
-.option input:checked + label {
-    background: #ffd000;
-    color: #061735;
-
-    border-color: #ffd000;
-
-    transform: translateY(-2px);
-
-    box-shadow:
-        0 8px 25px rgba(255,208,0,.2);
-}
-
-
-/* СЧЁТ */
-
-.score-inputs {
-    display: grid;
-
-    grid-template-columns: 1fr 45px 1fr;
-
-    align-items: center;
-
-    gap: 10px;
-}
-
-.score-inputs input {
+button {
     width: 100%;
-
-    padding: 18px 10px;
-
-    border: 0;
-    border-radius: 13px;
-
-    background: rgba(255,255,255,.1);
-
-    color: white;
-
-    font-size: 28px;
-
-    font-weight: 1000;
-
-    text-align: center;
-
-    outline: none;
-}
-
-.score-inputs input:focus {
-    box-shadow: 0 0 0 2px #ffd000;
-}
-
-.score-separator {
-    text-align: center;
-
-    font-size: 25px;
-    font-weight: 1000;
-}
-
-
-/* ИГРОКИ */
-
-.players {
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 10px;
-}
-
-.player-option {
-    position: relative;
-}
-
-.player-option input {
-    position: absolute;
-    opacity: 0;
-}
-
-.player-option label {
-    display: block;
-
+    border: none;
+    background: #ffcd00;
+    color: #050b25;
     padding: 15px;
-
-    background: rgba(255,255,255,.06);
-
-    border: 1px solid rgba(255,255,255,.1);
-
-    border-radius: 13px;
-
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: bold;
     cursor: pointer;
-
-    transition: .2s;
 }
 
-.player-option label:hover {
-    background: rgba(255,255,255,.12);
+button:hover {
+    opacity: .9;
 }
 
-.player-option input:checked + label {
-    background: #ffd000;
-    color: #061735;
-
-    border-color: #ffd000;
-
-    transform: translateY(-2px);
-}
-
-.player-number {
-    font-size: 12px;
-    font-weight: 900;
-    opacity: .5;
-}
-
-.player-name {
-    margin-top: 3px;
-
-    font-size: 16px;
-    font-weight: 900;
-}
-
-
-/* ОТПРАВИТЬ */
-
-.submit {
-    width: 100%;
-
-    border: 0;
-
-    padding: 18px;
-
-    border-radius: 14px;
-
-    background: #ffd000;
-    color: #061735;
-
-    font-size: 16px;
-    font-weight: 1000;
-
-    cursor: pointer;
-
-    transition: .2s;
-}
-
-.submit:hover {
-    transform: translateY(-2px);
-
-    box-shadow:
-        0 10px 30px rgba(255,208,0,.25);
-}
-
-.submit:active {
-    transform: translateY(1px);
-}
-
-
-/* РЕЗУЛЬТАТ */
-
-.success {
+.result {
     display: none;
-
-    margin-top: 20px;
-    padding: 25px;
-
-    background: rgba(45,190,100,.15);
-
-    border: 1px solid rgba(45,190,100,.3);
-
-    border-radius: 18px;
-
+    margin-top: 18px;
+    padding: 18px;
+    background: #101d4c;
+    border-radius: 14px;
     text-align: center;
 }
 
-.success.show {
-    display: block;
-}
-
-.success-title {
-    font-size: 25px;
-    font-weight: 1000;
-}
-
-.success-text {
-    margin-top: 8px;
-    opacity: .7;
-}
-
-
-/* МОБИЛЬНЫЙ */
-
-@media(max-width:600px) {
-
-    body {
-        padding: 12px;
-    }
-
-    .match,
-    .block {
-        padding: 18px;
-    }
-
+@media(max-width:500px) {
     .teams {
-        grid-template-columns: 1fr;
+        gap: 8px;
     }
 
-    .vs {
-        display: none;
+    .team {
+        font-size: 15px;
     }
-
-    .options,
-    .players {
-        grid-template-columns: 1fr;
-    }
-
-    .score-inputs {
-        grid-template-columns: 1fr 30px 1fr;
-    }
-
 }
 </style>
 </head>
 
-
 <body>
 
-<div class="page">
+<div class="container">
 
-    <a href="index.html" class="back">
-        ← Вернуться на сайт
-    </a>
+<a href="index.html" class="back">← На главную</a>
 
+<h1>🏒 Прогноз матча</h1>
 
-    <!-- ЗАГОЛОВОК -->
+<div class="card">
+    <label>Выберите матч</label>
 
-    <div class="header">
+    <select id="match">
+        <option value="chelny-akbars">
+            ХК Челны 2011 — Ак Барс 2011
+        </option>
 
-        <div class="label">
-            ИНТЕРАКТИВ
-        </div>
+        <option value="chelny-neft">
+            ХК Челны 2011 — Нефтяник 2011
+        </option>
 
-        <h1>
-            ПРОГНОЗ МАТЧА
-        </h1>
+        <option value="chelny-izstal">
+            ХК Челны 2011 — Ижсталь 2011
+        </option>
+    </select>
 
-        <p class="subtitle">
-            Проверь свою хоккейную интуицию
-        </p>
-
+    <div class="teams">
+        <div class="team" id="homeTeam">ХК Челны 2011</div>
+        <div class="vs">VS</div>
+        <div class="team" id="awayTeam">Ак Барс 2011</div>
     </div>
+</div>
 
+<div class="card">
 
-    <!-- МАТЧ -->
+    <label>Кто победит?</label>
 
-    <div class="match">
-
-        <div class="match-title">
-            БЛИЖАЙШИЙ МАТЧ
+    <div class="options">
+        <div class="option" onclick="chooseWinner(this, 'home')">
+            🏒 ХК Челны 2011
         </div>
 
-        <div class="teams">
-
-            <div class="team">
-
-                <div class="team-name">
-                    ЧЕЛНЫ 2011
-                </div>
-
-                <div class="team-sub">
-                    ХК «Челны»
-                </div>
-
-            </div>
-
-
-            <div class="vs">
-                VS
-            </div>
-
-
-            <div class="team">
-
-                <div class="team-name" id="opponentName">
-                    СОПЕРНИК
-                </div>
-
-                <div class="team-sub">
-                    Гостевая команда
-                </div>
-
-            </div>
-
+        <div class="option" onclick="chooseWinner(this, 'away')">
+            🏒 Соперник
         </div>
-
-    </div>
-
-
-    <!-- ПОБЕДИТЕЛЬ -->
-
-    <div class="block">
-
-        <div class="block-title">
-            🏆 Кто выиграет?
-        </div>
-
-        <div class="options">
-
-            <div class="option">
-
-                <input
-                    type="radio"
-                    name="winner"
-                    id="winnerHome"
-                    value="Челны 2011"
-                >
-
-                <label for="winnerHome">
-                    🏒 Челны 2011
-                </label>
-
-            </div>
-
-
-            <div class="option">
-
-                <input
-                    type="radio"
-                    name="winner"
-                    id="winnerAway"
-                    value="Соперник"
-                >
-
-                <label for="winnerAway">
-                    🏒 Соперник
-                </label>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- СЧЁТ -->
-
-    <div class="block">
-
-        <div class="block-title">
-            🎯 Какой будет счёт?
-        </div>
-
-        <div class="score-inputs">
-
-            <input
-                type="number"
-                id="homeScore"
-                min="0"
-                max="30"
-                placeholder="0"
-            >
-
-            <div class="score-separator">
-                :
-            </div>
-
-            <input
-                type="number"
-                id="awayScore"
-                min="0"
-                max="30"
-                placeholder="0"
-            >
-
-        </div>
-
-    </div>
-
-
-    <!-- ПЕРВЫЙ ГОЛ -->
-
-    <div class="block">
-
-        <div class="block-title">
-            ⚡ Кто забьёт первым?
-        </div>
-
-        <div class="players">
-
-            <div class="player-option">
-
-                <input
-                    type="radio"
-                    name="scorer"
-                    id="player1"
-                    value="Амир Шарифуллин"
-                >
-
-                <label for="player1">
-
-                    <div class="player-number">
-                        #26
-                    </div>
-
-                    <div class="player-name">
-                        Амир Шарифуллин
-                    </div>
-
-                </label>
-
-            </div>
-
-
-            <div class="player-option">
-
-                <input
-                    type="radio"
-                    name="scorer"
-                    id="player2"
-                    value="Саид Хузин"
-                >
-
-                <label for="player2">
-
-                    <div class="player-number">
-                        #5
-                    </div>
-
-                    <div class="player-name">
-                        Саид Хузин
-                    </div>
-
-                </label>
-
-            </div>
-
-
-            <div class="player-option">
-
-                <input
-                    type="radio"
-                    name="scorer"
-                    id="player3"
-                    value="Данис Шарифуллин"
-                >
-
-                <label for="player3">
-
-                    <div class="player-number">
-                        #11
-                    </div>
-
-                    <div class="player-name">
-                        Данис Шарифуллин
-                    </div>
-
-                </label>
-
-            </div>
-
-
-            <div class="player-option">
-
-                <input
-                    type="radio"
-                    name="scorer"
-                    id="player4"
-                    value="Другой игрок"
-                >
-
-                <label for="player4">
-
-                    <div class="player-number">
-                        —
-                    </div>
-
-                    <div class="player-name">
-                        Другой игрок
-                    </div>
-
-                </label>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ОТПРАВКА -->
-
-    <button class="submit" id="submitPrediction">
-        ОТПРАВИТЬ ПРОГНОЗ
-    </button>
-
-
-    <!-- УСПЕШНАЯ ОТПРАВКА -->
-
-    <div class="success" id="success">
-
-        <div class="success-title">
-            ✅ Прогноз принят!
-        </div>
-
-        <div class="success-text" id="successText">
-            Твой прогноз сохранён.
-        </div>
-
     </div>
 
 </div>
 
+<div class="card">
+
+    <label>Счёт матча</label>
+
+    <div class="score">
+        <input type="number" id="homeScore" min="0" max="99" placeholder="0">
+        <span>:</span>
+        <input type="number" id="awayScore" min="0" max="99" placeholder="0">
+    </div>
+
+</div>
+
+<div class="card">
+
+    <label>Кто забьёт за ХК Челны 2011?</label>
+
+    <select id="scorer">
+
+        <option value="">Выберите игрока</option>
+
+        <option>Амир Шарифуллин #26</option>
+        <option>Саид Хузин #5</option>
+        <option>Данис Шарифуллин #11</option>
+        <option>Амир Норов #18</option>
+        <option>Альберт Осипов #90</option>
+        <option>Кирилл Большуновский #81</option>
+
+    </select>
+
+</div>
+
+<button onclick="makePrediction()">
+    Сделать прогноз
+</button>
+
+<div class="result" id="result"></div>
+
+</div>
 
 <script>
 
-/* =========================================
-   НАСТРОЙКИ МАТЧА
-========================================= */
+let winner = "";
 
-const MATCH = {
-
-    opponent: "СОПЕРНИК"
-
+const matches = {
+    "chelny-akbars": "Ак Барс 2011",
+    "chelny-neft": "Нефтяник 2011",
+    "chelny-izstal": "Ижсталь 2011"
 };
 
+document.getElementById("match").addEventListener("change", function() {
+    document.getElementById("awayTeam").textContent = matches[this.value];
 
-/* =========================================
-   ПОДСТАВЛЯЕМ СОПЕРНИКА
-========================================= */
+    winner = "";
 
-document.getElementById("opponentName").textContent =
-    MATCH.opponent;
-
-
-/* =========================================
-   ОТПРАВКА ПРОГНОЗА
-========================================= */
-
-document
-    .getElementById("submitPrediction")
-    .addEventListener("click", function () {
-
-
-        /* Победитель */
-
-        const winner =
-            document.querySelector(
-                'input[name="winner"]:checked'
-            );
-
-
-        /* Счёт */
-
-        const homeScore =
-            document.getElementById("homeScore").value;
-
-        const awayScore =
-            document.getElementById("awayScore").value;
-
-
-        /* Бомбардир */
-
-        const scorer =
-            document.querySelector(
-                'input[name="scorer"]:checked'
-            );
-
-
-        /* Проверка */
-
-        if (!winner) {
-
-            alert("Выбери победителя!");
-
-            return;
-
-        }
-
-
-        if (
-            homeScore === "" ||
-            awayScore === ""
-        ) {
-
-            alert("Укажи счёт матча!");
-
-            return;
-
-        }
-
-
-        if (!scorer) {
-
-            alert("Выбери игрока, который забьёт первым!");
-
-            return;
-
-        }
-
-
-        /* Проверяем соответствие победителя и счёта */
-
-        const h =
-            Number(homeScore);
-
-        const a =
-            Number(awayScore);
-
-
-        if (h === a) {
-
-            alert(
-                "При равном счёте выбери победителя по буллитам или укажи другой счёт."
-            );
-
-            return;
-
-        }
-
-
-        if (
-            winner.value === "Челны 2011" &&
-            h <= a
-        ) {
-
-            alert(
-                "Если выигрывают «Челны 2011», их счёт должен быть больше."
-            );
-
-            return;
-
-        }
-
-
-        if (
-            winner.value === "Соперник" &&
-            a <= h
-        ) {
-
-            alert(
-                "Если выигрывает соперник, его счёт должен быть больше."
-            );
-
-            return;
-
-        }
-
-
-        /* УСПЕШНАЯ ОТПРАВКА */
-
-        document.getElementById("successText").textContent =
-            "Твой прогноз: " +
-            winner.value +
-            " — " +
-            h +
-            ":" +
-            a +
-            ". Первый гол — " +
-            scorer.value +
-            ".";
-
-
-        document
-            .getElementById("success")
-            .classList.add("show");
-
-
-        /* Прокрутка к результату */
-
-        document
-            .getElementById("success")
-            .scrollIntoView({
-                behavior: "smooth",
-                block: "center"
-            });
-
+    document.querySelectorAll(".option").forEach(el => {
+        el.classList.remove("active");
     });
+});
+
+function chooseWinner(element, value) {
+
+    winner = value;
+
+    document.querySelectorAll(".option").forEach(el => {
+        el.classList.remove("active");
+    });
+
+    element.classList.add("active");
+}
+
+function makePrediction() {
+
+    const match = document.getElementById("match");
+    const opponent = matches[match.value];
+
+    const homeScore = document.getElementById("homeScore").value;
+    const awayScore = document.getElementById("awayScore").value;
+
+    const scorer = document.getElementById("scorer").value;
+
+    if (winner === "") {
+        alert("Выберите победителя");
+        return;
+    }
+
+    if (homeScore === "" || awayScore === "") {
+        alert("Укажите счёт");
+        return;
+    }
+
+    if (scorer === "") {
+        alert("Выберите автора гола");
+        return;
+    }
+
+    const winnerName =
+        winner === "home"
+        ? "ХК Челны 2011"
+        : opponent;
+
+    const result = document.getElementById("result");
+
+    result.style.display = "block";
+
+    result.innerHTML = `
+        <h2>Прогноз принят! 🏒</h2>
+
+        <p>
+            <b>Матч:</b><br>
+            ХК Челны 2011 — ${opponent}
+        </p>
+
+        <p>
+            <b>Победитель:</b><br>
+            ${winnerName}
+        </p>
+
+        <p>
+            <b>Счёт:</b><br>
+            ${homeScore}:${awayScore}
+        </p>
+
+        <p>
+            <b>Автор гола:</b><br>
+            ${scorer}
+        </p>
+    `;
+}
 
 </script>
 
