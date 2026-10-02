@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050b22">
+
+<meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+>
+
+<meta
+    name="theme-color"
+    content="#050b22"
+>
 
 <title>Админка — ХК Челны 2011</title>
 
@@ -130,7 +139,8 @@ button{
 
     padding:25px;
 
-    box-shadow:0 30px 80px rgba(0,0,0,.4);
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.4);
 }
 
 .login-logo{
@@ -141,6 +151,8 @@ button{
     object-fit:contain;
 
     margin:0 auto 20px;
+
+    display:block;
 }
 
 .login-box h1{
@@ -368,7 +380,7 @@ select:focus{
     color:white;
 }
 
-/* IMAGE UPLOAD */
+/* IMAGE / FONT UPLOAD */
 
 .upload{
     border:1px dashed var(--border);
@@ -400,6 +412,80 @@ select:focus{
     margin-top:10px;
 
     display:none;
+}
+
+/* FONT CARD */
+
+.font-box{
+    border:1px solid var(--border);
+
+    background:#07102d;
+
+    border-radius:14px;
+
+    padding:15px;
+
+    margin-top:12px;
+}
+
+.font-box-title{
+    font-size:15px;
+
+    font-weight:900;
+
+    margin-bottom:5px;
+}
+
+.font-box-description{
+    color:var(--muted);
+
+    font-size:11px;
+
+    line-height:1.5;
+
+    margin-bottom:12px;
+}
+
+.font-current{
+    padding:10px;
+
+    border-radius:9px;
+
+    background:#0d1738;
+
+    border:1px solid var(--border);
+
+    color:var(--yellow);
+
+    font-size:12px;
+
+    margin-bottom:10px;
+
+    word-break:break-word;
+}
+
+.font-preview{
+    padding:15px;
+
+    margin-top:10px;
+
+    background:#0d1738;
+
+    border:1px solid var(--border);
+
+    border-radius:10px;
+
+    font-size:24px;
+
+    min-height:60px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-align:center;
 }
 
 /* ITEMS */
@@ -553,14 +639,13 @@ select:focus{
 }
 
 </style>
+
 </head>
 
 <body>
 
 
-<!-- =====================================================
-     LOGIN
-     ===================================================== -->
+<!-- LOGIN -->
 
 <div id="loginScreen" class="login">
 
@@ -632,9 +717,7 @@ select:focus{
 </div>
 
 
-<!-- =====================================================
-     ADMIN
-     ===================================================== -->
+<!-- ADMIN -->
 
 <div
     id="adminScreen"
@@ -737,9 +820,7 @@ select:focus{
 </div>
 
 
-<!-- =====================================================
-     HOME
-     ===================================================== -->
+<!-- HOME -->
 
 <section
     id="home"
@@ -911,9 +992,7 @@ select:focus{
 </section>
 
 
-<!-- =====================================================
-     NEWS
-     ===================================================== -->
+<!-- NEWS -->
 
 <section
     id="news"
@@ -1094,9 +1173,7 @@ select:focus{
 </section>
 
 
-<!-- =====================================================
-     MEDIA
-     ===================================================== -->
+<!-- MEDIA -->
 
 <section
     id="media"
@@ -1201,9 +1278,7 @@ select:focus{
 </section>
 
 
-<!-- =====================================================
-     ACHIEVEMENTS
-     ===================================================== -->
+<!-- ACHIEVEMENTS -->
 
 <section
     id="achievements"
@@ -1320,9 +1395,7 @@ select:focus{
 </section>
 
 
-<!-- =====================================================
-     BIRTHDAYS
-     ===================================================== -->
+<!-- BIRTHDAYS -->
 
 <section
     id="birthdays"
@@ -1420,9 +1493,7 @@ select:focus{
 </section>
 
 
-<!-- =====================================================
-     PLAYERS
-     ===================================================== -->
+<!-- PLAYERS -->
 
 <section
     id="players"
@@ -1520,9 +1591,7 @@ select:focus{
 </section>
 
 
-<!-- =====================================================
-     MATCHES
-     ===================================================== -->
+<!-- MATCHES -->
 
 <section
     id="matches"
@@ -1662,9 +1731,7 @@ select:focus{
 </section>
 
 
-<!-- =====================================================
-     STANDINGS
-     ===================================================== -->
+<!-- STANDINGS -->
 
 <section
     id="standings"
@@ -1816,9 +1883,7 @@ select:focus{
 </section>
 
 
-<!-- =====================================================
-     DESIGN
-     ===================================================== -->
+<!-- DESIGN -->
 
 <section
     id="design"
@@ -1833,6 +1898,8 @@ select:focus{
     Здесь глобально меняется внешний вид всего сайта.
 </p>
 
+
+<!-- BASIC -->
 
 <div class="card">
 
@@ -1982,6 +2049,8 @@ select:focus{
 </div>
 
 
+<!-- LOGO -->
+
 <div class="card">
 
 <h3>
@@ -2006,6 +2075,159 @@ select:focus{
 
 </div>
 
+
+<!-- FONTS -->
+
+<div class="card">
+
+<h3>
+    Шрифты сайта
+</h3>
+
+<p class="panel-description">
+    Загружай шрифты прямо с телефона. После сохранения
+    выбранные шрифты будут использоваться на всём сайте.
+</p>
+
+
+<!-- MAIN FONT -->
+
+<div class="font-box">
+
+<div class="font-box-title">
+    Основной шрифт
+</div>
+
+<div class="font-box-description">
+    Используется для обычного текста, карточек,
+    описаний и большинства элементов.
+</div>
+
+<div
+    id="currentMainFont"
+    class="font-current"
+>
+    Не выбран
+</div>
+
+<div class="upload">
+
+<input
+    id="fontMainFile"
+    type="file"
+    accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf"
+    onchange="previewFont(this,'fontMainPreview')"
+>
+
+</div>
+
+<div
+    id="fontMainPreview"
+    class="font-preview"
+>
+    ХК ЧЕЛНЫ 2011
+</div>
+
+</div>
+
+
+<!-- HEADING FONT -->
+
+<div class="font-box">
+
+<div class="font-box-title">
+    Шрифт заголовков
+</div>
+
+<div class="font-box-description">
+    Используется для крупных заголовков,
+    названий разделов и акцентов.
+</div>
+
+<div
+    id="currentHeadingFont"
+    class="font-current"
+>
+    Не выбран
+</div>
+
+<div class="upload">
+
+<input
+    id="fontHeadingFile"
+    type="file"
+    accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf"
+    onchange="previewFont(this,'fontHeadingPreview')"
+>
+
+</div>
+
+<div
+    id="fontHeadingPreview"
+    class="font-preview"
+>
+    ХК ЧЕЛНЫ 2011
+</div>
+
+</div>
+
+
+<!-- SECONDARY FONT -->
+
+<div class="font-box">
+
+<div class="font-box-title">
+    Дополнительный шрифт
+</div>
+
+<div class="font-box-description">
+    Используется для даты, тегов, навигации
+    и небольших подписей.
+</div>
+
+<div
+    id="currentSecondaryFont"
+    class="font-current"
+>
+    Не выбран
+</div>
+
+<div class="upload">
+
+<input
+    id="fontSecondaryFile"
+    type="file"
+    accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf"
+    onchange="previewFont(this,'fontSecondaryPreview')"
+>
+
+</div>
+
+<div
+    id="fontSecondaryPreview"
+    class="font-preview"
+>
+    ХК ЧЕЛНЫ 2011
+</div>
+
+</div>
+
+
+<div class="buttons">
+
+<button
+    class="btn btn-secondary"
+    onclick="clearFontFiles()"
+>
+    Очистить выбранные файлы
+</button>
+
+</div>
+
+</div>
+
+
+<!-- ICONS -->
 
 <div class="card">
 
@@ -2120,11 +2342,13 @@ const SUPABASE_KEY =
 "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
 
 let accessToken =
-localStorage.getItem("supabase_access_token");
+localStorage.getItem(
+    "supabase_access_token"
+);
 
 
 /* =========================================================
-   HELPERS
+   REQUEST
    ========================================================= */
 
 async function request(
@@ -2136,10 +2360,12 @@ async function request(
 
     const headers={
         "apikey":SUPABASE_KEY,
+
         "Authorization":
             `Bearer ${
                 accessToken || SUPABASE_KEY
             }`,
+
         "Content-Type":
             "application/json"
     };
@@ -2203,7 +2429,9 @@ async function login(){
         .value;
 
     const error=
-        document.getElementById("loginError");
+        document.getElementById(
+            "loginError"
+        );
 
     error.textContent="";
 
@@ -2217,6 +2445,7 @@ async function login(){
 
                     headers:{
                         "apikey":SUPABASE_KEY,
+
                         "Content-Type":
                             "application/json"
                     },
@@ -2252,7 +2481,9 @@ async function login(){
 
     }catch(error){
 
-        error.textContent=
+        document.getElementById(
+            "loginError"
+        ).textContent=
             error.message;
     }
 }
@@ -2309,41 +2540,32 @@ function openTab(
 
     button.classList.add("active");
 
-    if(id==="home"){
+    if(id==="home")
         loadHomeData();
-    }
 
-    if(id==="news"){
+    if(id==="news")
         loadNews();
-    }
 
-    if(id==="media"){
+    if(id==="media")
         loadAlbums();
-    }
 
-    if(id==="achievements"){
+    if(id==="achievements")
         loadAchievements();
-    }
 
-    if(id==="birthdays"){
+    if(id==="birthdays")
         loadBirthdays();
-    }
 
-    if(id==="players"){
+    if(id==="players")
         loadPlayers();
-    }
 
-    if(id==="matches"){
+    if(id==="matches")
         loadMatches();
-    }
 
-    if(id==="standings"){
+    if(id==="standings")
         loadStandings();
-    }
 
-    if(id==="design"){
+    if(id==="design")
         loadDesign();
-    }
 }
 
 
@@ -2351,17 +2573,14 @@ function openTab(
    STATUS
    ========================================================= */
 
-function notify(
-    message
-){
+function notify(message){
 
     const el=
         document.getElementById(
             "status"
         );
 
-    el.textContent=
-        message;
+    el.textContent=message;
 
     el.classList.add("show");
 
@@ -2378,8 +2597,9 @@ function notify(
    UPLOAD
    ========================================================= */
 
-async function uploadImage(
-    input
+async function uploadFile(
+    input,
+    folder="site"
 ){
 
     if(
@@ -2405,7 +2625,7 @@ async function uploadImage(
         .substring(2,9)}.${extension}`;
 
     const path=
-        `site/${filename}`;
+        `${folder}/${filename}`;
 
     const response=
         await fetch(
@@ -2414,13 +2634,15 @@ async function uploadImage(
                 method:"POST",
 
                 headers:{
-                    "apikey":SUPABASE_KEY,
+                    "apikey":
+                        SUPABASE_KEY,
 
                     "Authorization":
                         `Bearer ${accessToken}`,
 
                     "Content-Type":
-                        file.type
+                        file.type ||
+                        "application/octet-stream"
                 },
 
                 body:file
@@ -2435,6 +2657,24 @@ async function uploadImage(
     }
 
     return `${SUPABASE_URL}/storage/v1/object/public/site-media/${path}`;
+}
+
+
+async function uploadImage(input){
+
+    return uploadFile(
+        input,
+        "site"
+    );
+}
+
+
+async function uploadFont(input){
+
+    return uploadFile(
+        input,
+        "fonts"
+    );
 }
 
 
@@ -2465,120 +2705,186 @@ function previewFile(
 
 
 /* =========================================================
+   FONT PREVIEW
+   ========================================================= */
+
+function previewFont(
+    input,
+    previewId
+){
+
+    const file=
+        input.files?.[0];
+
+    if(!file)return;
+
+    const preview=
+        document.getElementById(
+            previewId
+        );
+
+    const fontName=
+        "PreviewFont" +
+        Date.now();
+
+    const url=
+        URL.createObjectURL(file);
+
+    const style=
+        document.createElement(
+            "style"
+        );
+
+    style.id=
+        fontName;
+
+    style.textContent=`
+        @font-face{
+            font-family:"${fontName}";
+            src:url("${url}");
+        }
+        #${previewId}{
+            font-family:"${fontName}",sans-serif;
+        }
+    `;
+
+    document.head.appendChild(
+        style
+    );
+
+    preview.style.fontFamily=
+        `"${fontName}",sans-serif`;
+
+    preview.dataset.font=
+        fontName;
+
+    preview.textContent=
+        file.name;
+}
+
+
+/* =========================================================
    HOME
    ========================================================= */
 
 async function loadHomeData(){
 
-    const news=
-        await request(
-            "news",
-            "GET",
-            null,
-            "?select=*&order=created_at.desc"
+    try{
+
+        const news=
+            await request(
+                "news",
+                "GET",
+                null,
+                "?select=*&order=created_at.desc"
+            );
+
+        const albums=
+            await request(
+                "albums",
+                "GET",
+                null,
+                "?select=*&order=created_at.desc"
+            );
+
+        fillSelect(
+            "homeAnnouncement",
+            news.filter(
+                n=>
+                    String(n.tag||"")
+                    .toLowerCase()
+                    ===
+                    "анонс"
+            ),
+            "Выбрать анонс"
         );
 
-    const albums=
-        await request(
-            "albums",
-            "GET",
-            null,
-            "?select=*&order=created_at.desc"
+        fillSelect(
+            "homeNews1",
+            news,
+            "Автоматически"
         );
 
-    fillSelect(
-        "homeAnnouncement",
-        news.filter(
-            n=>
-                String(n.tag||"")
-                .toLowerCase()
-                ===
-                "анонс"
-        ),
-        "Выбрать анонс"
-    );
-
-    fillSelect(
-        "homeNews1",
-        news,
-        "Автоматически"
-    );
-
-    fillSelect(
-        "homeNews2",
-        news,
-        "Автоматически"
-    );
-
-    fillSelect(
-        "homeNews3",
-        news,
-        "Автоматически"
-    );
-
-    fillSelect(
-        "homeAlbum",
-        albums,
-        "Автоматически"
-    );
-
-    const settings=
-        await request(
-            "settings",
-            "GET",
-            null,
-            "?select=*&limit=1"
+        fillSelect(
+            "homeNews2",
+            news,
+            "Автоматически"
         );
 
-    const s=
-        settings[0];
+        fillSelect(
+            "homeNews3",
+            news,
+            "Автоматически"
+        );
 
-    if(!s)return;
+        fillSelect(
+            "homeAlbum",
+            albums,
+            "Автоматически"
+        );
 
-    setSelect(
-        "homeAnnouncement",
-        s.home_announcement_id
-    );
+        const settings=
+            await request(
+                "settings",
+                "GET",
+                null,
+                "?select=*&limit=1"
+            );
 
-    setSelect(
-        "homeNews1",
-        s.home_news_1_id
-    );
+        const s=
+            settings[0];
 
-    setSelect(
-        "homeNews2",
-        s.home_news_2_id
-    );
+        if(!s)return;
 
-    setSelect(
-        "homeNews3",
-        s.home_news_3_id
-    );
+        setSelect(
+            "homeAnnouncement",
+            s.home_announcement_id
+        );
 
-    setSelect(
-        "homeAlbum",
-        s.home_media_album_id
-    );
+        setSelect(
+            "homeNews1",
+            s.home_news_1_id
+        );
 
-    document.getElementById(
-        "showPress"
-    ).checked=
-        s.home_show_press !== false;
+        setSelect(
+            "homeNews2",
+            s.home_news_2_id
+        );
 
-    document.getElementById(
-        "showMedia"
-    ).checked=
-        s.home_show_media !== false;
+        setSelect(
+            "homeNews3",
+            s.home_news_3_id
+        );
 
-    document.getElementById(
-        "showAchievements"
-    ).checked=
-        s.home_show_achievements !== false;
+        setSelect(
+            "homeAlbum",
+            s.home_media_album_id
+        );
 
-    document.getElementById(
-        "showBirthdays"
-    ).checked=
-        s.home_show_birthdays !== false;
+        document.getElementById(
+            "showPress"
+        ).checked=
+            s.home_show_press !== false;
+
+        document.getElementById(
+            "showMedia"
+        ).checked=
+            s.home_show_media !== false;
+
+        document.getElementById(
+            "showAchievements"
+        ).checked=
+            s.home_show_achievements !== false;
+
+        document.getElementById(
+            "showBirthdays"
+        ).checked=
+            s.home_show_birthdays !== false;
+
+    }catch(error){
+
+        console.error(error);
+    }
 }
 
 
@@ -2635,10 +2941,13 @@ function setSelect(
     if(
         [...select.options]
         .some(
-            o=>String(o.value)
-                ===String(value)
+            o=>
+                String(o.value)
+                ===
+                String(value)
         )
     ){
+
         select.value=value;
     }
 }
@@ -2646,82 +2955,89 @@ function setSelect(
 
 async function saveHome(){
 
-    const rows=
+    try{
+
+        const rows=
+            await request(
+                "settings",
+                "GET",
+                null,
+                "?select=id&limit=1"
+            );
+
+        if(!rows.length){
+
+            notify(
+                "Нет строки settings"
+            );
+
+            return;
+        }
+
+        const id=
+            rows[0].id;
+
         await request(
             "settings",
-            "GET",
-            null,
-            "?select=id&limit=1"
-        );
+            "PATCH",
+            {
+                home_announcement_id:
+                    valueOrNull(
+                        "homeAnnouncement"
+                    ),
 
-    if(!rows.length){
+                home_news_1_id:
+                    valueOrNull(
+                        "homeNews1"
+                    ),
+
+                home_news_2_id:
+                    valueOrNull(
+                        "homeNews2"
+                    ),
+
+                home_news_3_id:
+                    valueOrNull(
+                        "homeNews3"
+                    ),
+
+                home_media_album_id:
+                    valueOrNull(
+                        "homeAlbum"
+                    ),
+
+                home_show_press:
+                    document.getElementById(
+                        "showPress"
+                    ).checked,
+
+                home_show_media:
+                    document.getElementById(
+                        "showMedia"
+                    ).checked,
+
+                home_show_achievements:
+                    document.getElementById(
+                        "showAchievements"
+                    ).checked,
+
+                home_show_birthdays:
+                    document.getElementById(
+                        "showBirthdays"
+                    ).checked
+
+            },
+            `?id=eq.${id}`
+        );
 
         notify(
-            "Нет строки settings"
+            "Главная сохранена"
         );
 
-        return;
+    }catch(error){
+
+        alert(error.message);
     }
-
-    const id=
-        rows[0].id;
-
-    await request(
-        "settings",
-        "PATCH",
-        {
-            home_announcement_id:
-                valueOrNull(
-                    "homeAnnouncement"
-                ),
-
-            home_news_1_id:
-                valueOrNull(
-                    "homeNews1"
-                ),
-
-            home_news_2_id:
-                valueOrNull(
-                    "homeNews2"
-                ),
-
-            home_news_3_id:
-                valueOrNull(
-                    "homeNews3"
-                ),
-
-            home_media_album_id:
-                valueOrNull(
-                    "homeAlbum"
-                ),
-
-            home_show_press:
-                document.getElementById(
-                    "showPress"
-                ).checked,
-
-            home_show_media:
-                document.getElementById(
-                    "showMedia"
-                ).checked,
-
-            home_show_achievements:
-                document.getElementById(
-                    "showAchievements"
-                ).checked,
-
-            home_show_birthdays:
-                document.getElementById(
-                    "showBirthdays"
-                ).checked
-
-        },
-        `?id=eq.${id}`
-    );
-
-    notify(
-        "Главная сохранена"
-    );
 }
 
 
@@ -2793,7 +3109,8 @@ async function saveNews(){
                     ?
                     `${document.getElementById(
                         "newsDate"
-                    ).value}T12:00:00`
+                    ).value
+                    }T12:00:00`
                     :
                     new Date().toISOString()
             }
@@ -2889,7 +3206,10 @@ async function loadNews(){
                     </div>
 
                     <div class="item-meta">
-                        ${escapeHTML(item.tag || "Без тега")}
+                        ${escapeHTML(
+                            item.tag ||
+                            "Без тега"
+                        )}
                     </div>
 
                 </div>
@@ -2898,7 +3218,11 @@ async function loadNews(){
 
                     <button
                         class="small-btn"
-                        onclick="deleteItem('news',${item.id},loadNews)"
+                        onclick="deleteItem(
+                            'news',
+                            ${item.id},
+                            loadNews
+                        )"
                     >
                         Удалить
                     </button>
@@ -3021,7 +3345,10 @@ async function loadAlbums(){
                     </div>
 
                     <div class="item-meta">
-                        ${escapeHTML(item.description || "")}
+                        ${escapeHTML(
+                            item.description ||
+                            ""
+                        )}
                     </div>
 
                 </div>
@@ -3038,7 +3365,11 @@ async function loadAlbums(){
 
                     <button
                         class="small-btn"
-                        onclick="deleteItem('albums',${item.id},loadAlbums)"
+                        onclick="deleteItem(
+                            'albums',
+                            ${item.id},
+                            loadAlbums
+                        )"
                     >
                         Удалить
                     </button>
@@ -3165,7 +3496,11 @@ async function loadAchievements(){
 
                 <button
                     class="small-btn"
-                    onclick="deleteItem('achievements',${item.id},loadAchievements)"
+                    onclick="deleteItem(
+                        'achievements',
+                        ${item.id},
+                        loadAchievements
+                    )"
                 >
                     Удалить
                 </button>
@@ -3211,7 +3546,8 @@ async function createBirthday(){
                 birthday:
                     document.getElementById(
                         "birthdayDate"
-                    ).value || null,
+                    ).value ||
+                    null,
 
                 image_url:image
             }
@@ -3284,7 +3620,11 @@ async function loadBirthdays(){
 
                 <button
                     class="small-btn"
-                    onclick="deleteItem('birthdays',${item.id},loadBirthdays)"
+                    onclick="deleteItem(
+                        'birthdays',
+                        ${item.id},
+                        loadBirthdays
+                    )"
                 >
                     Удалить
                 </button>
@@ -3370,15 +3710,17 @@ async function loadPlayers(){
 
             div.innerHTML=`
 
-                <div class="item-image"
-                     style="
-                     display:flex;
-                     align-items:center;
-                     justify-content:center;
-                     font-size:20px;
-                     font-weight:900;
-                     color:#ffcd00;
-                     ">
+                <div
+                    class="item-image"
+                    style="
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:20px;
+                    font-weight:900;
+                    color:#ffcd00;
+                    "
+                >
                     #${item.number}
                 </div>
 
@@ -3389,14 +3731,20 @@ async function loadPlayers(){
                     </div>
 
                     <div class="item-meta">
-                        ${escapeHTML(item.position)}
+                        ${escapeHTML(
+                            item.position
+                        )}
                     </div>
 
                 </div>
 
                 <button
                     class="small-btn"
-                    onclick="deleteItem('players',${item.id},loadPlayers)"
+                    onclick="deleteItem(
+                        'players',
+                        ${item.id},
+                        loadPlayers
+                    )"
                 >
                     Удалить
                 </button>
@@ -3494,20 +3842,24 @@ async function loadMatches(){
 
             div.innerHTML=`
 
-                <div class="item-image"
-                     style="
-                     display:flex;
-                     align-items:center;
-                     justify-content:center;
-                     font-size:20px;
-                     ">
+                <div
+                    class="item-image"
+                    style="
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:20px;
+                    "
+                >
                     🏒
                 </div>
 
                 <div class="item-info">
 
                     <div class="item-title">
-                        ${escapeHTML(item.opponent)}
+                        ${escapeHTML(
+                            item.opponent
+                        )}
                     </div>
 
                     <div class="item-meta">
@@ -3520,7 +3872,11 @@ async function loadMatches(){
 
                 <button
                     class="small-btn"
-                    onclick="deleteItem('matches',${item.id},loadMatches)"
+                    onclick="deleteItem(
+                        'matches',
+                        ${item.id},
+                        loadMatches
+                    )"
                 >
                     Удалить
                 </button>
@@ -3642,33 +3998,43 @@ async function loadStandings(){
 
             div.innerHTML=`
 
-                <div class="item-image"
-                     style="
-                     display:flex;
-                     align-items:center;
-                     justify-content:center;
-                     font-weight:900;
-                     color:#ffcd00;
-                     ">
+                <div
+                    class="item-image"
+                    style="
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-weight:900;
+                    color:#ffcd00;
+                    "
+                >
                     ${item.position}
                 </div>
 
                 <div class="item-info">
 
                     <div class="item-title">
-                        ${escapeHTML(item.team)}
+                        ${escapeHTML(
+                            item.team
+                        )}
                     </div>
 
                     <div class="item-meta">
-                        Игр: ${item.games || 0}
-                        · Очков: ${item.points || 0}
+                        Игр:
+                        ${item.games || 0}
+                        · Очков:
+                        ${item.points || 0}
                     </div>
 
                 </div>
 
                 <button
                     class="small-btn"
-                    onclick="deleteItem('standings',${item.id},loadStandings)"
+                    onclick="deleteItem(
+                        'standings',
+                        ${item.id},
+                        loadStandings
+                    )"
                 >
                     Удалить
                 </button>
@@ -3686,96 +4052,135 @@ async function loadStandings(){
 
 async function loadDesign(){
 
-    const rows=
-        await request(
-            "settings",
-            "GET",
-            null,
-            "?select=*&limit=1"
+    try{
+
+        const rows=
+            await request(
+                "settings",
+                "GET",
+                null,
+                "?select=*&limit=1"
+            );
+
+        if(!rows.length)return;
+
+        const s=
+            rows[0];
+
+        document.getElementById(
+            "designSiteName"
+        ).value=
+            s.site_name ||
+            "ХК Челны 2011";
+
+        setColor(
+            "designPrimary",
+            s.primary_color,
+            "#000056"
         );
 
-    if(!rows.length)return;
+        setColor(
+            "designSecondary",
+            s.secondary_color,
+            "#ffcd00"
+        );
 
-    const s=
-        rows[0];
+        setColor(
+            "designBackground",
+            s.background_color,
+            "#050b22"
+        );
 
-    document.getElementById(
-        "designSiteName"
-    ).value=
-        s.site_name ||
-        "ХК Челны 2011";
+        setColor(
+            "designCard",
+            s.card_color,
+            "#0d1738"
+        );
 
-    setColor(
-        "designPrimary",
-        s.primary_color,
-        "#000056"
-    );
+        setColor(
+            "designText",
+            s.text_color,
+            "#ffffff"
+        );
 
-    setColor(
-        "designSecondary",
-        s.secondary_color,
-        "#ffcd00"
-    );
+        setColor(
+            "designMuted",
+            s.muted_text_color,
+            "#aab5d5"
+        );
 
-    setColor(
-        "designBackground",
-        s.background_color,
-        "#050b22"
-    );
+        setColor(
+            "designBorder",
+            s.border_color,
+            "#26345f"
+        );
 
-    setColor(
-        "designCard",
-        s.card_color,
-        "#0d1738"
-    );
+        document.getElementById(
+            "designRadius"
+        ).value=
+            s.border_radius || 18;
 
-    setColor(
-        "designText",
-        s.text_color,
-        "#ffffff"
-    );
+        document.getElementById(
+            "iconHome"
+        ).value=
+            s.home_icon || "⌂";
 
-    setColor(
-        "designMuted",
-        s.muted_text_color,
-        "#aab5d5"
-    );
+        document.getElementById(
+            "iconMatches"
+        ).value=
+            s.matches_icon || "🏒";
 
-    setColor(
-        "designBorder",
-        s.border_color,
-        "#26345f"
-    );
+        document.getElementById(
+            "iconRoster"
+        ).value=
+            s.roster_icon || "👥";
 
-    document.getElementById(
-        "designRadius"
-    ).value=
-        s.border_radius || 18;
+        document.getElementById(
+            "iconTable"
+        ).value=
+            s.table_icon || "📊";
 
-    document.getElementById(
-        "iconHome"
-    ).value=
-        s.home_icon || "⌂";
+        document.getElementById(
+            "iconNews"
+        ).value=
+            s.news_icon || "📰";
 
-    document.getElementById(
-        "iconMatches"
-    ).value=
-        s.matches_icon || "🏒";
 
-    document.getElementById(
-        "iconRoster"
-    ).value=
-        s.roster_icon || "👥";
+        /* FONTS */
 
-    document.getElementById(
-        "iconTable"
-    ).value=
-        s.table_icon || "📊";
+        document.getElementById(
+            "currentMainFont"
+        ).textContent=
+            s.font_main
+            ?
+            `Текущий: ${s.font_main}`
+            :
+            "Текущий: Stapel";
 
-    document.getElementById(
-        "iconNews"
-    ).value=
-        s.news_icon || "📰";
+
+        document.getElementById(
+            "currentHeadingFont"
+        ).textContent=
+            s.font_heading
+            ?
+            `Текущий: ${s.font_heading}`
+            :
+            "Текущий: Stapel";
+
+
+        document.getElementById(
+            "currentSecondaryFont"
+        ).textContent=
+            s.font_secondary
+            ?
+            `Текущий: ${s.font_secondary}`
+            :
+            "Текущий: Stengazeta";
+
+    }catch(error){
+
+        console.error(error);
+    }
 }
 
 
@@ -3790,6 +4195,10 @@ function setColor(
         value || fallback;
 }
 
+
+/* =========================================================
+   SAVE DESIGN
+   ========================================================= */
 
 async function saveDesign(){
 
@@ -3812,18 +4221,76 @@ async function saveDesign(){
             return;
         }
 
+
+        /* LOGO */
+
         let logo=null;
 
-        const input=
+        const logoInput=
             document.getElementById(
                 "logoFile"
             );
 
-        if(input.files.length){
+        if(logoInput.files.length){
 
             logo=
-                await uploadImage(input);
+                await uploadImage(
+                    logoInput
+                );
         }
+
+
+        /* FONTS */
+
+        let fontMain=null;
+        let fontHeading=null;
+        let fontSecondary=null;
+
+
+        const fontMainInput=
+            document.getElementById(
+                "fontMainFile"
+            );
+
+        const fontHeadingInput=
+            document.getElementById(
+                "fontHeadingFile"
+            );
+
+        const fontSecondaryInput=
+            document.getElementById(
+                "fontSecondaryFile"
+            );
+
+
+        if(fontMainInput.files.length){
+
+            fontMain=
+                await uploadFont(
+                    fontMainInput
+                );
+        }
+
+
+        if(fontHeadingInput.files.length){
+
+            fontHeading=
+                await uploadFont(
+                    fontHeadingInput
+                );
+        }
+
+
+        if(fontSecondaryInput.files.length){
+
+            fontSecondary=
+                await uploadFont(
+                    fontSecondaryInput
+                );
+        }
+
+
+        /* DATA */
 
         const data={
 
@@ -3900,9 +4367,32 @@ async function saveDesign(){
                 ).value
         };
 
+
         if(logo){
             data.logo_url=logo;
         }
+
+
+        if(fontMain){
+
+            data.font_main=
+                fontMain;
+        }
+
+
+        if(fontHeading){
+
+            data.font_heading=
+                fontHeading;
+        }
+
+
+        if(fontSecondary){
+
+            data.font_secondary=
+                fontSecondary;
+        }
+
 
         await request(
             "settings",
@@ -3911,14 +4401,56 @@ async function saveDesign(){
             `?id=eq.${rows[0].id}`
         );
 
+
+        /* CLEAR FILE INPUTS */
+
+        logoInput.value="";
+
+        fontMainInput.value="";
+
+        fontHeadingInput.value="";
+
+        fontSecondaryInput.value="";
+
+
+        await loadDesign();
+
+
         notify(
             "Дизайн сохранён"
         );
 
     }catch(error){
 
-        alert(error.message);
+        alert(
+            "Ошибка сохранения:\n\n"+
+            error.message
+        );
     }
+}
+
+
+/* =========================================================
+   CLEAR FONT FILES
+   ========================================================= */
+
+function clearFontFiles(){
+
+    document.getElementById(
+        "fontMainFile"
+    ).value="";
+
+    document.getElementById(
+        "fontHeadingFile"
+    ).value="";
+
+    document.getElementById(
+        "fontSecondaryFile"
+    ).value="";
+
+    notify(
+        "Выбранные файлы очищены"
+    );
 }
 
 
@@ -3957,7 +4489,9 @@ async function deleteItem(
 
     }catch(error){
 
-        alert(error.message);
+        alert(
+            error.message
+        );
     }
 }
 
@@ -3978,11 +4512,26 @@ function escapeHTML(
     }
 
     return String(value)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
 
 
