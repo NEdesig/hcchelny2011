@@ -941,61 +941,93 @@ select:focus{
 
     <h2>⭐ ТОП игроков</h2>
 
-    <div id="scorersRows"></div>
-    <button class="btn" onclick="savePlayerStatsCategory('scorers')">
-      СОХРАНИТЬ БОМБАРДИРОВ
-    </button>
+    <div class="notice">
+      Выберите до 3 игроков в каждой категории и укажите их статистику.
+      Эти данные будут использоваться на главной странице сайта.
+    </div>
 
-    <div id="snipersRows"></div>
-    <button class="btn" onclick="savePlayerStatsCategory('snipers')">
-      СОХРАНИТЬ СНАЙПЕРОВ
-    </button>
+    <!-- БОМБАРДИРЫ -->
 
-    <div id="plus_minusRows"></div>
-    <button class="btn" onclick="savePlayerStatsCategory('plus_minus')">
-      СОХРАНИТЬ ПЛЮС / МИНУС
-    </button>
+    <div class="stat-category">
 
-    <div id="defense_scorersRows"></div>
-    <button class="btn" onclick="savePlayerStatsCategory('defense_scorers')">
-      СОХРАНИТЬ ЗАЩИТНИКОВ
-    </button>
+      <div class="stat-title">
+        🏆 Бомбардиры
+      </div>
+
+      <div id="scorersRows"></div>
+
+      <button
+        class="btn"
+        onclick="savePlayerStatsCategory('scorers')">
+        СОХРАНИТЬ БОМБАРДИРОВ
+      </button>
+
+    </div>
+
+
+    <!-- СНАЙПЕРЫ -->
+
+    <div class="stat-category">
+
+      <div class="stat-title">
+        🎯 Снайперы
+      </div>
+
+      <div id="snipersRows"></div>
+
+      <button
+        class="btn"
+        onclick="savePlayerStatsCategory('snipers')">
+        СОХРАНИТЬ СНАЙПЕРОВ
+      </button>
+
+    </div>
+
+
+    <!-- ПЛЮС / МИНУС -->
+
+    <div class="stat-category">
+
+      <div class="stat-title">
+        ➕➖ Плюс / минус
+      </div>
+
+      <div id="plus_minusRows"></div>
+
+      <button
+        class="btn"
+        onclick="savePlayerStatsCategory('plus_minus')">
+        СОХРАНИТЬ ПЛЮС / МИНУС
+      </button>
+
+    </div>
+
+
+    <!-- БОМБАРДИРЫ-ЗАЩИТНИКИ -->
+
+    <div class="stat-category">
+
+      <div class="stat-title">
+        🛡 Бомбардиры-защитники
+      </div>
+
+      <div id="defense_scorersRows"></div>
+
+      <button
+        class="btn"
+        onclick="savePlayerStatsCategory('defense_scorers')">
+        СОХРАНИТЬ ЗАЩИТНИКОВ
+      </button>
+
+    </div>
 
   </div>
 
 </section>
 
 
-/* =========================================================
-   ОТКРЫТИЕ ВКЛАДКИ ТОП
-========================================================= */
-
-async function openPlayerStats(){
-
-  const panel =
-    document.getElementById(
-      "playerStats"
-    );
-
-
-  if(!panel){
-
-    return;
-
-  }
-
-
-  panel.classList.add("active");
-
-
-  await loadPlayerStatsAdmin();
-
-}
-
-</script>
-
-
 <!-- STANDINGS -->
+
 <section
   id="standings"
   class="panel"
@@ -1012,7 +1044,6 @@ async function openPlayerStats(){
       <input id="standingTeam">
 
     </div>
-<script>
 
 /* =========================================================
    SUPABASE
