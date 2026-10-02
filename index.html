@@ -26,10 +26,28 @@ html{
 }
 
 body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--bg);
-  color:var(--text);
+  <script>
+window.onerror = function(message, source, lineno, colno) {
+  document.body.insertAdjacentHTML(
+    "afterbegin",
+    `<div style="
+      position:fixed;
+      z-index:999999;
+      top:0;
+      left:0;
+      right:0;
+      padding:15px;
+      background:#d00000;
+      color:white;
+      font:16px Arial;
+    ">
+      ОШИБКА JS:<br>
+      ${message}<br>
+      Строка: ${lineno}, столбец: ${colno}
+    </div>`
+  );
+};
+</script>
 }
 
 button{
