@@ -2722,33 +2722,41 @@ function showSection(type){
 
 async function init(){
 
-  try{
+  console.log("SITE INIT START");
 
-    await loadTeams();
+  const loaders = [
+    ["Команды", loadTeams],
+    ["Матчи", loadMatches],
+    ["Новости", loadNews],
+    ["Игроки", loadPlayers],
+    ["Таблица", loadStandings],
+    ["Достижения", loadAchievements],
+    ["Медиа", loadAlbums],
+    ["Именинники", loadBirthdays]
+  ];
 
-    await loadMatches();
+  for(const [name, loader] of loaders){
 
-    await loadNews();
+    try{
 
-    await loadPlayers();
+      console.log("Загрузка:", name);
 
-    await loadStandings();
+      await loader();
 
-    await loadAchievements();
+      console.log("Готово:", name);
 
-    await loadAlbums();
+    }catch(error){
 
-    await loadBirthdays();
+      console.error(
+        `Ошибка загрузки ${name}:`,
+        error
+      );
 
-  }catch(error){
-
-    console.error(
-      "INIT:",
-      error
-    );
+    }
 
   }
 
+  console.log("SITE INIT FINISHED");
 }
 
 
