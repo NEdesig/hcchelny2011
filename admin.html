@@ -25,8 +25,8 @@ body{
 
 button,
 input,
-select,
-textarea{
+textarea,
+select{
   font:inherit;
 }
 
@@ -34,361 +34,254 @@ button{
   cursor:pointer;
 }
 
-.hidden{
-  display:none!important;
-}
-
-.login-screen{
+.login{
   min-height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
   padding:20px;
-  background:
-    radial-gradient(
-      circle at top right,
-      rgba(8,117,220,.25),
-      transparent 35%
-    ),
-    #050b22;
 }
 
 .login-box{
   width:100%;
-  max-width:430px;
-  padding:32px;
-  border-radius:24px;
-  background:rgba(10,20,55,.94);
-  border:1px solid rgba(255,255,255,.1);
-  box-shadow:0 25px 80px rgba(0,0,0,.45);
+  max-width:420px;
+  background:#0d1738;
+  border:1px solid #26345f;
+  border-radius:22px;
+  padding:25px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
 }
 
-.login-logo{
-  width:90px;
-  height:90px;
-  object-fit:contain;
-  display:block;
-  margin:0 auto 20px;
-}
-
-.login-title{
+.logo-login{
   text-align:center;
-  font-size:28px;
+  font-size:36px;
   font-weight:900;
-  margin-bottom:8px;
+  margin-bottom:5px;
 }
 
-.login-subtitle{
+.login-sub{
   text-align:center;
-  color:#9da9c8;
-  margin-bottom:28px;
-}
-
-.input-group{
-  margin-bottom:15px;
-}
-
-.input-group label{
-  display:block;
-  margin-bottom:7px;
-  color:#b8c2dd;
+  color:#aab5d5;
   font-size:13px;
-  font-weight:700;
+  margin-bottom:25px;
+}
+
+.field{
+  margin-bottom:13px;
+}
+
+.field label{
+  display:block;
+  font-size:12px;
+  color:#aab5d5;
+  margin-bottom:6px;
 }
 
 input,
-select,
-textarea{
+textarea,
+select{
   width:100%;
-  border:1px solid rgba(255,255,255,.12);
-  background:#09132f;
+  border:1px solid #26345f;
+  background:#08102b;
   color:#fff;
   border-radius:12px;
-  padding:12px 14px;
+  padding:12px 13px;
   outline:none;
 }
 
-input:focus,
-select:focus,
-textarea:focus{
-  border-color:#0875dc;
-  box-shadow:0 0 0 3px rgba(8,117,220,.12);
-}
-
 textarea{
-  min-height:120px;
+  min-height:100px;
   resize:vertical;
 }
 
-.login-button{
-  width:100%;
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:#ffcd00;
+}
+
+.btn{
   border:0;
-  border-radius:13px;
-  padding:14px;
+  border-radius:12px;
+  padding:12px 15px;
+  background:#ffcd00;
+  color:#050b22;
+  font-weight:900;
+}
+
+.btn.secondary{
+  background:#17234c;
+  color:#fff;
+  border:1px solid #26345f;
+}
+
+.btn.danger{
+  background:#b72828;
+  color:#fff;
+}
+
+.btn.blue{
   background:#0875dc;
   color:#fff;
-  font-weight:900;
-  margin-top:8px;
 }
 
-.login-button:hover{
-  background:#0968c2;
+.btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
 }
 
-.login-error{
-  min-height:20px;
-  margin-top:14px;
-  text-align:center;
-  color:#ff7070;
+.error{
+  background:#5d2027;
+  border:1px solid #a33a45;
+  color:#ffdce0;
+  border-radius:12px;
+  padding:10px;
   font-size:13px;
+  margin-bottom:12px;
+  display:none;
 }
 
 .admin{
+  display:none;
   min-height:100vh;
-  background:#050b22;
 }
 
 .topbar{
   position:sticky;
   top:0;
   z-index:100;
+  background:#070d27;
+  border-bottom:1px solid #26345f;
+  padding:13px 15px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:15px;
-  padding:14px 20px;
-  background:rgba(5,11,34,.94);
-  backdrop-filter:blur(18px);
-  border-bottom:1px solid rgba(255,255,255,.08);
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.brand img{
-  width:44px;
-  height:44px;
-  object-fit:contain;
-}
-
-.brand-title{
-  font-size:17px;
+.top-title{
   font-weight:900;
+  font-size:18px;
 }
 
-.brand-sub{
-  color:#8190b5;
+.top-user{
+  color:#aab5d5;
   font-size:11px;
-  margin-top:2px;
+  max-width:170px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
-.logout{
-  border:1px solid rgba(255,255,255,.12);
-  color:#fff;
-  background:#0b1739;
-  border-radius:10px;
-  padding:9px 13px;
+.wrapper{
+  max-width:1100px;
+  margin:auto;
+  padding:15px;
 }
 
-.layout{
+.tabs{
   display:flex;
-  min-height:calc(100vh - 73px);
+  gap:7px;
+  overflow-x:auto;
+  padding-bottom:12px;
+  scrollbar-width:none;
 }
 
-.sidebar{
-  width:250px;
-  flex-shrink:0;
-  padding:18px 14px;
-  border-right:1px solid rgba(255,255,255,.07);
-  background:#07102a;
-}
-
-.nav-title{
-  color:#657496;
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:1.5px;
-  font-weight:900;
-  padding:10px 12px;
-}
-
-.nav-button{
-  width:100%;
-  border:0;
-  background:transparent;
-  color:#9ca9c8;
-  text-align:left;
-  padding:11px 12px;
-  border-radius:10px;
-  margin-bottom:4px;
-  font-weight:700;
-}
-
-.nav-button:hover{
-  background:rgba(255,255,255,.05);
-  color:#fff;
-}
-
-.nav-button.active{
-  background:#0875dc;
-  color:#fff;
-}
-
-.content{
-  width:100%;
-  max-width:1500px;
-  margin:0 auto;
-  padding:25px;
-}
-
-.section{
+.tabs::-webkit-scrollbar{
   display:none;
 }
 
-.section.active{
+.tab{
+  flex:0 0 auto;
+  border:1px solid #26345f;
+  background:#0d1738;
+  color:#aab5d5;
+  padding:10px 13px;
+  border-radius:12px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.tab.active{
+  background:#ffcd00;
+  color:#050b22;
+  border-color:#ffcd00;
+}
+
+.panel{
+  display:none;
+}
+
+.panel.active{
   display:block;
-}
-
-.page-title{
-  font-size:30px;
-  font-weight:950;
-  margin:0 0 5px;
-}
-
-.page-description{
-  color:#8491b1;
-  margin-bottom:25px;
 }
 
 .grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:18px;
+  gap:14px;
 }
 
-.grid-3{
+.grid3{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:18px;
+  gap:14px;
 }
 
 .card{
-  background:#09132f;
-  border:1px solid rgba(255,255,255,.08);
+  background:#0d1738;
+  border:1px solid #26345f;
   border-radius:18px;
-  padding:20px;
-  box-shadow:0 10px 35px rgba(0,0,0,.16);
+  padding:16px;
+  margin-bottom:14px;
 }
 
-.card-title{
-  font-size:17px;
-  font-weight:900;
-  margin-bottom:15px;
+.card h2{
+  font-size:18px;
+  margin:0 0 14px;
 }
 
-.card-description{
-  color:#7e8bab;
-  font-size:13px;
-  line-height:1.5;
-  margin-bottom:15px;
+.card h3{
+  font-size:15px;
+  margin:0 0 12px;
 }
 
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-}
-
-.form-grid-3{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:12px;
-}
-
-.full{
-  grid-column:1/-1;
-}
-
-.btn{
-  border:0;
-  border-radius:11px;
-  padding:11px 15px;
-  font-weight:900;
-  color:#fff;
-  background:#0875dc;
-}
-
-.btn:hover{
-  filter:brightness(1.08);
-}
-
-.btn.secondary{
-  background:#14234c;
-}
-
-.btn.success{
-  background:#159447;
-}
-
-.btn.warning{
-  background:#c98900;
-}
-
-.btn.danger{
-  background:#a82d3c;
+.small{
+  color:#aab5d5;
+  font-size:12px;
+  line-height:1.45;
 }
 
 .actions{
   display:flex;
   flex-wrap:wrap;
-  gap:9px;
-  margin-top:15px;
+  gap:8px;
+  margin-top:12px;
 }
 
-.status{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  z-index:500;
-  max-width:420px;
-  padding:13px 17px;
-  border-radius:12px;
-  background:#13204a;
-  border:1px solid rgba(255,255,255,.1);
-  box-shadow:0 15px 40px rgba(0,0,0,.3);
-  opacity:0;
-  pointer-events:none;
-  transform:translateY(10px);
-  transition:.2s;
+.row{
+  display:flex;
+  gap:8px;
+  align-items:center;
 }
 
-.status.show{
-  opacity:1;
-  transform:translateY(0);
-}
-
-.status.bad{
-  background:#4b1720;
+.row>*{
+  flex:1;
 }
 
 .list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+  display:grid;
+  gap:9px;
 }
 
 .list-item{
+  background:#08102b;
+  border:1px solid #26345f;
+  border-radius:13px;
+  padding:12px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:15px;
-  padding:13px;
-  border-radius:12px;
-  background:#07102a;
-  border:1px solid rgba(255,255,255,.06);
+  gap:10px;
 }
 
 .item-info{
@@ -396,127 +289,165 @@ textarea{
 }
 
 .item-title{
-  font-weight:900;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  font-weight:800;
+  font-size:14px;
 }
 
 .item-sub{
-  color:#7886a7;
-  font-size:12px;
-  margin-top:4px;
-}
-
-.small{
-  color:#7482a3;
-  font-size:12px;
+  color:#aab5d5;
+  font-size:11px;
+  margin-top:3px;
 }
 
 .preview{
-  margin-top:10px;
-  max-width:220px;
-  max-height:140px;
+  margin-top:9px;
+  max-width:180px;
+  max-height:130px;
   border-radius:12px;
   object-fit:cover;
   display:none;
 }
 
-.stat-box{
-  padding:17px;
-  border-radius:15px;
-  background:#07102a;
-  border:1px solid rgba(255,255,255,.06);
+.file{
+  padding:9px;
 }
 
-.stat-number{
-  font-size:30px;
-  font-weight:950;
-}
-
-.stat-label{
-  color:#7785a7;
-  font-size:12px;
-  margin-top:4px;
-}
-
-.match-event{
+.checkbox{
   display:flex;
   align-items:center;
-  gap:12px;
-  padding:12px;
-  border-radius:12px;
-  background:#07102a;
-  border:1px solid rgba(255,255,255,.06);
+  gap:8px;
+  color:#fff;
+  font-size:13px;
+  margin:8px 0;
 }
 
-.event-icon{
-  width:36px;
-  height:36px;
+.checkbox input{
+  width:auto;
+}
+
+.notice{
+  padding:12px;
+  border-radius:13px;
+  background:#111d42;
+  color:#c7d0eb;
+  font-size:12px;
+  line-height:1.5;
+  margin-bottom:14px;
+}
+
+.status{
+  position:fixed;
+  right:15px;
+  bottom:15px;
+  z-index:300;
+  background:#101b40;
+  border:1px solid #26345f;
+  color:#fff;
+  border-radius:13px;
+  padding:12px 15px;
+  font-size:12px;
+  box-shadow:0 10px 35px rgba(0,0,0,.35);
+  transform:translateY(120px);
+  opacity:0;
+  transition:.25s;
+}
+
+.status.show{
+  transform:translateY(0);
+  opacity:1;
+}
+
+.status.ok{
+  border-color:#287d52;
+}
+
+.status.bad{
+  border-color:#a33a45;
+}
+
+.stat-category{
+  margin-bottom:16px;
+}
+
+.stat-title{
+  font-size:16px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+
+.stat-row{
+  background:#08102b;
+  border:1px solid #26345f;
+  border-radius:14px;
+  padding:11px;
+  margin-bottom:9px;
+}
+
+.rank{
+  width:35px;
+  height:35px;
   border-radius:10px;
+  background:#ffcd00;
+  color:#050b22;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:#10285d;
-  font-size:17px;
+  font-weight:900;
+  flex:0 0 35px;
 }
 
-.mobile-menu{
+.stat-head{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-bottom:8px;
+}
+
+.stat-number{
+  font-weight:900;
+}
+
+.stat-preview{
+  width:60px;
+  height:60px;
+  object-fit:cover;
+  border-radius:12px;
   display:none;
+  margin-top:8px;
 }
 
-@media(max-width:900px){
+.color-row{
+  display:grid;
+  grid-template-columns:1fr 80px;
+  gap:8px;
+}
 
-  .sidebar{
-    width:210px;
-  }
+.color-row input[type=color]{
+  padding:4px;
+  height:44px;
+}
 
-  .grid,
-  .grid-3{
-    grid-template-columns:1fr;
-  }
-
-  .form-grid-3{
-    grid-template-columns:1fr;
-  }
+.font-preview{
+  margin-top:8px;
+  padding:12px;
+  border-radius:12px;
+  background:#08102b;
+  color:#fff;
+  font-size:18px;
 }
 
 @media(max-width:700px){
-
-  .topbar{
-    padding:11px 13px;
-  }
-
-  .sidebar{
-    display:none;
-  }
-
-  .content{
-    padding:15px;
-  }
-
-  .mobile-menu{
-    display:block;
-  }
-
-  .form-grid{
+  .grid,
+  .grid3{
     grid-template-columns:1fr;
   }
 
-  .page-title{
-    font-size:24px;
+  .wrapper{
+    padding:10px;
   }
 
-  .card{
-    padding:15px;
-  }
-
-  .list-item{
-    align-items:flex-start;
-    flex-direction:column;
-  }
-
-  .list-item .btn{
-    width:100%;
+  .top-user{
+    max-width:110px;
   }
 }
 </style>
@@ -524,2410 +455,968 @@ textarea{
 
 <body>
 
-<div
-  id="loginScreen"
-  class="login-screen"
->
-
+<div id="loginScreen" class="login">
   <div class="login-box">
 
-    <img
-      id="loginLogo"
-      class="login-logo"
-      src=""
-      alt="ХК Челны 2011"
-    >
+    <div class="logo-login">Ч2011</div>
+    <div class="login-sub">Админ-панель ХК Челны 2011</div>
 
-    <div class="login-title">
-      Админ-панель
+    <div id="loginError" class="error"></div>
+
+    <div class="field">
+      <label>Email</label>
+      <input id="loginEmail" type="email" placeholder="admin@email.com">
     </div>
 
-    <div class="login-subtitle">
-      ХК Челны 2011
+    <div class="field">
+      <label>Пароль</label>
+      <input id="loginPassword" type="password" placeholder="Пароль">
     </div>
 
-    <form id="loginForm">
-
-      <div class="input-group">
-
-        <label for="email">
-          Email
-        </label>
-
-        <input
-          id="email"
-          type="email"
-          autocomplete="username"
-          placeholder="Введите email"
-          required
-        >
-
-      </div>
-
-      <div class="input-group">
-
-        <label for="password">
-          Пароль
-        </label>
-
-        <input
-          id="password"
-          type="password"
-          autocomplete="current-password"
-          placeholder="Введите пароль"
-          required
-        >
-
-      </div>
-
-      <button
-        id="loginButton"
-        class="login-button"
-        type="submit"
-      >
-        ВОЙТИ
-      </button>
-
-      <div
-        id="loginError"
-        class="login-error"
-      ></div>
-
-    </form>
-
-  </div>
-
-</div>
-
-
-<div
-  id="adminApp"
-  class="admin hidden"
->
-
-  <header class="topbar">
-
-    <div class="brand">
-
-      <img
-        id="adminLogo"
-        src=""
-        alt=""
-      >
-
-      <div>
-
-        <div class="brand-title">
-          ХК Челны 2011
-        </div>
-
-        <div class="brand-sub">
-          Панель управления
-        </div>
-
-      </div>
-
-    </div>
-
-    <button
-      id="logoutButton"
-      class="logout"
-      type="button"
-    >
-      Выйти
+    <button id="loginButton" class="btn" style="width:100%" onclick="login()">
+      ВОЙТИ
     </button>
 
-  </header>
+  </div>
+</div>
 
+<div id="admin" class="admin">
 
-  <div class="layout">
+  <div class="topbar">
+    <div>
+      <div class="top-title">ХК Челны 2011</div>
+      <div class="top-user" id="userEmail"></div>
+    </div>
 
-    <aside class="sidebar">
+    <button class="btn secondary" onclick="logout()">
+      Выйти
+    </button>
+  </div>
 
-      <div class="nav-title">
-        Управление
+  <div class="wrapper">
+
+    <div class="tabs">
+
+      <button class="tab active" onclick="openTab('home',this)">
+        🏠 Главная
+      </button>
+
+      <button class="tab" onclick="openTab('news',this)">
+        📰 Новости
+      </button>
+
+      <button class="tab" onclick="openTab('media',this)">
+        🖼 Медиа
+      </button>
+
+      <button class="tab" onclick="openTab('achievements',this)">
+        🏆 Достижения
+      </button>
+
+      <button class="tab" onclick="openTab('birthdays',this)">
+        🎂 Именинники
+      </button>
+
+      <button class="tab" onclick="openTab('players',this)">
+        👥 Игроки
+      </button>
+
+      <button class="tab" onclick="openTab('playerStats',this)">
+        ⭐ ТОП игроков
+      </button>
+
+      <button class="tab" onclick="openTab('matches',this)">
+        🏒 Матчи
+      </button>
+
+      <button class="tab" onclick="openTab('standings',this)">
+        📊 Таблица
+      </button>
+
+      <button class="tab" onclick="openTab('shop',this)">
+        🛍 Магазин
+      </button>
+
+      <button class="tab" onclick="openTab('design',this)">
+        🎨 Дизайн
+      </button>
+
+    </div>
+
+    <section id="home" class="panel active">
+
+      <div class="card">
+        <h2>🏠 Главная страница</h2>
+
+        <div class="notice">
+          Здесь можно вручную выбрать, какой матч показывать как
+          <b>предстоящий</b> и какой как <b>последний</b>.
+          Если ничего не выбрать — сайт использует автоматический режим.
+        </div>
+
+        <div class="field">
+          <label>Предстоящий матч</label>
+          <select id="homeUpcoming"></select>
+        </div>
+
+        <div class="field">
+          <label>Последний матч</label>
+          <select id="homeLastMatch"></select>
+        </div>
+
+        <div class="field">
+          <label>Главное объявление</label>
+          <select id="homeAnnouncement"></select>
+        </div>
+
+        <div class="field">
+          <label>Главная новость №1</label>
+          <select id="homePress1"></select>
+        </div>
+
+        <div class="field">
+          <label>Главная новость №2</label>
+          <select id="homePress2"></select>
+        </div>
+
+        <div class="field">
+          <label>Главная новость №3</label>
+          <select id="homePress3"></select>
+        </div>
+
+        <div class="field">
+          <label>Главный фотоальбом</label>
+          <select id="homeAlbum"></select>
+        </div>
+
+        <label class="checkbox">
+          <input id="showPress" type="checkbox" checked>
+          Показывать раздел «Пресс»
+        </label>
+
+        <label class="checkbox">
+          <input id="showMedia" type="checkbox" checked>
+          Показывать раздел «Медиа»
+        </label>
+
+        <label class="checkbox">
+          <input id="showAchievements" type="checkbox" checked>
+          Показывать достижения
+        </label>
+
+        <label class="checkbox">
+          <input id="showBirthdays" type="checkbox" checked>
+          Показывать именинников
+        </label>
+
+        <div class="actions">
+          <button class="btn" onclick="saveHomeSettings()">
+            СОХРАНИТЬ ГЛАВНУЮ
+          </button>
+        </div>
       </div>
 
-      <button
-        class="nav-button active"
-        data-section="dashboard"
-      >
-        Главная
-      </button>
+    </section>
 
-      <button
-        class="nav-button"
-        data-section="matches"
-      >
-        Матчи
-      </button>
+    <section id="news" class="panel">
 
-      <button
-        class="nav-button"
-        data-section="matchcenter"
-      >
-        🎯 Матч-центр
-      </button>
+      <div class="card">
 
-      <button
-        class="nav-button"
-        data-section="players"
-      >
-        Игроки
-      </button>
+        <h2>📰 Добавить новость</h2>
 
-      <button
-        class="nav-button"
-        data-section="quickstats"
-      >
-        ⚡ Статистика
-      </button>
-
-      <button
-        class="nav-button"
-        data-section="news"
-      >
-        Новости
-      </button>
-
-      <button
-        class="nav-button"
-        data-section="albums"
-      >
-        Альбомы
-      </button>
-
-      <button
-        class="nav-button"
-        data-section="achievements"
-      >
-        Достижения
-      </button>
-
-      <button
-        class="nav-button"
-        data-section="birthdays"
-      >
-        Дни рождения
-      </button>
-
-      <button
-        class="nav-button"
-        data-section="standings"
-      >
-        Турнирная таблица
-      </button>
-
-      <button
-        class="nav-button"
-        data-section="products"
-      >
-        Товары
-      </button>
-
-      <button
-        class="nav-button"
-        data-section="settings"
-      >
-        Настройки
-      </button>
-
-    </aside>
-
-
-    <main class="content">
-
-
-      <!-- =================================================
-           DASHBOARD
-      ================================================== -->
-
-      <section
-        id="section-dashboard"
-        class="section active"
-      >
-
-        <h1 class="page-title">
-          Панель управления
-        </h1>
-
-        <div class="page-description">
-          Управляйте сайтом ХК Челны 2011 из одного места.
+        <div class="field">
+          <label>Заголовок</label>
+          <input id="newsTitle">
         </div>
-
-
-        <div class="grid-3">
-
-          <div class="stat-box">
-
-            <div
-              id="dashboardMatches"
-              class="stat-number"
-            >
-              0
-            </div>
-
-            <div class="stat-label">
-              Матчей
-            </div>
-
-          </div>
-
-
-          <div class="stat-box">
-
-            <div
-              id="dashboardPlayers"
-              class="stat-number"
-            >
-              0
-            </div>
-
-            <div class="stat-label">
-              Игроков
-            </div>
-
-          </div>
-
-
-          <div class="stat-box">
-
-            <div
-              id="dashboardNews"
-              class="stat-number"
-            >
-              0
-            </div>
-
-            <div class="stat-label">
-              Новостей
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div
-          class="grid"
-          style="margin-top:18px"
-        >
-
-          <div class="card">
-
-            <div class="card-title">
-              Быстрые действия
-            </div>
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="showSection('matches')"
-              >
-                + Матч
-              </button>
-
-              <button
-                class="btn"
-                onclick="showSection('players')"
-              >
-                + Игрок
-              </button>
-
-              <button
-                class="btn"
-                onclick="showSection('news')"
-              >
-                + Новость
-              </button>
-
-              <button
-                class="btn"
-                onclick="showSection('matchcenter')"
-              >
-                🎯 Матч-центр
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div class="card-title">
-              Статус
-            </div>
-
-            <div
-              id="dashboardStatus"
-              class="small"
-            >
-              Подключение к Supabase...
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =================================================
-           MATCHES
-      ================================================== -->
-
-      <section
-        id="section-matches"
-        class="section"
-      >
-
-        <h1 class="page-title">
-          Матчи
-        </h1>
-
-        <div class="page-description">
-          Создание и редактирование матчей команды.
-        </div>
-
 
         <div class="grid">
 
-          <div class="card">
-
-            <div class="card-title">
-              Добавить матч
-            </div>
-
-            <div class="form-grid">
-
-              <div class="input-group">
-
-                <label>
-                  Название
-                </label>
-
-                <input
-                  id="matchTitle"
-                  placeholder="Челны — Ак Барс"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Дата и время
-                </label>
-
-                <input
-                  id="matchDate"
-                  type="datetime-local"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Турнир
-                </label>
-
-                <input
-                  id="matchTournament"
-                  placeholder="Первенство ПФО"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Место
-                </label>
-
-                <input
-                  id="matchVenue"
-                  placeholder="Ледовый дворец"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Хозяева
-                </label>
-
-                <select
-                  id="matchHomeTeam"
-                >
-                  <option value="">
-                    — Выберите команду —
-                  </option>
-                </select>
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Гости
-                </label>
-
-                <select
-                  id="matchAwayTeam"
-                >
-                  <option value="">
-                    — Выберите команду —
-                  </option>
-                </select>
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Счёт хозяев
-                </label>
-
-                <input
-                  id="matchHomeScore"
-                  type="number"
-                  min="0"
-                  value="0"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Счёт гостей
-                </label>
-
-                <input
-                  id="matchAwayScore"
-                  type="number"
-                  min="0"
-                  value="0"
-                >
-
-              </div>
-
-            </div>
-
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="addMatch()"
-              >
-                Добавить матч
-              </button>
-
-            </div>
-
+          <div class="field">
+            <label>Тег</label>
+            <input id="newsTag" placeholder="Команда / Матч / Новости">
           </div>
 
-
-          <div class="card">
-
-            <div class="card-title">
-              Список матчей
-            </div>
-
-            <div
-              id="matchesList"
-              class="list"
-            >
-              Загрузка...
-            </div>
-
+          <div class="field">
+            <label>Дата</label>
+            <input id="newsDate" type="date">
           </div>
 
         </div>
 
-      </section>
-
-
-      <!-- =================================================
-           MATCH CENTER
-      ================================================== -->
-
-      <section
-        id="section-matchcenter"
-        class="section"
-      >
-
-        <h1 class="page-title">
-          🎯 Матч-центр
-        </h1>
-
-        <div class="page-description">
-          Управление матчем, событиями, периодами,
-          штрафами и трансляцией.
+        <div class="field">
+          <label>Краткое описание</label>
+          <textarea id="newsDescription"></textarea>
         </div>
 
-
-        <div class="card">
-
-          <div class="form-grid">
-
-            <div class="input-group">
-
-              <label>
-                Матч
-              </label>
-
-              <select
-                id="eventMatchSelect"
-              >
-                <option value="">
-                  — Выберите матч —
-                </option>
-              </select>
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Статус
-              </label>
-
-              <select
-                id="matchStatus"
-              >
-
-                <option value="scheduled">
-                  Запланирован
-                </option>
-
-                <option value="live">
-                  Идёт
-                </option>
-
-                <option value="finished">
-                  Завершён
-                </option>
-
-                <option value="postponed">
-                  Перенесён
-                </option>
-
-                <option value="cancelled">
-                  Отменён
-                </option>
-
-              </select>
-
-            </div>
-
-
-            <div class="input-group full">
-
-              <label>
-                Ссылка на трансляцию
-              </label>
-
-              <input
-                id="matchStream"
-                type="url"
-                placeholder="https://..."
-              >
-
-            </div>
-
-          </div>
-
-
-          <div class="actions">
-
-            <button
-              class="btn"
-              onclick="saveMatchCenter()"
-            >
-              Сохранить
-            </button>
-
-            <button
-              class="btn success"
-              onclick="setMatchLive()"
-            >
-              МАТЧ НАЧАЛСЯ
-            </button>
-
-            <button
-              class="btn danger"
-              onclick="finishMatchCenter()"
-            >
-              ЗАВЕРШИТЬ МАТЧ
-            </button>
-
-          </div>
-
+        <div class="field">
+          <label>Текст новости</label>
+          <textarea id="newsContent"></textarea>
         </div>
 
-
-        <div
-          class="grid"
-          style="margin-top:18px"
-        >
-
-          <div class="card">
-
-            <div class="card-title">
-              ⚡ Гол
-            </div>
-
-            <div class="form-grid">
-
-              <div class="input-group">
-
-                <label>
-                  Автор гола
-                </label>
-
-                <select
-                  id="goalScorer"
-                >
-                  <option value="">
-                    — Игрок —
-                  </option>
-                </select>
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Период
-                </label>
-
-                <select
-                  id="goalPeriod"
-                >
-
-                  <option value="1">
-                    1 период
-                  </option>
-
-                  <option value="2">
-                    2 период
-                  </option>
-
-                  <option value="3">
-                    3 период
-                  </option>
-
-                  <option value="4">
-                    Овертайм
-                  </option>
-
-                </select>
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Время
-                </label>
-
-                <input
-                  id="goalTime"
-                  placeholder="12:34"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Ассист 1
-                </label>
-
-                <select
-                  id="goalAssist1"
-                >
-                  <option value="">
-                    — Нет —
-                  </option>
-                </select>
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Ассист 2
-                </label>
-
-                <select
-                  id="goalAssist2"
-                >
-                  <option value="">
-                    — Нет —
-                  </option>
-                </select>
-
-              </div>
-
-            </div>
-
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="addGoalEvent()"
-              >
-                + ДОБАВИТЬ ГОЛ
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div class="card-title">
-              ⏱ Штраф
-            </div>
-
-            <div class="form-grid">
-
-              <div class="input-group">
-
-                <label>
-                  Игрок
-                </label>
-
-                <select
-                  id="penaltyPlayer"
-                >
-                  <option value="">
-                    — Игрок —
-                  </option>
-                </select>
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Период
-                </label>
-
-                <select
-                  id="penaltyPeriod"
-                >
-
-                  <option value="1">
-                    1 период
-                  </option>
-
-                  <option value="2">
-                    2 период
-                  </option>
-
-                  <option value="3">
-                    3 период
-                  </option>
-
-                  <option value="4">
-                    Овертайм
-                  </option>
-
-                </select>
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Время
-                </label>
-
-                <input
-                  id="penaltyTime"
-                  placeholder="08:42"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Минуты
-                </label>
-
-                <input
-                  id="penaltyMinutes"
-                  type="number"
-                  min="1"
-                  value="2"
-                >
-
-              </div>
-
-            </div>
-
-
-            <div class="actions">
-
-              <button
-                class="btn warning"
-                onclick="addPenaltyEvent()"
-              >
-                + ДОБАВИТЬ ШТРАФ
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div
-          class="card"
-          style="margin-top:18px"
-        >
-
-          <div class="card-title">
-            Счёт по периодам
-          </div>
-
-
-          <div class="form-grid-3">
-
-
-            <div class="stat-box">
-
-              <div class="item-title">
-                1 период
-              </div>
-
-              <div
-                class="form-grid"
-                style="margin-top:10px"
-              >
-
-                <input
-                  id="p1Home"
-                  type="number"
-                  min="0"
-                  value="0"
-                  placeholder="Хозяева"
-                >
-
-                <input
-                  id="p1Away"
-                  type="number"
-                  min="0"
-                  value="0"
-                  placeholder="Гости"
-                >
-
-              </div>
-
-              <input
-                id="p1Pim"
-                type="number"
-                min="0"
-                value="0"
-                placeholder="Штрафные минуты"
-                style="margin-top:8px"
-              >
-
-            </div>
-
-
-            <div class="stat-box">
-
-              <div class="item-title">
-                2 период
-              </div>
-
-              <div
-                class="form-grid"
-                style="margin-top:10px"
-              >
-
-                <input
-                  id="p2Home"
-                  type="number"
-                  min="0"
-                  value="0"
-                  placeholder="Хозяева"
-                >
-
-                <input
-                  id="p2Away"
-                  type="number"
-                  min="0"
-                  value="0"
-                  placeholder="Гости"
-                >
-
-              </div>
-
-              <input
-                id="p2Pim"
-                type="number"
-                min="0"
-                value="0"
-                placeholder="Штрафные минуты"
-                style="margin-top:8px"
-              >
-
-            </div>
-
-
-            <div class="stat-box">
-
-              <div class="item-title">
-                3 период
-              </div>
-
-              <div
-                class="form-grid"
-                style="margin-top:10px"
-              >
-
-                <input
-                  id="p3Home"
-                  type="number"
-                  min="0"
-                  value="0"
-                  placeholder="Хозяева"
-                >
-
-                <input
-                  id="p3Away"
-                  type="number"
-                  min="0"
-                  value="0"
-                  placeholder="Гости"
-                >
-
-              </div>
-
-              <input
-                id="p3Pim"
-                type="number"
-                min="0"
-                value="0"
-                placeholder="Штрафные минуты"
-                style="margin-top:8px"
-              >
-
-            </div>
-
-          </div>
-
-
-          <div class="actions">
-
-            <button
-              class="btn"
-              onclick="savePeriods()"
-            >
-              Сохранить периоды
-            </button>
-
-          </div>
-
-        </div>
-
-
-        <div
-          class="card"
-          style="margin-top:18px"
-        >
-
-          <div class="card-title">
-            События матча
-          </div>
-
-          <div
-            id="matchEventsList"
-            class="list"
+        <div class="field">
+          <label>Фото</label>
+
+          <input
+            id="newsImage"
+            class="file"
+            type="file"
+            accept="image/*"
+            onchange="previewFile(this,'newsPreview')"
           >
-            Выберите матч.
-          </div>
+
+          <img id="newsPreview" class="preview">
+        </div>
+
+        <button class="btn" onclick="addNews()">
+          ДОБАВИТЬ НОВОСТЬ
+        </button>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Новости</h2>
+
+        <div id="newsList" class="list"></div>
+
+      </div>
+
+    </section>
+
+    <section id="media" class="panel">
+
+      <div class="card">
+
+        <h2>🖼 Добавить фотоальбом</h2>
+
+        <div class="field">
+          <label>Название</label>
+          <input id="albumTitle">
+        </div>
+
+        <div class="field">
+          <label>Описание</label>
+          <textarea id="albumDescription"></textarea>
+        </div>
+
+        <div class="field">
+
+          <label>Обложка</label>
+
+          <input
+            id="albumCover"
+            class="file"
+            type="file"
+            accept="image/*"
+            onchange="previewFile(this,'albumPreview')"
+          >
+
+          <img id="albumPreview" class="preview">
 
         </div>
 
-      </section>
+        <button class="btn" onclick="addAlbum()">
+          ДОБАВИТЬ АЛЬБОМ
+        </button>
 
+      </div>
 
-      <!-- =================================================
-           PLAYERS
-      ================================================== -->
+      <div class="card">
 
-      <section
-        id="section-players"
-        class="section"
-      >
+        <h2>Фотоальбомы</h2>
 
-        <h1 class="page-title">
-          Игроки
-        </h1>
+        <div id="albumsList" class="list"></div>
 
-        <div class="page-description">
-          Состав команды и профили игроков.
+      </div>
+
+    </section>
+
+    <section id="achievements" class="panel">
+
+      <div class="card">
+
+        <h2>🏆 Добавить достижение</h2>
+
+        <div class="field">
+          <label>Название</label>
+          <input id="achievementTitle">
         </div>
 
+        <div class="field">
+          <label>Описание</label>
+          <textarea id="achievementDescription"></textarea>
+        </div>
+
+        <div class="field">
+
+          <label>Фото</label>
+
+          <input
+            id="achievementImage"
+            class="file"
+            type="file"
+            accept="image/*"
+            onchange="previewFile(this,'achievementPreview')"
+          >
+
+          <img id="achievementPreview" class="preview">
+
+        </div>
+
+        <button class="btn" onclick="addAchievement()">
+          ДОБАВИТЬ ДОСТИЖЕНИЕ
+        </button>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Достижения</h2>
+
+        <div id="achievementsList" class="list"></div>
+
+      </div>
+
+    </section>
+
+    <section id="birthdays" class="panel">
+
+      <div class="card">
+
+        <h2>🎂 Добавить именинника</h2>
+
+        <div class="field">
+          <label>Имя</label>
+          <input id="birthdayName">
+        </div>
+
+        <div class="field">
+          <label>Дата рождения</label>
+          <input id="birthdayDate" type="date">
+        </div>
+
+        <div class="field">
+
+          <label>Фото</label>
+
+          <input
+            id="birthdayImage"
+            class="file"
+            type="file"
+            accept="image/*"
+            onchange="previewFile(this,'birthdayPreview')"
+          >
+
+          <img id="birthdayPreview" class="preview">
+
+        </div>
+
+        <button class="btn" onclick="addBirthday()">
+          ДОБАВИТЬ
+        </button>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Именинники</h2>
+
+        <div id="birthdaysList" class="list"></div>
+
+      </div>
+
+    </section>
+
+    <section id="players" class="panel">
+
+      <div class="card">
+
+        <h2>👥 Добавить игрока</h2>
 
         <div class="grid">
 
-          <div class="card">
-
-            <div class="card-title">
-              Добавить игрока
-            </div>
-
-            <div class="form-grid">
-
-              <div class="input-group">
-
-                <label>
-                  Номер
-                </label>
-
-                <input
-                  id="playerNumber"
-                  type="number"
-                  min="0"
-                  placeholder="18"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Имя и фамилия
-                </label>
-
-                <input
-                  id="playerName"
-                  placeholder="Амир Норов"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Позиция
-                </label>
-
-                <select
-                  id="playerPosition"
-                >
-
-                  <option value="Нападающий">
-                    Нападающий
-                  </option>
-
-                  <option value="Защитник">
-                    Защитник
-                  </option>
-
-                  <option value="Вратарь">
-                    Вратарь
-                  </option>
-
-                </select>
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Дата рождения
-                </label>
-
-                <input
-                  id="playerBirthDate"
-                  type="date"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Рост, см
-                </label>
-
-                <input
-                  id="playerHeight"
-                  type="number"
-                  placeholder="178"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Вес, кг
-                </label>
-
-                <input
-                  id="playerWeight"
-                  type="number"
-                  step="0.1"
-                  placeholder="65"
-                >
-
-              </div>
-
-
-              <div class="input-group full">
-
-                <label>
-                  Фото
-                </label>
-
-                <input
-                  id="playerImage"
-                  type="file"
-                  accept="image/*"
-                >
-
-              </div>
-
-            </div>
-
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="addPlayer()"
-              >
-                Добавить игрока
-              </button>
-
-            </div>
-
+          <div class="field">
+            <label>Номер</label>
+            <input id="playerNumber" type="number" min="0">
           </div>
 
-
-          <div class="card">
-
-            <div class="card-title">
-              Список игроков
-            </div>
-
-            <div
-              id="playersList"
-              class="list"
-            >
-              Загрузка...
-            </div>
-
+          <div class="field">
+            <label>Позиция</label>
+            <input id="playerPosition" placeholder="Нападающий">
           </div>
 
         </div>
 
+        <div class="field">
+          <label>Имя и фамилия</label>
+          <input id="playerName">
+        </div>
 
-        <div
-          class="card"
-          style="margin-top:18px"
+        <div class="field">
+
+          <label>Фото игрока</label>
+
+          <input
+            id="playerImage"
+            class="file"
+            type="file"
+            accept="image/*"
+            onchange="previewFile(this,'playerPreview')"
+          >
+
+          <img id="playerPreview" class="preview">
+
+        </div>
+
+        <button class="btn" onclick="addPlayer()">
+          ДОБАВИТЬ ИГРОКА
+        </button>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Состав</h2>
+
+        <div id="playersList" class="list"></div>
+
+      </div>
+
+    </section>
+
+    <section id="playerStats" class="panel">
+
+      <div class="card">
+
+        <h2>⭐ ТОП игроков</h2>
+
+        <div class="notice">
+          Для каждой категории можно выбрать 3 игроков.
+          Укажите статистику и при необходимости отдельное фото.
+        </div>
+
+        <div id="scorersRows"></div>
+
+        <button
+          class="btn"
+          onclick="savePlayerStatsCategory('scorers')"
         >
+          СОХРАНИТЬ БОМБАРДИРОВ
+        </button>
 
-          <div class="card-title">
-            Редактировать профиль
-          </div>
+      </div>
 
-          <div class="form-grid">
+      <div class="card">
 
-            <div class="input-group">
+        <div id="snipersRows"></div>
 
-              <label>
-                Игрок
-              </label>
+        <button
+          class="btn"
+          onclick="savePlayerStatsCategory('snipers')"
+        >
+          СОХРАНИТЬ СНАЙПЕРОВ
+        </button>
 
-              <select
-                id="editPlayerSelect"
-              >
-                <option value="">
-                  — Выберите игрока —
-                </option>
-              </select>
+      </div>
 
-            </div>
+      <div class="card">
 
+        <div id="plus_minusRows"></div>
 
-            <div class="input-group">
+        <button
+          class="btn"
+          onclick="savePlayerStatsCategory('plus_minus')"
+        >
+          СОХРАНИТЬ ПЛЮС / МИНУС
+        </button>
 
-              <label>
-                Позиция
-              </label>
+      </div>
 
-              <select
-                id="editPosition"
-              >
+      <div class="card">
 
-                <option value="Нападающий">
-                  Нападающий
-                </option>
+        <div id="defense_scorersRows"></div>
 
-                <option value="Защитник">
-                  Защитник
-                </option>
+        <button
+          class="btn"
+          onclick="savePlayerStatsCategory('defense_scorers')"
+        >
+          СОХРАНИТЬ БОМБАРДИРОВ-ЗАЩИТНИКОВ
+        </button>
 
-                <option value="Вратарь">
-                  Вратарь
-                </option>
+      </div>
 
-              </select>
+    </section>
 
-            </div>
+    <section id="matches" class="panel">
 
+      <div class="card">
 
-            <div class="input-group">
-
-              <label>
-                Дата рождения
-              </label>
-
-              <input
-                id="editBirthDate"
-                type="date"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Рост
-              </label>
-
-              <input
-                id="editHeight"
-                type="number"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Вес
-              </label>
-
-              <input
-                id="editWeight"
-                type="number"
-                step="0.1"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Новое фото
-              </label>
-
-              <input
-                id="editPlayerImage"
-                type="file"
-                accept="image/*"
-              >
-
-            </div>
-
-          </div>
-
-
-          <div class="actions">
-
-            <button
-              class="btn"
-              onclick="savePlayerProfile()"
-            >
-              Сохранить профиль
-            </button>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =================================================
-           QUICK STATS
-      ================================================== -->
-
-      <section
-        id="section-quickstats"
-        class="section"
-      >
-
-        <h1 class="page-title">
-          ⚡ Статистика
-        </h1>
-
-        <div class="page-description">
-          Быстрое добавление голов, ассистов и статистики вратарей.
-        </div>
-
+        <h2>🏒 Добавить матч</h2>
 
         <div class="grid">
 
-
-          <div class="card">
-
-            <div class="card-title">
-              +1 Гол
-            </div>
-
-            <select
-              id="quickGoalPlayer"
-            >
-              <option value="">
-                — Игрок —
-              </option>
-            </select>
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="quickAddStat('goals')"
-              >
-                ДОБАВИТЬ ГОЛ
-              </button>
-
-            </div>
-
+          <div class="field">
+            <label>Дата</label>
+            <input id="matchDate" type="date">
           </div>
 
-
-          <div class="card">
-
-            <div class="card-title">
-              +1 Ассист
-            </div>
-
-            <select
-              id="quickAssistPlayer"
-            >
-              <option value="">
-                — Игрок —
-              </option>
-            </select>
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="quickAddStat('assists')"
-              >
-                ДОБАВИТЬ АССИСТ
-              </button>
-
-            </div>
-
+          <div class="field">
+            <label>Время</label>
+            <input id="matchTime" type="time">
           </div>
 
+        </div>
 
-          <div class="card">
+        <div class="field">
+          <label>Соперник</label>
+          <input id="matchOpponent">
+        </div>
 
-            <div class="card-title">
-              Вратарь
-            </div>
+        <div class="field">
+          <label>Турнир</label>
+          <input id="matchTournament">
+        </div>
 
-            <select
-              id="goaliePlayer"
-            >
-              <option value="">
-                — Вратарь —
-              </option>
-            </select>
+        <div class="grid">
 
+          <div class="field">
+            <label>Голы ХК Челны</label>
+            <input id="matchHomeScore" type="number" min="0">
+          </div>
+
+          <div class="field">
+            <label>Голы соперника</label>
+            <input id="matchAwayScore" type="number" min="0">
+          </div>
+
+        </div>
+
+        <div class="field">
+          <label>Место проведения</label>
+          <input id="matchVenue">
+        </div>
+
+        <button class="btn" onclick="addMatch()">
+          ДОБАВИТЬ МАТЧ
+        </button>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Матчи</h2>
+
+        <div id="matchesList" class="list"></div>
+
+      </div>
+
+    </section>
+
+    <section id="standings" class="panel">
+
+      <div class="card">
+
+        <h2>📊 Добавить команду в таблицу</h2>
+
+        <div class="field">
+          <label>Команда</label>
+          <input id="standingTeam">
+        </div>
+
+        <div class="grid">
+
+          <div class="field">
+            <label>Игр</label>
+            <input id="standingGames" type="number" min="0">
+          </div>
+
+          <div class="field">
+            <label>Очков</label>
+            <input id="standingPoints" type="number" min="0">
+          </div>
+
+        </div>
+
+        <div class="field">
+          <label>Позиция</label>
+          <input id="standingPosition" type="number" min="1">
+        </div>
+
+        <button class="btn" onclick="addStanding()">
+          ДОБАВИТЬ В ТАБЛИЦУ
+        </button>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Таблица</h2>
+
+        <div id="standingsList" class="list"></div>
+
+      </div>
+
+    </section>
+
+    <section id="shop" class="panel">
+
+      <div class="card">
+
+        <h2>🛍 Добавить товар</h2>
+
+        <div class="field">
+          <label>Название</label>
+          <input id="productName">
+        </div>
+
+        <div class="field">
+          <label>Описание</label>
+          <textarea id="productDescription"></textarea>
+        </div>
+
+        <div class="grid">
+
+          <div class="field">
+            <label>Цена, ₽</label>
             <input
-              id="goalieGames"
-              type="number"
-              min="1"
-              value="1"
-              placeholder="Матчей"
-              style="margin-top:10px"
-            >
-
-            <input
-              id="goalieGoalsAgainst"
+              id="productPrice"
               type="number"
               min="0"
-              value="0"
-              placeholder="Пропущено"
-              style="margin-top:10px"
-            >
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="addGoalieGame()"
-              >
-                Сохранить
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div class="card-title">
-              КН вратаря
-            </div>
-
-            <select
-              id="goalieKnpPlayer"
-            >
-              <option value="">
-                — Вратарь —
-              </option>
-            </select>
-
-            <input
-              id="goalieKnp"
-              type="number"
               step="0.01"
-              min="0"
-              placeholder="КН"
-              style="margin-top:10px"
             >
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="saveGoalieKnp()"
-              >
-                Сохранить КН
-              </button>
-
-            </div>
-
           </div>
 
+          <div class="field">
+            <label>Категория</label>
+            <input id="productCategory">
+          </div>
 
         </div>
 
+        <div class="field">
+          <label>Контакт для заказа</label>
+          <input id="productContact">
+        </div>
 
-        <div
-          class="card"
-          style="margin-top:18px"
-        >
+        <div class="field">
 
-          <div class="card-title">
-            Статистика сезона 2026/27
-          </div>
+          <label>Фото товара</label>
 
-          <div
-            id="quickStatsList"
-            class="list"
+          <input
+            id="productImage"
+            class="file"
+            type="file"
+            accept="image/*"
+            onchange="previewFile(this,'productPreview')"
           >
-            Загрузка...
-          </div>
+
+          <img id="productPreview" class="preview">
 
         </div>
 
-      </section>
+        <button class="btn" onclick="addProduct()">
+          ДОБАВИТЬ ТОВАР
+        </button>
 
+      </div>
 
-      <!-- =================================================
-           NEWS
-      ================================================== -->
+      <div class="card">
 
-      <section
-        id="section-news"
-        class="section"
-      >
+        <h2>Товары</h2>
 
-        <h1 class="page-title">
-          Новости
-        </h1>
+        <div id="productsList" class="list"></div>
 
-        <div class="page-description">
-          Публикации сайта.
+      </div>
+
+    </section>
+
+    <section id="design" class="panel">
+
+      <div class="card">
+
+        <h2>🎨 Дизайн сайта</h2>
+
+        <div class="field">
+          <label>Название сайта</label>
+          <input id="designSiteName">
         </div>
 
+        <div class="field">
+
+          <label>Логотип</label>
+
+          <input
+            id="designLogo"
+            class="file"
+            type="file"
+            accept="image/*"
+            onchange="previewFile(this,'designLogoPreview')"
+          >
+
+          <img id="designLogoPreview" class="preview">
+
+        </div>
+
+        <h3>Цвета</h3>
 
         <div class="grid">
 
-          <div class="card">
+          <div class="field">
+            <label>Основной цвет</label>
 
-            <div class="card-title">
-              Добавить новость
-            </div>
+            <div class="color-row">
 
-            <div class="form-grid">
-
-              <div class="input-group">
-
-                <label>
-                  Заголовок
-                </label>
-
-                <input
-                  id="newsTitle"
-                  placeholder="Матч завершён!"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Категория
-                </label>
-
-                <input
-                  id="newsTag"
-                  placeholder="Матч"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Дата
-                </label>
-
-                <input
-                  id="newsDate"
-                  type="date"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Изображение
-                </label>
-
-                <input
-                  id="newsImage"
-                  type="file"
-                  accept="image/*"
-                >
-
-              </div>
-
-
-              <div class="input-group full">
-
-                <label>
-                  Краткое описание
-                </label>
-
-                <textarea
-                  id="newsDescription"
-                  placeholder="Короткое описание новости..."
-                ></textarea>
-
-              </div>
-
-
-              <div class="input-group full">
-
-                <label>
-                  Текст
-                </label>
-
-                <textarea
-                  id="newsContent"
-                  placeholder="Полный текст новости..."
-                ></textarea>
-
-              </div>
-
-            </div>
-
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="addNews()"
-              >
-                Опубликовать
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div class="card-title">
-              Новости
-            </div>
-
-            <div
-              id="newsList"
-              class="list"
-            >
-              Загрузка...
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =================================================
-           ALBUMS
-      ================================================== -->
-
-      <section
-        id="section-albums"
-        class="section"
-      >
-
-        <h1 class="page-title">
-          Альбомы
-        </h1>
-
-        <div class="page-description">
-          Фотоальбомы команды.
-        </div>
-
-
-        <div class="grid">
-
-          <div class="card">
-
-            <div class="card-title">
-              Новый альбом
-            </div>
-
-            <div class="input-group">
-
-              <label>
-                Название
-              </label>
+              <input id="primaryColor">
 
               <input
-                id="albumTitle"
-                placeholder="Матч с Ак Барсом"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Описание
-              </label>
-
-              <textarea
-                id="albumDescription"
-                placeholder="Описание альбома..."
-              ></textarea>
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Обложка
-              </label>
-
-              <input
-                id="albumCover"
-                type="file"
-                accept="image/*"
-              >
-
-            </div>
-
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="addAlbum()"
-              >
-                Создать альбом
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div class="card-title">
-              Альбомы
-            </div>
-
-            <div
-              id="albumsList"
-              class="list"
-            >
-              Загрузка...
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =================================================
-           ACHIEVEMENTS
-      ================================================== -->
-
-      <section
-        id="section-achievements"
-        class="section"
-      >
-
-        <h1 class="page-title">
-          Достижения
-        </h1>
-
-        <div class="page-description">
-          Кубки, турниры и достижения команды.
-        </div>
-
-
-        <div class="grid">
-
-          <div class="card">
-
-            <div class="card-title">
-              Добавить достижение
-            </div>
-
-            <div class="input-group">
-
-              <label>
-                Название
-              </label>
-
-              <input
-                id="achievementTitle"
-                placeholder="Победитель Кубка Поволжья"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Описание
-              </label>
-
-              <textarea
-                id="achievementDescription"
-              ></textarea>
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Изображение
-              </label>
-
-              <input
-                id="achievementImage"
-                type="file"
-                accept="image/*"
-              >
-
-            </div>
-
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="addAchievement()"
-              >
-                Добавить
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div class="card-title">
-              Достижения
-            </div>
-
-            <div
-              id="achievementsList"
-              class="list"
-            >
-              Загрузка...
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =================================================
-           BIRTHDAYS
-      ================================================== -->
-
-      <section
-        id="section-birthdays"
-        class="section"
-      >
-
-        <h1 class="page-title">
-          Дни рождения
-        </h1>
-
-        <div class="page-description">
-          Дни рождения игроков.
-        </div>
-
-
-        <div class="grid">
-
-          <div class="card">
-
-            <div class="card-title">
-              Добавить
-            </div>
-
-            <div class="input-group">
-
-              <label>
-                Имя
-              </label>
-
-              <input
-                id="birthdayName"
-                placeholder="Амир Норов"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Дата
-              </label>
-
-              <input
-                id="birthdayDate"
-                type="date"
-              >
-
-            </div>
-
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="addBirthday()"
-              >
-                Добавить
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div class="card-title">
-              Именинники
-            </div>
-
-            <div
-              id="birthdaysList"
-              class="list"
-            >
-              Загрузка...
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =================================================
-           STANDINGS
-      ================================================== -->
-
-      <section
-        id="section-standings"
-        class="section"
-      >
-
-        <h1 class="page-title">
-          Турнирная таблица
-        </h1>
-
-        <div class="page-description">
-          Команды и текущие показатели.
-        </div>
-
-
-        <div class="grid">
-
-          <div class="card">
-
-            <div class="card-title">
-              Добавить команду
-            </div>
-
-            <div class="input-group">
-
-              <label>
-                Команда
-              </label>
-
-              <input
-                id="standingTeam"
-                placeholder="ХК Челны"
-              >
-
-            </div>
-
-
-            <div class="form-grid">
-
-              <div class="input-group">
-
-                <label>
-                  Место
-                </label>
-
-                <input
-                  id="standingPosition"
-                  type="number"
-                  min="1"
-                >
-
-              </div>
-
-
-              <div class="input-group">
-
-                <label>
-                  Игр
-                </label>
-
-                <input
-                  id="standingGames"
-                  type="number"
-                  min="0"
-                >
-
-              </div>
-
-
-              <div class="input-group full">
-
-                <label>
-                  Очков
-                </label>
-
-                <input
-                  id="standingPoints"
-                  type="number"
-                  min="0"
-                >
-
-              </div>
-
-            </div>
-
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="addStanding()"
-              >
-                Добавить
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div class="card-title">
-              Таблица
-            </div>
-
-            <div
-              id="standingsList"
-              class="list"
-            >
-              Загрузка...
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =================================================
-           PRODUCTS
-      ================================================== -->
-
-      <section
-        id="section-products"
-        class="section"
-      >
-
-        <h1 class="page-title">
-          Товары
-        </h1>
-
-        <div class="page-description">
-          Мерч и продукция команды.
-        </div>
-
-
-        <div class="grid">
-
-          <div class="card">
-
-            <div class="card-title">
-              Добавить товар
-            </div>
-
-            <div class="input-group">
-
-              <label>
-                Название
-              </label>
-
-              <input
-                id="productName"
-                placeholder="Шарф ХК Челны"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Цена
-              </label>
-
-              <input
-                id="productPrice"
-                type="number"
-                min="0"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Описание
-              </label>
-
-              <textarea
-                id="productDescription"
-              ></textarea>
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Изображение
-              </label>
-
-              <input
-                id="productImage"
-                type="file"
-                accept="image/*"
-              >
-
-            </div>
-
-
-            <div class="actions">
-
-              <button
-                class="btn"
-                onclick="addProduct()"
-              >
-                Добавить
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div class="card-title">
-              Товары
-            </div>
-
-            <div
-              id="productsList"
-              class="list"
-            >
-              Загрузка...
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =================================================
-           SETTINGS
-      ================================================== -->
-
-      <section
-        id="section-settings"
-        class="section"
-      >
-
-        <h1 class="page-title">
-          Настройки
-        </h1>
-
-        <div class="page-description">
-          Основные параметры сайта.
-        </div>
-
-
-        <div class="card">
-
-          <div class="form-grid">
-
-            <div class="input-group">
-
-              <label>
-                Название команды
-              </label>
-
-              <input
-                id="settingTeamName"
-                placeholder="ХК Челны 2011"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Основной цвет
-              </label>
-
-              <input
-                id="settingPrimaryColor"
-                type="text"
+                id="primaryColorPicker"
+                type="color"
                 value="#000056"
               >
 
             </div>
+          </div>
 
+          <div class="field">
+            <label>Вторичный цвет</label>
 
-            <div class="input-group">
+            <div class="color-row">
 
-              <label>
-                Вторичный цвет
-              </label>
-
-              <input
-                id="settingSecondaryColor"
-                type="text"
-                value="#0875dc"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Акцент
-              </label>
+              <input id="secondaryColor">
 
               <input
-                id="settingAccentColor"
-                type="text"
+                id="secondaryColorPicker"
+                type="color"
                 value="#ffcd00"
               >
 
             </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Основной шрифт
-              </label>
-
-              <input
-                id="settingFontMain"
-                value="Stapel"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Шрифт заголовков
-              </label>
-
-              <input
-                id="settingFontHeading"
-                value="Stapel"
-              >
-
-            </div>
-
-
-            <div class="input-group">
-
-              <label>
-                Вторичный шрифт
-              </label>
-
-              <input
-                id="settingFontSecondary"
-                value="Arial"
-              >
-
-            </div>
-
-
-            <div class="input-group full">
-
-              <label>
-                Логотип
-              </label>
-
-              <input
-                id="settingLogo"
-                type="file"
-                accept="image/*"
-              >
-
-            </div>
-
           </div>
 
+          <div class="field">
+            <label>Фон</label>
 
-          <div class="actions">
+            <div class="color-row">
 
-            <button
-              class="btn"
-              onclick="saveSettings()"
-            >
-              Сохранить настройки
-            </button>
+              <input id="backgroundColor">
 
+              <input
+                id="backgroundColorPicker"
+                type="color"
+                value="#050b22"
+              >
+
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Карточки</label>
+
+            <div class="color-row">
+
+              <input id="cardColor">
+
+              <input
+                id="cardColorPicker"
+                type="color"
+                value="#0d1738"
+              >
+
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Основной текст</label>
+
+            <div class="color-row">
+
+              <input id="textColor">
+
+              <input
+                id="textColorPicker"
+                type="color"
+                value="#ffffff"
+              >
+
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Вторичный текст</label>
+
+            <div class="color-row">
+
+              <input id="mutedTextColor">
+
+              <input
+                id="mutedTextColorPicker"
+                type="color"
+                value="#aab5d5"
+              >
+
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Кнопки</label>
+
+            <div class="color-row">
+
+              <input id="buttonColor">
+
+              <input
+                id="buttonColorPicker"
+                type="color"
+                value="#ffcd00"
+              >
+
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Границы</label>
+
+            <div class="color-row">
+
+              <input id="borderColor">
+
+              <input
+                id="borderColorPicker"
+                type="color"
+                value="#26345f"
+              >
+
+            </div>
           </div>
 
         </div>
 
-      </section>
+        <div class="field">
 
-    </main>
+          <label>Скругление карточек, px</label>
+
+          <input
+            id="borderRadius"
+            type="number"
+            min="0"
+            max="50"
+            value="14"
+          >
+
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h2>🧭 Иконки разделов</h2>
+
+        <div class="grid">
+
+          <div class="field">
+            <label>Главная</label>
+            <input id="homeIcon" placeholder="🏠">
+          </div>
+
+          <div class="field">
+            <label>Матчи</label>
+            <input id="matchesIcon" placeholder="🏒">
+          </div>
+
+          <div class="field">
+            <label>Состав</label>
+            <input id="rosterIcon" placeholder="👥">
+          </div>
+
+          <div class="field">
+            <label>Таблица</label>
+            <input id="tableIcon" placeholder="📊">
+          </div>
+
+          <div class="field">
+            <label>Новости</label>
+            <input id="newsIcon" placeholder="📰">
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h2>🔤 Шрифты</h2>
+
+        <div class="field">
+
+          <label>Основной шрифт</label>
+
+          <input
+            id="fontMain"
+            class="file"
+            type="file"
+            accept=".ttf,.otf,.woff,.woff2"
+            onchange="previewFont(this,'fontMainPreview')"
+          >
+
+          <div id="fontMainPreview" class="font-preview">
+            Пример основного шрифта
+          </div>
+
+        </div>
+
+        <div class="field">
+
+          <label>Шрифт заголовков</label>
+
+          <input
+            id="fontHeading"
+            class="file"
+            type="file"
+            accept=".ttf,.otf,.woff,.woff2"
+            onchange="previewFont(this,'fontHeadingPreview')"
+          >
+
+          <div id="fontHeadingPreview" class="font-preview">
+            Пример шрифта заголовков
+          </div>
+
+        </div>
+
+        <div class="field">
+
+          <label>Второй шрифт</label>
+
+          <input
+            id="fontSecondary"
+            class="file"
+            type="file"
+            accept=".ttf,.otf,.woff,.woff2"
+            onchange="previewFont(this,'fontSecondaryPreview')"
+          >
+
+          <div id="fontSecondaryPreview" class="font-preview">
+            Пример второго шрифта
+          </div>
+
+        </div>
+
+        <button class="btn" onclick="saveDesign()">
+          СОХРАНИТЬ ДИЗАЙН
+        </button>
+
+      </div>
+
+    </section>
 
   </div>
 
 </div>
 
-
-<div
-  id="status"
-  class="status"
-></div>
-
+<div id="status" class="status"></div>
 
 <script>
-  const SUPABASE_URL =
+
+const SUPABASE_URL =
   "https://jxlbojosxaaqnyuzohnw.supabase.co";
 
 const SUPABASE_KEY =
@@ -2937,154 +1426,269 @@ const STORAGE_BUCKET =
   "site-media";
 
 
-let accessToken = null;
-
-let currentUser = null;
-
-let settingsCache = {};
-
-let teamsCache = [];
-
-let matchesCache = [];
+let session = null;
 
 let playersCache = [];
-
+let playerStatsCache = [];
+let matchesCache = [];
 let newsCache = [];
-
 let albumsCache = [];
-
 let achievementsCache = [];
-
 let birthdaysCache = [];
-
 let standingsCache = [];
-
 let productsCache = [];
 
 
-/* =========================================================
-   BASIC HELPERS
-========================================================= */
+function saveSession(){
 
-function $(id){
-
-  return document.getElementById(id);
-
-}
-
-
-function getValue(id){
-
-  const el = $(id);
-
-  return el
-    ? el.value
-    : "";
+  localStorage.setItem(
+    "hk_chelny_admin_session",
+    JSON.stringify(session)
+  );
 
 }
 
 
-function setValue(id,value){
+function getSavedSession(){
 
-  const el = $(id);
+  try{
 
-  if(el){
+    return JSON.parse(
+      localStorage.getItem(
+        "hk_chelny_admin_session"
+      ) || "null"
+    );
 
-    el.value =
-      value ?? "";
+  }catch(e){
+
+    return null;
 
   }
 
 }
 
 
-function escapeHtml(value){
+function clearSession(){
 
-  return String(
-    value ?? ""
-  )
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-
-}
-
-
-function status(
-  message,
-  type = "good"
-){
-
-  const box =
-    $("status");
-
-  if(!box) return;
-
-  box.textContent =
-    message;
-
-  box.className =
-    "status show" +
-    (
-      type === "bad"
-        ? " bad"
-        : ""
-    );
-
-
-  clearTimeout(
-    window.__statusTimer
+  localStorage.removeItem(
+    "hk_chelny_admin_session"
   );
 
+}
 
-  window.__statusTimer =
-    setTimeout(
-      () => {
 
-        box.className =
-          "status";
+async function login(){
 
-      },
-      3500
+  const email =
+    document.getElementById(
+      "loginEmail"
+    ).value.trim();
+
+  const password =
+    document.getElementById(
+      "loginPassword"
+    ).value;
+
+  const error =
+    document.getElementById(
+      "loginError"
     );
+
+  const button =
+    document.getElementById(
+      "loginButton"
+    );
+
+  error.style.display = "none";
+
+  if(!email || !password){
+
+    error.textContent =
+      "Введите email и пароль.";
+
+    error.style.display =
+      "block";
+
+    return;
+  }
+
+  button.disabled = true;
+
+  try{
+
+    const response =
+      await fetch(
+        `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
+        {
+          method:"POST",
+
+          headers:{
+            apikey:SUPABASE_KEY,
+            "Content-Type":"application/json"
+          },
+
+          body:JSON.stringify({
+            email,
+            password
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if(!response.ok){
+
+      throw new Error(
+        data?.error_description ||
+        data?.msg ||
+        "Неверный email или пароль."
+      );
+
+    }
+
+    session = data;
+
+    saveSession();
+
+    showAdmin();
+
+  }catch(e){
+
+    error.textContent =
+      e.message;
+
+    error.style.display =
+      "block";
+
+  }finally{
+
+    button.disabled = false;
+
+  }
 
 }
 
 
-/* =========================================================
-   SUPABASE REQUEST
-========================================================= */
+async function refreshSession(){
+
+  if(!session?.refresh_token){
+
+    return false;
+  }
+
+  try{
+
+    const response =
+      await fetch(
+        `${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,
+        {
+          method:"POST",
+
+          headers:{
+            apikey:SUPABASE_KEY,
+            "Content-Type":"application/json"
+          },
+
+          body:JSON.stringify({
+            refresh_token:
+              session.refresh_token
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if(!response.ok){
+
+      clearSession();
+
+      session = null;
+
+      return false;
+    }
+
+    session = data;
+
+    saveSession();
+
+    return true;
+
+  }catch(e){
+
+    return false;
+
+  }
+
+}
+
+
+async function ensureSession(){
+
+  if(!session?.access_token){
+
+    return false;
+  }
+
+  const expiresAt =
+    Number(
+      session.expires_at || 0
+    );
+
+  if(
+    expiresAt &&
+    expiresAt * 1000 <
+    Date.now() + 60000
+  ){
+
+    return await refreshSession();
+
+  }
+
+  return true;
+
+}
+
 
 async function request(
   path,
-  options = {}
+  options = {},
+  retry = true
 ){
+
+  const valid =
+    await ensureSession();
+
+  if(!valid){
+
+    showLogin();
+
+    throw new Error(
+      "Сессия закончилась. Войдите снова."
+    );
+
+  }
 
   const headers = {
 
     apikey:
       SUPABASE_KEY,
 
-    Authorization:
-      `Bearer ${
-        accessToken ||
-        SUPABASE_KEY
-      }`,
-
     "Content-Type":
       "application/json",
 
-    ...(options.headers || {})
+    ...(options.headers || {}),
+
+    Authorization:
+      `Bearer ${session.access_token}`
 
   };
 
 
   const response =
     await fetch(
-      SUPABASE_URL +
-      path,
+      `${SUPABASE_URL}${path}`,
       {
         ...options,
         headers
@@ -3092,489 +1696,280 @@ async function request(
     );
 
 
-  const text =
-    await response.text();
+  if(
+    (
+      response.status === 401 ||
+      response.status === 403
+    ) &&
+    retry
+  ){
 
+    const refreshed =
+      await refreshSession();
 
-  let data = null;
+    if(refreshed){
 
-
-  if(text){
-
-    try{
-
-      data =
-        JSON.parse(text);
-
-    }catch{
-
-      data =
-        text;
+      return request(
+        path,
+        options,
+        false
+      );
 
     }
 
   }
 
 
-  if(!response.ok){
+  if(
+    !response.ok
+  ){
 
-    const message =
-      typeof data === "object"
-        ? (
-            data?.message ||
-            data?.error_description ||
-            data?.error ||
-            JSON.stringify(data)
-          )
-        : String(data);
-
+    const text =
+      await response.text();
 
     throw new Error(
-      message ||
-      `HTTP ${response.status}`
+      text ||
+      `Ошибка запроса: ${response.status}`
     );
 
   }
 
 
-  return data;
+  const contentType =
+    response.headers.get(
+      "content-type"
+    ) || "";
+
+  if(
+    contentType.includes(
+      "application/json"
+    )
+  ){
+
+    return await response.json();
+
+  }
+
+  return null;
 
 }
 
 
-/* =========================================================
-   AUTH
-========================================================= */
+window.addEventListener(
+  "load",
+  async function(){
 
-async function login(){
+    session =
+      getSavedSession();
 
-  const email =
-    getValue("email")
-      .trim();
+    if(session){
 
-  const password =
-    getValue("password");
+      const valid =
+        await ensureSession();
 
+      if(valid){
 
-  const error =
-    $("loginError");
+        showAdmin();
 
-  const button =
-    $("loginButton");
+      }else{
 
+        showLogin();
 
-  if(error){
+      }
 
-    error.textContent =
-      "";
+    }else{
 
-  }
-
-
-  if(!email || !password){
-
-    if(error){
-
-      error.textContent =
-        "Введите email и пароль.";
-
-    }
-
-    return;
-
-  }
-
-
-  if(button){
-
-    button.disabled =
-      true;
-
-    button.textContent =
-      "ВХОД...";
-
-  }
-
-
-  try{
-
-    const result =
-      await fetch(
-        `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
-        {
-
-          method:"POST",
-
-          headers:{
-
-            apikey:
-              SUPABASE_KEY,
-
-            "Content-Type":
-              "application/json"
-
-          },
-
-          body:
-            JSON.stringify({
-
-              email,
-
-              password
-
-            })
-
-        }
-      );
-
-
-    const data =
-      await result.json();
-
-
-    if(!result.ok){
-
-      throw new Error(
-        data?.error_description ||
-        data?.msg ||
-        data?.message ||
-        "Неверный email или пароль."
-      );
-
-    }
-
-
-    accessToken =
-      data.access_token;
-
-    currentUser =
-      data.user;
-
-
-    localStorage.setItem(
-      "chelny_admin_token",
-      accessToken
-    );
-
-
-    localStorage.setItem(
-      "chelny_admin_user",
-      JSON.stringify(
-        currentUser || {}
-      )
-    );
-
-
-    showAdmin();
-
-
-  }catch(errorObject){
-
-    console.error(
-      "LOGIN ERROR:",
-      errorObject
-    );
-
-
-    if(error){
-
-      error.textContent =
-        errorObject.message ||
-        "Ошибка входа.";
-
-    }
-
-  }finally{
-
-    if(button){
-
-      button.disabled =
-        false;
-
-      button.textContent =
-        "ВОЙТИ";
+      showLogin();
 
     }
 
   }
-
-}
-
-
-async function restoreSession(){
-
-  const token =
-    localStorage.getItem(
-      "chelny_admin_token"
-    );
+);
 
 
-  if(!token){
+function showAdmin(){
 
-    showLogin();
+  document.getElementById(
+    "loginScreen"
+  ).style.display =
+    "none";
 
-    return;
+  document.getElementById(
+    "admin"
+  ).style.display =
+    "block";
 
-  }
+  document.getElementById(
+    "userEmail"
+  ).textContent =
+    session?.user?.email || "";
 
-
-  accessToken =
-    token;
-
-
-  try{
-
-    const result =
-      await fetch(
-        `${SUPABASE_URL}/auth/v1/user`,
-        {
-
-          headers:{
-
-            apikey:
-              SUPABASE_KEY,
-
-            Authorization:
-              `Bearer ${token}`
-
-          }
-
-        }
-      );
-
-
-    if(!result.ok){
-
-      throw new Error(
-        "Session expired"
-      );
-
-    }
-
-
-    currentUser =
-      await result.json();
-
-
-    showAdmin();
-
-
-  }catch(error){
-
-    console.warn(
-      "SESSION:",
-      error
-    );
-
-
-    localStorage.removeItem(
-      "chelny_admin_token"
-    );
-
-    localStorage.removeItem(
-      "chelny_admin_user"
-    );
-
-
-    accessToken =
-      null;
-
-    currentUser =
-      null;
-
-
-    showLogin();
-
-  }
+  loadEverything();
 
 }
 
 
 function showLogin(){
 
-  $("loginScreen")
-    ?.classList.remove(
-      "hidden"
-    );
+  document.getElementById(
+    "loginScreen"
+  ).style.display =
+    "flex";
 
-  $("adminApp")
-    ?.classList.add(
-      "hidden"
-    );
-
-}
-
-
-async function showAdmin(){
-
-  $("loginScreen")
-    ?.classList.add(
-      "hidden"
-    );
-
-  $("adminApp")
-    ?.classList.remove(
-      "hidden"
-    );
-
-
-  try{
-
-    await loadEverything();
-
-  }catch(error){
-
-    console.error(
-      "ADMIN LOAD ERROR:",
-      error
-    );
-
-
-    status(
-      "Админка открыта, но часть данных не загрузилась.",
-      "bad"
-    );
-
-  }
+  document.getElementById(
+    "admin"
+  ).style.display =
+    "none";
 
 }
 
 
-async function logout(){
+function logout(){
 
-  try{
+  clearSession();
 
-    if(accessToken){
-
-      await fetch(
-        `${SUPABASE_URL}/auth/v1/logout`,
-        {
-
-          method:"POST",
-
-          headers:{
-
-            apikey:
-              SUPABASE_KEY,
-
-            Authorization:
-              `Bearer ${accessToken}`
-
-          }
-
-        }
-      );
-
-    }
-
-  }catch(error){
-
-    console.warn(
-      error
-    );
-
-  }
-
-
-  localStorage.removeItem(
-    "chelny_admin_token"
-  );
-
-  localStorage.removeItem(
-    "chelny_admin_user"
-  );
-
-
-  accessToken =
-    null;
-
-  currentUser =
-    null;
-
+  session = null;
 
   showLogin();
 
 }
 
 
-/* =========================================================
-   NAVIGATION
-========================================================= */
-
-function showSection(
-  section
+function openTab(
+  id,
+  button
 ){
 
   document
     .querySelectorAll(
-      ".section"
+      ".panel"
     )
     .forEach(
-      item => {
-
-        item.classList.toggle(
-          "active",
-          item.id ===
-            `section-${section}`
-        );
-
-      }
+      panel =>
+        panel.classList.remove(
+          "active"
+        )
     );
-
 
   document
     .querySelectorAll(
-      ".nav-button"
+      ".tab"
     )
     .forEach(
-      item => {
-
-        item.classList.toggle(
-          "active",
-          item.dataset.section ===
-            section
-        );
-
-      }
+      tab =>
+        tab.classList.remove(
+          "active"
+        )
     );
 
+  document.getElementById(
+    id
+  ).classList.add(
+    "active"
+  );
 
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
+  if(button){
+
+    button.classList.add(
+      "active"
+    );
+
+  }
+
+
+  if(id === "playerStats"){
+
+    loadPlayerStatsAdmin();
+
+  }
+
+
+  if(id === "design"){
+
+    loadDesign();
+
+  }
+
+
+  if(id === "home"){
+
+    loadHomeSettings();
+
+  }
 
 }
 
 
-document
-  .querySelectorAll(
-    ".nav-button"
-  )
-  .forEach(
-    button => {
+function status(
+  message,
+  type = "ok"
+){
 
-      button.addEventListener(
-        "click",
-        () => {
+  const el =
+    document.getElementById(
+      "status"
+    );
 
-          showSection(
-            button.dataset.section
-          );
+  if(!el) return;
 
-        }
-      );
+  el.textContent =
+    message;
 
-    }
+  el.className =
+    `status show ${type}`;
+
+  clearTimeout(
+    status.timer
   );
 
+  status.timer =
+    setTimeout(
+      () => {
 
-/* =========================================================
-   UPLOAD
-========================================================= */
+        el.classList.remove(
+          "show"
+        );
+
+      },
+      3000
+    );
+
+}
+
+
+function previewFile(
+  input,
+  id
+){
+
+  const file =
+    input.files?.[0];
+
+  const image =
+    document.getElementById(
+      id
+    );
+
+  if(!file || !image){
+
+    return;
+
+  }
+
+  image.src =
+    URL.createObjectURL(
+      file
+    );
+
+  image.style.display =
+    "block";
+
+}
+
 
 async function uploadImage(
-  file
+  file,
+  retry = true
 ){
 
   if(!file){
@@ -3583,24 +1978,22 @@ async function uploadImage(
 
   }
 
-
-  const safeName =
+  const extension =
     file.name
-      .replace(
-        /[^a-zA-Z0-9._-]/g,
-        "_"
-      );
+      .split(".")
+      .pop()
+      .toLowerCase();
 
-
-  const path =
-    `admin/${Date.now()}_${safeName}`;
+  const name =
+    `uploads/${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2)}.${extension}`;
 
 
   const response =
     await fetch(
-      `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`,
+      `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${name}`,
       {
-
         method:"POST",
 
         headers:{
@@ -3609,17 +2002,11 @@ async function uploadImage(
             SUPABASE_KEY,
 
           Authorization:
-            `Bearer ${
-              accessToken ||
-              SUPABASE_KEY
-            }`,
+            `Bearer ${session.access_token}`,
 
           "Content-Type":
             file.type ||
-            "application/octet-stream",
-
-          "x-upsert":
-            "true"
+            "application/octet-stream"
 
         },
 
@@ -3629,6 +2016,33 @@ async function uploadImage(
     );
 
 
+  if(
+    (
+      response.status === 401 ||
+      response.status === 403
+    ) &&
+    retry
+  ){
+
+    const refreshed =
+      await refreshSession();
+
+    if(refreshed){
+
+      return uploadImage(
+        file,
+        false
+      );
+
+    }
+
+    throw new Error(
+      "Сессия закончилась."
+    );
+
+  }
+
+
   if(!response.ok){
 
     const text =
@@ -3636,666 +2050,44 @@ async function uploadImage(
 
     throw new Error(
       text ||
-      "Не удалось загрузить файл."
+      "Ошибка загрузки изображения."
     );
 
   }
 
 
-  return (
-    `${SUPABASE_URL}/storage/v1/object/public/` +
-    `${STORAGE_BUCKET}/${path}`
-  );
+  return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${name}`;
 
 }
 
 
-/* =========================================================
-   SETTINGS
-========================================================= */
+async function loadEverything(){
 
-async function loadSettings(){
+  await Promise.allSettled([
 
-  try{
+    loadPlayers(),
 
-    const rows =
-      await request(
-        "/rest/v1/settings?select=*"
-      );
+    loadPlayerStatsAdmin(),
 
+    loadNews(),
 
-    settingsCache =
-      rows?.[0] ||
-      {};
+    loadAlbums(),
 
+    loadAchievements(),
 
-    setValue(
-      "settingTeamName",
-      settingsCache.team_name ||
-      "ХК Челны 2011"
-    );
+    loadBirthdays(),
 
+    loadMatches(),
 
-    setValue(
-      "settingPrimaryColor",
-      settingsCache.primary_color ||
-      "#000056"
-    );
+    loadStandings(),
 
+    loadProducts(),
 
-    setValue(
-      "settingSecondaryColor",
-      settingsCache.secondary_color ||
-      "#0875dc"
-    );
+    loadDesign(),
 
+    loadHomeSettings()
 
-    setValue(
-      "settingAccentColor",
-      settingsCache.accent_color ||
-      "#ffcd00"
-    );
-
-
-    setValue(
-      "settingFontMain",
-      settingsCache.font_main ||
-      "Stapel"
-    );
-
-
-    setValue(
-      "settingFontHeading",
-      settingsCache.font_heading ||
-      "Stapel"
-    );
-
-
-    setValue(
-      "settingFontSecondary",
-      settingsCache.font_secondary ||
-      "Arial"
-    );
-
-
-    if(settingsCache.logo_url){
-
-      $("loginLogo").src =
-        settingsCache.logo_url;
-
-      $("adminLogo").src =
-        settingsCache.logo_url;
-
-    }
-
-  }catch(error){
-
-    console.warn(
-      "SETTINGS:",
-      error
-    );
-
-  }
-
-}
-
-
-async function saveSettings(){
-
-  try{
-
-    const logoFile =
-      $("settingLogo")
-        ?.files?.[0];
-
-
-    let logo_url =
-      settingsCache.logo_url ||
-      null;
-
-
-    if(logoFile){
-
-      logo_url =
-        await uploadImage(
-          logoFile
-        );
-
-    }
-
-
-    const body = {
-
-      team_name:
-        getValue(
-          "settingTeamName"
-        ),
-
-      primary_color:
-        getValue(
-          "settingPrimaryColor"
-        ),
-
-      secondary_color:
-        getValue(
-          "settingSecondaryColor"
-        ),
-
-      accent_color:
-        getValue(
-          "settingAccentColor"
-        ),
-
-      font_main:
-        getValue(
-          "settingFontMain"
-        ),
-
-      font_heading:
-        getValue(
-          "settingFontHeading"
-        ),
-
-      font_secondary:
-        getValue(
-          "settingFontSecondary"
-        ),
-
-      logo_url
-
-    };
-
-
-    if(settingsCache.id){
-
-      await request(
-        `/rest/v1/settings?id=eq.${settingsCache.id}`,
-        {
-
-          method:"PATCH",
-
-          headers:{
-            Prefer:"return=minimal"
-          },
-
-          body:
-            JSON.stringify(body)
-
-        }
-      );
-
-    }else{
-
-      await request(
-        "/rest/v1/settings",
-        {
-
-          method:"POST",
-
-          headers:{
-            Prefer:"return=minimal"
-          },
-
-          body:
-            JSON.stringify(body)
-
-        }
-      );
-
-    }
-
-
-    settingsCache =
-      {
-        ...settingsCache,
-        ...body
-      };
-
-
-    if(logo_url){
-
-      $("loginLogo").src =
-        logo_url;
-
-      $("adminLogo").src =
-        logo_url;
-
-    }
-
-
-    status(
-      "Настройки сохранены."
-    );
-
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   TEAMS
-========================================================= */
-
-async function loadTeams(){
-
-  try{
-
-    teamsCache =
-      await request(
-        "/rest/v1/teams?select=*&order=name.asc"
-      );
-
-
-    fillTeamSelects();
-
-  }catch(error){
-
-    console.warn(
-      "TEAMS:",
-      error
-    );
-
-  }
-
-}
-
-
-function fillTeamSelects(){
-
-  const selects = [
-
-    $("matchHomeTeam"),
-
-    $("matchAwayTeam")
-
-  ];
-
-
-  selects.forEach(
-    select => {
-
-      if(!select) return;
-
-
-      select.innerHTML =
-        `<option value="">
-          — Выберите команду —
-        </option>` +
-
-        teamsCache
-          .map(
-            team =>
-
-              `<option value="${team.id}">
-                ${escapeHtml(
-                  team.name ||
-                  ""
-                )}
-              </option>`
-
-          )
-          .join("");
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   MATCHES
-========================================================= */
-
-async function loadMatches(){
-
-  try{
-
-    matchesCache =
-      await request(
-        "/rest/v1/matches?select=*&order=match_date.asc"
-      );
-
-
-    renderMatches();
-
-
-    $("dashboardMatches")
-      && (
-        $("dashboardMatches")
-          .textContent =
-            matchesCache.length
-      );
-
-
-    fillEventMatches();
-
-  }catch(error){
-
-    console.warn(
-      "MATCHES:",
-      error
-    );
-
-  }
-
-}
-
-
-function renderMatches(){
-
-  const box =
-    $("matchesList");
-
-
-  if(!box) return;
-
-
-  if(!matchesCache.length){
-
-    box.innerHTML =
-      `<div class="small">
-        Матчей пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    matchesCache
-      .map(
-        match => {
-
-          const home =
-            teamsCache.find(
-              team =>
-                Number(team.id) ===
-                Number(
-                  match.home_team_id
-                )
-            );
-
-
-          const away =
-            teamsCache.find(
-              team =>
-                Number(team.id) ===
-                Number(
-                  match.away_team_id
-                )
-            );
-
-
-          return `
-
-            <div class="list-item">
-
-              <div class="item-info">
-
-                <div class="item-title">
-
-                  ${escapeHtml(
-                    match.title ||
-                    match.name ||
-                    `${home?.name || "—"} — ${away?.name || "—"}`
-                  )}
-
-                </div>
-
-                <div class="item-sub">
-
-                  ${
-                    match.match_date
-                      ? new Date(
-                          match.match_date
-                        ).toLocaleString(
-                          "ru-RU"
-                        )
-                      : ""
-                  }
-
-                  ·
-
-                  ${
-                    match.status ||
-                    "scheduled"
-                  }
-
-                  ·
-
-                  ${
-                    match.home_score ??
-                    0
-                  }
-
-                  :
-
-                  ${
-                    match.away_score ??
-                    0
-                  }
-
-                </div>
-
-              </div>
-
-
-              <button
-                class="btn danger"
-                onclick="deleteMatch(${match.id})"
-              >
-                Удалить
-              </button>
-
-            </div>
-
-          `;
-
-        }
-      )
-      .join("");
-
-}
-
-
-async function addMatch(){
-
-  try{
-
-    const title =
-      getValue(
-        "matchTitle"
-      ).trim();
-
-
-    const matchDate =
-      getValue(
-        "matchDate"
-      );
-
-
-    const tournament =
-      getValue(
-        "matchTournament"
-      ).trim();
-
-
-    const venue =
-      getValue(
-        "matchVenue"
-      ).trim();
-
-
-    const homeTeam =
-      getValue(
-        "matchHomeTeam"
-      );
-
-
-    const awayTeam =
-      getValue(
-        "matchAwayTeam"
-      );
-
-
-    const homeScore =
-      Number(
-        getValue(
-          "matchHomeScore"
-        ) || 0
-      );
-
-
-    const awayScore =
-      Number(
-        getValue(
-          "matchAwayScore"
-        ) || 0
-      );
-
-
-    if(!matchDate){
-
-      status(
-        "Укажите дату матча.",
-        "bad"
-      );
-
-      return;
-
-    }
-
-
-    await request(
-      "/rest/v1/matches",
-      {
-
-        method:"POST",
-
-        headers:{
-          Prefer:"return=minimal"
-        },
-
-        body:
-          JSON.stringify({
-
-            title,
-
-            match_date:
-              new Date(
-                matchDate
-              ).toISOString(),
-
-            tournament,
-
-            venue,
-
-            home_team_id:
-              homeTeam
-                ? Number(homeTeam)
-                : null,
-
-            away_team_id:
-              awayTeam
-                ? Number(awayTeam)
-                : null,
-
-            home_score:
-              homeScore,
-
-            away_score:
-              awayScore,
-
-            status:
-              "scheduled"
-
-          })
-
-      }
-    );
-
-
-    status(
-      "Матч добавлен."
-    );
-
-
-    $("matchTitle").value =
-      "";
-
-    $("matchTournament").value =
-      "";
-
-    $("matchVenue").value =
-      "";
-
-    $("matchDate").value =
-      "";
-
-
-    await loadMatches();
-
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-async function deleteMatch(id){
-
-  if(
-    !confirm(
-      "Удалить матч?"
-    )
-  ){
-
-    return;
-
-  }
-
-
-  try{
-
-    await request(
-      `/rest/v1/matches?id=eq.${id}`,
-      {
-        method:"DELETE"
-      }
-    );
-
-
-    status(
-      "Матч удалён."
-    );
-
-
-    await loadMatches();
-
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
+  ]);
 
 }
 
@@ -4310,30 +2102,18 @@ async function loadPlayers(){
 
     playersCache =
       await request(
-        "/rest/v1/players?select=*&order=number.asc,name.asc"
-      );
-
+        "/rest/v1/players?select=*&order=number.asc"
+      ) || [];
 
     renderPlayers();
 
+    fillPlayerSelects();
 
-    $("dashboardPlayers")
-      && (
-        $("dashboardPlayers")
-          .textContent =
-            playersCache.length
-      );
+  }catch(e){
 
-
-    fillExtendedPlayers();
-
-    fillEditPlayerSelect();
-
-  }catch(error){
-
-    console.warn(
-      "PLAYERS:",
-      error
+    status(
+      e.message,
+      "bad"
     );
 
   }
@@ -4343,16 +2123,16 @@ async function loadPlayers(){
 
 function renderPlayers(){
 
-  const box =
-    $("playersList");
+  const list =
+    document.getElementById(
+      "playersList"
+    );
 
-
-  if(!box) return;
-
+  if(!list) return;
 
   if(!playersCache.length){
 
-    box.innerHTML =
+    list.innerHTML =
       `<div class="small">
         Игроков пока нет.
       </div>`;
@@ -4362,65 +2142,36 @@ function renderPlayers(){
   }
 
 
-  box.innerHTML =
-    playersCache
-      .map(
-        player => `
+  list.innerHTML =
+    playersCache.map(
+      player => `
 
-          <div class="list-item">
+        <div class="list-item">
 
-            <div class="item-info">
+          <div class="item-info">
 
-              <div class="item-title">
-
-                #${escapeHtml(
-                  player.number ??
-                  ""
-                )}
-
-                ${escapeHtml(
-                  player.name ||
-                  ""
-                )}
-
-              </div>
-
-              <div class="item-sub">
-
-                ${escapeHtml(
-                  player.position ||
-                  ""
-                )}
-
-                ${
-                  player.height_cm
-                    ? ` · ${player.height_cm} см`
-                    : ""
-                }
-
-                ${
-                  player.weight_kg
-                    ? ` · ${player.weight_kg} кг`
-                    : ""
-                }
-
-              </div>
-
+            <div class="item-title">
+              #${escapeHtml(player.number)}
+              · ${escapeHtml(player.name)}
             </div>
 
-
-            <button
-              class="btn danger"
-              onclick="deletePlayer(${player.id})"
-            >
-              Удалить
-            </button>
+            <div class="item-sub">
+              ${escapeHtml(player.position || "")}
+            </div>
 
           </div>
 
-        `
-      )
-      .join("");
+          <button
+            class="btn danger"
+            onclick="deletePlayer(${player.id})"
+          >
+            Удалить
+          </button>
+
+        </div>
+
+      `
+    ).join("");
 
 }
 
@@ -4430,57 +2181,24 @@ async function addPlayer(){
   try{
 
     const number =
-      getValue(
+      document.getElementById(
         "playerNumber"
-      );
-
+      ).value;
 
     const name =
-      getValue(
+      document.getElementById(
         "playerName"
-      ).trim();
-
+      ).value.trim();
 
     const position =
-      getValue(
+      document.getElementById(
         "playerPosition"
-      );
-
-
-    const birth_date =
-      getValue(
-        "playerBirthDate"
-      ) ||
-      null;
-
-
-    const height_cm =
-      getValue(
-        "playerHeight"
-      )
-        ? Number(
-            getValue(
-              "playerHeight"
-            )
-          )
-        : null;
-
-
-    const weight_kg =
-      getValue(
-        "playerWeight"
-      )
-        ? Number(
-            getValue(
-              "playerWeight"
-            )
-          )
-        : null;
-
+      ).value.trim();
 
     const file =
-      $("playerImage")
-        ?.files?.[0];
+      document.getElementById(
+        "playerImage"
+      ).files?.[0];
 
 
     if(!name){
@@ -4495,16 +2213,12 @@ async function addPlayer(){
     }
 
 
-    let photo_url =
-      null;
-
+    let photo_url = null;
 
     if(file){
 
       photo_url =
-        await uploadImage(
-          file
-        );
+        await uploadImage(file);
 
     }
 
@@ -4512,34 +2226,24 @@ async function addPlayer(){
     await request(
       "/rest/v1/players",
       {
-
         method:"POST",
 
         headers:{
           Prefer:"return=minimal"
         },
 
-        body:
-          JSON.stringify({
+        body:JSON.stringify({
 
-            number:
-              number
-                ? Number(number)
-                : null,
+          number:
+            Number(number || 0),
 
-            name,
+          name,
 
-            position,
+          position,
 
-            birth_date,
+          photo_url
 
-            height_cm,
-
-            weight_kg,
-
-            photo_url
-
-          })
+        })
 
       }
     );
@@ -4549,32 +2253,33 @@ async function addPlayer(){
       "Игрок добавлен."
     );
 
+    document.getElementById(
+      "playerName"
+    ).value = "";
 
-    $("playerNumber").value =
-      "";
+    document.getElementById(
+      "playerPosition"
+    ).value = "";
 
-    $("playerName").value =
-      "";
+    document.getElementById(
+      "playerNumber"
+    ).value = "";
 
-    $("playerBirthDate").value =
-      "";
+    document.getElementById(
+      "playerImage"
+    ).value = "";
 
-    $("playerHeight").value =
-      "";
-
-    $("playerWeight").value =
-      "";
-
-    $("playerImage").value =
-      "";
+    document.getElementById(
+      "playerPreview"
+    ).style.display = "none";
 
 
     await loadPlayers();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -4610,14 +2315,12 @@ async function deletePlayer(id){
       "Игрок удалён."
     );
 
-
     await loadPlayers();
 
-
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -4627,336 +2330,338 @@ async function deletePlayer(id){
 
 
 /* =========================================================
-   EXTENDED PLAYERS
+   PLAYER STATS
 ========================================================= */
 
-function fillExtendedPlayers(){
+const PLAYER_CATEGORIES = {
 
-  const selects = [
+  scorers:{
+    title:"Бомбардиры"
+  },
 
-    "goalScorer",
+  snipers:{
+    title:"Снайперы"
+  },
 
-    "goalAssist1",
+  plus_minus:{
+    title:"Плюс / минус"
+  },
 
-    "goalAssist2",
-
-    "penaltyPlayer",
-
-    "quickGoalPlayer",
-
-    "quickAssistPlayer"
-
-  ];
-
-
-  selects.forEach(
-    id => {
-
-      const select =
-        $(id);
-
-      if(!select) return;
-
-
-      const first =
-        id ===
-        "goalAssist1" ||
-        id ===
-        "goalAssist2"
-
-          ? `<option value="">
-              — Нет —
-             </option>`
-
-          : `<option value="">
-              — Выберите игрока —
-             </option>`;
-
-
-      select.innerHTML =
-        first +
-
-        playersCache
-          .map(
-            player =>
-
-              `<option value="${player.id}">
-                #${escapeHtml(
-                  player.number ??
-                  ""
-                )}
-                ${escapeHtml(
-                  player.name ||
-                  ""
-                )}
-              </option>`
-
-          )
-          .join("");
-
-    }
-  );
-
-
-  const goalies =
-    playersCache.filter(
-      player =>
-        String(
-          player.position ||
-          ""
-        ).toLowerCase()
-        .includes(
-          "врат"
-        )
-    );
-
-
-  [
-    "goaliePlayer",
-    "goalieKnpPlayer"
-
-  ].forEach(
-    id => {
-
-      const select =
-        $(id);
-
-      if(!select) return;
-
-
-      select.innerHTML =
-        `<option value="">
-          — Вратарь —
-        </option>` +
-
-        goalies
-          .map(
-            player =>
-
-              `<option value="${player.id}">
-                #${escapeHtml(
-                  player.number ??
-                  ""
-                )}
-                ${escapeHtml(
-                  player.name ||
-                  ""
-                )}
-              </option>`
-
-          )
-          .join("");
-
-    }
-  );
-
-}
-
-
-function fillEditPlayerSelect(){
-
-  const select =
-    $("editPlayerSelect");
-
-  if(!select) return;
-
-
-  select.innerHTML =
-    `<option value="">
-      — Выберите игрока —
-    </option>` +
-
-    playersCache
-      .map(
-        player =>
-
-          `<option value="${player.id}">
-            #${escapeHtml(
-              player.number ??
-              ""
-            )}
-            ${escapeHtml(
-              player.name ||
-              ""
-            )}
-          </option>`
-
-      )
-      .join("");
-
-}
-
-
-/* =========================================================
-   PLAYER PROFILE
-========================================================= */
-
-document.addEventListener(
-  "change",
-  event => {
-
-    if(
-      event.target?.id !==
-      "editPlayerSelect"
-    ){
-
-      return;
-
-    }
-
-
-    const player =
-      playersCache.find(
-        item =>
-          String(item.id) ===
-          String(
-            event.target.value
-          )
-      );
-
-
-    if(!player){
-
-      return;
-
-    }
-
-
-    setValue(
-      "editBirthDate",
-      player.birth_date ||
-      ""
-    );
-
-
-    setValue(
-      "editHeight",
-      player.height_cm ??
-      ""
-    );
-
-
-    setValue(
-      "editWeight",
-      player.weight_kg ??
-      ""
-    );
-
-
-    setValue(
-      "editPosition",
-      player.position ||
-      "Нападающий"
-    );
-
+  defense_scorers:{
+    title:"Бомбардиры-защитники"
   }
-);
+
+};
 
 
-async function savePlayerProfile(){
+function playerStatRow(
+  category,
+  rank,
+  current
+){
+
+  const selected =
+    current?.player_id || "";
+
+  const stat =
+    current?.stat_value || "";
+
+  const photo =
+    current?.photo_url || "";
+
+
+  return `
+
+    <div
+      class="stat-row"
+      data-category="${escapeAttr(category)}"
+      data-rank="${rank}"
+    >
+
+      <div class="stat-head">
+
+        <div class="rank">
+          ${rank}
+        </div>
+
+        <div class="stat-number">
+          Место ${rank}
+        </div>
+
+      </div>
+
+      <div class="field">
+
+        <label>Игрок</label>
+
+        <select class="stat-player">
+
+          <option value="">
+            Выберите игрока
+          </option>
+
+          ${
+            playersCache.map(
+              player => `
+                <option
+                  value="${player.id}"
+                  ${String(player.id) === String(selected) ? "selected" : ""}
+                >
+                  #${escapeHtml(player.number)}
+                  · ${escapeHtml(player.name)}
+                </option>
+              `
+            ).join("")
+          }
+
+        </select>
+
+      </div>
+
+      <div class="field">
+
+        <label>Статистика</label>
+
+        <input
+          class="stat-value"
+          value="${escapeAttr(stat)}"
+          placeholder="Например: 35"
+        >
+
+      </div>
+
+      <div class="field">
+
+        <label>Фото</label>
+
+        <input
+          class="file stat-photo"
+          type="file"
+          accept="image/*"
+          onchange="previewFile(this,'statPreview_${category}_${rank}')"
+        >
+
+        <img
+          id="statPreview_${category}_${rank}"
+          class="stat-preview"
+          ${photo ? `src="${escapeAttr(photo)}" style="display:block"` : ""}
+        >
+
+        <input
+          type="hidden"
+          class="old-photo"
+          value="${escapeAttr(photo)}"
+        >
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+async function loadPlayerStatsAdmin(){
 
   try{
 
-    const id =
-      getValue(
-        "editPlayerSelect"
+    playerStatsCache =
+      await request(
+        "/rest/v1/player_stats?select=*&order=category.asc,rank.asc"
+      ) || [];
+
+
+    Object.keys(
+      PLAYER_CATEGORIES
+    ).forEach(
+      category => {
+
+        const container =
+          document.getElementById(
+            `${category}Rows`
+          );
+
+        if(!container) return;
+
+        const current =
+          playerStatsCache.filter(
+            item =>
+              item.category === category
+          );
+
+
+        container.innerHTML = `
+
+          <div class="stat-category">
+
+            <div class="stat-title">
+              ${PLAYER_CATEGORIES[category].title}
+            </div>
+
+            ${[1,2,3].map(
+              rank => {
+
+                const row =
+                  current.find(
+                    item =>
+                      Number(item.rank) === rank
+                  );
+
+                return playerStatRow(
+                  category,
+                  rank,
+                  row
+                );
+
+              }
+            ).join("")}
+
+          </div>
+
+        `;
+
+      }
+    );
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+
+  }
+
+}
+
+
+async function savePlayerStatsCategory(
+  category
+){
+
+  try{
+
+    const container =
+      document.getElementById(
+        `${category}Rows`
       );
 
-
-    if(!id){
-
-      status(
-        "Выберите игрока.",
-        "bad"
-      );
-
-      return;
-
-    }
+    if(!container) return;
 
 
-    const body = {
-
-      birth_date:
-        getValue(
-          "editBirthDate"
-        ) ||
-        null,
-
-      height_cm:
-        getValue(
-          "editHeight"
-        )
-          ? Number(
-              getValue(
-                "editHeight"
-              )
-            )
-          : null,
-
-      weight_kg:
-        getValue(
-          "editWeight"
-        )
-          ? Number(
-              getValue(
-                "editWeight"
-              )
-            )
-          : null,
-
-      position:
-        getValue(
-          "editPosition"
-        ) ||
-        null
-
-    };
+    const rows =
+      [...container.querySelectorAll(
+        ".stat-row"
+      )];
 
 
-    const file =
-      $("editPlayerImage")
-        ?.files?.[0];
+    const payload = [];
 
 
-    if(file){
+    for(
+      const row of rows
+    ){
 
-      body.photo_url =
-        await uploadImage(
-          file
-        );
+      const player_id =
+        row.querySelector(
+          ".stat-player"
+        ).value;
+
+      const stat_value =
+        row.querySelector(
+          ".stat-value"
+        ).value.trim();
+
+      const file =
+        row.querySelector(
+          ".stat-photo"
+        ).files?.[0];
+
+      let photo_url =
+        row.querySelector(
+          ".old-photo"
+        ).value || null;
+
+
+      if(
+        !player_id
+      ){
+
+        continue;
+
+      }
+
+
+      if(file){
+
+        photo_url =
+          await uploadImage(file);
+
+      }
+
+
+      payload.push({
+
+        category,
+
+        rank:
+          Number(
+            row.dataset.rank
+          ),
+
+        player_id:
+          Number(player_id),
+
+        stat_value,
+
+        photo_url
+
+      });
 
     }
 
 
     await request(
-      `/rest/v1/players?id=eq.${id}`,
+      `/rest/v1/player_stats?category=eq.${encodeURIComponent(category)}`,
       {
-
-        method:"PATCH",
-
-        headers:{
-          Prefer:"return=minimal"
-        },
-
-        body:
-          JSON.stringify(body)
-
+        method:"DELETE"
       }
     );
 
 
+    if(payload.length){
+
+      await request(
+        "/rest/v1/player_stats",
+        {
+          method:"POST",
+
+          headers:{
+            Prefer:"return=minimal"
+          },
+
+          body:
+            JSON.stringify(
+              payload
+            )
+        }
+      );
+
+    }
+
+
     status(
-      "Профиль игрока сохранён."
+      "Статистика сохранена."
     );
 
 
-    await loadPlayers();
+    await loadPlayerStatsAdmin();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -4976,74 +2681,54 @@ async function loadNews(){
     newsCache =
       await request(
         "/rest/v1/news?select=*&order=created_at.desc"
+      ) || [];
+
+
+    const list =
+      document.getElementById(
+        "newsList"
       );
 
-
-    renderNews();
-
-
-    $("dashboardNews")
-      && (
-        $("dashboardNews")
-          .textContent =
-            newsCache.length
-      );
+    if(!list) return;
 
 
-  }catch(error){
+    if(!newsCache.length){
 
-    console.warn(
-      "NEWS:",
-      error
-    );
+      list.innerHTML =
+        `<div class="small">
+          Новостей пока нет.
+        </div>`;
 
-  }
+      fillNewsSelects();
 
-}
+      return;
 
-
-function renderNews(){
-
-  const box =
-    $("newsList");
-
-  if(!box) return;
+    }
 
 
-  box.innerHTML =
-    newsCache
-      .map(
-        item => `
+    list.innerHTML =
+      newsCache.map(
+        news => `
 
           <div class="list-item">
 
             <div class="item-info">
 
               <div class="item-title">
-                ${escapeHtml(
-                  item.title ||
-                  "Без названия"
-                )}
+                ${escapeHtml(news.title)}
               </div>
 
               <div class="item-sub">
-                ${escapeHtml(
-                  item.tag ||
-                  "Новость"
-                )}
+                ${escapeHtml(news.tag || "")}
                 ·
-                ${escapeHtml(
-                  item.date ||
-                  ""
-                )}
+                ${escapeHtml(news.date || "")}
               </div>
 
             </div>
 
-
             <button
               class="btn danger"
-              onclick="deleteNews(${item.id})"
+              onclick="deleteNews(${news.id})"
             >
               Удалить
             </button>
@@ -5051,12 +2736,19 @@ function renderNews(){
           </div>
 
         `
-      )
-      .join("") ||
+      ).join("");
 
-      `<div class="small">
-        Новостей пока нет.
-      </div>`;
+
+    fillNewsSelects();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+
+  }
 
 }
 
@@ -5066,15 +2758,40 @@ async function addNews(){
   try{
 
     const title =
-      getValue(
+      document.getElementById(
         "newsTitle"
-      ).trim();
+      ).value.trim();
+
+    const tag =
+      document.getElementById(
+        "newsTag"
+      ).value.trim();
+
+    const date =
+      document.getElementById(
+        "newsDate"
+      ).value;
+
+    const description =
+      document.getElementById(
+        "newsDescription"
+      ).value.trim();
+
+    const content =
+      document.getElementById(
+        "newsContent"
+      ).value.trim();
+
+    const file =
+      document.getElementById(
+        "newsImage"
+      ).files?.[0];
 
 
     if(!title){
 
       status(
-        "Введите заголовок.",
+        "Введите заголовок новости.",
         "bad"
       );
 
@@ -5083,21 +2800,12 @@ async function addNews(){
     }
 
 
-    const file =
-      $("newsImage")
-        ?.files?.[0];
-
-
-    let image_url =
-      null;
-
+    let image_url = null;
 
     if(file){
 
       image_url =
-        await uploadImage(
-          file
-        );
+        await uploadImage(file);
 
     }
 
@@ -5105,91 +2813,44 @@ async function addNews(){
     await request(
       "/rest/v1/news",
       {
-
         method:"POST",
 
         headers:{
           Prefer:"return=minimal"
         },
 
-        body:
-          JSON.stringify({
+        body:JSON.stringify({
 
-            title,
+          title,
 
-            tag:
-              getValue(
-                "newsTag"
-              ) ||
-              "Новость",
+          tag,
 
-            date:
-              getValue(
-                "newsDate"
-              ) ||
-              null,
+          date:
+            date || null,
 
-            description:
-              getValue(
-                "newsDescription"
-              ),
+          description,
 
-            content:
-              getValue(
-                "newsContent"
-              ),
+          content,
 
-            image_url
+          image_url
 
-          })
+        })
 
       }
     );
 
 
     status(
-      "Новость опубликована."
+      "Новость добавлена."
     );
-
-
-    [
-      "newsTitle",
-      "newsTag",
-      "newsDate",
-      "newsDescription",
-      "newsContent"
-
-    ].forEach(
-      id => {
-
-        const el =
-          $(id);
-
-        if(el){
-
-          el.value =
-            "";
-
-        }
-
-      }
-    );
-
-
-    if($("newsImage")){
-
-      $("newsImage").value =
-        "";
-
-    }
 
 
     await loadNews();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -5225,13 +2886,12 @@ async function deleteNews(id){
       "Новость удалена."
     );
 
-
     await loadNews();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -5251,60 +2911,52 @@ async function loadAlbums(){
     albumsCache =
       await request(
         "/rest/v1/albums?select=*&order=created_at.desc"
+      ) || [];
+
+
+    const list =
+      document.getElementById(
+        "albumsList"
       );
 
-
-    renderAlbums();
-
-  }catch(error){
-
-    console.warn(
-      "ALBUMS:",
-      error
-    );
-
-  }
-
-}
+    if(!list) return;
 
 
-function renderAlbums(){
+    if(!albumsCache.length){
 
-  const box =
-    $("albumsList");
+      list.innerHTML =
+        `<div class="small">
+          Альбомов пока нет.
+        </div>`;
 
-  if(!box) return;
+      fillAlbumSelect();
+
+      return;
+
+    }
 
 
-  box.innerHTML =
-    albumsCache
-      .map(
-        item => `
+    list.innerHTML =
+      albumsCache.map(
+        album => `
 
           <div class="list-item">
 
             <div class="item-info">
 
               <div class="item-title">
-                ${escapeHtml(
-                  item.title ||
-                  ""
-                )}
+                ${escapeHtml(album.title)}
               </div>
 
               <div class="item-sub">
-                ${escapeHtml(
-                  item.description ||
-                  ""
-                )}
+                ${escapeHtml(album.description || "")}
               </div>
 
             </div>
 
-
             <button
               class="btn danger"
-              onclick="deleteAlbum(${item.id})"
+              onclick="deleteAlbum(${album.id})"
             >
               Удалить
             </button>
@@ -5312,12 +2964,19 @@ function renderAlbums(){
           </div>
 
         `
-      )
-      .join("") ||
+      ).join("");
 
-      `<div class="small">
-        Альбомов пока нет.
-      </div>`;
+
+    fillAlbumSelect();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+
+  }
 
 }
 
@@ -5327,9 +2986,19 @@ async function addAlbum(){
   try{
 
     const title =
-      getValue(
+      document.getElementById(
         "albumTitle"
-      ).trim();
+      ).value.trim();
+
+    const description =
+      document.getElementById(
+        "albumDescription"
+      ).value.trim();
+
+    const file =
+      document.getElementById(
+        "albumCover"
+      ).files?.[0];
 
 
     if(!title){
@@ -5344,21 +3013,12 @@ async function addAlbum(){
     }
 
 
-    const file =
-      $("albumCover")
-        ?.files?.[0];
-
-
-    let cover_url =
-      null;
-
+    let cover_url = null;
 
     if(file){
 
       cover_url =
-        await uploadImage(
-          file
-        );
+        await uploadImage(file);
 
     }
 
@@ -5366,42 +3026,36 @@ async function addAlbum(){
     await request(
       "/rest/v1/albums",
       {
-
         method:"POST",
 
         headers:{
           Prefer:"return=minimal"
         },
 
-        body:
-          JSON.stringify({
+        body:JSON.stringify({
 
-            title,
+          title,
 
-            description:
-              getValue(
-                "albumDescription"
-              ),
+          description,
 
-            cover_url
+          cover_url
 
-          })
+        })
 
       }
     );
 
 
     status(
-      "Альбом создан."
+      "Альбом добавлен."
     );
-
 
     await loadAlbums();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -5437,13 +3091,12 @@ async function deleteAlbum(id){
       "Альбом удалён."
     );
 
-
     await loadAlbums();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -5463,35 +3116,32 @@ async function loadAchievements(){
     achievementsCache =
       await request(
         "/rest/v1/achievements?select=*&order=created_at.desc"
+      ) || [];
+
+
+    const list =
+      document.getElementById(
+        "achievementsList"
       );
 
-
-    renderAchievements();
-
-  }catch(error){
-
-    console.warn(
-      "ACHIEVEMENTS:",
-      error
-    );
-
-  }
-
-}
+    if(!list) return;
 
 
-function renderAchievements(){
+    if(!achievementsCache.length){
 
-  const box =
-    $("achievementsList");
+      list.innerHTML =
+        `<div class="small">
+          Достижений пока нет.
+        </div>`;
 
-  if(!box) return;
+      return;
+
+    }
 
 
-  box.innerHTML =
-    achievementsCache
-      .map(
-        item => `
+    list.innerHTML =
+      achievementsCache.map(
+        achievement => `
 
           <div class="list-item">
 
@@ -5499,24 +3149,21 @@ function renderAchievements(){
 
               <div class="item-title">
                 ${escapeHtml(
-                  item.title ||
-                  ""
+                  achievement.title
                 )}
               </div>
 
               <div class="item-sub">
                 ${escapeHtml(
-                  item.description ||
-                  ""
+                  achievement.description || ""
                 )}
               </div>
 
             </div>
 
-
             <button
               class="btn danger"
-              onclick="deleteAchievement(${item.id})"
+              onclick="deleteAchievement(${achievement.id})"
             >
               Удалить
             </button>
@@ -5524,12 +3171,16 @@ function renderAchievements(){
           </div>
 
         `
-      )
-      .join("") ||
+      ).join("");
 
-      `<div class="small">
-        Достижений пока нет.
-      </div>`;
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+
+  }
 
 }
 
@@ -5539,15 +3190,25 @@ async function addAchievement(){
   try{
 
     const title =
-      getValue(
+      document.getElementById(
         "achievementTitle"
-      ).trim();
+      ).value.trim();
+
+    const description =
+      document.getElementById(
+        "achievementDescription"
+      ).value.trim();
+
+    const file =
+      document.getElementById(
+        "achievementImage"
+      ).files?.[0];
 
 
     if(!title){
 
       status(
-        "Введите название.",
+        "Введите название достижения.",
         "bad"
       );
 
@@ -5556,21 +3217,12 @@ async function addAchievement(){
     }
 
 
-    const file =
-      $("achievementImage")
-        ?.files?.[0];
-
-
-    let image_url =
-      null;
-
+    let image_url = null;
 
     if(file){
 
       image_url =
-        await uploadImage(
-          file
-        );
+        await uploadImage(file);
 
     }
 
@@ -5578,26 +3230,21 @@ async function addAchievement(){
     await request(
       "/rest/v1/achievements",
       {
-
         method:"POST",
 
         headers:{
           Prefer:"return=minimal"
         },
 
-        body:
-          JSON.stringify({
+        body:JSON.stringify({
 
-            title,
+          title,
 
-            description:
-              getValue(
-                "achievementDescription"
-              ),
+          description,
 
-            image_url
+          image_url
 
-          })
+        })
 
       }
     );
@@ -5607,13 +3254,12 @@ async function addAchievement(){
       "Достижение добавлено."
     );
 
-
     await loadAchievements();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -5649,13 +3295,12 @@ async function deleteAchievement(id){
       "Достижение удалено."
     );
 
-
     await loadAchievements();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -5675,35 +3320,32 @@ async function loadBirthdays(){
     birthdaysCache =
       await request(
         "/rest/v1/birthdays?select=*&order=birthday.asc"
+      ) || [];
+
+
+    const list =
+      document.getElementById(
+        "birthdaysList"
       );
 
-
-    renderBirthdays();
-
-  }catch(error){
-
-    console.warn(
-      "BIRTHDAYS:",
-      error
-    );
-
-  }
-
-}
+    if(!list) return;
 
 
-function renderBirthdays(){
+    if(!birthdaysCache.length){
 
-  const box =
-    $("birthdaysList");
+      list.innerHTML =
+        `<div class="small">
+          Именинников пока нет.
+        </div>`;
 
-  if(!box) return;
+      return;
+
+    }
 
 
-  box.innerHTML =
-    birthdaysCache
-      .map(
-        item => `
+    list.innerHTML =
+      birthdaysCache.map(
+        birthday => `
 
           <div class="list-item">
 
@@ -5711,24 +3353,21 @@ function renderBirthdays(){
 
               <div class="item-title">
                 ${escapeHtml(
-                  item.name ||
-                  ""
+                  birthday.name
                 )}
               </div>
 
               <div class="item-sub">
                 ${escapeHtml(
-                  item.birthday ||
-                  ""
+                  birthday.birthday || ""
                 )}
               </div>
 
             </div>
 
-
             <button
               class="btn danger"
-              onclick="deleteBirthday(${item.id})"
+              onclick="deleteBirthday(${birthday.id})"
             >
               Удалить
             </button>
@@ -5736,12 +3375,16 @@ function renderBirthdays(){
           </div>
 
         `
-      )
-      .join("") ||
+      ).join("");
 
-      `<div class="small">
-        Именинников пока нет.
-      </div>`;
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+
+  }
 
 }
 
@@ -5751,21 +3394,25 @@ async function addBirthday(){
   try{
 
     const name =
-      getValue(
+      document.getElementById(
         "birthdayName"
-      ).trim();
-
+      ).value.trim();
 
     const birthday =
-      getValue(
+      document.getElementById(
         "birthdayDate"
-      );
+      ).value;
+
+    const file =
+      document.getElementById(
+        "birthdayImage"
+      ).files?.[0];
 
 
-    if(!name || !birthday){
+    if(!name){
 
       status(
-        "Заполните имя и дату.",
+        "Введите имя.",
         "bad"
       );
 
@@ -5774,24 +3421,35 @@ async function addBirthday(){
     }
 
 
+    let image_url = null;
+
+    if(file){
+
+      image_url =
+        await uploadImage(file);
+
+    }
+
+
     await request(
       "/rest/v1/birthdays",
       {
-
         method:"POST",
 
         headers:{
           Prefer:"return=minimal"
         },
 
-        body:
-          JSON.stringify({
+        body:JSON.stringify({
 
-            name,
+          name,
 
-            birthday
+          birthday:
+            birthday || null,
 
-          })
+          image_url
+
+        })
 
       }
     );
@@ -5801,20 +3459,12 @@ async function addBirthday(){
       "Именинник добавлен."
     );
 
-
-    $("birthdayName").value =
-      "";
-
-    $("birthdayDate").value =
-      "";
-
-
     await loadBirthdays();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -5850,13 +3500,262 @@ async function deleteBirthday(id){
       "Именинник удалён."
     );
 
-
     await loadBirthdays();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
+      "bad"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   MATCHES
+========================================================= */
+
+async function loadMatches(){
+
+  try{
+
+    matchesCache =
+      await request(
+        "/rest/v1/matches?select=*&order=date.asc"
+      ) || [];
+
+
+    const list =
+      document.getElementById(
+        "matchesList"
+      );
+
+    if(!list) return;
+
+
+    if(!matchesCache.length){
+
+      list.innerHTML =
+        `<div class="small">
+          Матчей пока нет.
+        </div>`;
+
+      fillMatchSelects();
+
+      return;
+
+    }
+
+
+    list.innerHTML =
+      matchesCache.map(
+        match => `
+
+          <div class="list-item">
+
+            <div class="item-info">
+
+              <div class="item-title">
+                ХК Челны —
+                ${escapeHtml(
+                  match.opponent || ""
+                )}
+              </div>
+
+              <div class="item-sub">
+                ${escapeHtml(
+                  match.date || ""
+                )}
+                ·
+                ${escapeHtml(
+                  match.time || ""
+                )}
+                ·
+                ${escapeHtml(
+                  match.tournament || ""
+                )}
+                ${
+                  match.home_score !== null &&
+                  match.home_score !== undefined
+                    ? ` · ${match.home_score}:${match.away_score}`
+                    : ""
+                }
+              </div>
+
+            </div>
+
+            <button
+              class="btn danger"
+              onclick="deleteMatch(${match.id})"
+            >
+              Удалить
+            </button>
+
+          </div>
+
+        `
+      ).join("");
+
+
+    fillMatchSelects();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+
+  }
+
+}
+
+
+async function addMatch(){
+
+  try{
+
+    const date =
+      document.getElementById(
+        "matchDate"
+      ).value;
+
+    const time =
+      document.getElementById(
+        "matchTime"
+      ).value;
+
+    const opponent =
+      document.getElementById(
+        "matchOpponent"
+      ).value.trim();
+
+    const tournament =
+      document.getElementById(
+        "matchTournament"
+      ).value.trim();
+
+    const home_score =
+      document.getElementById(
+        "matchHomeScore"
+      ).value;
+
+    const away_score =
+      document.getElementById(
+        "matchAwayScore"
+      ).value;
+
+    const venue =
+      document.getElementById(
+        "matchVenue"
+      ).value.trim();
+
+
+    if(!opponent){
+
+      status(
+        "Введите соперника.",
+        "bad"
+      );
+
+      return;
+
+    }
+
+
+    await request(
+      "/rest/v1/matches",
+      {
+        method:"POST",
+
+        headers:{
+          Prefer:"return=minimal"
+        },
+
+        body:JSON.stringify({
+
+          date:
+            date || null,
+
+          time:
+            time || null,
+
+          opponent,
+
+          tournament,
+
+          home_score:
+            home_score === ""
+              ? null
+              : Number(home_score),
+
+          away_score:
+            away_score === ""
+              ? null
+              : Number(away_score),
+
+          venue
+
+        })
+
+      }
+    );
+
+
+    status(
+      "Матч добавлен."
+    );
+
+    await loadMatches();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+
+  }
+
+}
+
+
+async function deleteMatch(id){
+
+  if(
+    !confirm(
+      "Удалить матч?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    await request(
+      `/rest/v1/matches?id=eq.${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+
+    status(
+      "Матч удалён."
+    );
+
+    await loadMatches();
+
+  }catch(e){
+
+    status(
+      e.message,
       "bad"
     );
 
@@ -5876,75 +3775,63 @@ async function loadStandings(){
     standingsCache =
       await request(
         "/rest/v1/standings?select=*&order=position.asc"
+      ) || [];
+
+
+    const list =
+      document.getElementById(
+        "standingsList"
       );
 
-
-    renderStandings();
-
-  }catch(error){
-
-    console.warn(
-      "STANDINGS:",
-      error
-    );
-
-  }
-
-}
+    if(!list) return;
 
 
-function renderStandings(){
+    if(!standingsCache.length){
 
-  const box =
-    $("standingsList");
+      list.innerHTML =
+        `<div class="small">
+          Таблица пока пустая.
+        </div>`;
 
-  if(!box) return;
+      return;
+
+    }
 
 
-  box.innerHTML =
-    standingsCache
-      .map(
-        item => `
+    list.innerHTML =
+      standingsCache.map(
+        team => `
 
           <div class="list-item">
 
             <div class="item-info">
 
               <div class="item-title">
+                #${escapeHtml(
+                  team.position
+                )}
+                ·
                 ${escapeHtml(
-                  item.team_name ||
-                  ""
+                  team.team
                 )}
               </div>
 
               <div class="item-sub">
-
-                ${
-                  item.position ||
-                  "-"
-                }
-                место
-                ·
-                ${
-                  item.games ||
-                  0
-                }
-                игр
-                ·
-                ${
-                  item.points ||
-                  0
-                }
-                очков
-
+                Игр:
+                ${escapeHtml(
+                  team.games
+                )}
+                · Очков:
+                ${escapeHtml(
+                  team.points
+                )}
               </div>
 
             </div>
 
-
             <button
               class="btn danger"
-              onclick="deleteStanding(${item.id})"
+              onclick="deleteStanding(${team.id})"
             >
               Удалить
             </button>
@@ -5952,12 +3839,16 @@ function renderStandings(){
           </div>
 
         `
-      )
-      .join("") ||
+      ).join("");
 
-      `<div class="small">
-        Таблица пока пуста.
-      </div>`;
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+
+  }
 
 }
 
@@ -5966,16 +3857,31 @@ async function addStanding(){
 
   try{
 
-    const team_name =
-      getValue(
+    const team =
+      document.getElementById(
         "standingTeam"
-      ).trim();
+      ).value.trim();
+
+    const games =
+      document.getElementById(
+        "standingGames"
+      ).value;
+
+    const points =
+      document.getElementById(
+        "standingPoints"
+      ).value;
+
+    const position =
+      document.getElementById(
+        "standingPosition"
+      ).value;
 
 
-    if(!team_name){
+    if(!team){
 
       status(
-        "Введите команду.",
+        "Введите название команды.",
         "bad"
       );
 
@@ -5987,69 +3893,41 @@ async function addStanding(){
     await request(
       "/rest/v1/standings",
       {
-
         method:"POST",
 
         headers:{
           Prefer:"return=minimal"
         },
 
-        body:
-          JSON.stringify({
+        body:JSON.stringify({
 
-            team_name,
+          team,
 
-            position:
-              Number(
-                getValue(
-                  "standingPosition"
-                ) || 0
-              ),
+          games:
+            Number(games || 0),
 
-            games:
-              Number(
-                getValue(
-                  "standingGames"
-                ) || 0
-              ),
+          points:
+            Number(points || 0),
 
-            points:
-              Number(
-                getValue(
-                  "standingPoints"
-                ) || 0
-              )
+          position:
+            Number(position || 1)
 
-          })
+        })
 
       }
     );
 
 
     status(
-      "Команда добавлена."
+      "Команда добавлена в таблицу."
     );
-
-
-    $("standingTeam").value =
-      "";
-
-    $("standingPosition").value =
-      "";
-
-    $("standingGames").value =
-      "";
-
-    $("standingPoints").value =
-      "";
-
 
     await loadStandings();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -6085,13 +3963,12 @@ async function deleteStanding(id){
       "Команда удалена."
     );
 
-
     await loadStandings();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -6101,7 +3978,7 @@ async function deleteStanding(id){
 
 
 /* =========================================================
-   PRODUCTS
+   SHOP
 ========================================================= */
 
 async function loadProducts(){
@@ -6111,35 +3988,32 @@ async function loadProducts(){
     productsCache =
       await request(
         "/rest/v1/products?select=*&order=created_at.desc"
+      ) || [];
+
+
+    const list =
+      document.getElementById(
+        "productsList"
       );
 
-
-    renderProducts();
-
-  }catch(error){
-
-    console.warn(
-      "PRODUCTS:",
-      error
-    );
-
-  }
-
-}
+    if(!list) return;
 
 
-function renderProducts(){
+    if(!productsCache.length){
 
-  const box =
-    $("productsList");
+      list.innerHTML =
+        `<div class="small">
+          Товаров пока нет.
+        </div>`;
 
-  if(!box) return;
+      return;
+
+    }
 
 
-  box.innerHTML =
-    productsCache
-      .map(
-        item => `
+    list.innerHTML =
+      productsCache.map(
+        product => `
 
           <div class="list-item">
 
@@ -6147,24 +4021,37 @@ function renderProducts(){
 
               <div class="item-title">
                 ${escapeHtml(
-                  item.name ||
-                  ""
+                  product.name
                 )}
               </div>
 
               <div class="item-sub">
+
+                ${escapeHtml(
+                  product.category || ""
+                )}
+
+                ·
+
+                ${Number(
+                  product.price || 0
+                ).toLocaleString("ru-RU")}
+
+                ₽
+
                 ${
-                  item.price ||
-                  0
-                } ₽
+                  product.contact
+                    ? ` · ${escapeHtml(product.contact)}`
+                    : ""
+                }
+
               </div>
 
             </div>
 
-
             <button
               class="btn danger"
-              onclick="deleteProduct(${item.id})"
+              onclick="deleteProduct(${product.id})"
             >
               Удалить
             </button>
@@ -6172,12 +4059,16 @@ function renderProducts(){
           </div>
 
         `
-      )
-      .join("") ||
+      ).join("");
 
-      `<div class="small">
-        Товаров пока нет.
-      </div>`;
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+
+  }
 
 }
 
@@ -6187,9 +4078,34 @@ async function addProduct(){
   try{
 
     const name =
-      getValue(
+      document.getElementById(
         "productName"
-      ).trim();
+      ).value.trim();
+
+    const description =
+      document.getElementById(
+        "productDescription"
+      ).value.trim();
+
+    const price =
+      document.getElementById(
+        "productPrice"
+      ).value;
+
+    const category =
+      document.getElementById(
+        "productCategory"
+      ).value.trim();
+
+    const contact =
+      document.getElementById(
+        "productContact"
+      ).value.trim();
+
+    const file =
+      document.getElementById(
+        "productImage"
+      ).files?.[0];
 
 
     if(!name){
@@ -6204,21 +4120,12 @@ async function addProduct(){
     }
 
 
-    const file =
-      $("productImage")
-        ?.files?.[0];
-
-
-    let image_url =
-      null;
-
+    let image_url = null;
 
     if(file){
 
       image_url =
-        await uploadImage(
-          file
-        );
+        await uploadImage(file);
 
     }
 
@@ -6226,33 +4133,28 @@ async function addProduct(){
     await request(
       "/rest/v1/products",
       {
-
         method:"POST",
 
         headers:{
           Prefer:"return=minimal"
         },
 
-        body:
-          JSON.stringify({
+        body:JSON.stringify({
 
-            name,
+          name,
 
-            price:
-              Number(
-                getValue(
-                  "productPrice"
-                ) || 0
-              ),
+          description,
 
-            description:
-              getValue(
-                "productDescription"
-              ),
+          price:
+            Number(price || 0),
 
-            image_url
+          category,
 
-          })
+          image_url,
+
+          contact
+
+        })
 
       }
     );
@@ -6262,13 +4164,12 @@ async function addProduct(){
       "Товар добавлен."
     );
 
-
     await loadProducts();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -6304,13 +4205,12 @@ async function deleteProduct(id){
       "Товар удалён."
     );
 
-
     await loadProducts();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -6320,1317 +4220,339 @@ async function deleteProduct(id){
 
 
 /* =========================================================
-   MATCH CENTER
+   DESIGN
 ========================================================= */
 
-function fillEventMatches(){
-
-  const select =
-    $("eventMatchSelect");
-
-  if(!select) return;
-
-
-  select.innerHTML =
-    `<option value="">
-      — Выберите матч —
-    </option>` +
-
-    matchesCache
-      .map(
-        match =>
-
-          `<option value="${match.id}">
-            ${escapeHtml(
-              match.title ||
-              match.name ||
-              `Матч #${match.id}`
-            )}
-          </option>`
-
-      )
-      .join("");
-
-}
-
-
-async function loadMatchCenterData(
-  id
-){
-
-  if(!id) return;
-
+async function loadDesign(){
 
   try{
 
-    const rows =
+    const data =
       await request(
-        `/rest/v1/matches?id=eq.${id}&select=*`
+        "/rest/v1/settings?select=*&limit=1"
       );
 
+    const s =
+      data?.[0];
 
-    const match =
-      rows?.[0];
-
-
-    if(!match){
-
-      return;
-
-    }
+    if(!s) return;
 
 
     setValue(
-      "matchStatus",
-      match.status ||
-      "scheduled"
+      "designSiteName",
+      s.site_name
     );
-
 
     setValue(
-      "matchStream",
-      match.stream_url ||
-      ""
+      "primaryColor",
+      s.primary_color
+    );
+
+    setValue(
+      "secondaryColor",
+      s.secondary_color
+    );
+
+    setValue(
+      "backgroundColor",
+      s.background_color
+    );
+
+    setValue(
+      "cardColor",
+      s.card_color
+    );
+
+    setValue(
+      "textColor",
+      s.text_color
+    );
+
+    setValue(
+      "mutedTextColor",
+      s.muted_text_color
+    );
+
+    setValue(
+      "buttonColor",
+      s.button_color
+    );
+
+    setValue(
+      "borderColor",
+      s.border_color
+    );
+
+    setValue(
+      "borderRadius",
+      s.border_radius
+    );
+
+    setValue(
+      "homeIcon",
+      s.home_icon
+    );
+
+    setValue(
+      "matchesIcon",
+      s.matches_icon
+    );
+
+    setValue(
+      "rosterIcon",
+      s.roster_icon
+    );
+
+    setValue(
+      "tableIcon",
+      s.table_icon
+    );
+
+    setValue(
+      "newsIcon",
+      s.news_icon
     );
 
 
-    await loadMatchEvents(
-      id
-    );
+    if(s.logo_url){
 
-
-    const periods =
-      await request(
-        `/rest/v1/match_periods?match_id=eq.${id}&select=*&order=period.asc`
-      );
-
-
-    periods.forEach(
-      period => {
-
-        setValue(
-          `p${period.period}Home`,
-          period.home_score ??
-          0
+      const preview =
+        document.getElementById(
+          "designLogoPreview"
         );
 
-        setValue(
-          `p${period.period}Away`,
-          period.away_score ??
-          0
-        );
+      preview.src =
+        s.logo_url;
 
-        setValue(
-          `p${period.period}Pim`,
-          period.penalty_minutes ??
-          0
-        );
-
-      }
-    );
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-async function saveMatchCenter(){
-
-  try{
-
-    const id =
-      getValue(
-        "eventMatchSelect"
-      );
-
-
-    if(!id){
-
-      status(
-        "Выберите матч.",
-        "bad"
-      );
-
-      return;
+      preview.style.display =
+        "block";
 
     }
 
 
-    await request(
-      `/rest/v1/matches?id=eq.${id}`,
-      {
-
-        method:"PATCH",
-
-        headers:{
-          Prefer:"return=minimal"
-        },
-
-        body:
-          JSON.stringify({
-
-            status:
-              getValue(
-                "matchStatus"
-              ) ||
-              "scheduled",
-
-            stream_url:
-              getValue(
-                "matchStream"
-              ).trim() ||
-              null
-
-          })
-
-      }
-    );
-
-
-    status(
-      "Матч-центр сохранён."
-    );
-
-
-    await loadMatches();
-
-    await loadMatchCenterData(
-      id
-    );
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-async function setMatchLive(){
-
-  const id =
-    getValue(
-      "eventMatchSelect"
-    );
-
-
-  if(!id){
-
-    status(
-      "Выберите матч.",
-      "bad"
-    );
-
-    return;
-
-  }
-
-
-  try{
-
-    await request(
-      `/rest/v1/matches?id=eq.${id}`,
-      {
-
-        method:"PATCH",
-
-        headers:{
-          Prefer:"return=minimal"
-        },
-
-        body:
-          JSON.stringify({
-
-            status:
-              "live"
-
-          })
-
-      }
-    );
-
-
-    setValue(
-      "matchStatus",
-      "live"
-    );
-
-
-    status(
-      "МАТЧ НАЧАЛСЯ."
-    );
-
-
-    await loadMatches();
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-async function finishMatchCenter(){
-
-  const id =
-    getValue(
-      "eventMatchSelect"
-    );
-
-
-  if(!id){
-
-    status(
-      "Выберите матч.",
-      "bad"
-    );
-
-    return;
-
-  }
-
-
-  try{
-
-    await request(
-      `/rest/v1/matches?id=eq.${id}`,
-      {
-
-        method:"PATCH",
-
-        headers:{
-          Prefer:"return=minimal"
-        },
-
-        body:
-          JSON.stringify({
-
-            status:
-              "finished"
-
-          })
-
-      }
-    );
-
-
-    setValue(
-      "matchStatus",
-      "finished"
-    );
-
-
-    status(
-      "Матч завершён."
-    );
-
-
-    await loadMatches();
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   MATCH EVENTS
-========================================================= */
-
-async function addGoalEvent(){
-
-  try{
-
-    const matchId =
-      getValue(
-        "eventMatchSelect"
-      );
-
-
-    const scorer =
-      getValue(
-        "goalScorer"
-      );
-
-
-    if(!matchId){
-
-      status(
-        "Выберите матч.",
-        "bad"
-      );
-
-      return;
-
-    }
-
-
-    if(!scorer){
-
-      status(
-        "Выберите автора гола.",
-        "bad"
-      );
-
-      return;
-
-    }
-
-
-    const match =
-      (
-        await request(
-          `/rest/v1/matches?id=eq.${matchId}&select=home_team_id,away_team_id`
-        )
-      )?.[0];
-
-
-    let teamId =
-      match?.home_team_id ||
-      null;
-
-
-    const chelny =
-      teamsCache.find(
-        team =>
-          String(
-            team.name ||
-            ""
+    [
+      ["primaryColorPicker",s.primary_color],
+      ["secondaryColorPicker",s.secondary_color],
+      ["backgroundColorPicker",s.background_color],
+      ["cardColorPicker",s.card_color],
+      ["textColorPicker",s.text_color],
+      ["mutedTextColorPicker",s.muted_text_color],
+      ["buttonColorPicker",s.button_color],
+      ["borderColorPicker",s.border_color]
+    ].forEach(
+      ([id,value]) => {
+
+        const el =
+          document.getElementById(id);
+
+        if(
+          el &&
+          /^#[0-9a-fA-F]{6}$/.test(
+            value || ""
           )
-            .toLowerCase()
-            .includes(
-              "челны"
-            )
-      );
+        ){
 
+          el.value =
+            value;
 
-    if(chelny){
-
-      teamId =
-        chelny.id;
-
-    }
-
-
-    await request(
-      "/rest/v1/match_events",
-      {
-
-        method:"POST",
-
-        headers:{
-          Prefer:"return=minimal"
-        },
-
-        body:
-          JSON.stringify({
-
-            match_id:
-              Number(matchId),
-
-            event_type:
-              "goal",
-
-            period:
-              Number(
-                getValue(
-                  "goalPeriod"
-                ) ||
-                1
-              ),
-
-            event_time:
-              getValue(
-                "goalTime"
-              ) ||
-              null,
-
-            team_id:
-              teamId
-                ? Number(teamId)
-                : null,
-
-            player_id:
-              Number(scorer),
-
-            assist1_player_id:
-              getValue(
-                "goalAssist1"
-              )
-                ? Number(
-                    getValue(
-                      "goalAssist1"
-                    )
-                  )
-                : null,
-
-            assist2_player_id:
-              getValue(
-                "goalAssist2"
-              )
-                ? Number(
-                    getValue(
-                      "goalAssist2"
-                    )
-                  )
-                : null
-
-          })
+        }
 
       }
     );
 
+  }catch(e){
 
-    await incrementPlayerStats(
-      Number(scorer),
-      "goals",
-      1
-    );
-
-
-    const assist1 =
-      getValue(
-        "goalAssist1"
-      );
-
-
-    const assist2 =
-      getValue(
-        "goalAssist2"
-      );
-
-
-    if(assist1){
-
-      await incrementPlayerStats(
-        Number(assist1),
-        "assists",
-        1
-      );
-
-    }
-
-
-    if(assist2){
-
-      await incrementPlayerStats(
-        Number(assist2),
-        "assists",
-        1
-      );
-
-    }
-
-
-    status(
-      "Гол добавлен."
-    );
-
-
-    await loadMatchEvents(
-      matchId
-    );
-
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
+    console.error(e);
 
   }
 
 }
 
 
-async function addPenaltyEvent(){
+async function saveDesign(){
 
   try{
 
-    const matchId =
-      getValue(
-        "eventMatchSelect"
+    const existing =
+      await request(
+        "/rest/v1/settings?select=*&limit=1"
       );
 
+    const current =
+      existing?.[0];
 
-    if(!matchId){
 
-      status(
-        "Выберите матч.",
-        "bad"
-      );
+    let logo_url =
+      current?.logo_url || null;
 
-      return;
+
+    const logoFile =
+      document.getElementById(
+        "designLogo"
+      ).files?.[0];
+
+
+    if(logoFile){
+
+      logo_url =
+        await uploadImage(
+          logoFile
+        );
 
     }
 
 
-    const player =
-      getValue(
-        "penaltyPlayer"
-      );
+    let font_main =
+      current?.font_main || null;
+
+    let font_heading =
+      current?.font_heading || null;
+
+    let font_secondary =
+      current?.font_secondary || null;
 
 
-    const minutes =
-      Number(
+    const fontMainFile =
+      document.getElementById(
+        "fontMain"
+      ).files?.[0];
+
+    const fontHeadingFile =
+      document.getElementById(
+        "fontHeading"
+      ).files?.[0];
+
+    const fontSecondaryFile =
+      document.getElementById(
+        "fontSecondary"
+      ).files?.[0];
+
+
+    if(fontMainFile){
+
+      font_main =
+        await uploadFont(
+          fontMainFile
+        );
+
+    }
+
+
+    if(fontHeadingFile){
+
+      font_heading =
+        await uploadFont(
+          fontHeadingFile
+        );
+
+    }
+
+
+    if(fontSecondaryFile){
+
+      font_secondary =
+        await uploadFont(
+          fontSecondaryFile
+        );
+
+    }
+
+
+    const body = {
+
+      site_name:
         getValue(
-          "penaltyMinutes"
-        ) ||
-        2
-      );
-
-
-    await request(
-      "/rest/v1/match_events",
-      {
-
-        method:"POST",
-
-        headers:{
-          Prefer:"return=minimal"
-        },
-
-        body:
-          JSON.stringify({
-
-            match_id:
-              Number(matchId),
-
-            event_type:
-              "penalty",
-
-            period:
-              Number(
-                getValue(
-                  "penaltyPeriod"
-                ) ||
-                1
-              ),
-
-            event_time:
-              getValue(
-                "penaltyTime"
-              ) ||
-              null,
-
-            player_id:
-              player
-                ? Number(player)
-                : null,
-
-            penalty_minutes:
-              minutes
-
-          })
-
-      }
-    );
-
-
-    if(player){
-
-      await incrementPlayerStats(
-        Number(player),
-        "pim",
-        minutes
-      );
-
-    }
-
-
-    status(
-      "Штраф добавлен."
-    );
-
-
-    await loadMatchEvents(
-      matchId
-    );
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-async function loadMatchEvents(
-  matchId
-){
-
-  const box =
-    $("matchEventsList");
-
-
-  if(!box) return;
-
-
-  try{
-
-    const events =
-      await request(
-        `/rest/v1/match_events?match_id=eq.${matchId}&select=*&order=period.asc,id.asc`
-      );
-
-
-    if(!events.length){
-
-      box.innerHTML =
-        `<div class="small">
-          Событий пока нет.
-        </div>`;
-
-      return;
-
-    }
-
-
-    box.innerHTML =
-      events
-        .map(
-          event => {
-
-            const player =
-              playersCache.find(
-                item =>
-                  Number(item.id) ===
-                  Number(
-                    event.player_id
-                  )
-              );
-
-
-            const assist1 =
-              playersCache.find(
-                item =>
-                  Number(item.id) ===
-                  Number(
-                    event.assist1_player_id
-                  )
-              );
-
-
-            const assist2 =
-              playersCache.find(
-                item =>
-                  Number(item.id) ===
-                  Number(
-                    event.assist2_player_id
-                  )
-              );
-
-
-            return `
-
-              <div class="list-item">
-
-                <div class="item-info">
-
-                  <div class="item-title">
-
-                    ${
-                      event.event_type ===
-                      "goal"
-                        ? "⚡ ГОЛ"
-                        : "⏱ ШТРАФ"
-                    }
-
-                    ·
-
-                    ${escapeHtml(
-                      event.event_time ||
-                      ""
-                    )}
-
-                    ·
-
-                    ${escapeHtml(
-                      player?.name ||
-                      ""
-                    )}
-
-                  </div>
-
-
-                  <div class="item-sub">
-
-                    ${
-                      event.event_type ===
-                      "goal"
-
-                        ?
-
-                        `Ассисты:
-                        ${escapeHtml(
-                          [
-                            assist1?.name,
-                            assist2?.name
-                          ]
-                            .filter(Boolean)
-                            .join(", ") ||
-                          "нет"
-                        )}`
-
-                        :
-
-                        `${
-                          event.penalty_minutes ||
-                          2
-                        } мин.`
-
-                    }
-
-                    ·
-
-                    ${
-                      event.period
-                    }
-                    период
-
-                  </div>
-
-                </div>
-
-
-                <button
-                  class="btn danger"
-                  onclick="deleteMatchEvent(
-                    ${event.id},
-                    ${matchId}
-                  )"
-                >
-                  Удалить
-                </button>
-
-              </div>
-
-            `;
-
-          }
-        )
-        .join("");
-
-  }catch(error){
-
-    box.innerHTML =
-      `<div class="small">
-        ${escapeHtml(
-          error.message
-        )}
-      </div>`;
-
-  }
-
-}
-
-
-async function deleteMatchEvent(
-  id,
-  matchId
-){
-
-  if(
-    !confirm(
-      "Удалить событие?"
-    )
-  ){
-
-    return;
-
-  }
-
-
-  try{
-
-    await request(
-      `/rest/v1/match_events?id=eq.${id}`,
-      {
-        method:"DELETE"
-      }
-    );
-
-
-    status(
-      "Событие удалено."
-    );
-
-
-    await loadMatchEvents(
-      matchId
-    );
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   PERIODS
-========================================================= */
-
-async function savePeriods(){
-
-  try{
-
-    const matchId =
-      getValue(
-        "eventMatchSelect"
-      );
-
-
-    if(!matchId){
-
-      status(
-        "Выберите матч.",
-        "bad"
-      );
-
-      return;
-
-    }
-
-
-    for(
-      let period = 1;
-      period <= 3;
-      period++
-    ){
-
-      const body = {
-
-        match_id:
-          Number(matchId),
-
-        period,
-
-        home_score:
-          Number(
-            getValue(
-              `p${period}Home`
-            ) ||
-            0
-          ),
-
-        away_score:
-          Number(
-            getValue(
-              `p${period}Away`
-            ) ||
-            0
-          ),
-
-        penalty_minutes:
-          Number(
-            getValue(
-              `p${period}Pim`
-            ) ||
-            0
-          )
-
-      };
-
-
-      const existing =
-        await request(
-          `/rest/v1/match_periods?match_id=eq.${matchId}&period=eq.${period}&select=id`
-        );
-
-
-      if(existing?.length){
-
-        await request(
-          `/rest/v1/match_periods?id=eq.${existing[0].id}`,
-          {
-
-            method:"PATCH",
-
-            headers:{
-              Prefer:"return=minimal"
-            },
-
-            body:
-              JSON.stringify(body)
-
-          }
-        );
-
-      }else{
-
-        await request(
-          "/rest/v1/match_periods",
-          {
-
-            method:"POST",
-
-            headers:{
-              Prefer:"return=minimal"
-            },
-
-            body:
-              JSON.stringify(body)
-
-          }
-        );
-
-      }
-
-    }
-
-
-    status(
-      "Периоды сохранены."
-    );
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   PLAYER STATS
-========================================================= */
-
-async function incrementPlayerStats(
-  playerId,
-  field,
-  amount = 1
-){
-
-  const season =
-    "2026/27";
-
-
-  const rows =
-    await request(
-      `/rest/v1/player_season_stats?player_id=eq.${playerId}&season=eq.${encodeURIComponent(season)}&select=*`
-    );
-
-
-  const current =
-    rows?.[0] ||
-    {
-
-      player_id:
-        Number(playerId),
-
-      season,
-
-      games:0,
-
-      goals:0,
-
-      assists:0,
-
-      points:0,
-
-      pim:0,
-
-      goalie_games:0,
-
-      goals_against:0,
-
-      gaa:0
+          "designSiteName"
+        ),
+
+      logo_url,
+
+      primary_color:
+        getValue(
+          "primaryColor"
+        ),
+
+      secondary_color:
+        getValue(
+          "secondaryColor"
+        ),
+
+      background_color:
+        getValue(
+          "backgroundColor"
+        ),
+
+      card_color:
+        getValue(
+          "cardColor"
+        ),
+
+      text_color:
+        getValue(
+          "textColor"
+        ),
+
+      muted_text_color:
+        getValue(
+          "mutedTextColor"
+        ),
+
+      button_color:
+        getValue(
+          "buttonColor"
+        ),
+
+      border_color:
+        getValue(
+          "borderColor"
+        ),
+
+      border_radius:
+        Number(
+          getValue(
+            "borderRadius"
+          ) || 14
+        ),
+
+      home_icon:
+        getValue(
+          "homeIcon"
+        ),
+
+      matches_icon:
+        getValue(
+          "matchesIcon"
+        ),
+
+      roster_icon:
+        getValue(
+          "rosterIcon"
+        ),
+
+      table_icon:
+        getValue(
+          "tableIcon"
+        ),
+
+      news_icon:
+        getValue(
+          "newsIcon"
+        ),
+
+      font_main,
+
+      font_heading,
+
+      font_secondary
 
     };
 
 
-  current[field] =
-    Number(
-      current[field] ||
-      0
-    ) +
-    Number(
-      amount ||
-      0
-    );
-
-
-  current.points =
-    Number(
-      current.goals ||
-      0
-    ) +
-    Number(
-      current.assists ||
-      0
-    );
-
-
-  if(rows?.[0]){
-
-    await request(
-      `/rest/v1/player_season_stats?id=eq.${rows[0].id}`,
-      {
-
-        method:"PATCH",
-
-        headers:{
-          Prefer:"return=minimal"
-        },
-
-        body:
-          JSON.stringify({
-
-            games:
-              current.games,
-
-            goals:
-              current.goals,
-
-            assists:
-              current.assists,
-
-            points:
-              current.points,
-
-            pim:
-              current.pim,
-
-            goalie_games:
-              current.goalie_games,
-
-            goals_against:
-              current.goals_against,
-
-            gaa:
-              current.gaa
-
-          })
-
-      }
-    );
-
-  }else{
-
-    await request(
-      "/rest/v1/player_season_stats",
-      {
-
-        method:"POST",
-
-        headers:{
-          Prefer:"return=minimal"
-        },
-
-        body:
-          JSON.stringify(current)
-
-      }
-    );
-
-  }
-
-}
-
-
-async function quickAddStat(
-  field
-){
-
-  const id =
-    getValue(
-      field === "goals"
-        ? "quickGoalPlayer"
-        : "quickAssistPlayer"
-    );
-
-
-  if(!id){
-
-    status(
-      "Выберите игрока.",
-      "bad"
-    );
-
-    return;
-
-  }
-
-
-  try{
-
-    await incrementPlayerStats(
-      Number(id),
-      field,
-      1
-    );
-
-
-    status(
-      field === "goals"
-        ? "Гол добавлен."
-        : "Ассист добавлен."
-    );
-
-
-    await loadQuickStats();
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-async function addGoalieGame(){
-
-  const id =
-    getValue(
-      "goaliePlayer"
-    );
-
-
-  if(!id){
-
-    status(
-      "Выберите вратаря.",
-      "bad"
-    );
-
-    return;
-
-  }
-
-
-  try{
-
-    await incrementPlayerStats(
-      Number(id),
-      "goalie_games",
-      Number(
-        getValue(
-          "goalieGames"
-        ) ||
-        1
-      )
-    );
-
-
-    await incrementPlayerStats(
-      Number(id),
-      "goals_against",
-      Number(
-        getValue(
-          "goalieGoalsAgainst"
-        ) ||
-        0
-      )
-    );
-
-
-    status(
-      "Статистика вратаря сохранена."
-    );
-
-
-    await loadQuickStats();
-
-  }catch(error){
-
-    status(
-      error.message,
-      "bad"
-    );
-
-  }
-
-}
-
-
-async function saveGoalieKnp(){
-
-  const id =
-    getValue(
-      "goalieKnpPlayer"
-    );
-
-
-  if(!id){
-
-    status(
-      "Выберите вратаря.",
-      "bad"
-    );
-
-    return;
-
-  }
-
-
-  try{
-
-    const season =
-      "2026/27";
-
-
-    const rows =
-      await request(
-        `/rest/v1/player_season_stats?player_id=eq.${id}&season=eq.${encodeURIComponent(season)}&select=*`
-      );
-
-
-    const value =
-      Number(
-        getValue(
-          "goalieKnp"
-        ) ||
-        0
-      );
-
-
-    if(rows?.length){
+    if(current?.id){
 
       await request(
-        `/rest/v1/player_season_stats?id=eq.${rows[0].id}`,
+        `/rest/v1/settings?id=eq.${current.id}`,
         {
-
           method:"PATCH",
 
           headers:{
@@ -7638,9 +4560,7 @@ async function saveGoalieKnp(){
           },
 
           body:
-            JSON.stringify({
-              gaa:value
-            })
+            JSON.stringify(body)
 
         }
       );
@@ -7648,9 +4568,8 @@ async function saveGoalieKnp(){
     }else{
 
       await request(
-        "/rest/v1/player_season_stats",
+        "/rest/v1/settings",
         {
-
           method:"POST",
 
           headers:{
@@ -7658,16 +4577,7 @@ async function saveGoalieKnp(){
           },
 
           body:
-            JSON.stringify({
-
-              player_id:
-                Number(id),
-
-              season,
-
-              gaa:value
-
-            })
+            JSON.stringify(body)
 
         }
       );
@@ -7676,16 +4586,16 @@ async function saveGoalieKnp(){
 
 
     status(
-      "КН сохранён."
+      "Дизайн сохранён."
     );
 
 
-    await loadQuickStats();
+    await loadDesign();
 
-  }catch(error){
+  }catch(e){
 
     status(
-      error.message,
+      e.message,
       "bad"
     );
 
@@ -7694,162 +4604,385 @@ async function saveGoalieKnp(){
 }
 
 
-async function loadQuickStats(){
+async function uploadFont(
+  file,
+  retry = true
+){
 
-  const box =
-    $("quickStatsList");
+  const extension =
+    file.name
+      .split(".")
+      .pop()
+      .toLowerCase();
 
 
-  if(!box) return;
+  const name =
+    `fonts/${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2)}.${extension}`;
 
 
-  try{
+  const response =
+    await fetch(
+      `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${name}`,
+      {
+        method:"POST",
 
-    const rows =
-      await request(
-        "/rest/v1/player_season_stats?season=eq.2026%2F27&select=*"
+        headers:{
+
+          apikey:
+            SUPABASE_KEY,
+
+          Authorization:
+            `Bearer ${session.access_token}`,
+
+          "Content-Type":
+            file.type ||
+            "application/octet-stream"
+
+        },
+
+        body:file
+
+      }
+    );
+
+
+  if(
+    (
+      response.status === 401 ||
+      response.status === 403
+    ) &&
+    retry
+  ){
+
+    const refreshed =
+      await refreshSession();
+
+    if(refreshed){
+
+      return uploadFont(
+        file,
+        false
+      );
+
+    }
+
+    throw new Error(
+      "Сессия закончилась."
+    );
+
+  }
+
+
+  if(!response.ok){
+
+    const text =
+      await response.text();
+
+    throw new Error(
+      text ||
+      "Ошибка загрузки шрифта"
+    );
+
+  }
+
+
+  return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${name}`;
+
+}
+
+
+function previewFont(
+  input,
+  id
+){
+
+  const file =
+    input.files?.[0];
+
+  if(!file) return;
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+    function(e){
+
+      const fontName =
+        "PreviewFont_" +
+        Math.random()
+          .toString(36)
+          .substring(2);
+
+
+      const style =
+        document.createElement(
+          "style"
+        );
+
+
+      style.textContent = `
+
+        @font-face{
+
+          font-family:'${fontName}';
+
+          src:url(
+            '${e.target.result}'
+          );
+
+        }
+
+        #${id}{
+
+          font-family:
+            '${fontName}',
+            sans-serif;
+
+        }
+
+      `;
+
+
+      document.head.appendChild(
+        style
       );
 
 
-    if(!rows?.length){
+      document.getElementById(
+        id
+      ).textContent =
+        "Пример выбранного шрифта";
 
-      box.innerHTML =
-        `<div class="small">
-          Статистика пока пустая.
-        </div>`;
+    };
+
+
+  reader.readAsDataURL(
+    file
+  );
+
+}
+
+
+/* =========================================================
+   HOME SETTINGS
+========================================================= */
+
+async function loadHomeSettings(){
+
+  try{
+
+    await Promise.allSettled([
+
+      loadMatches(),
+
+      loadNews(),
+
+      loadAlbums()
+
+    ]);
+
+
+    const data =
+      await request(
+        "/rest/v1/settings?select=*&limit=1"
+      );
+
+    const s =
+      data?.[0];
+
+    if(!s) return;
+
+
+    fillMatchSelects();
+
+    fillNewsSelects();
+
+    fillAlbumSelect();
+
+
+    setSelected(
+      "homeUpcoming",
+      s.home_upcoming
+    );
+
+    setSelected(
+      "homeLastMatch",
+      s.home_last_match
+    );
+
+    setSelected(
+      "homeAnnouncement",
+      s.home_announcement
+    );
+
+    setSelected(
+      "homePress1",
+      s.home_press_1
+    );
+
+    setSelected(
+      "homePress2",
+      s.home_press_2
+    );
+
+    setSelected(
+      "homePress3",
+      s.home_press_3
+    );
+
+    setSelected(
+      "homeAlbum",
+      s.home_album
+    );
+
+
+    document.getElementById(
+      "showPress"
+    ).checked =
+      s.show_press !== false;
+
+
+    document.getElementById(
+      "showMedia"
+    ).checked =
+      s.show_media !== false;
+
+
+    document.getElementById(
+      "showAchievements"
+    ).checked =
+      s.show_achievements !== false;
+
+
+    document.getElementById(
+      "showBirthdays"
+    ).checked =
+      s.show_birthdays !== false;
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+async function saveHomeSettings(){
+
+  try{
+
+    const data =
+      await request(
+        "/rest/v1/settings?select=*&limit=1"
+      );
+
+    const current =
+      data?.[0];
+
+
+    if(!current){
+
+      status(
+        "Сначала сохраните дизайн.",
+        "bad"
+      );
 
       return;
 
     }
 
 
-    box.innerHTML =
-      rows
-        .map(
-          statRow => {
+    const body = {
 
-            const player =
-              playersCache.find(
-                item =>
-                  Number(item.id) ===
-                  Number(
-                    statRow.player_id
-                  )
-              );
+      home_upcoming:
+        getValue(
+          "homeUpcoming"
+        ) || null,
+
+      home_last_match:
+        getValue(
+          "homeLastMatch"
+        ) || null,
+
+      home_announcement:
+        getValue(
+          "homeAnnouncement"
+        ) || null,
+
+      home_press_1:
+        getValue(
+          "homePress1"
+        ) || null,
+
+      home_press_2:
+        getValue(
+          "homePress2"
+        ) || null,
+
+      home_press_3:
+        getValue(
+          "homePress3"
+        ) || null,
+
+      home_album:
+        getValue(
+          "homeAlbum"
+        ) || null,
+
+      show_press:
+        document.getElementById(
+          "showPress"
+        ).checked,
+
+      show_media:
+        document.getElementById(
+          "showMedia"
+        ).checked,
+
+      show_achievements:
+        document.getElementById(
+          "showAchievements"
+        ).checked,
+
+      show_birthdays:
+        document.getElementById(
+          "showBirthdays"
+        ).checked
+
+    };
 
 
-            if(!player){
+    await request(
+      `/rest/v1/settings?id=eq.${current.id}`,
+      {
+        method:"PATCH",
 
-              return "";
+        headers:{
+          Prefer:"return=minimal"
+        },
 
-            }
+        body:
+          JSON.stringify(body)
 
-
-            const isGoalie =
-              String(
-                player.position ||
-                ""
-              )
-                .toLowerCase()
-                .includes(
-                  "врат"
-                );
+      }
+    );
 
 
-            return `
+    status(
+      "Настройки главной сохранены."
+    );
 
-              <div class="list-item">
+  }catch(e){
 
-                <div class="item-info">
-
-                  <div class="item-title">
-
-                    #${escapeHtml(
-                      player.number ??
-                      ""
-                    )}
-
-                    ${escapeHtml(
-                      player.name ||
-                      ""
-                    )}
-
-                  </div>
-
-
-                  <div class="item-sub">
-
-                    Г:
-                    ${statRow.goals || 0}
-
-                    ·
-
-                    П:
-                    ${statRow.assists || 0}
-
-                    ·
-
-                    О:
-                    ${statRow.points || 0}
-
-                    ·
-
-                    Ш:
-                    ${statRow.pim || 0}
-
-                    ${
-                      isGoalie
-
-                        ?
-
-                        `
-
-                          · И:
-                          ${
-                            statRow.goalie_games ||
-                            0
-                          }
-
-                          · ПШ:
-                          ${
-                            statRow.goals_against ||
-                            0
-                          }
-
-                          · КН:
-                          ${
-                            statRow.gaa ??
-                            0
-                          }
-
-                        `
-
-                        :
-
-                        ""
-
-                    }
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            `;
-
-          }
-        )
-        .join("");
-
-  }catch(error){
-
-    box.innerHTML =
-      `<div class="small">
-        ${escapeHtml(
-          error.message
-        )}
-      </div>`;
+    status(
+      e.message,
+      "bad"
+    );
 
   }
 
@@ -7857,151 +4990,431 @@ async function loadQuickStats(){
 
 
 /* =========================================================
-   LOAD EVERYTHING
+   SELECTS
 ========================================================= */
 
-async function loadEverything(){
+function fillMatchSelects(){
 
-  await loadSettings();
-
-  await loadTeams();
-
-  await loadMatches();
-
-  await loadPlayers();
-
-  await loadNews();
-
-  await loadAlbums();
-
-  await loadAchievements();
-
-  await loadBirthdays();
-
-  await loadStandings();
-
-  await loadProducts();
-
-  await loadQuickStats();
+  const ids = [
+    "homeUpcoming",
+    "homeLastMatch"
+  ];
 
 
-  fillEventMatches();
+  ids.forEach(
+    id => {
 
-  fillExtendedPlayers();
+      const select =
+        document.getElementById(
+          id
+        );
 
-  fillEditPlayerSelect();
-
-
-  if(
-    $("dashboardStatus")
-  ){
-
-    $("dashboardStatus")
-      .textContent =
-        "Подключение к Supabase активно.";
-
-  }
-
-}
+      if(!select) return;
 
 
-/* =========================================================
-   MATCH SELECT
-========================================================= */
-
-document.addEventListener(
-  "change",
-  async event => {
-
-    if(
-      event.target?.id ===
-      "eventMatchSelect"
-    ){
-
-      await loadMatchCenterData(
-        event.target.value
-      );
-
-    }
-
-  }
-);
+      const current =
+        select.value;
 
 
-/* =========================================================
-   LOGIN EVENTS
-========================================================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-
-    const loginForm =
-      $("loginForm");
+      select.innerHTML =
+        `<option value="">
+          Автоматически
+        </option>`;
 
 
-    if(loginForm){
+      matchesCache.forEach(
+        match => {
 
-      loginForm.addEventListener(
-        "submit",
-        event => {
+          const option =
+            document.createElement(
+              "option"
+            );
 
-          event.preventDefault();
 
-          login();
+          option.value =
+            match.id;
+
+
+          option.textContent =
+            `${match.date || ""}
+             · ХК Челны — ${match.opponent || ""}`;
+
+
+          select.appendChild(
+            option
+          );
 
         }
       );
 
+
+      if(current){
+
+        select.value =
+          current;
+
+      }
+
     }
+  );
+
+}
 
 
-    const logoutButton =
-      $("logoutButton");
+function fillNewsSelects(){
+
+  const ids = [
+
+    "homeAnnouncement",
+
+    "homePress1",
+
+    "homePress2",
+
+    "homePress3"
+
+  ];
 
 
-    if(logoutButton){
+  ids.forEach(
+    id => {
 
-      logoutButton.addEventListener(
-        "click",
-        logout
+      const select =
+        document.getElementById(
+          id
+        );
+
+      if(!select) return;
+
+
+      const current =
+        select.value;
+
+
+      select.innerHTML =
+        `<option value="">
+          Автоматически
+        </option>`;
+
+
+      newsCache.forEach(
+        news => {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+
+          option.value =
+            news.id;
+
+
+          option.textContent =
+            `${news.title || ""}
+             · ${news.tag || ""}`;
+
+
+          select.appendChild(
+            option
+          );
+
+        }
+      );
+
+
+      if(current){
+
+        select.value =
+          current;
+
+      }
+
+    }
+  );
+
+}
+
+
+function fillAlbumSelect(){
+
+  const select =
+    document.getElementById(
+      "homeAlbum"
+    );
+
+  if(!select) return;
+
+
+  const current =
+    select.value;
+
+
+  select.innerHTML =
+    `<option value="">
+      Автоматически
+    </option>`;
+
+
+  albumsCache.forEach(
+    album => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        album.id;
+
+
+      option.textContent =
+        album.title ||
+        "Альбом";
+
+
+      select.appendChild(
+        option
       );
 
     }
+  );
 
 
-    restoreSession();
+  if(current){
+
+    select.value =
+      current;
+
+  }
+
+}
+
+
+function fillPlayerSelects(){
+
+  const stats =
+    document.getElementById(
+      "playerStats"
+    );
+
+  if(
+    stats &&
+    stats.classList.contains(
+      "active"
+    )
+  ){
+
+    loadPlayerStatsAdmin();
+
+  }
+
+}
+
+
+/* =========================================================
+   COLOR PICKERS
+========================================================= */
+
+[
+  "primary",
+  "secondary",
+  "background",
+  "card",
+  "text",
+  "mutedText",
+  "button",
+  "border"
+].forEach(
+  name => {
+
+    const text =
+      document.getElementById(
+        name === "mutedText"
+          ? "mutedTextColor"
+          : name + "Color"
+      );
+
+
+    const picker =
+      document.getElementById(
+        name === "mutedText"
+          ? "mutedTextColorPicker"
+          : name + "ColorPicker"
+      );
+
+
+    if(
+      !text ||
+      !picker
+    ){
+
+      return;
+
+    }
+
+
+    picker.addEventListener(
+      "input",
+      () => {
+
+        text.value =
+          picker.value;
+
+      }
+    );
+
+
+    text.addEventListener(
+      "input",
+      () => {
+
+        if(
+          /^#[0-9a-fA-F]{6}$/
+            .test(
+              text.value
+            )
+        ){
+
+          picker.value =
+            text.value;
+
+        }
+
+      }
+    );
 
   }
 );
 
 
 /* =========================================================
-   GLOBAL ERROR HANDLER
+   HELPERS
 ========================================================= */
 
-window.addEventListener(
-  "error",
-  event => {
+function getValue(id){
 
-    console.error(
-      "GLOBAL ERROR:",
-      event.error ||
-      event.message
+  return document.getElementById(
+    id
+  )?.value ?? "";
+
+}
+
+
+function setValue(
+  id,
+  value
+){
+
+  const el =
+    document.getElementById(
+      id
     );
+
+
+  if(el){
+
+    el.value =
+      value ?? "";
 
   }
-);
+
+}
 
 
-window.addEventListener(
-  "unhandledrejection",
-  event => {
+function setSelected(
+  id,
+  value
+){
 
-    console.error(
-      "PROMISE ERROR:",
-      event.reason
+  const el =
+    document.getElementById(
+      id
     );
+
+
+  if(!el) return;
+
+
+  if(
+    value !== null &&
+    value !== undefined
+  ){
+
+    el.value =
+      String(value);
+
+  }
+
+}
+
+
+function escapeHtml(
+  value
+){
+
+  return String(
+    value ?? ""
+  )
+
+  .replaceAll(
+    "&",
+    "&amp;"
+  )
+
+  .replaceAll(
+    "<",
+    "&lt;"
+  )
+
+  .replaceAll(
+    ">",
+    "&gt;"
+  )
+
+  .replaceAll(
+    '"',
+    "&quot;"
+  )
+
+  .replaceAll(
+    "'",
+    "&#039;"
+  );
+
+}
+
+
+function escapeAttr(
+  value
+){
+
+  return escapeHtml(
+    value
+  );
+
+}
+
+
+/* =========================================================
+   ENTER TO LOGIN
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  function(e){
+
+    if(
+      e.key === "Enter" &&
+      document.getElementById(
+        "loginScreen"
+      ).style.display !== "none"
+    ){
+
+      login();
+
+    }
 
   }
 );
