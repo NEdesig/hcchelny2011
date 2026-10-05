@@ -2,31 +2,56 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <meta name="theme-color" content="#000056">
 
   <title>ХК Челны 2011</title>
 
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Общая конфигурация -->
   <script src="config.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    /* =========================================================
+       ОСНОВНЫЕ НАСТРОЙКИ
+    ========================================================= */
 
     :root {
       --primary: #000056;
-      --accent: #0875dc;
-      --gold: #ffcd00;
+      --blue: #0875dc;
+      --yellow: #ffcd00;
+      --white: #ffffff;
+
       --bg: #f4f6fa;
+      --text: #101426;
+      --muted: #72798c;
       --card: #ffffff;
-      --text: #11152b;
-      --muted: #7b8298;
-      --border: #e7eaf1;
+      --border: rgba(0, 0, 86, 0.08);
+
       --radius: 22px;
-      --nav-height: 78px;
+      --shadow: 0 12px 35px rgba(0, 0, 86, 0.08);
+
+      --font-main: Stapel, Arial, sans-serif;
+      --font-heading: Stapel, Arial, sans-serif;
+      --font-secondary: Stengazeta, Arial, sans-serif;
+      --font-third: Christopher, Arial, sans-serif;
     }
+
+    /* =========================================================
+       RESET
+    ========================================================= */
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -35,11 +60,11 @@
     }
 
     body {
-      margin: 0;
+      min-height: 100vh;
       background: var(--bg);
       color: var(--text);
-      font-family: Inter, Arial, sans-serif;
-      padding-bottom: calc(var(--nav-height) + 15px);
+      font-family: var(--font-main);
+      padding-bottom: 92px;
     }
 
     button,
@@ -59,809 +84,1093 @@
       display: block;
     }
 
-    .app {
-      width: 100%;
-      max-width: 680px;
-      margin: 0 auto;
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
-    .page {
-      display: none;
-      padding: 18px 16px 30px;
-      animation: pageIn .25s ease;
-    }
+    /* =========================================================
+       LOADER
+    ========================================================= */
 
-    .page.active {
-      display: block;
-    }
+    #pageLoader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
 
-    @keyframes pageIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* HEADER */
-
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 13px;
-      margin-bottom: 20px;
-    }
-
-    .team-logo {
-      width: 58px;
-      height: 58px;
-      border-radius: 17px;
-      background: var(--primary);
-      object-fit: contain;
-      padding: 7px;
-      box-shadow: 0 8px 22px rgba(0,0,86,.18);
-      flex-shrink: 0;
-    }
-
-    .team-logo.empty {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 20px;
+
+      background: var(--primary);
+      color: white;
+
+      transition:
+        opacity 0.35s ease,
+        visibility 0.35s ease;
+    }
+
+    #pageLoader.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-inner {
+      text-align: center;
+    }
+
+    .loader-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 18px;
+
+      border-radius: 22px;
+      background: white;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: var(--primary);
+      font-size: 25px;
       font-weight: 900;
     }
 
-    .header-title {
+    .loader-text {
+      font-size: 14px;
+      opacity: 0.75;
+    }
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+
+    .site-header {
+      position: relative;
+      overflow: hidden;
+
+      background:
+        radial-gradient(
+          circle at 100% 0%,
+          rgba(8, 117, 220, 0.5),
+          transparent 38%
+        ),
+        var(--primary);
+
+      color: white;
+
+      padding:
+        calc(18px + env(safe-area-inset-top))
+        18px
+        25px;
+    }
+
+    .site-header::after {
+      content: "";
+
+      position: absolute;
+      right: -80px;
+      bottom: -100px;
+
+      width: 240px;
+      height: 240px;
+
+      border: 35px solid rgba(255, 205, 0, 0.09);
+      border-radius: 50%;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+
+      max-width: 900px;
+      margin: 0 auto;
+
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .team-logo {
+      width: 62px;
+      height: 62px;
+
+      flex: 0 0 62px;
+
+      border-radius: 18px;
+
+      background: rgba(255,255,255,0.12);
+
+      border: 1px solid rgba(255,255,255,0.2);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      overflow: hidden;
+    }
+
+    .team-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .team-logo-placeholder {
+      font-size: 20px;
+      font-weight: 900;
+      color: white;
+    }
+
+    .team-info {
       min-width: 0;
     }
 
-    .header-title small {
-      display: block;
-      color: var(--muted);
+    .team-small {
       font-size: 11px;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .11em;
+      letter-spacing: 1.4px;
+      opacity: 0.65;
+
       margin-bottom: 3px;
+      text-transform: uppercase;
     }
 
-    .header-title h1 {
-      margin: 0;
-      font-size: 22px;
+    .team-title {
+      font-family: var(--font-heading);
+
+      font-size: 25px;
       line-height: 1;
+
       font-weight: 900;
-      letter-spacing: -.04em;
+      letter-spacing: -0.5px;
+
+      color: white;
     }
 
-    /* TITLES */
+    .team-subtitle {
+      margin-top: 7px;
+
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    /* =========================================================
+       MAIN
+    ========================================================= */
+
+    main {
+      width: 100%;
+      max-width: 900px;
+
+      margin: 0 auto;
+
+      padding: 18px 14px 30px;
+    }
+
+    .section {
+      margin-bottom: 24px;
+    }
 
     .section-head {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin: 26px 0 12px;
+      justify-content: space-between;
+
+      margin-bottom: 11px;
+      padding: 0 3px;
     }
 
-    .section-head h2 {
-      margin: 0;
-      font-size: 19px;
+    .section-title {
+      font-family: var(--font-heading);
+
+      font-size: 18px;
       font-weight: 900;
-      letter-spacing: -.035em;
+      letter-spacing: -0.2px;
     }
 
-    .section-head button {
-      background: transparent;
-      color: var(--accent);
+    .section-link {
+      color: var(--blue);
       font-size: 12px;
       font-weight: 800;
     }
 
-    /* MATCHDAY */
+    /* =========================================================
+       MATCHDAY CARD
+    ========================================================= */
 
-    .matchday {
+    .match-card {
       position: relative;
       overflow: hidden;
+
+      min-height: 255px;
+
+      padding: 19px;
+
+      color: white;
+
       border-radius: 27px;
-      padding: 20px;
+
       background:
-        radial-gradient(circle at 100% 0%, rgba(8,117,220,.65), transparent 42%),
-        linear-gradient(135deg, #000056 0%, #071478 55%, #0875dc 130%);
-      color: #fff;
-      box-shadow: 0 16px 35px rgba(0,0,86,.25);
-      min-height: 275px;
+        radial-gradient(
+          circle at 90% 10%,
+          rgba(8, 117, 220, 0.7),
+          transparent 35%
+        ),
+        linear-gradient(
+          145deg,
+          #000056 0%,
+          #000056 55%,
+          #061d92 100%
+        );
+
+      box-shadow:
+        0 18px 45px rgba(0, 0, 86, 0.2);
+
       cursor: pointer;
+
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
     }
 
-    .matchday::after {
+    .match-card:active {
+      transform: scale(0.985);
+    }
+
+    .match-card::before {
       content: "";
+
       position: absolute;
+
       width: 190px;
       height: 190px;
-      border: 28px solid rgba(255,255,255,.05);
+
+      right: -85px;
+      bottom: -95px;
+
+      border: 25px solid rgba(255, 205, 0, 0.12);
       border-radius: 50%;
-      right: -75px;
-      bottom: -70px;
     }
 
-    .matchday-top {
+    .match-card-top {
       position: relative;
-      z-index: 1;
+      z-index: 2;
+
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
     }
 
-    .matchday-label {
-      font-size: 11px;
+    .match-label {
+      display: inline-flex;
+      align-items: center;
+
+      min-height: 27px;
+
+      padding: 0 10px;
+
+      border-radius: 9px;
+
+      background: rgba(255,255,255,0.11);
+
+      font-size: 10px;
       font-weight: 900;
-      letter-spacing: .13em;
+
+      letter-spacing: 1px;
       text-transform: uppercase;
     }
 
-    .stream-button {
-      width: 38px;
-      height: 38px;
-      border-radius: 13px;
-      background: rgba(255,255,255,.14);
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 17px;
-      backdrop-filter: blur(8px);
+    .match-status {
+      font-size: 10px;
+      font-weight: 900;
+
+      color: var(--yellow);
+
+      text-transform: uppercase;
     }
 
-    .matchday-date {
+    .match-date {
       position: relative;
-      z-index: 1;
-      margin-top: 14px;
+      z-index: 2;
+
+      margin-top: 13px;
+
       font-size: 12px;
-      color: rgba(255,255,255,.7);
+      opacity: 0.68;
     }
 
     .match-teams {
       position: relative;
-      z-index: 1;
+      z-index: 2;
+
       display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      grid-template-columns: 1fr 65px 1fr;
+
       align-items: center;
-      gap: 8px;
-      margin-top: 16px;
+
+      margin-top: 17px;
     }
 
     .match-team {
       text-align: center;
-      font-size: 15px;
+    }
+
+    .match-team-logo {
+      width: 64px;
+      height: 64px;
+
+      margin: 0 auto 8px;
+
+      border-radius: 19px;
+
+      background: rgba(255,255,255,0.1);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      overflow: hidden;
+    }
+
+    .match-team-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .match-team-placeholder {
+      font-size: 17px;
       font-weight: 900;
-      line-height: 1.1;
     }
 
-    .match-team.home {
-      text-align: left;
-    }
+    .match-team-name {
+      font-size: 12px;
+      line-height: 1.15;
 
-    .match-team.away {
-      text-align: right;
+      font-weight: 900;
     }
 
     .match-vs {
-      font-size: 11px;
+      text-align: center;
+
+      font-size: 13px;
       font-weight: 900;
-      opacity: .55;
+
+      color: rgba(255,255,255,0.5);
     }
 
-    .match-score {
+    .match-time {
       position: relative;
-      z-index: 1;
-      margin-top: 14px;
+      z-index: 2;
+
       text-align: center;
-      font-size: 12px;
-      font-weight: 800;
+
+      margin-top: 15px;
+
+      font-size: 20px;
+      font-weight: 900;
     }
 
-    .countdown {
+    .match-countdown {
       position: relative;
-      z-index: 1;
-      margin-top: 16px;
+      z-index: 2;
+
+      text-align: center;
+
+      margin-top: 3px;
+
+      font-size: 11px;
+      opacity: 0.65;
+    }
+
+    .match-bottom {
+      position: relative;
+      z-index: 2;
+
       display: flex;
-      justify-content: center;
-      gap: 7px;
+      align-items: center;
+      justify-content: space-between;
+
+      margin-top: 16px;
     }
 
-    .count-box {
-      min-width: 55px;
-      padding: 8px 6px;
-      background: rgba(255,255,255,.1);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 12px;
-      text-align: center;
+    .match-tournament {
+      font-size: 10px;
+      opacity: 0.62;
     }
 
-    .count-box strong {
-      display: block;
-      font-size: 17px;
-      line-height: 1;
+    .broadcast-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+
+      padding: 8px 10px;
+
+      border-radius: 10px;
+
+      background: var(--yellow);
+      color: var(--primary);
+
+      font-size: 10px;
+      font-weight: 900;
     }
 
-    .count-box span {
-      display: block;
-      margin-top: 4px;
-      font-size: 8px;
-      opacity: .6;
-      text-transform: uppercase;
-    }
-
-    .match-started {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      margin-top: 22px;
-      font-size: 18px;
-      font-weight: 1000;
-      color: var(--gold);
-    }
-
-    /* CARDS */
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: 0 7px 24px rgba(19,28,56,.05);
-    }
+    /* =========================================================
+       PREVIOUS MATCH
+    ========================================================= */
 
     .previous-match {
       overflow: hidden;
+
+      border-radius: 21px;
+
+      background: var(--card);
+
+      box-shadow: var(--shadow);
+
       cursor: pointer;
     }
 
     .previous-match-image {
       width: 100%;
-      aspect-ratio: 16 / 8;
+      height: 155px;
+
       object-fit: cover;
-      background: #dfe4ed;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--primary),
+          var(--blue)
+        );
     }
 
-    .previous-info {
+    .previous-match-content {
       padding: 15px;
     }
 
-    .previous-info small {
-      color: var(--muted);
+    .previous-match-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      margin-bottom: 10px;
+    }
+
+    .previous-match-label {
       font-size: 10px;
-      font-weight: 800;
+      font-weight: 900;
+
+      color: var(--muted);
+
       text-transform: uppercase;
     }
 
-    .previous-info h3 {
-      margin: 5px 0 0;
-      font-size: 16px;
+    .previous-match-date {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .previous-score {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+
+      align-items: center;
+      gap: 10px;
+    }
+
+    .previous-team {
+      font-size: 13px;
       font-weight: 900;
     }
 
-    /* PLAYERS */
+    .previous-team:last-child {
+      text-align: right;
+    }
+
+    .previous-score-number {
+      font-size: 26px;
+      font-weight: 900;
+
+      color: var(--primary);
+    }
+
+    /* =========================================================
+       TOP STATS
+    ========================================================= */
+
+    .stats-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .stats-card {
+      overflow: hidden;
+
+      background: var(--card);
+
+      border: 1px solid var(--border);
+
+      border-radius: 18px;
+
+      box-shadow: 0 7px 25px rgba(0, 0, 86, 0.045);
+    }
+
+    .stats-header {
+      width: 100%;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 14px 15px;
+
+      background: transparent;
+
+      color: var(--text);
+
+      text-align: left;
+    }
+
+    .stats-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stats-icon {
+      width: 34px;
+      height: 34px;
+
+      border-radius: 11px;
+
+      background: rgba(8,117,220,0.1);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: var(--blue);
+
+      font-size: 15px;
+    }
+
+    .stats-title {
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .stats-arrow {
+      color: var(--muted);
+
+      font-size: 16px;
+
+      transition:
+        transform 0.25s ease;
+    }
+
+    .stats-card.open .stats-arrow {
+      transform: rotate(180deg);
+    }
+
+    .stats-content {
+      display: none;
+
+      padding: 0 10px 10px;
+    }
+
+    .stats-card.open .stats-content {
+      display: block;
+    }
+
+    .stat-player {
+      display: grid;
+      grid-template-columns: 35px 1fr auto;
+
+      align-items: center;
+      gap: 10px;
+
+      padding: 9px 6px;
+
+      border-top: 1px solid var(--border);
+    }
+
+    .stat-place {
+      font-size: 12px;
+      font-weight: 900;
+
+      color: var(--muted);
+
+      text-align: center;
+    }
+
+    .stat-player-info {
+      min-width: 0;
+    }
+
+    .stat-player-name {
+      font-size: 12px;
+      font-weight: 900;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stat-player-number {
+      margin-top: 2px;
+
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      font-size: 15px;
+      font-weight: 900;
+
+      color: var(--blue);
+    }
+
+    /* =========================================================
+       PLAYERS
+    ========================================================= */
 
     .players-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+
       gap: 10px;
     }
 
     .player-card {
-      overflow: hidden;
-      cursor: pointer;
       position: relative;
-      transition: transform .18s ease;
+
+      overflow: hidden;
+
+      min-height: 185px;
+
+      border-radius: 20px;
+
+      background: var(--primary);
+
+      color: white;
+
+      cursor: pointer;
+
+      transition:
+        transform 0.2s ease;
     }
 
     .player-card:active {
-      transform: scale(.97);
+      transform: scale(0.97);
     }
 
     .player-photo {
+      position: absolute;
+      inset: 0;
+
       width: 100%;
-      aspect-ratio: 1 / 1.05;
+      height: 100%;
+
       object-fit: cover;
-      background: linear-gradient(135deg,#e4e8f0,#cbd2df);
     }
 
-    .player-info {
-      padding: 11px;
+    .player-overlay {
+      position: absolute;
+      inset: 0;
+
+      background:
+        linear-gradient(
+          to top,
+          rgba(0,0,35,0.95),
+          rgba(0,0,35,0.15) 65%,
+          transparent
+        );
     }
 
     .player-number {
       position: absolute;
-      top: 8px;
-      left: 8px;
-      min-width: 32px;
-      height: 28px;
-      padding: 0 8px;
-      border-radius: 9px;
-      background: rgba(0,0,86,.85);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+
+      top: 10px;
+      right: 10px;
+
+      font-size: 26px;
       font-weight: 900;
-      font-size: 12px;
-      backdrop-filter: blur(8px);
+
+      opacity: 0.8;
     }
 
-    .player-role {
+    .player-info {
       position: absolute;
-      top: 8px;
-      right: 8px;
-      min-width: 27px;
-      height: 27px;
-      border-radius: 8px;
-      background: var(--gold);
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 1000;
-      font-size: 11px;
-    }
 
-    .player-info h3 {
-      margin: 0;
-      font-size: 13px;
-      font-weight: 900;
+      left: 12px;
+      right: 12px;
+      bottom: 11px;
     }
 
     .player-position {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 700;
-    }
-
-    /* LEADERS */
-
-    .leader-buttons {
-      display: grid;
-      gap: 8px;
-    }
-
-    .leader-button {
-      width: 100%;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      text-align: left;
-      color: var(--text);
-    }
-
-    .leader-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .leader-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 11px;
-      background: #eef4ff;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 8px;
       font-weight: 900;
-    }
 
-    .leader-button strong {
-      display: block;
-      font-size: 13px;
-    }
+      color: var(--yellow);
 
-    .leader-button small {
-      display: block;
-      color: var(--muted);
-      font-size: 9px;
-      margin-top: 3px;
-    }
+      letter-spacing: 1px;
 
-    .leader-arrow {
-      transition: transform .2s ease;
-    }
-
-    .leader-button.open .leader-arrow {
-      transform: rotate(180deg);
-    }
-
-    .leader-content {
-      display: none;
-      padding: 5px 8px 8px;
-    }
-
-    .leader-content.open {
-      display: block;
-    }
-
-    .leader-row {
-      display: grid;
-      grid-template-columns: 27px 1fr auto;
-      gap: 8px;
-      align-items: center;
-      padding: 9px 5px;
-      border-bottom: 1px solid #edf0f5;
-    }
-
-    .leader-row:last-child {
-      border-bottom: 0;
-    }
-
-    .leader-rank {
-      font-size: 11px;
-      font-weight: 900;
-      color: var(--muted);
-    }
-
-    .leader-name {
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .leader-value {
-      font-size: 12px;
-      font-weight: 1000;
-      color: var(--primary);
-    }
-
-    /* LIST */
-
-    .list {
-      display: grid;
-      gap: 9px;
-    }
-
-    .list-item {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 17px;
-      padding: 14px;
-    }
-
-    /* NEWS */
-
-    .news-card {
-      overflow: hidden;
-    }
-
-    .news-card img {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-    }
-
-    .news-body {
-      padding: 14px;
-    }
-
-    .news-body small {
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 700;
-    }
-
-    .news-body h3 {
-      margin: 6px 0 0;
-      font-size: 16px;
-    }
-
-    /* TABLE */
-
-    .standings {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      min-width: 570px;
-    }
-
-    th {
-      color: var(--muted);
-      font-size: 9px;
       text-transform: uppercase;
-      font-weight: 800;
-      padding: 10px 6px;
-      border-bottom: 1px solid var(--border);
+
+      margin-bottom: 3px;
     }
 
-    td {
-      padding: 12px 6px;
-      border-bottom: 1px solid #edf0f5;
-      text-align: center;
-      font-weight: 700;
+    .player-name {
+      font-size: 13px;
+      font-weight: 900;
+
+      line-height: 1.1;
     }
 
-    td:nth-child(2) {
-      text-align: left;
+    .player-role {
+      margin-top: 3px;
+
+      font-size: 9px;
+      opacity: 0.65;
     }
 
-    /* PRODUCTS */
+    /* =========================================================
+       ACHIEVEMENTS
+    ========================================================= */
 
-    .products {
-      display: grid;
-      grid-template-columns: repeat(2,1fr);
+    .achievements-list {
+      display: flex;
+
       gap: 10px;
+
+      overflow-x: auto;
+
+      padding-bottom: 4px;
+
+      scrollbar-width: none;
     }
 
-    .product {
-      overflow: hidden;
-      cursor: pointer;
+    .achievements-list::-webkit-scrollbar {
+      display: none;
     }
 
-    .product img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
+    .achievement-card {
+      flex: 0 0 180px;
+
+      min-height: 130px;
+
+      padding: 15px;
+
+      border-radius: 20px;
+
+      background:
+        linear-gradient(
+          145deg,
+          var(--primary),
+          #081a8c
+        );
+
+      color: white;
+
+      box-shadow: var(--shadow);
+    }
+
+    .achievement-year {
+      font-size: 10px;
+
+      color: var(--yellow);
+
+      font-weight: 900;
+    }
+
+    .achievement-title {
+      margin-top: 14px;
+
+      font-size: 16px;
+      line-height: 1.1;
+
+      font-weight: 900;
+    }
+
+    .achievement-description {
+      margin-top: 6px;
+
+      font-size: 10px;
+
+      line-height: 1.35;
+
+      opacity: 0.65;
+    }
+
+    /* =========================================================
+       BIRTHDAYS
+    ========================================================= */
+
+    .birthday-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      padding: 13px;
+
+      border-radius: 18px;
+
+      background: var(--card);
+
+      border: 1px solid var(--border);
+
+      box-shadow: var(--shadow);
+    }
+
+    .birthday-photo {
+      width: 50px;
+      height: 50px;
+
+      border-radius: 15px;
+
       object-fit: cover;
-      background: #e4e8f0;
+
+      background: var(--primary);
     }
 
-    .product-info {
-      padding: 11px;
+    .birthday-info {
+      flex: 1;
     }
 
-    .product-info h3 {
-      margin: 0;
+    .birthday-name {
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .birthday-date {
+      margin-top: 3px;
+
+      font-size: 10px;
+
+      color: var(--muted);
+    }
+
+    .birthday-icon {
+      font-size: 20px;
+    }
+
+    /* =========================================================
+       EMPTY
+    ========================================================= */
+
+    .empty {
+      padding: 24px 15px;
+
+      border-radius: 18px;
+
+      background: var(--card);
+
+      color: var(--muted);
+
+      text-align: center;
+
       font-size: 12px;
     }
 
-    .product-price {
-      margin-top: 7px;
-      color: var(--primary);
-      font-size: 15px;
-      font-weight: 1000;
-    }
-
-    /* BOTTOM NAV */
+    /* =========================================================
+       BOTTOM NAVIGATION
+    ========================================================= */
 
     .bottom-nav {
       position: fixed;
-      z-index: 100;
-      left: 50%;
-      bottom: 10px;
-      transform: translateX(-50%);
-      width: min(calc(100% - 18px), 660px);
-      height: var(--nav-height);
-      padding: 7px;
+
+      z-index: 500;
+
+      left: 10px;
+      right: 10px;
+      bottom: calc(9px + env(safe-area-inset-bottom));
+
+      height: 68px;
+
       display: grid;
-      grid-template-columns: repeat(6,1fr);
-      background: rgba(255,255,255,.92);
-      border: 1px solid rgba(215,220,232,.8);
-      border-radius: 24px;
-      box-shadow: 0 14px 40px rgba(15,24,54,.16);
-      backdrop-filter: blur(20px);
+
+      grid-template-columns: repeat(5, 1fr);
+
+      padding: 5px;
+
+      border-radius: 23px;
+
+      background: rgba(255,255,255,0.94);
+
+      border: 1px solid rgba(0,0,86,0.08);
+
+      box-shadow:
+        0 10px 40px rgba(0,0,86,0.17);
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
     .nav-item {
+      position: relative;
+
       display: flex;
+
       flex-direction: column;
+
       align-items: center;
       justify-content: center;
+
       gap: 4px;
+
+      border-radius: 17px;
+
       background: transparent;
-      color: #8b92a5;
-      border-radius: 18px;
-      transition: .18s ease;
+
+      color: #858b9b;
+
+      transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
     }
 
-    .nav-item span:first-child {
-      font-size: 18px;
-      line-height: 1;
-    }
-
-    .nav-item span:last-child {
-      font-size: 8px;
-      font-weight: 800;
+    .nav-item:active {
+      transform: scale(0.9);
     }
 
     .nav-item.active {
       background: var(--primary);
-      color: #fff;
-      transform: translateY(-2px);
-      box-shadow: 0 7px 18px rgba(0,0,86,.2);
+      color: white;
     }
 
-    /* MODAL */
+    .nav-icon {
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .nav-text {
+      font-size: 8px;
+      font-weight: 900;
+    }
+
+    /* =========================================================
+       MODAL
+    ========================================================= */
 
     .modal {
       position: fixed;
+
       inset: 0;
-      z-index: 500;
+
+      z-index: 1000;
+
       display: none;
+
       align-items: flex-end;
-      justify-content: center;
-      background: rgba(0,0,20,.48);
+
+      background: rgba(0,0,30,0.58);
+
       backdrop-filter: blur(5px);
     }
 
-    .modal.open {
+    .modal.show {
       display: flex;
     }
 
     .modal-box {
-      width: min(100%,680px);
+      width: 100%;
+
       max-height: 90vh;
+
       overflow-y: auto;
-      background: #fff;
-      border-radius: 28px 28px 0 0;
-      padding: 20px 16px 30px;
-      animation: modalIn .22s ease;
+
+      padding: 20px;
+
+      border-radius: 27px 27px 0 0;
+
+      background: var(--card);
+
+      animation: modalUp 0.25s ease;
     }
 
-    @keyframes modalIn {
+    @keyframes modalUp {
       from {
-        transform: translateY(30px);
-        opacity: 0;
+        transform: translateY(100%);
       }
 
       to {
         transform: translateY(0);
-        opacity: 1;
       }
     }
 
-    .modal-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
+    .modal-close {
+      display: block;
 
-    .modal-top h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 900;
-    }
+      width: 100%;
 
-    .close {
-      width: 35px;
-      height: 35px;
-      border-radius: 11px;
-      background: #f0f2f6;
-      font-size: 17px;
-    }
+      margin-bottom: 15px;
 
-    .detail-grid {
-      display: grid;
-      gap: 8px;
-    }
-
-    .detail-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 12px;
-      border-radius: 13px;
-      background: #f6f7fa;
-    }
-
-    .detail-row span:first-child {
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .detail-row span:last-child {
-      font-size: 12px;
-      font-weight: 800;
       text-align: right;
+
+      background: transparent;
+
+      color: var(--muted);
+
+      font-size: 25px;
     }
 
-    .modal-action {
-      display: block;
-      width: 100%;
-      margin-top: 12px;
-      padding: 14px;
-      border-radius: 14px;
-      background: var(--primary);
-      color: #fff;
-      font-size: 12px;
+    .modal-title {
+      font-size: 22px;
       font-weight: 900;
-      text-align: center;
-      text-decoration: none;
     }
 
-    /* EMPTY */
-
-    .empty {
-      padding: 30px 15px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
+    .modal-content {
+      margin-top: 16px;
     }
 
-    .loading {
-      padding: 35px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-    }
+    /* =========================================================
+       DESKTOP
+    ========================================================= */
 
-    /* GALLERY */
+    @media (min-width: 700px) {
 
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(2,1fr);
-      gap: 8px;
-    }
+      .site-header {
+        padding-left: 30px;
+        padding-right: 30px;
+      }
 
-    .gallery img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      border-radius: 15px;
-    }
+      main {
+        padding: 30px 20px 50px;
+      }
 
-    /* PLAYER PROFILE */
+      .players-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
 
-    .profile {
-      text-align: center;
-    }
+      .player-card {
+        min-height: 230px;
+      }
 
-    .profile-photo {
-      width: 130px;
-      height: 130px;
-      border-radius: 28px;
-      object-fit: cover;
-      margin: 0 auto 15px;
-      background: #e4e8f0;
-    }
-
-    .profile h2 {
-      margin: 0;
-      font-size: 23px;
-      font-weight: 1000;
-    }
-
-    .profile-number {
-      color: var(--accent);
-      font-weight: 900;
-      margin-top: 5px;
-    }
-
-    .profile-stats {
-      display: grid;
-      grid-template-columns: repeat(4,1fr);
-      gap: 7px;
-      margin-top: 18px;
-    }
-
-    .profile-stat {
-      background: #f4f6fa;
-      padding: 12px 5px;
-      border-radius: 13px;
-    }
-
-    .profile-stat strong {
-      display: block;
-      font-size: 16px;
-    }
-
-    .profile-stat span {
-      display: block;
-      color: var(--muted);
-      font-size: 8px;
-      margin-top: 3px;
-    }
-
-    @media (min-width: 681px) {
       .bottom-nav {
-        bottom: 18px;
+        left: 50%;
+        right: auto;
+
+        width: 600px;
+
+        transform: translateX(-50%);
+      }
+
+      .modal {
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-box {
+        width: min(600px, calc(100% - 30px));
+
+        border-radius: 27px;
+
+        max-height: 85vh;
       }
     }
   </style>
@@ -869,2395 +1178,3032 @@
 
 <body>
 
-<div class="app">
+  <!-- =======================================================
+       LOADER
+  ======================================================== -->
 
-  <!-- HOME -->
-
-  <main id="page-home" class="page active">
-
-    <header class="header">
-      <div id="logoBox" class="team-logo empty">Х</div>
-
-      <div class="header-title">
-        <small>Хоккейная команда</small>
-        <h1 id="teamTitle">ХК Челны 2011</h1>
+  <div id="pageLoader">
+    <div class="loader-inner">
+      <div class="loader-logo" id="loaderLogo">
+        Ч
       </div>
-    </header>
 
-    <section id="matchdaySection"></section>
-
-    <section id="previousSection"></section>
-
-    <section id="homeRosterSection"></section>
-
-    <section id="leadersSection"></section>
-
-    <section id="achievementsSection"></section>
-
-    <section id="birthdaysSection"></section>
-
-  </main>
-
-
-  <!-- MATCHES -->
-
-  <main id="page-matches" class="page">
-
-    <header class="header">
-      <div class="team-logo empty">М</div>
-
-      <div class="header-title">
-        <small>Календарь</small>
-        <h1>Матчи</h1>
+      <div class="loader-text">
+        Загрузка сайта...
       </div>
-    </header>
-
-    <div id="matchesList" class="list">
-      <div class="loading">Загрузка...</div>
     </div>
-
-  </main>
-
-
-  <!-- ROSTER -->
-
-  <main id="page-roster" class="page">
-
-    <header class="header">
-      <div class="team-logo empty">С</div>
-
-      <div class="header-title">
-        <small>Команда</small>
-        <h1>Состав</h1>
-      </div>
-    </header>
-
-    <div id="rosterContent">
-      <div class="loading">Загрузка...</div>
-    </div>
-
-  </main>
-
-
-  <!-- STANDINGS -->
-
-  <main id="page-standings" class="page">
-
-    <header class="header">
-      <div class="team-logo empty">Т</div>
-
-      <div class="header-title">
-        <small>Турнир</small>
-        <h1>Таблица</h1>
-      </div>
-    </header>
-
-    <div class="card standings">
-      <table>
-        <thead>
-          <tr>
-            <th>№</th>
-            <th>Команда</th>
-            <th>И</th>
-            <th>В</th>
-            <th>ВО</th>
-            <th>ВБ</th>
-            <th>ПО</th>
-            <th>ПБ</th>
-            <th>П</th>
-            <th>О</th>
-          </tr>
-        </thead>
-
-        <tbody id="standingsBody">
-          <tr>
-            <td colspan="10">Загрузка...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-  </main>
-
-
-  <!-- MEDIA -->
-
-  <main id="page-media" class="page">
-
-    <header class="header">
-      <div class="team-logo empty">М</div>
-
-      <div class="header-title">
-        <small>Фото и видео</small>
-        <h1>Медиа</h1>
-      </div>
-    </header>
-
-    <div id="mediaContent" class="list">
-      <div class="loading">Загрузка...</div>
-    </div>
-
-  </main>
-
-
-  <!-- PRODUCTS -->
-
-  <main id="page-products" class="page">
-
-    <header class="header">
-      <div class="team-logo empty">Т</div>
-
-      <div class="header-title">
-        <small>Магазин</small>
-        <h1>Товары</h1>
-      </div>
-    </header>
-
-    <div id="productsContent" class="products">
-      <div class="loading">Загрузка...</div>
-    </div>
-
-  </main>
-
-</div>
-
-
-<!-- BOTTOM NAV -->
-
-<nav class="bottom-nav">
-
-  <button class="nav-item active" data-page="home">
-    <span>⌂</span>
-    <span>Главная</span>
-  </button>
-
-  <button class="nav-item" data-page="matches">
-    <span>🏒</span>
-    <span>Матчи</span>
-  </button>
-
-  <button class="nav-item" data-page="roster">
-    <span>♙</span>
-    <span>Состав</span>
-  </button>
-
-  <button class="nav-item" data-page="standings">
-    <span>☷</span>
-    <span>Таблица</span>
-  </button>
-
-  <button class="nav-item" data-page="media">
-    <span>▧</span>
-    <span>Медиа</span>
-  </button>
-
-  <button class="nav-item" data-page="products">
-    <span>♢</span>
-    <span>Товары</span>
-  </button>
-
-</nav>
-
-
-<!-- MODAL -->
-
-<div id="modal" class="modal">
-
-  <div class="modal-box">
-
-    <div class="modal-top">
-
-      <h2 id="modalTitle">Информация</h2>
-
-      <button class="close" onclick="closeModal()">×</button>
-
-    </div>
-
-    <div id="modalContent"></div>
-
   </div>
 
-</div>
 
+  <!-- =======================================================
+       HEADER
+  ======================================================== -->
 
-<script>
+  <header class="site-header">
 
-const CONFIG = window.SITE_CONFIG;
+    <div class="header-content">
 
-const supabase = window.supabase.createClient(
-  CONFIG.supabaseUrl,
-  CONFIG.supabaseKey
-);
-
-
-let SETTINGS = null;
-let TEAMS = [];
-let PLAYERS = [];
-let STATS = [];
-let MATCHES = [];
-
-let countdownTimer = null;
-
-
-/* =========================
-   BASIC HELPERS
-========================= */
-
-function esc(value) {
-
-  if (value === null || value === undefined) {
-    return '';
-  }
-
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
-
-function formatDate(date) {
-
-  if (!date) {
-    return '—';
-  }
-
-  return new Date(date + 'T00:00:00')
-    .toLocaleDateString('ru-RU', {
-      day: 'numeric',
-      month: 'long'
-    });
-}
-
-
-function formatDateTime(date, time) {
-
-  if (!date) {
-    return '—';
-  }
-
-  const d = new Date(
-    `${date}T${time || '00:00'}`
-  );
-
-  return d.toLocaleString('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-
-function getTeam(id) {
-
-  return TEAMS.find(
-    team => Number(team.id) === Number(id)
-  );
-}
-
-
-function getTeamName(id) {
-
-  const team = getTeam(id);
-
-  return team?.name || 'Команда';
-}
-
-
-function showModal(title, html) {
-
-  document.getElementById('modalTitle').textContent = title;
-
-  document.getElementById('modalContent').innerHTML = html;
-
-  document.getElementById('modal').classList.add('open');
-
-}
-
-
-function closeModal() {
-
-  document.getElementById('modal').classList.remove('open');
-
-}
-
-
-document.getElementById('modal').addEventListener('click', e => {
-
-  if (e.target.id === 'modal') {
-    closeModal();
-  }
-
-});
-
-
-/* =========================
-   SETTINGS
-========================= */
-
-async function loadSettings() {
-
-  const { data, error } = await supabase
-    .from('settings')
-    .select('*')
-    .eq('id', 1)
-    .maybeSingle();
-
-  if (error) {
-
-    console.error(error);
-
-    return;
-
-  }
-
-  SETTINGS = data;
-
-  applySettings();
-
-}
-
-
-function applySettings() {
-
-  if (!SETTINGS) {
-    return;
-  }
-
-  const root = document.documentElement;
-
-  root.style.setProperty(
-    '--primary',
-    SETTINGS.primary_color || '#000056'
-  );
-
-  root.style.setProperty(
-    '--accent',
-    SETTINGS.accent_color || '#0875dc'
-  );
-
-  root.style.setProperty(
-    '--gold',
-    SETTINGS.gold_color || '#ffcd00'
-  );
-
-  root.style.setProperty(
-    '--bg',
-    SETTINGS.background_color || '#f4f6fa'
-  );
-
-  root.style.setProperty(
-    '--text',
-    SETTINGS.text_color || '#11152b'
-  );
-
-
-  if (SETTINGS.font_main) {
-
-    document.body.style.fontFamily =
-      SETTINGS.font_main;
-
-  }
-
-
-  document.getElementById('teamTitle').textContent =
-    SETTINGS.team_name || 'ХК Челны 2011';
-
-
-  const logo = document.getElementById('logoBox');
-
-  if (SETTINGS.logo_url) {
-
-    logo.classList.remove('empty');
-
-    logo.innerHTML = '';
-
-    logo.src = SETTINGS.logo_url;
-
-    logo.tagName === 'IMG'
-      ? null
-      : convertLogoToImage(logo);
-
-  }
-
-}
-
-
-function convertLogoToImage(el) {
-
-  const img = document.createElement('img');
-
-  img.id = 'logoBox';
-
-  img.className = 'team-logo';
-
-  img.src = SETTINGS.logo_url;
-
-  el.replaceWith(img);
-
-}
-
-
-/* =========================
-   DATA
-========================= */
-
-async function loadTeams() {
-
-  const { data } = await supabase
-    .from('teams')
-    .select('*')
-    .order('name');
-
-  TEAMS = data || [];
-
-}
-
-
-async function loadPlayers() {
-
-  const { data } = await supabase
-    .from('players')
-    .select('*')
-    .eq('active', true)
-    .order('number');
-
-  PLAYERS = data || [];
-
-}
-
-
-async function loadStats() {
-
-  const { data } = await supabase
-    .from('player_season_stats')
-    .select('*')
-    .eq('season', '2026/27');
-
-  STATS = data || [];
-
-}
-
-
-async function loadMatches() {
-
-  const { data } = await supabase
-    .from('matches')
-    .select('*')
-    .order('match_date', {
-      ascending: false
-    })
-    .order('match_time', {
-      ascending: false
-    });
-
-  MATCHES = data || [];
-
-}
-
-
-/* =========================
-   MATCHDAY
-========================= */
-
-function getFeaturedMatch() {
-
-  const featuredId =
-    SETTINGS?.homepage?.featuredMatchId;
-
-  if (featuredId) {
-
-    const selected = MATCHES.find(
-      match => Number(match.id) === Number(featuredId)
-    );
-
-    if (selected) {
-      return selected;
-    }
-
-  }
-
-
-  const now = new Date();
-
-  return [...MATCHES]
-    .filter(m => {
-
-      if (m.status === 'cancelled') {
-        return false;
-      }
-
-      return new Date(
-        `${m.match_date}T${m.match_time || '00:00'}`
-      ) >= now;
-
-    })
-    .sort((a,b) => {
-
-      return new Date(
-        `${a.match_date}T${a.match_time || '00:00'}`
-      ) - new Date(
-        `${b.match_date}T${b.match_time || '00:00'}`
-      );
-
-    })[0];
-
-}
-
-
-function renderMatchday() {
-
-  const container =
-    document.getElementById('matchdaySection');
-
-  const match = getFeaturedMatch();
-
-
-  if (!match) {
-
-    container.innerHTML = `
-      <div class="card empty">
-        Ближайших матчей пока нет
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  const home = getTeamName(match.home_team_id);
-
-  const away = getTeamName(match.away_team_id);
-
-
-  container.innerHTML = `
-
-    <div
-      class="matchday"
-      onclick="openMatch(${match.id})"
-    >
-
-      <div class="matchday-top">
-
-        <div class="matchday-label">
-          MATCHDAY
-        </div>
-
-        ${
-          match.stream_url
-          ?
-          `
-          <button
-            class="stream-button"
-            onclick="event.stopPropagation(); window.open('${esc(match.stream_url)}','_blank')"
-          >
-            ◉
-          </button>
-          `
-          :
-          ''
-        }
-
+      <div class="team-logo" id="teamLogo">
+        <span class="team-logo-placeholder">Ч</span>
       </div>
 
+      <div class="team-info">
 
-      <div class="matchday-date">
-
-        ${formatDateTime(
-          match.match_date,
-          match.match_time
-        )}
-
-      </div>
-
-
-      <div class="match-teams">
-
-        <div class="match-team home">
-          ${esc(home)}
+        <div class="team-small">
+          ХОККЕЙНЫЙ КЛУБ
         </div>
 
-        <div class="match-vs">
-          VS
+        <div
+          class="team-title"
+          id="teamTitle"
+        >
+          ХК Челны 2011
         </div>
 
-        <div class="match-team away">
-          ${esc(away)}
-        </div>
-
-      </div>
-
-
-      <div class="match-score">
-
-        ${esc(match.tournament || 'Хоккей')}
-
-      </div>
-
-
-      <div id="countdown-${match.id}">
-        <div class="countdown">
-
-          <div class="count-box">
-            <strong>—</strong>
-            <span>дн</span>
-          </div>
-
-          <div class="count-box">
-            <strong>—</strong>
-            <span>ч</span>
-          </div>
-
-          <div class="count-box">
-            <strong>—</strong>
-            <span>мин</span>
-          </div>
-
-          <div class="count-box">
-            <strong>—</strong>
-            <span>сек</span>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-  `;
-
-
-  startCountdown(match);
-
-}
-
-
-function startCountdown(match) {
-
-  if (countdownTimer) {
-    clearInterval(countdownTimer);
-  }
-
-
-  const target =
-    new Date(
-      `${match.match_date}T${match.match_time || '00:00'}`
-    );
-
-
-  const box =
-    document.getElementById(
-      `countdown-${match.id}`
-    );
-
-
-  function update() {
-
-    const diff =
-      target.getTime() - Date.now();
-
-
-    if (diff <= 0) {
-
-      box.innerHTML = `
-        <div class="match-started">
-          МАТЧ НАЧАЛСЯ
-        </div>
-      `;
-
-      clearInterval(countdownTimer);
-
-      return;
-
-    }
-
-
-    const seconds =
-      Math.floor(diff / 1000);
-
-    const days =
-      Math.floor(seconds / 86400);
-
-    const hours =
-      Math.floor((seconds % 86400) / 3600);
-
-    const minutes =
-      Math.floor((seconds % 3600) / 60);
-
-    const secs =
-      seconds % 60;
-
-
-    box.innerHTML = `
-
-      <div class="countdown">
-
-        <div class="count-box">
-          <strong>${days}</strong>
-          <span>дн</span>
-        </div>
-
-        <div class="count-box">
-          <strong>${String(hours).padStart(2,'0')}</strong>
-          <span>ч</span>
-        </div>
-
-        <div class="count-box">
-          <strong>${String(minutes).padStart(2,'0')}</strong>
-          <span>мин</span>
-        </div>
-
-        <div class="count-box">
-          <strong>${String(secs).padStart(2,'0')}</strong>
-          <span>сек</span>
-        </div>
-
-      </div>
-
-    `;
-
-  }
-
-
-  update();
-
-  countdownTimer =
-    setInterval(update, 1000);
-
-}
-
-
-/* =========================
-   PREVIOUS MATCH
-========================= */
-
-function getPreviousMatch() {
-
-  const selectedId =
-    SETTINGS?.homepage?.previousMatchId;
-
-
-  if (selectedId) {
-
-    const selected =
-      MATCHES.find(
-        m => Number(m.id) === Number(selectedId)
-      );
-
-    if (selected) {
-      return selected;
-    }
-
-  }
-
-
-  const now = new Date();
-
-
-  return [...MATCHES]
-    .filter(m => {
-
-      if (m.status !== 'finished') {
-        return false;
-      }
-
-      return new Date(
-        `${m.match_date}T${m.match_time || '23:59'}`
-      ) < now;
-
-    })
-    .sort((a,b) => {
-
-      return new Date(
-        `${b.match_date}T${b.match_time || '23:59'}`
-      ) - new Date(
-        `${a.match_date}T${a.match_time || '23:59'}`
-      );
-
-    })[0];
-
-}
-
-
-function renderPreviousMatch() {
-
-  const section =
-    document.getElementById('previousSection');
-
-  const match =
-    getPreviousMatch();
-
-
-  if (!match) {
-
-    section.innerHTML = '';
-
-    return;
-
-  }
-
-
-  section.innerHTML = `
-
-    <div class="section-head">
-      <h2>Последний матч</h2>
-    </div>
-
-    <div
-      class="card previous-match"
-      onclick="openMatch(${match.id})"
-    >
-
-      <div class="previous-match-image"></div>
-
-      <div class="previous-info">
-
-        <small>
-          ${formatDate(match.match_date)}
-        </small>
-
-        <h3>
-          ${esc(getTeamName(match.home_team_id))}
-          —
-          ${esc(getTeamName(match.away_team_id))}
-        </h3>
-
-      </div>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =========================
-   ROSTER
-========================= */
-
-function renderHomeRoster() {
-
-  const section =
-    document.getElementById('homeRosterSection');
-
-
-  if (!SETTINGS?.homepage?.showRoster) {
-
-    section.innerHTML = '';
-
-    return;
-
-  }
-
-
-  const players =
-    PLAYERS.slice(0,6);
-
-
-  section.innerHTML = `
-
-    <div class="section-head">
-
-      <h2>Состав</h2>
-
-      <button
-        onclick="navigate('roster')"
-      >
-        Все →
-      </button>
-
-    </div>
-
-
-    <div class="players-grid">
-
-      ${
-        players.length
-        ?
-        players.map(playerCard).join('')
-        :
-        '<div class="card empty">Игроков пока нет</div>'
-      }
-
-    </div>
-
-  `;
-
-}
-
-
-function playerCard(player) {
-
-  const role =
-    player.role
-      ? `<div class="player-role">${esc(player.role)}</div>`
-      : '';
-
-
-  return `
-
-    <div
-      class="card player-card"
-      onclick="openPlayer(${player.id})"
-    >
-
-      <div class="player-number">
-        #${esc(player.number || '—')}
-      </div>
-
-      ${role}
-
-      ${
-        player.photo_url
-        ?
-        `<img
-          class="player-photo"
-          src="${esc(player.photo_url)}"
-          alt=""
-        >`
-        :
-        `<div class="player-photo"></div>`
-      }
-
-      <div class="player-info">
-
-        <h3>
-          ${esc(player.full_name)}
-        </h3>
-
-        <div class="player-position">
-          ${positionName(player.position)}
+        <div
+          class="team-subtitle"
+          id="teamSubtitle"
+        >
+          Официальный сайт команды
         </div>
 
       </div>
 
     </div>
 
-  `;
-
-}
+  </header>
 
 
-function positionName(position) {
+  <!-- =======================================================
+       MAIN
+  ======================================================== -->
 
-  return {
-    goalie: 'Вратарь',
-    defense: 'Защитник',
-    forward: 'Нападающий'
-  }[position] || position;
+  <main>
 
-}
+    <!-- NEXT MATCH -->
 
-
-function renderRoster() {
-
-  const container =
-    document.getElementById('rosterContent');
-
-
-  const groups = [
-    ['goalie','Вратари'],
-    ['defense','Защитники'],
-    ['forward','Нападающие']
-  ];
-
-
-  container.innerHTML = '';
-
-
-  groups.forEach(([type,title]) => {
-
-    const players =
-      PLAYERS.filter(
-        p => p.position === type
-      );
-
-
-    if (!players.length) {
-      return;
-    }
-
-
-    const section =
-      document.createElement('section');
-
-
-    section.innerHTML = `
+    <section class="section">
 
       <div class="section-head">
-        <h2>${title}</h2>
-      </div>
 
-      <div class="players-grid">
-
-        ${players.map(playerCard).join('')}
-
-      </div>
-
-    `;
-
-
-    container.appendChild(section);
-
-  });
-
-
-  if (!container.innerHTML) {
-
-    container.innerHTML =
-      '<div class="card empty">Состав пока не добавлен</div>';
-
-  }
-
-}
-
-
-/* =========================
-   LEADERS
-========================= */
-
-function statFor(player) {
-
-  return STATS.find(
-    s => Number(s.player_id) === Number(player.id)
-  ) || {
-
-    goals: 0,
-    assists: 0,
-    points: 0,
-    plus_minus: 0,
-    pim: 0,
-    goalie_games: 0,
-    goals_against: 0,
-    gaa: 0
-
-  };
-
-}
-
-
-function leaderBlock(title, subtitle, icon, players, valueKey, valueLabel) {
-
-  const id =
-    'leader-' +
-    Math.random()
-      .toString(36)
-      .slice(2);
-
-
-  const sorted =
-    [...players]
-      .sort(
-        (a,b) =>
-          Number(statFor(b)[valueKey] || 0) -
-          Number(statFor(a)[valueKey] || 0)
-      )
-      .slice(0,3);
-
-
-  return `
-
-    <div>
-
-      <button
-        class="leader-button"
-        onclick="toggleLeader('${id}',this)"
-      >
-
-        <div class="leader-left">
-
-          <div class="leader-icon">
-            ${icon}
-          </div>
-
-          <div>
-
-            <strong>${title}</strong>
-
-            <small>${subtitle}</small>
-
-          </div>
-
+        <div class="section-title">
+          Ближайший матч
         </div>
 
-        <span class="leader-arrow">
-          ↓
-        </span>
+        <div
+          class="section-link"
+          onclick="openMatches()"
+        >
+          Все матчи
+        </div>
 
-      </button>
+      </div>
 
 
       <div
-        id="${id}"
-        class="leader-content"
+        class="match-card"
+        id="nextMatchCard"
+        onclick="openNextMatch()"
       >
 
-        ${
-          sorted.length
-          ?
-          sorted.map((player,index) => {
+        <div class="match-card-top">
 
-            const value =
-              statFor(player)[valueKey] || 0;
+          <div class="match-label">
+            MATCHDAY
+          </div>
 
-            return `
+          <div
+            class="match-status"
+            id="nextMatchStatus"
+          >
+            ПРЕДСТОИТ
+          </div>
 
-              <div class="leader-row">
+        </div>
 
-                <div class="leader-rank">
-                  ${index + 1}
-                </div>
 
-                <div class="leader-name">
-                  ${esc(player.full_name)}
-                </div>
+        <div
+          class="match-date"
+          id="nextMatchDate"
+        >
+          Загрузка...
+        </div>
 
-                <div class="leader-value">
-                  ${value} ${valueLabel}
-                </div>
 
+        <div class="match-teams">
+
+          <div class="match-team">
+
+            <div
+              class="match-team-logo"
+              id="nextHomeLogo"
+            >
+              <span class="match-team-placeholder">
+                Ч
+              </span>
+            </div>
+
+            <div
+              class="match-team-name"
+              id="nextHomeName"
+            >
+              ХК Челны 2011
+            </div>
+
+          </div>
+
+
+          <div class="match-vs">
+            VS
+          </div>
+
+
+          <div class="match-team">
+
+            <div
+              class="match-team-logo"
+              id="nextAwayLogo"
+            >
+              <span class="match-team-placeholder">
+                ?
+              </span>
+            </div>
+
+            <div
+              class="match-team-name"
+              id="nextAwayName"
+            >
+              Соперник
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="match-time"
+          id="nextMatchTime"
+        >
+          —:—
+        </div>
+
+
+        <div
+          class="match-countdown"
+          id="nextCountdown"
+        >
+          —
+        </div>
+
+
+        <div class="match-bottom">
+
+          <div
+            class="match-tournament"
+            id="nextTournament"
+          >
+            —
+          </div>
+
+
+          <button
+            class="broadcast-button"
+            id="nextBroadcast"
+            style="display:none"
+            onclick="event.stopPropagation(); openBroadcast()"
+          >
+            📹 ТРАНСЛЯЦИЯ
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PREVIOUS MATCH -->
+
+    <section class="section">
+
+      <div class="section-head">
+
+        <div class="section-title">
+          Последний матч
+        </div>
+
+        <div
+          class="section-link"
+          onclick="openMatches()"
+        >
+          История
+        </div>
+
+      </div>
+
+
+      <div
+        class="previous-match"
+        id="previousMatchCard"
+        onclick="openPreviousMatch()"
+      >
+
+        <div
+          class="previous-match-image"
+          id="previousMatchImage"
+        ></div>
+
+
+        <div class="previous-match-content">
+
+          <div class="previous-match-top">
+
+            <div class="previous-match-label">
+              ЗАВЕРШЁН
+            </div>
+
+            <div
+              class="previous-match-date"
+              id="previousMatchDate"
+            >
+              —
+            </div>
+
+          </div>
+
+
+          <div class="previous-score">
+
+            <div
+              class="previous-team"
+              id="previousHomeName"
+            >
+              —
+            </div>
+
+            <div
+              class="previous-score-number"
+              id="previousScore"
+            >
+              — : —
+            </div>
+
+            <div
+              class="previous-team"
+              id="previousAwayName"
+            >
+              —
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- TOP STATS -->
+
+    <section class="section">
+
+      <div class="section-head">
+
+        <div class="section-title">
+          Лидеры команды
+        </div>
+
+      </div>
+
+
+      <div class="stats-list">
+
+        <!-- BOMBERS -->
+
+        <div class="stats-card">
+
+          <button
+            class="stats-header"
+            onclick="toggleStats(this)"
+          >
+
+            <div class="stats-title-wrap">
+
+              <div class="stats-icon">
+                ⚡
               </div>
 
-            `;
+              <div class="stats-title">
+                Бомбардиры
+              </div>
 
-          }).join('')
-          :
-          '<div class="empty">Нет данных</div>'
-        }
+            </div>
 
+            <div class="stats-arrow">
+              ↓
+            </div>
+
+          </button>
+
+
+          <div
+            class="stats-content"
+            id="scorersStats"
+          ></div>
+
+        </div>
+
+
+        <!-- SNIPERS -->
+
+        <div class="stats-card">
+
+          <button
+            class="stats-header"
+            onclick="toggleStats(this)"
+          >
+
+            <div class="stats-title-wrap">
+
+              <div class="stats-icon">
+                🎯
+              </div>
+
+              <div class="stats-title">
+                Снайперы
+              </div>
+
+            </div>
+
+            <div class="stats-arrow">
+              ↓
+            </div>
+
+          </button>
+
+
+          <div
+            class="stats-content"
+            id="snipersStats"
+          ></div>
+
+        </div>
+
+
+        <!-- PLUS MINUS -->
+
+        <div class="stats-card">
+
+          <button
+            class="stats-header"
+            onclick="toggleStats(this)"
+          >
+
+            <div class="stats-title-wrap">
+
+              <div class="stats-icon">
+                ＋/−
+              </div>
+
+              <div class="stats-title">
+                Плюс/минус
+              </div>
+
+            </div>
+
+            <div class="stats-arrow">
+              ↓
+            </div>
+
+          </button>
+
+
+          <div
+            class="stats-content"
+            id="plusMinusStats"
+          ></div>
+
+        </div>
+
+
+        <!-- DEFENSE -->
+
+        <div class="stats-card">
+
+          <button
+            class="stats-header"
+            onclick="toggleStats(this)"
+          >
+
+            <div class="stats-title-wrap">
+
+              <div class="stats-icon">
+                🛡
+              </div>
+
+              <div class="stats-title">
+                Защитники
+              </div>
+
+            </div>
+
+            <div class="stats-arrow">
+              ↓
+            </div>
+
+          </button>
+
+
+          <div
+            class="stats-content"
+            id="defenseStats"
+          ></div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PLAYERS -->
+
+    <section class="section">
+
+      <div class="section-head">
+
+        <div class="section-title">
+          Состав
+        </div>
+
+        <div
+          class="section-link"
+          onclick="openRoster()"
+        >
+          Весь состав
+        </div>
+
+      </div>
+
+
+      <div
+        class="players-grid"
+        id="playersGrid"
+      >
+
+        <div class="empty">
+          Загрузка состава...
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ACHIEVEMENTS -->
+
+    <section class="section">
+
+      <div class="section-head">
+
+        <div class="section-title">
+          Достижения
+        </div>
+
+      </div>
+
+
+      <div
+        class="achievements-list"
+        id="achievementsList"
+      >
+
+        <div class="empty">
+          Загрузка...
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- BIRTHDAYS -->
+
+    <section class="section">
+
+      <div class="section-head">
+
+        <div class="section-title">
+          Дни рождения
+        </div>
+
+      </div>
+
+
+      <div
+        id="birthdaysList"
+      >
+
+        <div class="empty">
+          Загрузка...
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =======================================================
+       BOTTOM NAV
+  ======================================================== -->
+
+  <nav class="bottom-nav">
+
+    <button
+      class="nav-item active"
+      onclick="setActiveNav(this); goHome()"
+    >
+      <div class="nav-icon">
+        ⌂
+      </div>
+
+      <div class="nav-text">
+        Главная
+      </div>
+    </button>
+
+
+    <button
+      class="nav-item"
+      onclick="setActiveNav(this); openMatches()"
+    >
+      <div class="nav-icon">
+        🏒
+      </div>
+
+      <div class="nav-text">
+        Матчи
+      </div>
+    </button>
+
+
+    <button
+      class="nav-item"
+      onclick="setActiveNav(this); openRoster()"
+    >
+      <div class="nav-icon">
+        👥
+      </div>
+
+      <div class="nav-text">
+        Состав
+      </div>
+    </button>
+
+
+    <button
+      class="nav-item"
+      onclick="setActiveNav(this); openStandings()"
+    >
+      <div class="nav-icon">
+        ☷
+      </div>
+
+      <div class="nav-text">
+        Таблица
+      </div>
+    </button>
+
+
+    <button
+      class="nav-item"
+      onclick="setActiveNav(this); openMore()"
+    >
+      <div class="nav-icon">
+        •••
+      </div>
+
+      <div class="nav-text">
+        Ещё
+      </div>
+    </button>
+
+  </nav>
+
+
+  <!-- =======================================================
+       MODAL
+  ======================================================== -->
+
+  <div
+    class="modal"
+    id="mainModal"
+    onclick="closeModalOutside(event)"
+  >
+
+    <div class="modal-box">
+
+      <button
+        class="modal-close"
+        onclick="closeModal()"
+      >
+        ×
+      </button>
+
+      <div
+        class="modal-title"
+        id="modalTitle"
+      >
+        —
+      </div>
+
+      <div
+        class="modal-content"
+        id="modalContent"
+      >
       </div>
 
     </div>
 
-  `;
+  </div>
 
-}
 
+  <!-- =======================================================
+       JAVASCRIPT
+  ======================================================== -->
 
-function toggleLeader(id,button) {
+  <script>
 
-  const content =
-    document.getElementById(id);
+    /* =======================================================
+       ГЛОБАЛЬНЫЕ ДАННЫЕ
+    ======================================================== */
 
-  content.classList.toggle('open');
+    let settings = {};
 
-  button.classList.toggle('open');
+    let teams = [];
+    let matches = [];
+    let players = [];
+    let achievements = [];
+    let birthdays = [];
+    let seasonStats = [];
 
-}
+    let nextMatch = null;
+    let previousMatch = null;
 
 
-function renderLeaders() {
+    /* =======================================================
+       ИНИЦИАЛИЗАЦИЯ
+    ======================================================== */
 
-  const section =
-    document.getElementById('leadersSection');
+    document.addEventListener(
+      "DOMContentLoaded",
+      async () => {
 
+        try {
 
-  if (!SETTINGS?.homepage?.showStats) {
+          await loadAllData();
 
-    section.innerHTML = '';
+          applySettings();
 
-    return;
+        } catch (error) {
 
-  }
+          console.error(
+            "Ошибка загрузки сайта:",
+            error
+          );
 
+        } finally {
 
-  section.innerHTML = `
+          setTimeout(() => {
 
-    <div class="section-head">
-      <h2>Статистика</h2>
-    </div>
+            document
+              .getElementById("pageLoader")
+              ?.classList
+              .add("hidden");
 
-    <div class="leader-buttons">
+          }, 300);
 
-      ${leaderBlock(
-        'Бомбардиры',
-        'очки',
-        '★',
-        PLAYERS.filter(p => p.position !== 'goalie'),
-        'points',
-        'очк.'
-      )}
+        }
 
-      ${leaderBlock(
-        'Снайперы',
-        'голы',
-        'G',
-        PLAYERS.filter(p => p.position !== 'goalie'),
-        'goals',
-        'гол.'
-      )}
+      }
+    );
 
-      ${leaderBlock(
-        'Плюс / минус',
-        'разница шайб',
-        '+',
-        PLAYERS.filter(p => p.position !== 'goalie'),
-        'plus_minus',
-        ''
-      )}
 
-      ${leaderBlock(
-        'Бомбардиры-защитники',
-        'очки защитников',
-        'D',
-        PLAYERS.filter(p => p.position === 'defense'),
-        'points',
-        'очк.'
-      )}
+    /* =======================================================
+       ЗАГРУЗКА ДАННЫХ
+    ======================================================== */
 
-    </div>
+    async function loadAllData() {
 
-  `;
+      await Promise.allSettled([
 
-}
+        loadSettings(),
 
+        loadTeams(),
 
-/* =========================
-   ACHIEVEMENTS
-========================= */
+        loadMatches(),
 
-async function renderAchievements() {
+        loadPlayers(),
 
-  const section =
-    document.getElementById('achievementsSection');
+        loadAchievements(),
 
+        loadBirthdays(),
 
-  if (!SETTINGS?.homepage?.showAchievements) {
+        loadSeasonStats()
 
-    section.innerHTML = '';
+      ]);
 
-    return;
+      renderNextMatch();
 
-  }
+      renderPreviousMatch();
 
+      renderPlayers();
 
-  const { data } =
-    await supabase
-      .from('achievements')
-      .select('*')
-      .order('sort_order');
+      renderStats();
 
+      renderAchievements();
 
-  if (!data?.length) {
+      renderBirthdays();
 
-    section.innerHTML = '';
+    }
+
+
+    /* =======================================================
+       SETTINGS
+    ======================================================== */
+
+    async function loadSettings() {
+
+      const {
+        data,
+        error
+      } = await supabaseClient
+        .from("settings")
+        .select("*")
+        .limit(1)
+        .maybeSingle();
 
-    return;
+      if (error) {
 
-  }
+        console.warn(
+          "Settings:",
+          error.message
+        );
 
+        return;
+      }
+
+      settings = data || {};
+    }
+
 
-  section.innerHTML = `
+    /* =======================================================
+       TEAMS
+    ======================================================== */
+
+    async function loadTeams() {
+
+      const {
+        data,
+        error
+      } = await supabaseClient
+        .from("teams")
+        .select("*")
+        .order("name", {
+          ascending: true
+        });
 
-    <div class="section-head">
-      <h2>Достижения</h2>
-    </div>
+      if (error) {
 
-    <div class="list">
+        console.warn(
+          "Teams:",
+          error.message
+        );
 
-      ${data.map(item => `
+        return;
+      }
+
+      teams = data || [];
+    }
 
-        <div class="card list-item">
 
-          <strong>
-            ${esc(item.title)}
-          </strong>
+    /* =======================================================
+       MATCHES
+    ======================================================== */
+
+    async function loadMatches() {
 
-          ${
-            item.description
-            ?
-            `<div style="margin-top:5px;color:var(--muted);font-size:11px">
-              ${esc(item.description)}
-            </div>`
-            :
-            ''
-          }
+      const {
+        data,
+        error
+      } = await supabaseClient
+        .from("matches")
+        .select(`
+          *,
+          home_team:teams!matches_home_team_id_fkey(*),
+          away_team:teams!matches_away_team_id_fkey(*)
+        `)
+        .order("match_date", {
+          ascending: true
+        });
 
-        </div>
+      if (error) {
 
-      `).join('')}
+        console.warn(
+          "Matches:",
+          error.message
+        );
 
-    </div>
+        /*
+          Если в таблице нет таких связей,
+          пробуем обычный запрос.
+        */
 
-  `;
+        const fallback =
+          await supabaseClient
+            .from("matches")
+            .select("*")
+            .order("match_date", {
+              ascending: true
+            });
 
-}
+        if (!fallback.error) {
+          matches = fallback.data || [];
+        }
 
+        return;
+      }
 
-/* =========================
-   BIRTHDAYS
-========================= */
+      matches = data || [];
+    }
 
-async function renderBirthdays() {
 
-  const section =
-    document.getElementById('birthdaysSection');
+    /* =======================================================
+       PLAYERS
+    ======================================================== */
 
+    async function loadPlayers() {
 
-  if (!SETTINGS?.homepage?.showBirthdays) {
+      const {
+        data,
+        error
+      } = await supabaseClient
+        .from("players")
+        .select("*")
+        .order("number", {
+          ascending: true
+        });
 
-    section.innerHTML = '';
+      if (error) {
 
-    return;
+        console.warn(
+          "Players:",
+          error.message
+        );
 
-  }
+        return;
+      }
 
+      players = data || [];
+    }
 
-  const { data } =
-    await supabase
-      .from('birthdays')
-      .select(`
-        *,
-        players (
-          full_name,
-          photo_url,
-          number
-        )
-      `)
-      .order('birthday');
 
+    /* =======================================================
+       ACHIEVEMENTS
+    ======================================================== */
 
-  if (!data?.length) {
+    async function loadAchievements() {
 
-    section.innerHTML = '';
+      const {
+        data,
+        error
+      } = await supabaseClient
+        .from("achievements")
+        .select("*")
+        .order("year", {
+          ascending: false
+        });
 
-    return;
+      if (error) {
 
-  }
+        console.warn(
+          "Achievements:",
+          error.message
+        );
 
+        return;
+      }
 
-  section.innerHTML = `
+      achievements = data || [];
+    }
 
-    <div class="section-head">
-      <h2>Дни рождения</h2>
-    </div>
 
-    <div class="list">
+    /* =======================================================
+       BIRTHDAYS
+    ======================================================== */
 
-      ${data.slice(0,5).map(item => `
+    async function loadBirthdays() {
 
-        <div class="card list-item">
+      const {
+        data,
+        error
+      } = await supabaseClient
+        .from("birthdays")
+        .select("*")
+        .order("date", {
+          ascending: true
+        });
 
-          <strong>
-            ${esc(item.players?.full_name || 'Игрок')}
-          </strong>
+      if (error) {
 
-          <div style="margin-top:4px;color:var(--muted);font-size:11px">
-            ${formatDate(item.birthday)}
-          </div>
+        console.warn(
+          "Birthdays:",
+          error.message
+        );
 
-        </div>
+        return;
+      }
 
-      `).join('')}
+      birthdays = data || [];
+    }
 
-    </div>
 
-  `;
+    /* =======================================================
+       SEASON STATS
+    ======================================================== */
 
-}
+    async function loadSeasonStats() {
 
+      const {
+        data,
+        error
+      } = await supabaseClient
+        .from("player_season_stats")
+        .select("*");
 
-/* =========================
-   MATCHES PAGE
-========================= */
+      if (error) {
 
-function renderMatches() {
+        console.warn(
+          "Season stats:",
+          error.message
+        );
 
-  const container =
-    document.getElementById('matchesList');
+        return;
+      }
 
+      seasonStats = data || [];
+    }
 
-  if (!MATCHES.length) {
 
-    container.innerHTML =
-      '<div class="card empty">Матчей пока нет</div>';
+    /* =======================================================
+       SETTINGS → ДИЗАЙН
+    ======================================================== */
 
-    return;
+    function applySettings() {
 
-  }
+      const root =
+        document.documentElement;
 
+      const primary =
+        settings.primary_color ||
+        settings.color_primary ||
+        DEFAULT_COLORS.primary;
 
-  container.innerHTML =
-    MATCHES.map(match => {
+      const blue =
+        settings.blue_color ||
+        settings.color_blue ||
+        DEFAULT_COLORS.blue;
+
+      const yellow =
+        settings.yellow_color ||
+        settings.color_yellow ||
+        DEFAULT_COLORS.yellow;
+
+      const white =
+        settings.white_color ||
+        settings.color_white ||
+        DEFAULT_COLORS.white;
+
+      root.style.setProperty(
+        "--primary",
+        primary
+      );
+
+      root.style.setProperty(
+        "--blue",
+        blue
+      );
+
+      root.style.setProperty(
+        "--yellow",
+        yellow
+      );
+
+      root.style.setProperty(
+        "--white",
+        white
+      );
+
+
+      /* Командное название */
+
+      const title =
+        settings.team_name ||
+        settings.title ||
+        DEFAULT_TEAM_NAME;
+
+      document.getElementById(
+        "teamTitle"
+      ).textContent = title;
+
+
+      /* Подзаголовок */
+
+      if (settings.subtitle) {
+
+        document.getElementById(
+          "teamSubtitle"
+        ).textContent =
+          settings.subtitle;
+
+      }
+
+
+      /* Логотип */
+
+      const logo =
+        settings.logo_url ||
+        settings.logo ||
+        "";
+
+      if (logo) {
+
+        setImage(
+          "teamLogo",
+          logo,
+          "Ч"
+        );
+
+        setImage(
+          "loaderLogo",
+          logo,
+          "Ч"
+        );
+
+      }
+
+    }
+
+
+    /* =======================================================
+       IMAGE HELPER
+    ======================================================== */
+
+    function setImage(
+      elementId,
+      url,
+      fallback
+    ) {
+
+      const element =
+        document.getElementById(elementId);
+
+      if (!element) return;
+
+      element.innerHTML = "";
+
+      const img =
+        document.createElement("img");
+
+      img.src = url;
+
+      img.alt = "";
+
+      img.onerror = () => {
+
+        element.innerHTML =
+          `<span class="team-logo-placeholder">${fallback}</span>`;
+
+      };
+
+      element.appendChild(img);
+    }
+
+
+    /* =======================================================
+       NEXT MATCH
+    ======================================================== */
+
+    function renderNextMatch() {
+
+      const now =
+        new Date();
+
+      /*
+        Берём только матчи,
+        которые ещё не завершены.
+      */
+
+      const upcoming =
+        matches
+          .filter(match => {
+
+            const date =
+              getMatchDate(match);
+
+            if (!date) return false;
+
+            const status =
+              String(
+                match.status || ""
+              ).toLowerCase();
+
+            return (
+              date >= now &&
+              status !== "finished" &&
+              status !== "completed"
+            );
+
+          })
+          .sort(
+            (a, b) =>
+              getMatchDate(a) -
+              getMatchDate(b)
+          );
+
+
+      nextMatch =
+        upcoming[0] || null;
+
+
+      if (!nextMatch) {
+
+        document.getElementById(
+          "nextMatchDate"
+        ).textContent =
+          "Матч пока не назначен";
+
+        document.getElementById(
+          "nextMatchTime"
+        ).textContent =
+          "—";
+
+        document.getElementById(
+          "nextCountdown"
+        ).textContent =
+          "Следите за расписанием";
+
+        return;
+      }
+
 
       const home =
-        getTeamName(match.home_team_id);
+        getTeam(
+          nextMatch,
+          true
+        );
 
       const away =
-        getTeamName(match.away_team_id);
+        getTeam(
+          nextMatch,
+          false
+        );
+
+
+      document.getElementById(
+        "nextHomeName"
+      ).textContent =
+        getTeamName(
+          home,
+          nextMatch.home_team_name
+        );
+
+
+      document.getElementById(
+        "nextAwayName"
+      ).textContent =
+        getTeamName(
+          away,
+          nextMatch.away_team_name
+        );
+
+
+      setMatchLogo(
+        "nextHomeLogo",
+        home,
+        "Ч"
+      );
+
+
+      setMatchLogo(
+        "nextAwayLogo",
+        away,
+        "?"
+      );
+
+
+      const date =
+        getMatchDate(
+          nextMatch
+        );
+
+
+      document.getElementById(
+        "nextMatchDate"
+      ).textContent =
+        formatDate(
+          date
+        );
+
+
+      document.getElementById(
+        "nextMatchTime"
+      ).textContent =
+        formatTime(
+          date
+        );
+
+
+      document.getElementById(
+        "nextTournament"
+      ).textContent =
+        nextMatch.tournament ||
+        nextMatch.competition ||
+        "Хоккей";
+
+
+      if (nextMatch.stream_url) {
+
+        document.getElementById(
+          "nextBroadcast"
+        ).style.display =
+          "inline-flex";
+
+      }
+
+
+      updateCountdown();
+
+      if (
+        window.nextCountdownTimer
+      ) {
+
+        clearInterval(
+          window.nextCountdownTimer
+        );
+
+      }
+
+      window.nextCountdownTimer =
+        setInterval(
+          updateCountdown,
+          1000
+        );
+
+    }
+
+
+    /* =======================================================
+       COUNTDOWN
+    ======================================================== */
+
+    function updateCountdown() {
+
+      if (!nextMatch) return;
+
+      const date =
+        getMatchDate(
+          nextMatch
+        );
+
+      if (!date) return;
+
+      const diff =
+        date.getTime() -
+        Date.now();
+
+
+      const status =
+        document.getElementById(
+          "nextMatchStatus"
+        );
+
+      const countdown =
+        document.getElementById(
+          "nextCountdown"
+        );
+
+
+      if (diff <= 0) {
+
+        status.textContent =
+          "МАТЧ НАЧАЛСЯ";
+
+        countdown.textContent =
+          "";
+
+        return;
+      }
+
+
+      const totalSeconds =
+        Math.floor(
+          diff / 1000
+        );
+
+      const days =
+        Math.floor(
+          totalSeconds / 86400
+        );
+
+      const hours =
+        Math.floor(
+          (totalSeconds % 86400) /
+          3600
+        );
+
+      const minutes =
+        Math.floor(
+          (totalSeconds % 3600) /
+          60
+        );
+
+      const seconds =
+        totalSeconds % 60;
+
+
+      if (days > 0) {
+
+        countdown.textContent =
+          `До матча ${days} д ${pad(hours)} ч`;
+
+      } else {
+
+        countdown.textContent =
+          `До матча ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
+      }
+
+    }
+
+
+    function pad(value) {
+
+      return String(
+        value
+      ).padStart(
+        2,
+        "0"
+      );
+
+    }
+
+
+    /* =======================================================
+       PREVIOUS MATCH
+    ======================================================== */
+
+    function renderPreviousMatch() {
+
+      const now =
+        new Date();
+
+
+      const played =
+        matches
+          .filter(match => {
+
+            const date =
+              getMatchDate(match);
+
+            if (!date) return false;
+
+            const status =
+              String(
+                match.status || ""
+              ).toLowerCase();
+
+            /*
+              Матч считается последним,
+              если он реально уже прошёл
+              или имеет статус завершён.
+            */
+
+            return (
+              date <= now ||
+              status === "finished" ||
+              status === "completed"
+            );
+
+          })
+          .sort(
+            (a, b) =>
+              getMatchDate(b) -
+              getMatchDate(a)
+          );
+
+
+      previousMatch =
+        played[0] || null;
+
+
+      if (!previousMatch) {
+
+        document.getElementById(
+          "previousMatchDate"
+        ).textContent =
+          "Нет завершённых матчей";
+
+        return;
+      }
+
+
+      const home =
+        getTeam(
+          previousMatch,
+          true
+        );
+
+      const away =
+        getTeam(
+          previousMatch,
+          false
+        );
+
+
+      document.getElementById(
+        "previousHomeName"
+      ).textContent =
+        getTeamName(
+          home,
+          previousMatch.home_team_name
+        );
+
+
+      document.getElementById(
+        "previousAwayName"
+      ).textContent =
+        getTeamName(
+          away,
+          previousMatch.away_team_name
+        );
+
+
+      const homeScore =
+        getScore(
+          previousMatch,
+          true
+        );
+
+      const awayScore =
+        getScore(
+          previousMatch,
+          false
+        );
+
+
+      document.getElementById(
+        "previousScore"
+      ).textContent =
+        `${homeScore} : ${awayScore}`;
+
+
+      document.getElementById(
+        "previousMatchDate"
+      ).textContent =
+        formatDate(
+          getMatchDate(
+            previousMatch
+          )
+        );
+
+
+      const image =
+        previousMatch.image_url ||
+        previousMatch.photo_url ||
+        previousMatch.poster_url;
+
+
+      const imageElement =
+        document.getElementById(
+          "previousMatchImage"
+        );
+
+
+      if (image) {
+
+        imageElement.style.backgroundImage =
+          `url("${image}")`;
+
+        imageElement.style.backgroundSize =
+          "cover";
+
+        imageElement.style.backgroundPosition =
+          "center";
+
+      }
+
+    }
+
+
+    /* =======================================================
+       PLAYERS
+    ======================================================== */
+
+    function renderPlayers() {
+
+      const container =
+        document.getElementById(
+          "playersGrid"
+        );
+
+
+      if (!players.length) {
+
+        container.innerHTML = `
+          <div class="empty">
+            Состав пока не добавлен
+          </div>
+        `;
+
+        return;
+      }
+
+
+      /*
+        На главной показываем
+        первых 8 игроков.
+      */
+
+      const visiblePlayers =
+        players.slice(
+          0,
+          8
+        );
+
+
+      container.innerHTML =
+        visiblePlayers
+          .map(
+            player =>
+              createPlayerCard(
+                player
+              )
+          )
+          .join("");
+
+    }
+
+
+    function createPlayerCard(
+      player
+    ) {
+
+      const photo =
+        player.photo_url ||
+        player.image_url ||
+        "";
+
+
+      const position =
+        normalizePosition(
+          player.position
+        );
+
+
+      const role =
+        player.role ||
+        player.label ||
+        "";
 
 
       return `
-
         <div
-          class="card list-item"
-          onclick="openMatch(${match.id})"
+          class="player-card"
+          onclick="openPlayer(${Number(player.id)})"
         >
 
-          <small style="color:var(--muted);font-size:10px">
-            ${formatDateTime(
-              match.match_date,
-              match.match_time
+          ${
+            photo
+              ? `
+                <img
+                  class="player-photo"
+                  src="${escapeAttr(photo)}"
+                  alt=""
+                  onerror="this.style.display='none'"
+                >
+              `
+              : ""
+          }
+
+          <div class="player-overlay"></div>
+
+
+          <div class="player-number">
+            ${escapeHtml(
+              player.number ??
+              ""
             )}
-          </small>
-
-          <div
-            style="
-              display:grid;
-              grid-template-columns:1fr auto 1fr;
-              align-items:center;
-              gap:8px;
-              margin-top:8px;
-            "
-          >
-
-            <strong style="text-align:left">
-              ${esc(home)}
-            </strong>
-
-            <span
-              style="
-                font-size:10px;
-                color:var(--muted);
-                font-weight:900;
-              "
-            >
-              VS
-            </span>
-
-            <strong style="text-align:right">
-              ${esc(away)}
-            </strong>
-
           </div>
 
 
-          <div
-            style="
-              margin-top:8px;
-              color:var(--muted);
-              font-size:10px;
-            "
-          >
+          <div class="player-info">
 
-            ${esc(match.tournament || '')}
+            <div class="player-position">
+              ${escapeHtml(position)}
+            </div>
+
+            <div class="player-name">
+              ${escapeHtml(
+                player.full_name ||
+                player.name ||
+                "Игрок"
+              )}
+            </div>
 
             ${
-              match.venue
-              ?
-              ` · ${esc(match.venue)}`
-              :
-              ''
+              role
+                ? `
+                  <div class="player-role">
+                    ${escapeHtml(role)}
+                  </div>
+                `
+                : ""
             }
 
           </div>
 
         </div>
-
       `;
 
-    }).join('');
-
-}
-
-
-/* =========================
-   MATCH DETAILS
-========================= */
-
-async function openMatch(id) {
-
-  const match =
-    MATCHES.find(
-      m => Number(m.id) === Number(id)
-    );
-
-
-  if (!match) {
-    return;
-  }
-
-
-  const { data: periods } =
-    await supabase
-      .from('match_periods')
-      .select('*')
-      .eq('match_id', id)
-      .order('period');
-
-
-  const { data: events } =
-    await supabase
-      .from('match_events')
-      .select(`
-        *,
-        player:players!match_events_player_id_fkey(full_name),
-        assist1:players!match_events_assist1_player_id_fkey(full_name),
-        assist2:players!match_events_assist2_player_id_fkey(full_name)
-      `)
-      .eq('match_id', id)
-      .order('period')
-      .order('created_at');
-
-
-  const lineup =
-    Array.isArray(match.lineup)
-      ? match.lineup
-      : [];
-
-
-  let lineupHTML = '';
-
-
-  if (lineup.length) {
-
-    lineupHTML = `
-
-      <div class="section-head">
-        <h2>Состав</h2>
-      </div>
-
-      <div class="list">
-
-        ${lineup.map(line => `
-
-          <div class="list-item">
-
-            <strong>
-              ${esc(line.number || '')}
-            </strong>
-
-            <span style="margin-left:8px">
-              ${esc(line.name || '')}
-            </span>
-
-          </div>
-
-        `).join('')}
-
-      </div>
-
-    `;
-
-  }
-
-
-  let periodsHTML = '';
-
-
-  if (periods?.length) {
-
-    periodsHTML = `
-
-      <div class="section-head">
-        <h2>Периоды</h2>
-      </div>
-
-      <div class="list">
-
-        ${periods.map(p => `
-
-          <div class="detail-row">
-
-            <span>
-              ${p.period === 4 ? 'ОТ / Б' : `${p.period} период`}
-            </span>
-
-            <span>
-              ${p.home_score} : ${p.away_score}
-            </span>
-
-          </div>
-
-        `).join('')}
-
-      </div>
-
-    `;
-
-  }
-
-
-  let eventsHTML = '';
-
-
-  if (events?.length) {
-
-    eventsHTML = `
-
-      <div class="section-head">
-        <h2>События</h2>
-      </div>
-
-      <div class="list">
-
-        ${events.map(event => `
-
-          <div class="list-item">
-
-            <strong>
-              ${
-                event.event_type === 'goal'
-                  ? 'Гол'
-                  : 'Удаление'
-              }
-            </strong>
-
-            <div style="margin-top:5px;font-size:11px">
-
-              ${event.event_time || ''}
-
-              ${
-                event.player?.full_name
-                ?
-                ` · ${esc(event.player.full_name)}`
-                :
-                ''
-              }
-
-              ${
-                event.assist1?.full_name
-                ?
-                ` · ассист: ${esc(event.assist1.full_name)}`
-                :
-                ''
-              }
-
-            </div>
-
-          </div>
-
-        `).join('')}
-
-      </div>
-
-    `;
-
-  }
-
-
-  showModal(
-    'Матч',
-    `
-
-      <div class="detail-grid">
-
-        <div class="detail-row">
-          <span>Дата</span>
-          <span>
-            ${formatDateTime(
-              match.match_date,
-              match.match_time
-            )}
-          </span>
-        </div>
-
-        <div class="detail-row">
-          <span>Турнир</span>
-          <span>
-            ${esc(match.tournament || '—')}
-          </span>
-        </div>
-
-        <div class="detail-row">
-          <span>Место</span>
-          <span>
-            ${esc(match.venue || '—')}
-          </span>
-        </div>
-
-        <div class="detail-row">
-          <span>Матч</span>
-          <span>
-            ${esc(getTeamName(match.home_team_id))}
-            —
-            ${esc(getTeamName(match.away_team_id))}
-          </span>
-        </div>
-
-        <div class="detail-row">
-          <span>Главный судья</span>
-          <span>
-            ${esc(match.chief_referee || '—')}
-          </span>
-        </div>
-
-        <div class="detail-row">
-          <span>Линейные</span>
-          <span>
-            ${esc(match.linesman1 || '—')}
-            <br>
-            ${esc(match.linesman2 || '—')}
-          </span>
-        </div>
-
-      </div>
-
-      ${
-        match.stream_url
-        ?
-        `<a
-          class="modal-action"
-          href="${esc(match.stream_url)}"
-          target="_blank"
-        >
-          📺 Трансляция
-        </a>`
-        :
-        ''
-      }
-
-      ${lineupHTML}
-
-      ${periodsHTML}
-
-      ${eventsHTML}
-
-    `
-  );
-
-}
-
-
-/* =========================
-   PLAYER
-========================= */
-
-function openPlayer(id) {
-
-  const player =
-    PLAYERS.find(
-      p => Number(p.id) === Number(id)
-    );
-
-
-  if (!player) {
-    return;
-  }
-
-
-  const stats =
-    statFor(player);
-
-
-  showModal(
-    player.full_name,
-    `
-
-      <div class="profile">
-
-        ${
-          player.photo_url
-          ?
-          `<img
-            class="profile-photo"
-            src="${esc(player.photo_url)}"
-          >`
-          :
-          `<div class="profile-photo"></div>`
-        }
-
-
-        <div class="profile-number">
-
-          #${esc(player.number || '—')}
-
-          ·
-
-          ${positionName(player.position)}
-
-        </div>
-
-
-        <div class="profile-stats">
-
-          <div class="profile-stat">
-            <strong>${stats.games || 0}</strong>
-            <span>ИГР</span>
-          </div>
-
-          <div class="profile-stat">
-            <strong>${stats.goals || 0}</strong>
-            <span>ГОЛОВ</span>
-          </div>
-
-          <div class="profile-stat">
-            <strong>${stats.assists || 0}</strong>
-            <span>АССИСТОВ</span>
-          </div>
-
-          <div class="profile-stat">
-            <strong>${stats.points || 0}</strong>
-            <span>ОЧКОВ</span>
-          </div>
-
-        </div>
-
-
-        <div class="detail-grid" style="margin-top:12px">
-
-          ${
-            player.birth_date
-            ?
-            `
-            <div class="detail-row">
-              <span>Дата рождения</span>
-              <span>${formatDate(player.birth_date)}</span>
-            </div>
-            `
-            :
-            ''
-          }
-
-          ${
-            player.height_cm
-            ?
-            `
-            <div class="detail-row">
-              <span>Рост</span>
-              <span>${player.height_cm} см</span>
-            </div>
-            `
-            :
-            ''
-          }
-
-          ${
-            player.weight_kg
-            ?
-            `
-            <div class="detail-row">
-              <span>Вес</span>
-              <span>${player.weight_kg} кг</span>
-            </div>
-            `
-            :
-            ''
-          }
-
-          ${
-            player.position === 'goalie'
-            ?
-            `
-            <div class="detail-row">
-              <span>КН</span>
-              <span>${stats.gaa || 0}</span>
-            </div>
-
-            <div class="detail-row">
-              <span>Пропущено</span>
-              <span>${stats.goals_against || 0}</span>
-            </div>
-            `
-            :
-            `
-            <div class="detail-row">
-              <span>+ / −</span>
-              <span>${stats.plus_minus || 0}</span>
-            </div>
-
-            <div class="detail-row">
-              <span>Штраф</span>
-              <span>${stats.pim || 0} мин.</span>
-            </div>
-            `
-          }
-
-        </div>
-
-      </div>
-
-    `
-  );
-
-}
-
-
-/* =========================
-   STANDINGS
-========================= */
-
-async function renderStandings() {
-
-  const tbody =
-    document.getElementById('standingsBody');
-
-
-  const { data } =
-    await supabase
-      .from('standings')
-      .select(`
-        *,
-        teams(name)
-      `)
-      .order('place');
-
-
-  if (!data?.length) {
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="10">
-          Таблица пока не заполнена
-        </td>
-      </tr>
-    `;
-
-    return;
-
-  }
-
-
-  tbody.innerHTML =
-    data.map(row => `
-
-      <tr>
-
-        <td>${row.place || '—'}</td>
-
-        <td>
-          ${esc(row.teams?.name || 'Команда')}
-        </td>
-
-        <td>${row.games}</td>
-        <td>${row.wins}</td>
-        <td>${row.overtime_wins}</td>
-        <td>${row.shootout_wins}</td>
-        <td>${row.overtime_losses}</td>
-        <td>${row.shootout_losses}</td>
-        <td>${row.losses}</td>
-        <td><strong>${row.points}</strong></td>
-
-      </tr>
-
-    `).join('');
-
-}
-
-
-/* =========================
-   MEDIA
-========================= */
-
-async function renderMedia() {
-
-  const container =
-    document.getElementById('mediaContent');
-
-
-  const { data } =
-    await supabase
-      .from('albums')
-      .select(`
-        *,
-        matches(
-          match_date,
-          home_team_id,
-          away_team_id
-        )
-      `)
-      .order('created_at', {
-        ascending: false
-      });
-
-
-  if (!data?.length) {
-
-    container.innerHTML =
-      '<div class="card empty">Альбомов пока нет</div>';
-
-    return;
-
-  }
-
-
-  container.innerHTML =
-    data.map(album => {
-
-      const photos =
-        Array.isArray(album.photos)
-          ? album.photos
-          : [];
-
-
-      return `
-
-        <div
-          class="card list-item"
-          onclick="openAlbum(${album.id})"
-        >
-
-          <strong>
-            ${esc(album.title)}
-          </strong>
-
-          <div style="
-            margin-top:5px;
-            color:var(--muted);
-            font-size:10px;
-          ">
-            ${photos.length} фото
-          </div>
-
-        </div>
-
-      `;
-
-    }).join('');
-
-}
-
-
-async function openAlbum(id) {
-
-  const { data } =
-    await supabase
-      .from('albums')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-
-  if (!data) {
-    return;
-  }
-
-
-  const photos =
-    Array.isArray(data.photos)
-      ? data.photos
-      : [];
-
-
-  showModal(
-    data.title,
-    `
-
-      ${
-        photos.length
-        ?
-        `<div class="gallery">
-
-          ${photos.map(url => `
-            <img src="${esc(url)}">
-          `).join('')}
-
-        </div>`
-        :
-        '<div class="empty">Фотографий пока нет</div>'
-      }
-
-    `
-  );
-
-}
-
-
-/* =========================
-   PRODUCTS
-========================= */
-
-async function renderProducts() {
-
-  const container =
-    document.getElementById('productsContent');
-
-
-  const { data } =
-    await supabase
-      .from('products')
-      .select('*')
-      .eq('active', true)
-      .order('created_at', {
-        ascending: false
-      });
-
-
-  if (!data?.length) {
-
-    container.innerHTML =
-      '<div class="card empty">Товаров пока нет</div>';
-
-    return;
-
-  }
-
-
-  container.innerHTML =
-    data.map(product => {
-
-      const images =
-        Array.isArray(product.images)
-          ? product.images
-          : [];
-
-
-      return `
-
-        <div
-          class="card product"
-          onclick="openProduct(${product.id})"
-        >
-
-          ${
-            images[0]
-            ?
-            `<img src="${esc(images[0])}">`
-            :
-            `<div style="
-              aspect-ratio:1;
-              background:#e4e8f0;
-            "></div>`
-          }
-
-
-          <div class="product-info">
-
-            <h3>
-              ${esc(product.name)}
-            </h3>
-
-            <div class="product-price">
-
-              ${Number(product.price || 0)
-                .toLocaleString('ru-RU')}
-              ₽
-
-            </div>
-
-          </div>
-
-        </div>
-
-      `;
-
-    }).join('');
-
-}
-
-
-async function openProduct(id) {
-
-  const { data } =
-    await supabase
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-
-  if (!data) {
-    return;
-  }
-
-
-  const images =
-    Array.isArray(data.images)
-      ? data.images
-      : [];
-
-
-  showModal(
-    data.name,
-    `
-
-      ${
-        images.length
-        ?
-        `
-        <div class="gallery">
-
-          ${images.map(url => `
-            <img src="${esc(url)}">
-          `).join('')}
-
-        </div>
-        `
-        :
-        ''
-      }
-
-
-      <div
-        style="
-          margin-top:15px;
-          font-size:22px;
-          font-weight:1000;
-          color:var(--primary);
-        "
-      >
-        ${Number(data.price || 0)
-          .toLocaleString('ru-RU')} ₽
-      </div>
-
-
-      ${
-        data.description
-        ?
-        `
-        <div
-          style="
-            margin-top:12px;
-            font-size:12px;
-            line-height:1.6;
-          "
-        >
-          ${esc(data.description)}
-        </div>
-        `
-        :
-        ''
-      }
-
-
-      ${
-        data.seller_contact
-        ?
-        `
-        <a
-          class="modal-action"
-          href="tel:${esc(data.seller_contact)}"
-        >
-          Связаться с продавцом
-        </a>
-        `
-        :
-        ''
-      }
-
-    `
-  );
-
-}
-
-
-/* =========================
-   NEWS
-========================= */
-
-async function renderNews() {
-
-  /*
-    Новости сейчас не выводятся
-    отдельной вкладкой, но функция
-    оставлена для расширения сайта.
-  */
-
-}
-
-
-/* =========================
-   NAVIGATION
-========================= */
-
-function navigate(page) {
-
-  document
-    .querySelectorAll('.page')
-    .forEach(el => {
-
-      el.classList.remove('active');
-
-    });
-
-
-  document
-    .getElementById(`page-${page}`)
-    ?.classList.add('active');
-
-
-  document
-    .querySelectorAll('.nav-item')
-    .forEach(el => {
-
-      el.classList.toggle(
-        'active',
-        el.dataset.page === page
+    }
+
+
+    /* =======================================================
+       STATS
+    ======================================================== */
+
+    function renderStats() {
+
+      const playerMap =
+        new Map(
+          players.map(
+            p => [
+              Number(p.id),
+              p
+            ]
+          )
+        );
+
+
+      const stats =
+        seasonStats
+          .map(stat => ({
+
+            ...stat,
+
+            player:
+              playerMap.get(
+                Number(
+                  stat.player_id
+                )
+              )
+
+          }))
+          .filter(
+            stat => stat.player
+          );
+
+
+      const scorers =
+        [...stats]
+          .sort(
+            (a,b) =>
+              Number(b.points || 0) -
+              Number(a.points || 0)
+          )
+          .slice(0,3);
+
+
+      const snipers =
+        [...stats]
+          .sort(
+            (a,b) =>
+              Number(b.goals || 0) -
+              Number(a.goals || 0)
+          )
+          .slice(0,3);
+
+
+      const plusMinus =
+        [...stats]
+          .sort(
+            (a,b) =>
+              Number(b.plus_minus || 0) -
+              Number(a.plus_minus || 0)
+          )
+          .slice(0,3);
+
+
+      const defense =
+        [...stats]
+          .filter(
+            stat =>
+              normalizePosition(
+                stat.player.position
+              ) === "ЗАЩИТНИК"
+          )
+          .sort(
+            (a,b) =>
+              Number(b.points || 0) -
+              Number(a.points || 0)
+          )
+          .slice(0,3);
+
+
+      renderStatList(
+        "scorersStats",
+        scorers,
+        stat =>
+          Number(
+            stat.points || 0
+          ),
+        "очков"
       );
 
-    });
+
+      renderStatList(
+        "snipersStats",
+        snipers,
+        stat =>
+          Number(
+            stat.goals || 0
+          ),
+        "голов"
+      );
 
 
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
+      renderStatList(
+        "plusMinusStats",
+        plusMinus,
+        stat =>
+          Number(
+            stat.plus_minus || 0
+          ),
+        ""
+      );
 
 
-  if (page === 'matches') {
-    renderMatches();
-  }
+      renderStatList(
+        "defenseStats",
+        defense,
+        stat =>
+          Number(
+            stat.points || 0
+          ),
+        "очков"
+      );
 
-  if (page === 'roster') {
-    renderRoster();
-  }
-
-  if (page === 'standings') {
-    renderStandings();
-  }
-
-  if (page === 'media') {
-    renderMedia();
-  }
-
-  if (page === 'products') {
-    renderProducts();
-  }
-
-}
+    }
 
 
-document
-  .querySelectorAll('.nav-item')
-  .forEach(button => {
+    function renderStatList(
+      elementId,
+      list,
+      valueFunction,
+      suffix
+    ) {
 
-    button.addEventListener(
-      'click',
-      () => navigate(button.dataset.page)
-    );
-
-  });
-
-
-/* =========================
-   START
-========================= */
-
-async function init() {
-
-  await loadSettings();
-
-  await Promise.all([
-    loadTeams(),
-    loadPlayers(),
-    loadStats(),
-    loadMatches()
-  ]);
+      const container =
+        document.getElementById(
+          elementId
+        );
 
 
-  renderMatchday();
+      if (!list.length) {
 
-  renderPreviousMatch();
+        container.innerHTML = `
+          <div class="empty">
+            Статистика пока не заполнена
+          </div>
+        `;
 
-  renderHomeRoster();
-
-  renderLeaders();
-
-  await renderAchievements();
-
-  await renderBirthdays();
-
-}
+        return;
+      }
 
 
-init();
+      container.innerHTML =
+        list
+          .map(
+            (stat,index) => {
 
-</script>
+              const player =
+                stat.player;
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-  
+              const value =
+                valueFunction(
+                  stat
+                );
+
+
+              return `
+                <div class="stat-player">
+
+                  <div class="stat-place">
+                    ${index + 1}
+                  </div>
+
+                  <div class="stat-player-info">
+
+                    <div class="stat-player-name">
+                      ${escapeHtml(
+                        player.full_name ||
+                        player.name ||
+                        "Игрок"
+                      )}
+                    </div>
+
+                    <div class="stat-player-number">
+                      №${escapeHtml(
+                        player.number ??
+                        "—"
+                      )}
+                    </div>
+
+                  </div>
+
+                  <div class="stat-value">
+                    ${value}
+                    ${
+                      suffix
+                        ? ` ${suffix}`
+                        : ""
+                    }
+                  </div>
+
+                </div>
+              `;
+
+            }
+          )
+          .join("");
+
+    }
+
+
+    /* =======================================================
+       ACHIEVEMENTS
+    ======================================================== */
+
+    function renderAchievements() {
+
+      const container =
+        document.getElementById(
+          "achievementsList"
+        );
+
+
+      if (!achievements.length) {
+
+        container.innerHTML = `
+          <div class="empty">
+            Достижения пока не добавлены
+          </div>
+        `;
+
+        return;
+      }
+
+
+      container.innerHTML =
+        achievements
+          .map(
+            item => `
+
+              <div class="achievement-card">
+
+                <div class="achievement-year">
+                  ${escapeHtml(
+                    item.year ||
+                    ""
+                  )}
+                </div>
+
+                <div class="achievement-title">
+                  ${escapeHtml(
+                    item.title ||
+                    item.name ||
+                    "Достижение"
+                  )}
+                </div>
+
+                ${
+                  item.description
+                    ? `
+                      <div class="achievement-description">
+                        ${escapeHtml(
+                          item.description
+                        )}
+                      </div>
+                    `
+                    : ""
+                }
+
+              </div>
+
+            `
+          )
+          .join("");
+
+    }
+
+
+    /* =======================================================
+       BIRTHDAYS
+    ======================================================== */
+
+    function renderBirthdays() {
+
+      const container =
+        document.getElementById(
+          "birthdaysList"
+        );
+
+
+      if (!birthdays.length) {
+
+        container.innerHTML = `
+          <div class="empty">
+            Дни рождения пока не добавлены
+          </div>
+        `;
+
+        return;
+      }
+
+
+      container.innerHTML =
+        birthdays
+          .slice(0,5)
+          .map(
+            birthday => `
+
+              <div class="birthday-card">
+
+                ${
+                  birthday.photo_url
+                    ? `
+                      <img
+                        class="birthday-photo"
+                        src="${escapeAttr(
+                          birthday.photo_url
+                        )}"
+                        alt=""
+                      >
+                    `
+                    : `
+                      <div class="birthday-photo"></div>
+                    `
+                }
+
+                <div class="birthday-info">
+
+                  <div class="birthday-name">
+                    ${escapeHtml(
+                      birthday.name ||
+                      birthday.full_name ||
+                      "Игрок"
+                    )}
+                  </div>
+
+                  <div class="birthday-date">
+                    ${escapeHtml(
+                      birthday.date ||
+                      birthday.birth_date ||
+                      ""
+                    )}
+                  </div>
+
+                </div>
+
+                <div class="birthday-icon">
+                  🎂
+                </div>
+
+              </div>
+
+            `
+          )
+          .join("");
+
+    }
+
+
+    /* =======================================================
+       MATCH HELPERS
+    ======================================================== */
+
+    function getMatchDate(
+      match
+    ) {
+
+      if (!match) return null;
+
+
+      const value =
+        match.match_date ||
+        match.date_time ||
+        match.datetime ||
+        match.date;
+
+
+      if (!value) return null;
+
+
+      const date =
+        new Date(value);
+
+
+      if (
+        Number.isNaN(
+          date.getTime()
+        )
+      ) {
+
+        return null;
+
+      }
+
+
+      return date;
+
+    }
+
+
+    function getTeam(
+      match,
+      home
+    ) {
+
+      return home
+        ? (
+            match.home_team ||
+            findTeam(
+              match.home_team_id
+            )
+          )
+        : (
+            match.away_team ||
+            findTeam(
+              match.away_team_id
+            )
+          );
+
+    }
+
+
+    function findTeam(
+      id
+    ) {
+
+      if (!id) return null;
+
+      return teams.find(
+        team =>
+          Number(team.id) ===
+          Number(id)
+      );
+
+    }
+
+
+    function getTeamName(
+      team,
+      fallback
+    ) {
+
+      return (
+        team?.name ||
+        team?.title ||
+        fallback ||
+        "Команда"
+      );
+
+    }
+
+
+    function setMatchLogo(
+      elementId,
+      team,
+      fallback
+    ) {
+
+      const element =
+        document.getElementById(
+          elementId
+        );
+
+      if (!element) return;
+
+
+      const logo =
+        team?.logo_url ||
+        team?.logo ||
+        "";
+
+
+      if (!logo) {
+
+        element.innerHTML =
+          `<span class="match-team-placeholder">${fallback}</span>`;
+
+        return;
+      }
+
+
+      element.innerHTML = `
+        <img
+          src="${escapeAttr(logo)}"
+          alt=""
+          onerror="
+            this.parentElement.innerHTML =
+            '<span class=&quot;match-team-placeholder&quot;>${fallback}</span>'
+          "
+        >
+      `;
+
+    }
+
+
+    function getScore(
+      match,
+      home
+    ) {
+
+      const direct =
+        home
+          ? (
+              match.home_score ??
+              match.home_goals
+            )
+          : (
+              match.away_score ??
+              match.away_goals
+            );
+
+
+      if (
+        direct !== undefined &&
+        direct !== null
+      ) {
+
+        return Number(
+          direct
+        );
+
+      }
+
+
+      return 0;
+
+    }
+
+
+    function formatDate(
+      date
+    ) {
+
+      if (!date) return "—";
+
+
+      return new Intl.DateTimeFormat(
+        "ru-RU",
+        {
+          day: "numeric",
+          month: "long",
+          year: "numeric"
+        }
+      ).format(date);
+
+    }
+
+
+    function formatTime(
+      date
+    ) {
+
+      if (!date) return "—";
+
+
+      return new Intl.DateTimeFormat(
+        "ru-RU",
+        {
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      ).format(date);
+
+    }
+
+
+    /* =======================================================
+       POSITION
+    ======================================================== */
+
+    function normalizePosition(
+      position
+    ) {
+
+      const value =
+        String(
+          position || ""
+        )
+        .toLowerCase()
+        .trim();
+
+
+      if (
+        value.includes("ворот")
+      ) {
+
+        return "ВРАТАРЬ";
+
+      }
+
+
+      if (
+        value.includes("защит")
+        ||
+        value.includes("def")
+      ) {
+
+        return "ЗАЩИТНИК";
+
+      }
+
+
+      if (
+        value.includes("напад")
+        ||
+        value.includes("форвард")
+        ||
+        value.includes("forward")
+      ) {
+
+        return "НАПАДАЮЩИЙ";
+
+      }
+
+
+      return (
+        String(
+          position || ""
+        ).toUpperCase() ||
+        "ИГРОК"
+      );
+
+    }
+
+
+    /* =======================================================
+       STATS ACCORDION
+    ======================================================== */
+
+    function toggleStats(
+      button
+    ) {
+
+      const card =
+        button.closest(
+          ".stats-card"
+        );
+
+
+      card.classList.toggle(
+        "open"
+      );
+
+    }
+
+
+    /* =======================================================
+       MODALS / NAVIGATION
+    ======================================================== */
+
+    function openNextMatch() {
+
+      if (!nextMatch) {
+
+        showModal(
+          "Ближайший матч",
+          `
+            <div class="empty">
+              Ближайший матч пока не добавлен.
+            </div>
+          `
+        );
+
+        return;
+      }
+
+
+      showMatchModal(
+        nextMatch
+      );
+
+    }
+
+
+    function openPreviousMatch() {
+
+      if (!previousMatch) return;
+
+      showMatchModal(
+        previousMatch
+      );
+
+    }
+
+
+    function showMatchModal(
+      match
+    ) {
+
+      const home =
+        getTeam(
+          match,
+          true
+        );
+
+      const away =
+        getTeam(
+          match,
+          false
+        );
+
+
+      const homeName =
+        getTeamName(
+          home,
+          match.home_team_name
+        );
+
+      const awayName =
+        getTeamName(
+          away,
+          match.away_team_name
+        );
+
+
+      const date =
+        getMatchDate(
+          match
+        );
+
+
+      showModal(
+        `${homeName} — ${awayName}`,
+        `
+
+          <div
+            style="
+              display:grid;
+              gap:12px;
+            "
+          >
+
+            <div class="empty">
+
+              <strong>
+                ${formatDate(date)}
+              </strong>
+
+              <br>
+
+              ${formatTime(date)}
+
+            </div>
+
+
+            <div class="empty">
+
+              ${escapeHtml(
+                match.tournament ||
+                match.competition ||
+                "Хоккей"
+              )}
+
+              ${
+                match.venue
+                  ? `
+                    <br>
+                    ${escapeHtml(
+                      match.venue
+                    )}
+                  `
+                  : ""
+              }
+
+            </div>
+
+
+            ${
+              match.stream_url
+                ? `
+                  <button
+                    onclick="
+                      window.open(
+                        '${escapeAttr(
+                          match.stream_url
+                        )}',
+                        '_blank'
+                      )
+                    "
+                    style="
+                      padding:14px;
+                      border-radius:15px;
+                      background:var(--primary);
+                      color:white;
+                      font-weight:900;
+                    "
+                  >
+                    📹 Смотреть трансляцию
+                  </button>
+                `
+                : ""
+            }
+
+          </div>
+
+        `
+      );
+
+    }
+
+
+    function openPlayer(
+      playerId
+    ) {
+
+      const player =
+        players.find(
+          p =>
+            Number(p.id) ===
+            Number(playerId)
+        );
+
+
+      if (!player) return;
+
+
+      const stat =
+        seasonStats.find(
+          s =>
+            Number(
+              s.player_id
+            ) ===
+            Number(player.id)
+        );
+
+
+      showModal(
+        player.full_name ||
+        player.name ||
+        "Игрок",
+        `
+
+          <div
+            style="
+              display:grid;
+              gap:10px;
+            "
+          >
+
+            ${
+              player.photo_url
+                ? `
+                  <img
+                    src="${escapeAttr(
+                      player.photo_url
+                    )}"
+                    style="
+                      width:100%;
+                      max-height:300px;
+                      object-fit:cover;
+                      border-radius:20px;
+                    "
+                    alt=""
+                  >
+                `
+                : ""
+            }
+
+
+            <div class="empty">
+
+              №${escapeHtml(
+                player.number ??
+                "—"
+              )}
+
+              <br>
+
+              ${escapeHtml(
+                normalizePosition(
+                  player.position
+                )
+              )}
+
+            </div>
+
+
+            ${
+              player.birth_date
+                ? `
+                  <div class="empty">
+                    Дата рождения:
+                    <br>
+                    <strong>
+                      ${escapeHtml(
+                        player.birth_date
+                      )}
+                    </strong>
+                  </div>
+                `
+                : ""
+            }
+
+
+            ${
+              player.height_cm ||
+              player.weight_kg
+                ? `
+                  <div class="empty">
+
+                    ${
+                      player.height_cm
+                        ? `Рост: ${player.height_cm} см`
+                        : ""
+                    }
+
+                    ${
+                      player.weight_kg
+                        ? `<br>Вес: ${player.weight_kg} кг`
+                        : ""
+                    }
+
+                  </div>
+                `
+                : ""
+            }
+
+
+            ${
+              stat
+                ? `
+                  <div class="empty">
+
+                    Игр:
+                    <strong>
+                      ${stat.games || 0}
+                    </strong>
+
+                    <br>
+
+                    Голы:
+                    <strong>
+                      ${stat.goals || 0}
+                    </strong>
+
+                    <br>
+
+                    Передачи:
+                    <strong>
+                      ${stat.assists || 0}
+                    </strong>
+
+                    <br>
+
+                    Очки:
+                    <strong>
+                      ${stat.points || 0}
+                    </strong>
+
+                    <br>
+
+                    +/−:
+                    <strong>
+                      ${stat.plus_minus || 0}
+                    </strong>
+
+                  </div>
+                `
+                : ""
+            }
+
+          </div>
+
+        `
+      );
+
+    }
+
+
+    function showModal(
+      title,
+      content
+    ) {
+
+      document.getElementById(
+        "modalTitle"
+      ).textContent =
+        title;
+
+
+      document.getElementById(
+        "modalContent"
+      ).innerHTML =
+        content;
+
+
+      document.getElementById(
+        "mainModal"
+      ).classList.add(
+        "show"
+      );
+
+      document.body.style.overflow =
+        "hidden";
+
+    }
+
+
+    function closeModal() {
+
+      document.getElementById(
+        "mainModal"
+      ).classList.remove(
+        "show"
+      );
+
+      document.body.style.overflow =
+        "";
+
+    }
+
+
+    function closeModalOutside(
+      event
+    ) {
+
+      if (
+        event.target.id ===
+        "mainModal"
+      ) {
+
+        closeModal();
+
+      }
+
+    }
+
+
+    /* =======================================================
+       NAVIGATION
+    ======================================================== */
+
+    function setActiveNav(
+      element
+    ) {
+
+      document
+        .querySelectorAll(
+          ".nav-item"
+        )
+        .forEach(
+          item =>
+            item.classList.remove(
+              "active"
+            )
+        );
+
+
+      element.classList.add(
+        "active"
+      );
+
+    }
+
+
+    function goHome() {
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    }
+
+
+    function openMatches() {
+
+      showModal(
+        "Матчи",
+        `
+          <div
+            style="
+              display:grid;
+              gap:8px;
+            "
+          >
+
+            ${
+              matches.length
+                ? matches
+                    .slice()
+                    .sort(
+                      (a,b) =>
+                        getMatchDate(a) -
+                        getMatchDate(b)
+                    )
+                    .map(
+                      match => {
+
+                        const home =
+                          getTeam(
+                            match,
+                            true
+                          );
+
+                        const away =
+                          getTeam(
+                            match,
+                            false
+                          );
+
+                        return `
+
+                          <div
+                            class="empty"
+                            style="
+                              text-align:left;
+                              cursor:pointer;
+                            "
+                            onclick="
+                              showMatchModal(
+                                matches.find(
+                                  m =>
+                                    Number(m.id) ===
+                                    Number(${Number(match.id)})
+                                )
+                              )
+                            "
+                          >
+
+                            <strong>
+                              ${escapeHtml(
+                                getTeamName(
+                                  home,
+                                  match.home_team_name
+                                )
+                              )}
+                              —
+                              ${escapeHtml(
+                                getTeamName(
+                                  away,
+                                  match.away_team_name
+                                )
+                              )}
+                            </strong>
+
+                            <br>
+
+                            ${formatDate(
+                              getMatchDate(match)
+                            )}
+
+                          </div>
+
+                        `;
+
+                      }
+                    )
+                    .join("")
+                : `
+                  <div class="empty">
+                    Матчи пока не добавлены.
+                  </div>
+                `
+            }
+
+          </div>
+        `
+      );
+
+    }
+
+
+    function openRoster() {
+
+      showModal(
+        "Состав команды",
+        `
+          <div
+            class="players-grid"
+          >
+
+            ${
+              players.length
+                ? players
+                    .map(
+                      player =>
+                        createPlayerCard(
+                          player
+                        )
+                    )
+                    .join("")
+                : `
+                  <div class="empty">
+                    Состав пока не добавлен.
+                  </div>
+                `
+            }
+
+          </div>
+        `
+      );
+
+    }
+
+
+    function openStandings() {
+
+      showModal(
+        "Таблица",
+        `
+          <div class="empty">
+            Таблица турнира будет доступна здесь.
+          </div>
+        `
+      );
+
+    }
+
+
+    function openMore() {
+
+      showModal(
+        "Ещё",
+        `
+
+          <div
+            style="
+              display:grid;
+              gap:8px;
+            "
+          >
+
+            <button
+              onclick="closeModal(); openNews()"
+              class="empty"
+            >
+              📰 Новости
+            </button>
+
+            <button
+              onclick="closeModal(); openMedia()"
+              class="empty"
+            >
+              📷 Медиа
+            </button>
+
+            <button
+              onclick="closeModal(); openProducts()"
+              class="empty"
+            >
+              🛍 Товары
+            </button>
+
+          </div>
+
+        `
+      );
+
+    }
+
+
+    function openNews() {
+
+      showModal(
+        "Новости",
+        `
+          <div class="empty">
+            Раздел новостей будет подключён
+            к админке.
+          </div>
+        `
+      );
+
+    }
+
+
+    function openMedia() {
+
+      showModal(
+        "Медиа",
+        `
+          <div class="empty">
+            Фотоальбомы будут загружаться
+            через админ-панель.
+          </div>
+        `
+      );
+
+    }
+
+
+    function openProducts() {
+
+      showModal(
+        "Товары",
+        `
+          <div class="empty">
+            Товары команды будут отображаться
+            здесь.
+          </div>
+        `
+      );
+
+    }
+
+
+    function openBroadcast() {
+
+      if (
+        nextMatch &&
+        nextMatch.stream_url
+      ) {
+
+        window.open(
+          nextMatch.stream_url,
+          "_blank"
+        );
+
+      }
+
+    }
+
+
+    /* =======================================================
+       ESCAPE
+    ======================================================== */
+
+    function escapeHtml(
+      value
+    ) {
+
+      return String(
+        value ?? ""
+      )
+      .replaceAll(
+        "&",
+        "&amp;"
+      )
+      .replaceAll(
+        "<",
+        "&lt;"
+      )
+      .replaceAll(
+        ">",
+        "&gt;"
+      )
+      .replaceAll(
+        '"',
+        "&quot;"
+      )
+      .replaceAll(
+        "'",
+        "&#039;"
+      );
+
+    }
+
+
+    function escapeAttr(
+      value
+    ) {
+
+      return escapeHtml(
+        value
+      );
+
+    }
+
+  </script>
+
 </body>
 </html>
