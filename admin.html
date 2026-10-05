@@ -1,0 +1,6845 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Админ-панель — ХК Челны 2011</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
+  <style>
+    :root {
+      --primary: #000056;
+      --accent: #0875dc;
+      --gold: #ffcd00;
+      --bg: #f3f5f9;
+      --card: #fff;
+      --text: #11152b;
+      --muted: #7c8397;
+      --border: #e4e7ee;
+      --danger: #dc3545;
+      --success: #1b9b62;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1100px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    /* HEADER */
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 15px;
+      background: var(--primary);
+      object-fit: contain;
+      padding: 6px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .save-indicator {
+      font-size: 11px;
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    /* NAV */
+
+    .admin-nav {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+    }
+
+    .admin-nav button {
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 13px;
+      padding: 10px 14px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .admin-nav button.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    /* SECTIONS */
+
+    .admin-section {
+      display: none;
+    }
+
+    .admin-section.active {
+      display: block;
+    }
+
+    .section-title {
+      margin: 22px 0 10px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .section-title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* CARD */
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      margin: 0 0 13px;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    /* FORMS */
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 11px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #fafbfc;
+      border-radius: 11px;
+      padding: 11px 12px;
+      color: var(--text);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      background: #fff;
+    }
+
+    input[type="color"] {
+      height: 44px;
+      padding: 4px;
+    }
+
+    /* BUTTONS */
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 11px;
+      padding: 11px 15px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: var(--primary);
+    }
+
+    .btn-danger {
+      background: #fff0f1;
+      color: var(--danger);
+    }
+
+    .btn-light {
+      background: #eef1f6;
+      color: var(--text);
+    }
+
+    /* LIST */
+
+    .admin-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .admin-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 12px;
+    }
+
+    .admin-item-main {
+      min-width: 0;
+    }
+
+    .admin-item-title {
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .admin-item-sub {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .admin-item-actions {
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 9px;
+      background: #eef1f6;
+      color: var(--text);
+      font-weight: 900;
+    }
+
+    .icon-btn.delete {
+      background: #fff0f1;
+      color: var(--danger);
+    }
+
+    /* UPLOAD */
+
+    .upload-box {
+      border: 1px dashed #bbc2d1;
+      border-radius: 15px;
+      padding: 18px;
+      text-align: center;
+      background: #fafbfc;
+    }
+
+    .upload-box strong {
+      display: block;
+      font-size: 12px;
+    }
+
+    .upload-box span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .preview {
+      max-width: 180px;
+      max-height: 180px;
+      object-fit: contain;
+      margin: 12px auto 0;
+      border-radius: 12px;
+    }
+
+    /* CHECKBOX */
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .check-row input {
+      width: auto;
+    }
+
+    .check-row label {
+      color: var(--text);
+    }
+
+    /* COLOR */
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .color-box {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .color-box label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    /* TABLE */
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 650px;
+      font-size: 10px;
+    }
+
+    .admin-table th {
+      text-align: left;
+      padding: 9px 6px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .admin-table td {
+      padding: 8px 6px;
+      border-bottom: 1px solid #edf0f4;
+    }
+
+    .admin-table input,
+    .admin-table select {
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 10px;
+    }
+
+    /* MATCH CENTER */
+
+    .match-editor {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 13px;
+      margin-top: 10px;
+      background: #fafbfc;
+    }
+
+    .match-editor-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .match-editor-title strong {
+      font-size: 12px;
+    }
+
+    /* LINEUP */
+
+    .line-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 35px;
+      gap: 7px;
+      margin-bottom: 7px;
+    }
+
+    .line-row button {
+      border: 0;
+      border-radius: 9px;
+      background: #ffe9eb;
+      color: var(--danger);
+    }
+
+    /* QUICK STATS */
+
+    .quick-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .quick-stat {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px;
+      background: #fff;
+    }
+
+    .quick-stat strong {
+      display: block;
+      font-size: 12px;
+    }
+
+    .quick-stat span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    /* MODAL */
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(0,0,20,.45);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-box {
+      width: min(100%, 700px);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 25px 25px 0 0;
+      padding: 18px;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .modal-head h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .close {
+      width: 35px;
+      height: 35px;
+      border: 0;
+      border-radius: 10px;
+      background: #eef0f4;
+      font-size: 18px;
+    }
+
+    /* TOAST */
+
+    .toast {
+      position: fixed;
+      z-index: 2000;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%) translateY(20px);
+      background: #11152b;
+      color: #fff;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 600px) {
+
+      .app {
+        padding: 12px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full {
+        grid-column: auto;
+      }
+
+      .color-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+
+  <header class="admin-header">
+
+    <div class="brand">
+
+      <img
+        id="adminLogo"
+        class="brand-logo"
+        src=""
+        alt=""
+      >
+
+      <div>
+        <h1>Админ-панель</h1>
+        <small id="adminTeamName">
+          ХК Челны 2011
+        </small>
+      </div>
+
+    </div>
+
+    <div
+      id="saveIndicator"
+      class="save-indicator"
+    >
+      Готово
+    </div>
+
+  </header>
+
+
+  <!-- NAV -->
+
+  <nav class="admin-nav">
+
+    <button
+      class="active"
+      data-section="dashboard"
+    >
+      Обзор
+    </button>
+
+    <button data-section="design">
+      Дизайн
+    </button>
+
+    <button data-section="homepage">
+      Главная
+    </button>
+
+    <button data-section="matches">
+      Матчи
+    </button>
+
+    <button data-section="players">
+      Состав
+    </button>
+
+    <button data-section="stats">
+      Статистика
+    </button>
+
+    <button data-section="teams">
+      Команды
+    </button>
+
+    <button data-section="standings">
+      Таблица
+    </button>
+
+    <button data-section="media">
+      Медиа
+    </button>
+
+    <button data-section="news">
+      Новости
+    </button>
+
+    <button data-section="products">
+      Товары
+    </button>
+
+    <button data-section="other">
+      Другое
+    </button>
+
+  </nav>
+
+
+  <!-- =========================
+       DASHBOARD
+  ========================== -->
+
+  <section
+    id="section-dashboard"
+    class="admin-section active"
+  >
+
+    <div class="section-title">
+
+      <h2>Обзор</h2>
+
+      <p>
+        Управление сайтом хоккейной команды
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Быстрые действия</h3>
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="openSection('matches')"
+        >
+          + Добавить матч
+        </button>
+
+        <button
+          class="btn btn-accent"
+          onclick="openSection('players')"
+        >
+          + Добавить игрока
+        </button>
+
+        <button
+          class="btn btn-gold"
+          onclick="openSection('news')"
+        >
+          + Новость
+        </button>
+
+        <button
+          class="btn btn-light"
+          onclick="openSection('products')"
+        >
+          + Товар
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="dashboardStats"
+      class="quick-stat-grid"
+    >
+
+      <div class="quick-stat">
+        <strong id="countMatches">—</strong>
+        <span>Матчей</span>
+      </div>
+
+      <div class="quick-stat">
+        <strong id="countPlayers">—</strong>
+        <span>Игроков</span>
+      </div>
+
+      <div class="quick-stat">
+        <strong id="countTeams">—</strong>
+        <span>Команд</span>
+      </div>
+
+      <div class="quick-stat">
+        <strong id="countProducts">—</strong>
+        <span>Товаров</span>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       DESIGN
+  ========================== -->
+
+  <section
+    id="section-design"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Дизайн</h2>
+
+      <p>
+        Управление цветами, логотипом, шрифтами и внешним видом
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Основная информация</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group full">
+
+          <label>
+            Название команды
+          </label>
+
+          <input
+            id="settingTeamName"
+            type="text"
+            placeholder="ХК Челны 2011"
+          >
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Цвета</h3>
+
+      <div class="color-grid">
+
+        <div class="color-box">
+
+          <label>
+            Основной
+          </label>
+
+          <input
+            id="settingPrimary"
+            type="color"
+            value="#000056"
+          >
+
+        </div>
+
+
+        <div class="color-box">
+
+          <label>
+            Акцент
+          </label>
+
+          <input
+            id="settingAccent"
+            type="color"
+            value="#0875dc"
+          >
+
+        </div>
+
+
+        <div class="color-box">
+
+          <label>
+            Золотой
+          </label>
+
+          <input
+            id="settingGold"
+            type="color"
+            value="#ffcd00"
+          >
+
+        </div>
+
+
+        <div class="color-box">
+
+          <label>
+            Фон
+          </label>
+
+          <input
+            id="settingBackground"
+            type="color"
+            value="#f4f6fa"
+          >
+
+        </div>
+
+
+        <div class="color-box">
+
+          <label>
+            Текст
+          </label>
+
+          <input
+            id="settingText"
+            type="color"
+            value="#11152b"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="saveDesign()"
+        >
+          Сохранить дизайн
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Логотип</h3>
+
+      <div class="upload-box">
+
+        <strong>
+          Загрузить логотип
+        </strong>
+
+        <span>
+          Выбери изображение прямо из галереи телефона
+        </span>
+
+        <input
+          id="logoFile"
+          type="file"
+          accept="image/*"
+          style="margin-top:12px"
+        >
+
+        <img
+          id="logoPreview"
+          class="preview"
+          style="display:none"
+        >
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="uploadLogo()"
+        >
+          Загрузить логотип
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Шрифты</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>
+            Основной шрифт
+          </label>
+
+          <input
+            id="fontMain"
+            value="Stapel"
+            placeholder="Stapel"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Заголовки
+          </label>
+
+          <input
+            id="fontHeading"
+            value="Stapel"
+            placeholder="Stapel"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Второй шрифт
+          </label>
+
+          <input
+            id="fontSecondary"
+            value="Stengazeta"
+            placeholder="Stengazeta"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="saveFonts()"
+        >
+          Сохранить шрифты
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       HOMEPAGE
+  ========================== -->
+
+  <section
+    id="section-homepage"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Главная страница</h2>
+
+      <p>
+        Выбери, какие блоки отображаются на главной
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Блоки главной</h3>
+
+
+      <div class="check-row">
+
+        <input
+          id="showRoster"
+          type="checkbox"
+          checked
+        >
+
+        <label for="showRoster">
+          Показывать состав
+        </label>
+
+      </div>
+
+
+      <div class="check-row">
+
+        <input
+          id="showStats"
+          type="checkbox"
+          checked
+        >
+
+        <label for="showStats">
+          Показывать статистику
+        </label>
+
+      </div>
+
+
+      <div class="check-row">
+
+        <input
+          id="showAchievements"
+          type="checkbox"
+          checked
+        >
+
+        <label for="showAchievements">
+          Показывать достижения
+        </label>
+
+      </div>
+
+
+      <div class="check-row">
+
+        <input
+          id="showBirthdays"
+          type="checkbox"
+          checked
+        >
+
+        <label for="showBirthdays">
+          Показывать дни рождения
+        </label>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="saveHomepageSettings()"
+        >
+          Сохранить
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Матч на главной</h3>
+
+      <div class="form-group">
+
+        <label>
+          Главный матч
+        </label>
+
+        <select id="featuredMatch">
+          <option value="">
+            Автоматически
+          </option>
+        </select>
+
+      </div>
+
+
+      <div class="form-group" style="margin-top:10px">
+
+        <label>
+          Последний матч
+        </label>
+
+        <select id="previousMatch">
+          <option value="">
+            Автоматически
+          </option>
+        </select>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="saveHomepageMatches()"
+        >
+          Сохранить
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       MATCHES
+  ========================== -->
+
+  <section
+    id="section-matches"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Матчи</h2>
+
+      <p>
+        Создание матчей, составов, судей и событий
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Новый матч</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>Дата</label>
+
+          <input
+            id="matchDate"
+            type="date"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Время</label>
+
+          <input
+            id="matchTime"
+            type="time"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Турнир</label>
+
+          <input
+            id="matchTournament"
+            placeholder="ПФО"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Место</label>
+
+          <input
+            id="matchVenue"
+            placeholder="Ледовый дворец"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Хозяева</label>
+
+          <select id="matchHomeTeam"></select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Гости</label>
+
+          <select id="matchAwayTeam"></select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Статус</label>
+
+          <select id="matchStatus">
+
+            <option value="scheduled">
+              Запланирован
+            </option>
+
+            <option value="live">
+              Идёт
+            </option>
+
+            <option value="finished">
+              Завершён
+            </option>
+
+            <option value="cancelled">
+              Отменён
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Ссылка на трансляцию
+          </label>
+
+          <input
+            id="matchStream"
+            type="url"
+            placeholder="https://..."
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Главный судья
+          </label>
+
+          <input
+            id="chiefReferee"
+            placeholder="Фамилия Имя"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Линейный №1
+          </label>
+
+          <input
+            id="linesman1"
+            placeholder="Фамилия Имя"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Линейный №2
+          </label>
+
+          <input
+            id="linesman2"
+            placeholder="Фамилия Имя"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="createMatch()"
+        >
+          Создать матч
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Матчи</h3>
+
+      <div
+        id="adminMatchesList"
+        class="admin-list"
+      >
+        Загрузка...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       PLAYERS
+  ========================== -->
+
+  <section
+    id="section-players"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Состав</h2>
+
+      <p>
+        Игроки команды и их профили
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Добавить игрока</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group full">
+
+          <label>
+            ФИО
+          </label>
+
+          <input
+            id="playerName"
+            placeholder="Иванов Иван Иванович"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Номер
+          </label>
+
+          <input
+            id="playerNumber"
+            type="number"
+            min="0"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Позиция
+          </label>
+
+          <select id="playerPosition">
+
+            <option value="goalie">
+              Вратарь
+            </option>
+
+            <option value="defense">
+              Защитник
+            </option>
+
+            <option value="forward">
+              Нападающий
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Роль
+          </label>
+
+          <select id="playerRole">
+
+            <option value="">
+              Нет
+            </option>
+
+            <option value="К">
+              Капитан
+            </option>
+
+            <option value="А">
+              Ассистент
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Дата рождения
+          </label>
+
+          <input
+            id="playerBirth"
+            type="date"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Рост, см
+          </label>
+
+          <input
+            id="playerHeight"
+            type="number"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Вес, кг
+          </label>
+
+          <input
+            id="playerWeight"
+            type="number"
+            step="0.1"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="upload-box" style="margin-top:12px">
+
+        <strong>
+          Фото игрока
+        </strong>
+
+        <span>
+          Можно выбрать фотографию прямо из галереи
+        </span>
+
+        <input
+          id="playerPhoto"
+          type="file"
+          accept="image/*"
+          style="margin-top:12px"
+        >
+
+        <img
+          id="playerPhotoPreview"
+          class="preview"
+          style="display:none"
+        >
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="createPlayer()"
+        >
+          Добавить игрока
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Игроки</h3>
+
+      <div
+        id="adminPlayersList"
+        class="admin-list"
+      >
+        Загрузка...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       STATS
+  ========================== -->
+
+  <section
+    id="section-stats"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Статистика</h2>
+
+      <p>
+        Ручное управление статистикой игроков
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Быстрое изменение</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>
+            Игрок
+          </label>
+
+          <select id="quickPlayer"></select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Действие
+          </label>
+
+          <select id="quickAction">
+
+            <option value="goals">
+              + Гол
+            </option>
+
+            <option value="assists">
+              + Ассист
+            </option>
+
+            <option value="plus_minus">
+              +1 Плюс/минус
+            </option>
+
+            <option value="minus_minus">
+              -1 Плюс/минус
+            </option>
+
+            <option value="pim">
+              +1 минута штрафа
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="quickUpdateStat()"
+        >
+          Применить
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Статистика игроков</h3>
+
+      <div class="table-wrap">
+
+        <table class="admin-table">
+
+          <thead>
+
+            <tr>
+              <th>Игрок</th>
+              <th>И</th>
+              <th>Г</th>
+              <th>А</th>
+              <th>О</th>
+              <th>+/-</th>
+              <th>Ш</th>
+              <th>КН</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="statsTableBody">
+            <tr>
+              <td colspan="8">
+                Загрузка...
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       TEAMS
+  ========================== -->
+
+  <section
+    id="section-teams"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Команды</h2>
+
+      <p>
+        Реестр команд для матчей и таблицы
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Добавить команду</h3>
+
+      <div class="form-group">
+
+        <label>
+          Название
+        </label>
+
+        <input
+          id="teamName"
+          placeholder="ХК Челны"
+        >
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="createTeam()"
+        >
+          Добавить
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Команды</h3>
+
+      <div
+        id="adminTeamsList"
+        class="admin-list"
+      >
+        Загрузка...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       STANDINGS
+  ========================== -->
+
+  <section
+    id="section-standings"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Таблица</h2>
+
+      <p>
+        Ручное заполнение турнирной таблицы
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Добавить строку</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>Место</label>
+
+          <input
+            id="standingPlace"
+            type="number"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Команда</label>
+
+          <select id="standingTeam"></select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>И</label>
+
+          <input id="standingGames" type="number" value="0">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>В</label>
+
+          <input id="standingWins" type="number" value="0">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>ВО</label>
+
+          <input id="standingOvertimeWins" type="number" value="0">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>ВБ</label>
+
+          <input id="standingShootoutWins" type="number" value="0">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>ПО</label>
+
+          <input id="standingOvertimeLosses" type="number" value="0">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>ПБ</label>
+
+          <input id="standingShootoutLosses" type="number" value="0">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>П</label>
+
+          <input id="standingLosses" type="number" value="0">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>О</label>
+
+          <input id="standingPoints" type="number" value="0">
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="createStanding()"
+        >
+          Добавить
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Строки таблицы</h3>
+
+      <div
+        id="adminStandingsList"
+        class="admin-list"
+      >
+        Загрузка...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       MEDIA
+  ========================== -->
+
+  <section
+    id="section-media"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Медиа</h2>
+
+      <p>
+        Альбомы и фотографии матчей
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Создать альбом</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>
+            Название
+          </label>
+
+          <input
+            id="albumTitle"
+            placeholder="Матч против..."
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Матч
+          </label>
+
+          <select id="albumMatch">
+
+            <option value="">
+              Без матча
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="upload-box"
+        style="margin-top:12px"
+      >
+
+        <strong>
+          Фотографии
+        </strong>
+
+        <span>
+          Можно выбрать сразу несколько фотографий
+        </span>
+
+        <input
+          id="albumFiles"
+          type="file"
+          accept="image/*"
+          multiple
+          style="margin-top:12px"
+        >
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="createAlbum()"
+        >
+          Создать альбом
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Альбомы</h3>
+
+      <div
+        id="adminAlbumsList"
+        class="admin-list"
+      >
+        Загрузка...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       NEWS
+  ========================== -->
+
+  <section
+    id="section-news"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Новости</h2>
+
+      <p>
+        Публикации команды
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Новая публикация</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group full">
+
+          <label>
+            Заголовок
+          </label>
+
+          <input
+            id="newsTitle"
+            placeholder="ХК Челны провели матч..."
+          >
+
+        </div>
+
+
+        <div class="form-group full">
+
+          <label>
+            Текст
+          </label>
+
+          <textarea
+            id="newsText"
+            placeholder="Текст новости..."
+          ></textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Теги
+          </label>
+
+          <input
+            id="newsTags"
+            placeholder="матч, команда"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Дата
+          </label>
+
+          <input
+            id="newsDate"
+            type="date"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Время
+          </label>
+
+          <input
+            id="newsTime"
+            type="time"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="upload-box"
+        style="margin-top:12px"
+      >
+
+        <strong>
+          Изображение
+        </strong>
+
+        <input
+          id="newsImage"
+          type="file"
+          accept="image/*"
+          style="margin-top:12px"
+        >
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="createNews()"
+        >
+          Опубликовать
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Публикации</h3>
+
+      <div
+        id="adminNewsList"
+        class="admin-list"
+      >
+        Загрузка...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       PRODUCTS
+  ========================== -->
+
+  <section
+    id="section-products"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Товары</h2>
+
+      <p>
+        Управление товарами команды
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Новый товар</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group full">
+
+          <label>
+            Название
+          </label>
+
+          <input
+            id="productName"
+            placeholder="Шайба с логотипом"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Цена
+          </label>
+
+          <input
+            id="productPrice"
+            type="number"
+            min="0"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Контакт продавца
+          </label>
+
+          <input
+            id="productContact"
+            placeholder="+7..."
+          >
+
+        </div>
+
+
+        <div class="form-group full">
+
+          <label>
+            Описание
+          </label>
+
+          <textarea
+            id="productDescription"
+            placeholder="Описание товара..."
+          ></textarea>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="upload-box"
+        style="margin-top:12px"
+      >
+
+        <strong>
+          Фотографии товара
+        </strong>
+
+        <span>
+          Можно выбрать несколько фотографий
+        </span>
+
+        <input
+          id="productFiles"
+          type="file"
+          accept="image/*"
+          multiple
+          style="margin-top:12px"
+        >
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="createProduct()"
+        >
+          Добавить товар
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Товары</h3>
+
+      <div
+        id="adminProductsList"
+        class="admin-list"
+      >
+        Загрузка...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       OTHER
+  ========================== -->
+
+  <section
+    id="section-other"
+    class="admin-section"
+  >
+
+    <div class="section-title">
+
+      <h2>Другое</h2>
+
+      <p>
+        Дополнительные данные сайта
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Достижения</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>
+            Название
+          </label>
+
+          <input
+            id="achievementTitle"
+            placeholder="Победитель турнира"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Порядок
+          </label>
+
+          <input
+            id="achievementOrder"
+            type="number"
+            value="0"
+          >
+
+        </div>
+
+
+        <div class="form-group full">
+
+          <label>
+            Описание
+          </label>
+
+          <input
+            id="achievementDescription"
+            placeholder="Сезон 2026/27"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="createAchievement()"
+        >
+          Добавить достижение
+        </button>
+
+      </div>
+
+      <div
+        id="achievementsAdminList"
+        class="admin-list"
+        style="margin-top:12px"
+      ></div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3>Дни рождения</h3>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>
+            Игрок
+          </label>
+
+          <select id="birthdayPlayer"></select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Дата
+          </label>
+
+          <input
+            id="birthdayDate"
+            type="date"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="createBirthday()"
+        >
+          Добавить
+        </button>
+
+      </div>
+
+
+      <div
+        id="birthdaysAdminList"
+        class="admin-list"
+        style="margin-top:12px"
+      ></div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- MODAL -->
+
+<div
+  id="modal"
+  class="modal"
+>
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+
+      <h2 id="modalTitle">
+        Редактирование
+      </h2>
+
+      <button
+        class="close"
+        onclick="closeModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div id="modalContent"></div>
+
+  </div>
+
+</div>
+
+
+<div
+  id="toast"
+  class="toast"
+></div>
+
+
+<script>
+
+const CONFIG = window.SITE_CONFIG;
+
+const supabase = window.supabase.createClient(
+  CONFIG.supabaseUrl,
+  CONFIG.supabaseKey
+);
+
+
+let SETTINGS = null;
+let TEAMS = [];
+let PLAYERS = [];
+let MATCHES = [];
+let STATS = [];
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function esc(value) {
+
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  return String(value)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#039;');
+
+}
+
+
+function toast(message) {
+
+  const el =
+    document.getElementById('toast');
+
+  el.textContent = message;
+
+  el.classList.add('show');
+
+  setTimeout(() => {
+
+    el.classList.remove('show');
+
+  }, 2200);
+
+}
+
+
+function setSaving(text = 'Сохранено') {
+
+  const el =
+    document.getElementById('saveIndicator');
+
+  el.textContent = text;
+
+  setTimeout(() => {
+
+    el.textContent = 'Готово';
+
+  }, 1500);
+
+}
+
+
+function openSection(section) {
+
+  document
+    .querySelectorAll('.admin-section')
+    .forEach(el => {
+
+      el.classList.remove('active');
+
+    });
+
+
+  document
+    .getElementById(`section-${section}`)
+    ?.classList.add('active');
+
+
+  document
+    .querySelectorAll('.admin-nav button')
+    .forEach(btn => {
+
+      btn.classList.toggle(
+        'active',
+        btn.dataset.section === section
+      );
+
+    });
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+
+}
+
+
+document
+  .querySelectorAll('.admin-nav button')
+  .forEach(button => {
+
+    button.addEventListener(
+      'click',
+      () => openSection(button.dataset.section)
+    );
+
+  });
+
+
+function showModal(title, html) {
+
+  document.getElementById('modalTitle')
+    .textContent = title;
+
+  document.getElementById('modalContent')
+    .innerHTML = html;
+
+  document.getElementById('modal')
+    .classList.add('open');
+
+}
+
+
+function closeModal() {
+
+  document.getElementById('modal')
+    .classList.remove('open');
+
+}
+
+
+document
+  .getElementById('modal')
+  .addEventListener('click', e => {
+
+    if (e.target.id === 'modal') {
+      closeModal();
+    }
+
+  });
+
+
+/* =========================
+   SETTINGS
+========================= */
+
+async function loadSettings() {
+
+  const { data, error } =
+    await supabase
+      .from('settings')
+      .select('*')
+      .eq('id',1)
+      .maybeSingle();
+
+
+  if (error) {
+
+    console.error(error);
+
+    return;
+
+  }
+
+
+  SETTINGS = data || {};
+
+  fillSettings();
+
+}
+
+
+function fillSettings() {
+
+  const s = SETTINGS || {};
+
+
+  document.getElementById('settingTeamName').value =
+    s.team_name || 'ХК Челны 2011';
+
+
+  document.getElementById('adminTeamName').textContent =
+    s.team_name || 'ХК Челны 2011';
+
+
+  document.getElementById('settingPrimary').value =
+    s.primary_color || '#000056';
+
+
+  document.getElementById('settingAccent').value =
+    s.accent_color || '#0875dc';
+
+
+  document.getElementById('settingGold').value =
+    s.gold_color || '#ffcd00';
+
+
+  document.getElementById('settingBackground').value =
+    s.background_color || '#f4f6fa';
+
+
+  document.getElementById('settingText').value =
+    s.text_color || '#11152b';
+
+
+  document.getElementById('fontMain').value =
+    s.font_main || 'Stapel';
+
+
+  document.getElementById('fontHeading').value =
+    s.font_heading || 'Stapel';
+
+
+  document.getElementById('fontSecondary').value =
+    s.font_secondary || 'Stengazeta';
+
+
+  if (s.logo_url) {
+
+    document.getElementById('adminLogo').src =
+      s.logo_url;
+
+    document.getElementById('logoPreview').src =
+      s.logo_url;
+
+    document.getElementById('logoPreview').style.display =
+      'block';
+
+  }
+
+
+  const homepage =
+    s.homepage || {};
+
+
+  document.getElementById('showRoster').checked =
+    homepage.showRoster !== false;
+
+
+  document.getElementById('showStats').checked =
+    homepage.showStats !== false;
+
+
+  document.getElementById('showAchievements').checked =
+    homepage.showAchievements !== false;
+
+
+  document.getElementById('showBirthdays').checked =
+    homepage.showBirthdays !== false;
+
+}
+
+
+async function saveDesign() {
+
+  const values = {
+
+    team_name:
+      document.getElementById('settingTeamName').value.trim(),
+
+    primary_color:
+      document.getElementById('settingPrimary').value,
+
+    accent_color:
+      document.getElementById('settingAccent').value,
+
+    gold_color:
+      document.getElementById('settingGold').value,
+
+    background_color:
+      document.getElementById('settingBackground').value,
+
+    text_color:
+      document.getElementById('settingText').value
+
+  };
+
+
+  const { error } =
+    await supabase
+      .from('settings')
+      .update(values)
+      .eq('id',1);
+
+
+  if (error) {
+
+    toast('Ошибка сохранения');
+
+    console.error(error);
+
+    return;
+
+  }
+
+
+  SETTINGS = {
+    ...SETTINGS,
+    ...values
+  };
+
+
+  setSaving();
+
+  toast('Дизайн сохранён');
+
+}
+
+
+async function saveFonts() {
+
+  const values = {
+
+    font_main:
+      document.getElementById('fontMain').value.trim(),
+
+    font_heading:
+      document.getElementById('fontHeading').value.trim(),
+
+    font_secondary:
+      document.getElementById('fontSecondary').value.trim()
+
+  };
+
+
+  const { error } =
+    await supabase
+      .from('settings')
+      .update(values)
+      .eq('id',1);
+
+
+  if (error) {
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  setSaving();
+
+  toast('Шрифты сохранены');
+
+}
+
+
+async function uploadLogo() {
+
+  const input =
+    document.getElementById('logoFile');
+
+  const file =
+    input.files?.[0];
+
+
+  if (!file) {
+
+    toast('Выбери файл');
+
+    return;
+
+  }
+
+
+  try {
+
+    const path =
+      `site/logo-${Date.now()}-${file.name}`;
+
+
+    const { error: uploadError } =
+      await supabase.storage
+        .from(CONFIG.storageBucket)
+        .upload(
+          path,
+          file,
+          {
+            upsert: true
+          }
+        );
+
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+
+    const { data } =
+      supabase.storage
+        .from(CONFIG.storageBucket)
+        .getPublicUrl(path);
+
+
+    const url =
+      data.publicUrl;
+
+
+    const { error } =
+      await supabase
+        .from('settings')
+        .update({
+          logo_url: url
+        })
+        .eq('id',1);
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    document.getElementById('adminLogo').src =
+      url;
+
+
+    document.getElementById('logoPreview').src =
+      url;
+
+
+    document.getElementById('logoPreview').style.display =
+      'block';
+
+
+    toast('Логотип загружен');
+
+  }
+
+  catch(error) {
+
+    console.error(error);
+
+    toast('Ошибка загрузки');
+
+  }
+
+}
+
+
+/* =========================
+   HOMEPAGE
+========================= */
+
+async function saveHomepageSettings() {
+
+  const homepage = {
+
+    ...(SETTINGS?.homepage || {}),
+
+    showRoster:
+      document.getElementById('showRoster').checked,
+
+    showStats:
+      document.getElementById('showStats').checked,
+
+    showAchievements:
+      document.getElementById('showAchievements').checked,
+
+    showBirthdays:
+      document.getElementById('showBirthdays').checked
+
+  };
+
+
+  const { error } =
+    await supabase
+      .from('settings')
+      .update({
+        homepage
+      })
+      .eq('id',1);
+
+
+  if (error) {
+
+    toast('Ошибка');
+
+    console.error(error);
+
+    return;
+
+  }
+
+
+  SETTINGS = {
+    ...SETTINGS,
+    homepage
+  };
+
+
+  toast('Настройки главной сохранены');
+
+}
+
+
+async function saveHomepageMatches() {
+
+  const homepage = {
+
+    ...(SETTINGS?.homepage || {}),
+
+    featuredMatchId:
+      document.getElementById('featuredMatch').value
+      || null,
+
+    previousMatchId:
+      document.getElementById('previousMatch').value
+      || null
+
+  };
+
+
+  const { error } =
+    await supabase
+      .from('settings')
+      .update({
+        homepage
+      })
+      .eq('id',1);
+
+
+  if (error) {
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  SETTINGS = {
+    ...SETTINGS,
+    homepage
+  };
+
+
+  toast('Матчи главной сохранены');
+
+}
+
+
+/* =========================
+   TEAMS
+========================= */
+
+async function loadTeams() {
+
+  const { data } =
+    await supabase
+      .from('teams')
+      .select('*')
+      .order('name');
+
+
+  TEAMS = data || [];
+
+  fillTeamSelects();
+
+  renderTeams();
+
+}
+
+
+function fillTeamSelects() {
+
+  const selects = [
+
+    'matchHomeTeam',
+    'matchAwayTeam',
+    'standingTeam'
+
+  ];
+
+
+  selects.forEach(id => {
+
+    const select =
+      document.getElementById(id);
+
+    if (!select) {
+      return;
+    }
+
+
+    select.innerHTML =
+      '<option value="">Выбрать команду</option>' +
+      TEAMS.map(team => `
+        <option value="${team.id}">
+          ${esc(team.name)}
+        </option>
+      `).join('');
+
+  });
+
+}
+
+
+async function createTeam() {
+
+  const name =
+    document.getElementById('teamName')
+      .value
+      .trim();
+
+
+  if (!name) {
+
+    toast('Введи название');
+
+    return;
+
+  }
+
+
+  const { error } =
+    await supabase
+      .from('teams')
+      .insert({
+        name
+      });
+
+
+  if (error) {
+
+    toast('Ошибка');
+
+    console.error(error);
+
+    return;
+
+  }
+
+
+  document.getElementById('teamName').value = '';
+
+  await loadTeams();
+
+  await updateDashboard();
+
+  toast('Команда добавлена');
+
+}
+
+
+function renderTeams() {
+
+  const container =
+    document.getElementById('adminTeamsList');
+
+
+  if (!container) {
+    return;
+  }
+
+
+  if (!TEAMS.length) {
+
+    container.innerHTML =
+      '<div class="admin-item">Команд пока нет</div>';
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    TEAMS.map(team => `
+
+      <div class="admin-item">
+
+        <div class="admin-item-main">
+
+          <div class="admin-item-title">
+            ${esc(team.name)}
+          </div>
+
+          <div class="admin-item-sub">
+            ID: ${team.id}
+          </div>
+
+        </div>
+
+        <div class="admin-item-actions">
+
+          <button
+            class="icon-btn delete"
+            onclick="deleteTeam(${team.id})"
+          >
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+async function deleteTeam(id) {
+
+  if (!confirm('Удалить команду?')) {
+    return;
+  }
+
+
+  const { error } =
+    await supabase
+      .from('teams')
+      .delete()
+      .eq('id',id);
+
+
+  if (error) {
+
+    toast('Не удалось удалить');
+
+    return;
+
+  }
+
+
+  await loadTeams();
+
+  await updateDashboard();
+
+  toast('Команда удалена');
+
+}
+
+
+/* =========================
+   MATCHES
+========================= */
+
+async function createMatch() {
+
+  const match = {
+
+    match_date:
+      document.getElementById('matchDate').value,
+
+    match_time:
+      document.getElementById('matchTime').value || null,
+
+    tournament:
+      document.getElementById('matchTournament').value.trim(),
+
+    venue:
+      document.getElementById('matchVenue').value.trim(),
+
+    home_team_id:
+      document.getElementById('matchHomeTeam').value || null,
+
+    away_team_id:
+      document.getElementById('matchAwayTeam').value || null,
+
+    status:
+      document.getElementById('matchStatus').value,
+
+    stream_url:
+      document.getElementById('matchStream').value.trim() || null,
+
+    chief_referee:
+      document.getElementById('chiefReferee').value.trim() || null,
+
+    linesman1:
+      document.getElementById('linesman1').value.trim() || null,
+
+    linesman2:
+      document.getElementById('linesman2').value.trim() || null
+
+  };
+
+
+  if (
+    !match.match_date ||
+    !match.home_team_id ||
+    !match.away_team_id
+  ) {
+
+    toast('Заполни дату и команды');
+
+    return;
+
+  }
+
+
+  const { error } =
+    await supabase
+      .from('matches')
+      .insert(match);
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка создания');
+
+    return;
+
+  }
+
+
+  clearMatchForm();
+
+  await loadMatches();
+
+  await updateMatchSelects();
+
+  await updateDashboard();
+
+  toast('Матч создан');
+
+}
+
+
+function clearMatchForm() {
+
+  [
+    'matchDate',
+    'matchTime',
+    'matchTournament',
+    'matchVenue',
+    'matchStream',
+    'chiefReferee',
+    'linesman1',
+    'linesman2'
+
+  ].forEach(id => {
+
+    document.getElementById(id).value = '';
+
+  });
+
+}
+
+
+async function loadMatches() {
+
+  const { data } =
+    await supabase
+      .from('matches')
+      .select('*')
+      .order('match_date', {
+        ascending: false
+      })
+      .order('match_time', {
+        ascending: false
+      });
+
+
+  MATCHES = data || [];
+
+  renderAdminMatches();
+
+  await updateMatchSelects();
+
+}
+
+
+function renderAdminMatches() {
+
+  const container =
+    document.getElementById(
+      'adminMatchesList'
+    );
+
+
+  if (!MATCHES.length) {
+
+    container.innerHTML =
+      '<div class="admin-item">Матчей пока нет</div>';
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    MATCHES.map(match => `
+
+      <div class="admin-item">
+
+        <div class="admin-item-main">
+
+          <div class="admin-item-title">
+
+            ${esc(getTeamName(match.home_team_id))}
+            —
+            ${esc(getTeamName(match.away_team_id))}
+
+          </div>
+
+          <div class="admin-item-sub">
+
+            ${match.match_date || '—'}
+            ${match.match_time || ''}
+
+            ·
+
+            ${esc(match.tournament || '')}
+
+            ·
+
+            ${esc(match.status || '')}
+
+          </div>
+
+        </div>
+
+
+        <div class="admin-item-actions">
+
+          <button
+            class="icon-btn"
+            onclick="editMatch(${match.id})"
+          >
+            ✎
+          </button>
+
+          <button
+            class="icon-btn delete"
+            onclick="deleteMatch(${match.id})"
+          >
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+function getTeamName(id) {
+
+  return TEAMS.find(
+    team => Number(team.id) === Number(id)
+  )?.name || 'Команда';
+
+}
+
+
+async function deleteMatch(id) {
+
+  if (!confirm('Удалить матч?')) {
+    return;
+  }
+
+
+  const { error } =
+    await supabase
+      .from('matches')
+      .delete()
+      .eq('id',id);
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка удаления');
+
+    return;
+
+  }
+
+
+  await loadMatches();
+
+  await updateDashboard();
+
+  toast('Матч удалён');
+
+}
+
+
+async function editMatch(id) {
+
+  const match =
+    MATCHES.find(
+      m => Number(m.id) === Number(id)
+    );
+
+
+  if (!match) {
+    return;
+  }
+
+
+  showModal(
+    'Редактировать матч',
+    `
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>Дата</label>
+
+          <input
+            id="editMatchDate"
+            type="date"
+            value="${esc(match.match_date || '')}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Время</label>
+
+          <input
+            id="editMatchTime"
+            type="time"
+            value="${esc(match.match_time || '')}"
+          >
+
+        </div>
+
+
+        <div class="form-group full">
+
+          <label>Турнир</label>
+
+          <input
+            id="editMatchTournament"
+            value="${esc(match.tournament || '')}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Место</label>
+
+          <input
+            id="editMatchVenue"
+            value="${esc(match.venue || '')}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Статус</label>
+
+          <select id="editMatchStatus">
+
+            <option value="scheduled" ${match.status === 'scheduled' ? 'selected' : ''}>
+              Запланирован
+            </option>
+
+            <option value="live" ${match.status === 'live' ? 'selected' : ''}>
+              Идёт
+            </option>
+
+            <option value="finished" ${match.status === 'finished' ? 'selected' : ''}>
+              Завершён
+            </option>
+
+            <option value="cancelled" ${match.status === 'cancelled' ? 'selected' : ''}>
+              Отменён
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group full">
+
+          <label>Трансляция</label>
+
+          <input
+            id="editMatchStream"
+            value="${esc(match.stream_url || '')}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Главный судья</label>
+
+          <input
+            id="editChiefReferee"
+            value="${esc(match.chief_referee || '')}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Линейный №1</label>
+
+          <input
+            id="editLinesman1"
+            value="${esc(match.linesman1 || '')}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Линейный №2</label>
+
+          <input
+            id="editLinesman2"
+            value="${esc(match.linesman2 || '')}"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="saveMatchEdit(${id})"
+        >
+          Сохранить
+        </button>
+
+        <button
+          class="btn btn-light"
+          onclick="openMatchManager(${id})"
+        >
+          Матч-центр
+        </button>
+
+      </div>
+
+    `
+  );
+
+}
+
+
+async function saveMatchEdit(id) {
+
+  const values = {
+
+    match_date:
+      document.getElementById('editMatchDate').value,
+
+    match_time:
+      document.getElementById('editMatchTime').value || null,
+
+    tournament:
+      document.getElementById('editMatchTournament').value.trim(),
+
+    venue:
+      document.getElementById('editMatchVenue').value.trim(),
+
+    status:
+      document.getElementById('editMatchStatus').value,
+
+    stream_url:
+      document.getElementById('editMatchStream').value.trim() || null,
+
+    chief_referee:
+      document.getElementById('editChiefReferee').value.trim() || null,
+
+    linesman1:
+      document.getElementById('editLinesman1').value.trim() || null,
+
+    linesman2:
+      document.getElementById('editLinesman2').value.trim() || null
+
+  };
+
+
+  const { error } =
+    await supabase
+      .from('matches')
+      .update(values)
+      .eq('id',id);
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  closeModal();
+
+  await loadMatches();
+
+  toast('Матч сохранён');
+
+}
+
+
+/* =========================
+   MATCH CENTER
+========================= */
+
+async function openMatchManager(id) {
+
+  const match =
+    MATCHES.find(
+      m => Number(m.id) === Number(id)
+    );
+
+
+  if (!match) {
+    return;
+  }
+
+
+  const { data: periods } =
+    await supabase
+      .from('match_periods')
+      .select('*')
+      .eq('match_id',id)
+      .order('period');
+
+
+  const { data: events } =
+    await supabase
+      .from('match_events')
+      .select('*')
+      .eq('match_id',id)
+      .order('created_at', {
+        ascending: false
+      });
+
+
+  showModal(
+    'Матч-центр',
+    `
+
+      <div class="card">
+
+        <h3>
+          ${esc(getTeamName(match.home_team_id))}
+          —
+          ${esc(getTeamName(match.away_team_id))}
+        </h3>
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label>Счёт хозяев</label>
+
+            <input
+              id="mcHomeScore"
+              type="number"
+              min="0"
+              value="${match.home_score || 0}"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Счёт гостей</label>
+
+            <input
+              id="mcAwayScore"
+              type="number"
+              min="0"
+              value="${match.away_score || 0}"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="buttons">
+
+          <button
+            class="btn btn-primary"
+            onclick="saveMatchScore(${id})"
+          >
+            Сохранить счёт
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>Периоды</h3>
+
+        <div id="periodEditor">
+
+          ${[1,2,3].map(period => {
+
+            const p =
+              periods?.find(
+                x => x.period === period
+              );
+
+
+            return `
+
+              <div class="match-editor">
+
+                <div class="match-editor-title">
+
+                  <strong>
+                    ${period} период
+                  </strong>
+
+                </div>
+
+
+                <div class="form-grid">
+
+                  <div class="form-group">
+
+                    <label>Хозяева</label>
+
+                    <input
+                      id="periodHome${period}"
+                      type="number"
+                      min="0"
+                      value="${p?.home_score || 0}"
+                    >
+
+                  </div>
+
+
+                  <div class="form-group">
+
+                    <label>Гости</label>
+
+                    <input
+                      id="periodAway${period}"
+                      type="number"
+                      min="0"
+                      value="${p?.away_score || 0}"
+                    >
+
+                  </div>
+
+
+                  <div class="form-group">
+
+                    <label>Штрафные минуты</label>
+
+                    <input
+                      id="periodPim${period}"
+                      type="number"
+                      min="0"
+                      value="${p?.penalty_minutes || 0}"
+                    >
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            `;
+
+          }).join('')}
+
+        </div>
+
+
+        <div class="buttons">
+
+          <button
+            class="btn btn-primary"
+            onclick="savePeriods(${id})"
+          >
+            Сохранить периоды
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>Добавить гол</h3>
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label>Период</label>
+
+            <select id="goalPeriod">
+
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">ОТ / Б</option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Время</label>
+
+            <input
+              id="goalTime"
+              placeholder="12:34"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Автор</label>
+
+            <select id="goalPlayer">
+
+              <option value="">
+                Игрок
+              </option>
+
+              ${PLAYERS
+                .filter(p => p.position !== 'goalie')
+                .map(p => `
+                  <option value="${p.id}">
+                    #${p.number} ${esc(p.full_name)}
+                  </option>
+                `)
+                .join('')}
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Ассист №1</label>
+
+            <select id="goalAssist1">
+
+              <option value="">
+                Нет
+              </option>
+
+              ${PLAYERS
+                .filter(p => p.position !== 'goalie')
+                .map(p => `
+                  <option value="${p.id}">
+                    #${p.number} ${esc(p.full_name)}
+                  </option>
+                `)
+                .join('')}
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Ассист №2</label>
+
+            <select id="goalAssist2">
+
+              <option value="">
+                Нет
+              </option>
+
+              ${PLAYERS
+                .filter(p => p.position !== 'goalie')
+                .map(p => `
+                  <option value="${p.id}">
+                    #${p.number} ${esc(p.full_name)}
+                  </option>
+                `)
+                .join('')}
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <div class="buttons">
+
+          <button
+            class="btn btn-primary"
+            onclick="addGoal(${id})"
+          >
+            + Гол
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>События</h3>
+
+        <div class="admin-list">
+
+          ${
+            events?.length
+            ?
+            events.map(event => `
+
+              <div class="admin-item">
+
+                <div class="admin-item-main">
+
+                  <div class="admin-item-title">
+
+                    ${
+                      event.event_type === 'goal'
+                        ? 'Гол'
+                        : 'Удаление'
+                    }
+
+                  </div>
+
+                  <div class="admin-item-sub">
+
+                    ${event.period} период
+
+                    ${event.event_time || ''}
+
+                  </div>
+
+                </div>
+
+
+                <div class="admin-item-actions">
+
+                  <button
+                    class="icon-btn delete"
+                    onclick="deleteEvent(${event.id},${id})"
+                  >
+                    ×
+                  </button>
+
+                </div>
+
+              </div>
+
+            `).join('')
+            :
+            '<div class="admin-item">Событий пока нет</div>'
+          }
+
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h3>Состав на матч</h3>
+
+        <div id="lineupEditor">
+
+          ${renderLineupEditor(match)}
+
+        </div>
+
+        <div class="buttons">
+
+          <button
+            class="btn btn-primary"
+            onclick="saveLineup(${id})"
+          >
+            Сохранить состав
+          </button>
+
+        </div>
+
+      </div>
+
+    `
+  );
+
+}
+
+
+function renderLineupEditor(match) {
+
+  const lineup =
+    Array.isArray(match.lineup)
+      ? match.lineup
+      : [];
+
+
+  if (!lineup.length) {
+
+    return `
+
+      <div class="line-row">
+
+        <input
+          placeholder="12"
+          class="line-number"
+        >
+
+        <input
+          placeholder="Фамилия"
+          class="line-name"
+        >
+
+        <button
+          onclick="removeLine(this)"
+        >
+          ×
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+
+  return lineup.map(line => `
+
+    <div class="line-row">
+
+      <input
+        class="line-number"
+        value="${esc(line.number || '')}"
+      >
+
+      <input
+        class="line-name"
+        value="${esc(line.name || '')}"
+      >
+
+      <button
+        onclick="removeLine(this)"
+      >
+        ×
+      </button>
+
+    </div>
+
+  `).join('');
+
+}
+
+
+function removeLine(button) {
+
+  button.parentElement.remove();
+
+}
+
+
+function addLine() {
+
+  const editor =
+    document.getElementById('lineupEditor');
+
+
+  editor.insertAdjacentHTML(
+    'beforeend',
+    `
+
+      <div class="line-row">
+
+        <input
+          placeholder="12"
+          class="line-number"
+        >
+
+        <input
+          placeholder="Фамилия"
+          class="line-name"
+        >
+
+        <button
+          onclick="removeLine(this)"
+        >
+          ×
+        </button>
+
+      </div>
+
+    `
+  );
+
+}
+
+
+async function saveLineup(id) {
+
+  const numbers =
+    document.querySelectorAll(
+      '#lineupEditor .line-number'
+    );
+
+
+  const names =
+    document.querySelectorAll(
+      '#lineupEditor .line-name'
+    );
+
+
+  const lineup = [];
+
+
+  numbers.forEach((input,index) => {
+
+    const number =
+      input.value.trim();
+
+    const name =
+      names[index]?.value.trim();
+
+
+    if (number || name) {
+
+      lineup.push({
+        number,
+        name
+      });
+
+    }
+
+  });
+
+
+  const { error } =
+    await supabase
+      .from('matches')
+      .update({
+        lineup
+      })
+      .eq('id',id);
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка сохранения состава');
+
+    return;
+
+  }
+
+
+  await loadMatches();
+
+  toast('Состав сохранён');
+
+}
+
+
+async function saveMatchScore(id) {
+
+  const home =
+    Number(
+      document.getElementById('mcHomeScore').value || 0
+    );
+
+
+  const away =
+    Number(
+      document.getElementById('mcAwayScore').value || 0
+    );
+
+
+  const { error } =
+    await supabase
+      .from('matches')
+      .update({
+        home_score: home,
+        away_score: away,
+        status: 'finished'
+      })
+      .eq('id',id);
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  await loadMatches();
+
+  toast('Счёт сохранён');
+
+}
+
+
+async function savePeriods(id) {
+
+  for (let period = 1; period <= 3; period++) {
+
+    const home =
+      Number(
+        document.getElementById(
+          `periodHome${period}`
+        ).value || 0
+      );
+
+
+    const away =
+      Number(
+        document.getElementById(
+          `periodAway${period}`
+        ).value || 0
+      );
+
+
+    const pim =
+      Number(
+        document.getElementById(
+          `periodPim${period}`
+        ).value || 0
+      );
+
+
+    const { error } =
+      await supabase
+        .from('match_periods')
+        .upsert({
+          match_id: id,
+          period,
+          home_score: home,
+          away_score: away,
+          penalty_minutes: pim
+        }, {
+          onConflict: 'match_id,period'
+        });
+
+
+    if (error) {
+
+      console.error(error);
+
+      toast('Ошибка периода');
+
+      return;
+
+    }
+
+  }
+
+
+  toast('Периоды сохранены');
+
+}
+
+
+async function addGoal(id) {
+
+  const player =
+    document.getElementById('goalPlayer').value;
+
+
+  if (!player) {
+
+    toast('Выбери автора гола');
+
+    return;
+
+  }
+
+
+  const { error } =
+    await supabase
+      .from('match_events')
+      .insert({
+
+        match_id: id,
+
+        event_type: 'goal',
+
+        period:
+          Number(
+            document.getElementById('goalPeriod').value
+          ),
+
+        event_time:
+          document.getElementById('goalTime').value || null,
+
+        player_id:
+          player,
+
+        assist1_player_id:
+          document.getElementById('goalAssist1').value || null,
+
+        assist2_player_id:
+          document.getElementById('goalAssist2').value || null
+
+      });
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  await incrementPlayerStat(
+    Number(player),
+    'goals'
+  );
+
+
+  const assist1 =
+    document.getElementById('goalAssist1').value;
+
+
+  const assist2 =
+    document.getElementById('goalAssist2').value;
+
+
+  if (assist1) {
+
+    await incrementPlayerStat(
+      Number(assist1),
+      'assists'
+    );
+
+  }
+
+
+  if (assist2) {
+
+    await incrementPlayerStat(
+      Number(assist2),
+      'assists'
+    );
+
+  }
+
+
+  toast('Гол добавлен');
+
+  openMatchManager(id);
+
+}
+
+
+async function deleteEvent(eventId,matchId) {
+
+  if (!confirm('Удалить событие?')) {
+    return;
+  }
+
+
+  const { error } =
+    await supabase
+      .from('match_events')
+      .delete()
+      .eq('id',eventId);
+
+
+  if (error) {
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  toast('Событие удалено');
+
+  openMatchManager(matchId);
+
+}
+
+
+/* =========================
+   PLAYERS
+========================= */
+
+async function createPlayer() {
+
+  const name =
+    document.getElementById('playerName')
+      .value
+      .trim();
+
+
+  if (!name) {
+
+    toast('Введи ФИО');
+
+    return;
+
+  }
+
+
+  let photoUrl = null;
+
+
+  const file =
+    document.getElementById('playerPhoto')
+      .files?.[0];
+
+
+  if (file) {
+
+    try {
+
+      photoUrl =
+        await uploadFile(file,'players');
+
+    }
+
+    catch(error) {
+
+      console.error(error);
+
+      toast('Ошибка загрузки фото');
+
+      return;
+
+    }
+
+  }
+
+
+  const player = {
+
+    full_name: name,
+
+    number:
+      Number(
+        document.getElementById('playerNumber').value
+      ) || null,
+
+    position:
+      document.getElementById('playerPosition').value,
+
+    role:
+      document.getElementById('playerRole').value || null,
+
+    birth_date:
+      document.getElementById('playerBirth').value || null,
+
+    height_cm:
+      Number(
+        document.getElementById('playerHeight').value
+      ) || null,
+
+    weight_kg:
+      Number(
+        document.getElementById('playerWeight').value
+      ) || null,
+
+    photo_url: photoUrl,
+
+    active: true
+
+  };
+
+
+  const { error } =
+    await supabase
+      .from('players')
+      .insert(player);
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  clearPlayerForm();
+
+  await loadPlayers();
+
+  await updateDashboard();
+
+  toast('Игрок добавлен');
+
+}
+
+
+function clearPlayerForm() {
+
+  [
+    'playerName',
+    'playerNumber',
+    'playerBirth',
+    'playerHeight',
+    'playerWeight'
+
+  ].forEach(id => {
+
+    document.getElementById(id).value = '';
+
+  });
+
+
+  document.getElementById('playerPhoto').value = '';
+
+}
+
+
+async function loadPlayers() {
+
+  const { data } =
+    await supabase
+      .from('players')
+      .select('*')
+      .order('number');
+
+
+  PLAYERS = data || [];
+
+  renderPlayers();
+
+  fillPlayerSelects();
+
+}
+
+
+function renderPlayers() {
+
+  const container =
+    document.getElementById(
+      'adminPlayersList'
+    );
+
+
+  if (!PLAYERS.length) {
+
+    container.innerHTML =
+      '<div class="admin-item">Игроков пока нет</div>';
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    PLAYERS.map(player => `
+
+      <div class="admin-item">
+
+        <div class="admin-item-main">
+
+          <div class="admin-item-title">
+
+            #${player.number || '—'}
+            ${esc(player.full_name)}
+
+          </div>
+
+          <div class="admin-item-sub">
+
+            ${esc(player.position || '')}
+
+            ${
+              player.role
+              ?
+              ` · ${esc(player.role)}`
+              :
+              ''
+            }
+
+          </div>
+
+        </div>
+
+
+        <div class="admin-item-actions">
+
+          <button
+            class="icon-btn"
+            onclick="editPlayer(${player.id})"
+          >
+            ✎
+          </button>
+
+          <button
+            class="icon-btn delete"
+            onclick="deletePlayer(${player.id})"
+          >
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+async function deletePlayer(id) {
+
+  if (!confirm('Удалить игрока?')) {
+    return;
+  }
+
+
+  const { error } =
+    await supabase
+      .from('players')
+      .update({
+        active: false
+      })
+      .eq('id',id);
+
+
+  if (error) {
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  await loadPlayers();
+
+  await updateDashboard();
+
+  toast('Игрок удалён');
+
+}
+
+
+function fillPlayerSelects() {
+
+  const selects = [
+    'quickPlayer',
+    'birthdayPlayer'
+  ];
+
+
+  selects.forEach(id => {
+
+    const select =
+      document.getElementById(id);
+
+    if (!select) {
+      return;
+    }
+
+
+    select.innerHTML =
+      '<option value="">Выбрать игрока</option>' +
+
+      PLAYERS
+        .filter(p => p.active !== false)
+        .map(player => `
+
+          <option value="${player.id}">
+
+            #${player.number || '—'}
+            ${esc(player.full_name)}
+
+          </option>
+
+        `)
+        .join('');
+
+  });
+
+}
+
+
+function editPlayer(id) {
+
+  const player =
+    PLAYERS.find(
+      p => Number(p.id) === Number(id)
+    );
+
+
+  if (!player) {
+    return;
+  }
+
+
+  showModal(
+    'Редактировать игрока',
+    `
+
+      <div class="form-grid">
+
+        <div class="form-group full">
+
+          <label>ФИО</label>
+
+          <input
+            id="editPlayerName"
+            value="${esc(player.full_name)}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Номер</label>
+
+          <input
+            id="editPlayerNumber"
+            type="number"
+            value="${player.number || ''}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Позиция</label>
+
+          <select id="editPlayerPosition">
+
+            <option value="goalie" ${player.position === 'goalie' ? 'selected' : ''}>
+              Вратарь
+            </option>
+
+            <option value="defense" ${player.position === 'defense' ? 'selected' : ''}>
+              Защитник
+            </option>
+
+            <option value="forward" ${player.position === 'forward' ? 'selected' : ''}>
+              Нападающий
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Роль</label>
+
+          <select id="editPlayerRole">
+
+            <option value="" ${!player.role ? 'selected' : ''}>
+              Нет
+            </option>
+
+            <option value="К" ${player.role === 'К' ? 'selected' : ''}>
+              Капитан
+            </option>
+
+            <option value="А" ${player.role === 'А' ? 'selected' : ''}>
+              Ассистент
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Дата рождения</label>
+
+          <input
+            id="editPlayerBirth"
+            type="date"
+            value="${player.birth_date || ''}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Рост</label>
+
+          <input
+            id="editPlayerHeight"
+            type="number"
+            value="${player.height_cm || ''}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Вес</label>
+
+          <input
+            id="editPlayerWeight"
+            type="number"
+            value="${player.weight_kg || ''}"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="savePlayerEdit(${id})"
+        >
+          Сохранить
+        </button>
+
+      </div>
+
+    `
+  );
+
+}
+
+
+async function savePlayerEdit(id) {
+
+  const values = {
+
+    full_name:
+      document.getElementById('editPlayerName').value.trim(),
+
+    number:
+      Number(
+        document.getElementById('editPlayerNumber').value
+      ) || null,
+
+    position:
+      document.getElementById('editPlayerPosition').value,
+
+    role:
+      document.getElementById('editPlayerRole').value || null,
+
+    birth_date:
+      document.getElementById('editPlayerBirth').value || null,
+
+    height_cm:
+      Number(
+        document.getElementById('editPlayerHeight').value
+      ) || null,
+
+    weight_kg:
+      Number(
+        document.getElementById('editPlayerWeight').value
+      ) || null
+
+  };
+
+
+  const { error } =
+    await supabase
+      .from('players')
+      .update(values)
+      .eq('id',id);
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  closeModal();
+
+  await loadPlayers();
+
+  toast('Игрок сохранён');
+
+}
+
+
+/* =========================
+   FILE UPLOAD
+========================= */
+
+async function uploadFile(file,folder) {
+
+  const cleanName =
+    file.name
+      .replace(/[^a-zA-Z0-9._-]/g,'_');
+
+
+  const path =
+    `${folder}/${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}-${cleanName}`;
+
+
+  const { error } =
+    await supabase.storage
+      .from(CONFIG.storageBucket)
+      .upload(
+        path,
+        file,
+        {
+          upsert: false
+        }
+      );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  const { data } =
+    supabase.storage
+      .from(CONFIG.storageBucket)
+      .getPublicUrl(path);
+
+
+  return data.publicUrl;
+
+}
+
+
+/* =========================
+   STATS
+========================= */
+
+async function loadStats() {
+
+  const { data } =
+    await supabase
+      .from('player_season_stats')
+      .select('*')
+      .eq('season','2026/27');
+
+
+  STATS = data || [];
+
+  renderStats();
+
+}
+
+
+function statFor(playerId) {
+
+  return STATS.find(
+    s => Number(s.player_id) === Number(playerId)
+  ) || {
+
+    games: 0,
+    goals: 0,
+    assists: 0,
+    points: 0,
+    plus_minus: 0,
+    pim: 0,
+    gaa: 0
+
+  };
+
+}
+
+
+function renderStats() {
+
+  const body =
+    document.getElementById(
+      'statsTableBody'
+    );
+
+
+  body.innerHTML =
+    PLAYERS.map(player => {
+
+      const s =
+        statFor(player.id);
+
+
+      return `
+
+        <tr>
+
+          <td>
+            #${player.number || '—'}
+            ${esc(player.full_name)}
+          </td>
+
+          <td>
+            <input
+              type="number"
+              value="${s.games || 0}"
+              onchange="saveStat(${player.id},'games',this.value)"
+            >
+          </td>
+
+          <td>
+            <input
+              type="number"
+              value="${s.goals || 0}"
+              onchange="saveStat(${player.id},'goals',this.value)"
+            >
+          </td>
+
+          <td>
+            <input
+              type="number"
+              value="${s.assists || 0}"
+              onchange="saveStat(${player.id},'assists',this.value)"
+            >
+          </td>
+
+          <td>
+            <input
+              type="number"
+              value="${s.points || 0}"
+              onchange="saveStat(${player.id},'points',this.value)"
+            >
+          </td>
+
+          <td>
+            <input
+              type="number"
+              value="${s.plus_minus || 0}"
+              onchange="saveStat(${player.id},'plus_minus',this.value)"
+            >
+          </td>
+
+          <td>
+            <input
+              type="number"
+              value="${s.pim || 0}"
+              onchange="saveStat(${player.id},'pim',this.value)"
+            >
+          </td>
+
+          <td>
+            <input
+              type="number"
+              step="0.01"
+              value="${s.gaa || 0}"
+              onchange="saveStat(${player.id},'gaa',this.value)"
+            >
+          </td>
+
+        </tr>
+
+      `;
+
+    }).join('');
+
+}
+
+
+async function saveStat(playerId,key,value) {
+
+  const current =
+    statFor(playerId);
+
+
+  const values = {
+
+    player_id: playerId,
+
+    season: '2026/27',
+
+    games:
+      Number(
+        current.games || 0
+      ),
+
+    goals:
+      Number(
+        current.goals || 0
+      ),
+
+    assists:
+      Number(
+        current.assists || 0
+      ),
+
+    points:
+      Number(
+        current.points || 0
+      ),
+
+    plus_minus:
+      Number(
+        current.plus_minus || 0
+      ),
+
+    pim:
+      Number(
+        current.pim || 0
+      ),
+
+    goalie_games:
+      Number(
+        current.goalie_games || 0
+      ),
+
+    goals_against:
+      Number(
+        current.goals_against || 0
+      ),
+
+    gaa:
+      Number(
+        current.gaa || 0
+      )
+
+  };
+
+
+  values[key] =
+    Number(value || 0);
+
+
+  if (
+    key === 'goals' ||
+    key === 'assists'
+  ) {
+
+    values.points =
+      values.goals +
+      values.assists;
+
+  }
+
+
+  const { error } =
+    await supabase
+      .from('player_season_stats')
+      .upsert(
+        values,
+        {
+          onConflict:
+            'player_id,season'
+        }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка статистики');
+
+    return;
+
+  }
+
+
+  await loadStats();
+
+}
+
+
+async function incrementPlayerStat(
+  playerId,
+  key
+) {
+
+  const current =
+    statFor(playerId);
+
+
+  const values = {
+
+    player_id: playerId,
+
+    season: '2026/27',
+
+    games:
+      Number(current.games || 0),
+
+    goals:
+      Number(current.goals || 0),
+
+    assists:
+      Number(current.assists || 0),
+
+    points:
+      Number(current.points || 0),
+
+    plus_minus:
+      Number(current.plus_minus || 0),
+
+    pim:
+      Number(current.pim || 0),
+
+    goalie_games:
+      Number(current.goalie_games || 0),
+
+    goals_against:
+      Number(current.goals_against || 0),
+
+    gaa:
+      Number(current.gaa || 0)
+
+  };
+
+
+  values[key] =
+    Number(values[key] || 0) + 1;
+
+
+  values.points =
+    values.goals +
+    values.assists;
+
+
+  await supabase
+    .from('player_season_stats')
+    .upsert(
+      values,
+      {
+        onConflict:
+          'player_id,season'
+      }
+    );
+
+
+  await loadStats();
+
+}
+
+
+async function quickUpdateStat() {
+
+  const playerId =
+    Number(
+      document.getElementById('quickPlayer').value
+    );
+
+
+  const action =
+    document.getElementById('quickAction').value;
+
+
+  if (!playerId) {
+
+    toast('Выбери игрока');
+
+    return;
+
+  }
+
+
+  if (action === 'minus_minus') {
+
+    const current =
+      statFor(playerId);
+
+
+    await saveStat(
+      playerId,
+      'plus_minus',
+      Number(current.plus_minus || 0) - 1
+    );
+
+
+    return;
+
+  }
+
+
+  await incrementPlayerStat(
+    playerId,
+    action
+  );
+
+
+  toast('Статистика обновлена');
+
+}
+
+
+/* =========================
+   STANDINGS
+========================= */
+
+async function createStanding() {
+
+  const values = {
+
+    place:
+      Number(
+        document.getElementById('standingPlace').value
+      ),
+
+    team_id:
+      Number(
+        document.getElementById('standingTeam').value
+      ),
+
+    games:
+      Number(
+        document.getElementById('standingGames').value || 0
+      ),
+
+    wins:
+      Number(
+        document.getElementById('standingWins').value || 0
+      ),
+
+    overtime_wins:
+      Number(
+        document.getElementById('standingOvertimeWins').value || 0
+      ),
+
+    shootout_wins:
+      Number(
+        document.getElementById('standingShootoutWins').value || 0
+      ),
+
+    overtime_losses:
+      Number(
+        document.getElementById('standingOvertimeLosses').value || 0
+      ),
+
+    shootout_losses:
+      Number(
+        document.getElementById('standingShootoutLosses').value || 0
+      ),
+
+    losses:
+      Number(
+        document.getElementById('standingLosses').value || 0
+      ),
+
+    points:
+      Number(
+        document.getElementById('standingPoints').value || 0
+      )
+
+  };
+
+
+  if (!values.team_id) {
+
+    toast('Выбери команду');
+
+    return;
+
+  }
+
+
+  const { error } =
+    await supabase
+      .from('standings')
+      .insert(values);
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  await renderAdminStandings();
+
+  toast('Строка добавлена');
+
+}
+
+
+async function renderAdminStandings() {
+
+  const container =
+    document.getElementById(
+      'adminStandingsList'
+    );
+
+
+  const { data } =
+    await supabase
+      .from('standings')
+      .select(`
+        *,
+        teams(name)
+      `)
+      .order('place');
+
+
+  if (!data?.length) {
+
+    container.innerHTML =
+      '<div class="admin-item">Таблица пуста</div>';
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    data.map(row => `
+
+      <div class="admin-item">
+
+        <div class="admin-item-main">
+
+          <div class="admin-item-title">
+
+            ${row.place}.
+            ${esc(row.teams?.name || '')}
+
+          </div>
+
+          <div class="admin-item-sub">
+
+            ${row.games} игр ·
+            ${row.points} очков
+
+          </div>
+
+        </div>
+
+        <div class="admin-item-actions">
+
+          <button
+            class="icon-btn delete"
+            onclick="deleteStanding(${row.id})"
+          >
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+async function deleteStanding(id) {
+
+  if (!confirm('Удалить строку?')) {
+    return;
+  }
+
+
+  await supabase
+    .from('standings')
+    .delete()
+    .eq('id',id);
+
+
+  await renderAdminStandings();
+
+}
+
+
+/* =========================
+   MEDIA
+========================= */
+
+async function updateMatchSelects() {
+
+  const select =
+    document.getElementById('albumMatch');
+
+
+  const featured =
+    document.getElementById('featuredMatch');
+
+
+  const previous =
+    document.getElementById('previousMatch');
+
+
+  const options =
+    MATCHES.map(match => `
+
+      <option value="${match.id}">
+
+        ${esc(getTeamName(match.home_team_id))}
+        —
+        ${esc(getTeamName(match.away_team_id))}
+        ·
+        ${match.match_date}
+
+      </option>
+
+    `).join('');
+
+
+  if (select) {
+
+    select.innerHTML =
+      '<option value="">Без матча</option>' +
+      options;
+
+  }
+
+
+  if (featured) {
+
+    featured.innerHTML =
+      '<option value="">Автоматически</option>' +
+      options;
+
+    if (SETTINGS?.homepage?.featuredMatchId) {
+
+      featured.value =
+        SETTINGS.homepage.featuredMatchId;
+
+    }
+
+  }
+
+
+  if (previous) {
+
+    previous.innerHTML =
+      '<option value="">Автоматически</option>' +
+      options;
+
+    if (SETTINGS?.homepage?.previousMatchId) {
+
+      previous.value =
+        SETTINGS.homepage.previousMatchId;
+
+    }
+
+  }
+
+}
+
+
+async function createAlbum() {
+
+  const title =
+    document.getElementById('albumTitle')
+      .value
+      .trim();
+
+
+  if (!title) {
+
+    toast('Введи название');
+
+    return;
+
+  }
+
+
+  const files =
+    Array.from(
+      document.getElementById('albumFiles')
+        .files || []
+    );
+
+
+  const photos = [];
+
+
+  for (const file of files) {
+
+    try {
+
+      const url =
+        await uploadFile(
+          file,
+          'albums'
+        );
+
+      photos.push(url);
+
+    }
+
+    catch(error) {
+
+      console.error(error);
+
+      toast('Ошибка загрузки фото');
+
+      return;
+
+    }
+
+  }
+
+
+  const { error } =
+    await supabase
+      .from('albums')
+      .insert({
+
+        title,
+
+        match_id:
+          document.getElementById('albumMatch').value
+          || null,
+
+        photos
+
+      });
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  document.getElementById('albumTitle').value = '';
+
+  document.getElementById('albumFiles').value = '';
+
+  await renderAdminAlbums();
+
+  toast('Альбом создан');
+
+}
+
+
+async function renderAdminAlbums() {
+
+  const container =
+    document.getElementById(
+      'adminAlbumsList'
+    );
+
+
+  const { data } =
+    await supabase
+      .from('albums')
+      .select('*')
+      .order('created_at',{
+        ascending:false
+      });
+
+
+  if (!data?.length) {
+
+    container.innerHTML =
+      '<div class="admin-item">Альбомов нет</div>';
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    data.map(album => `
+
+      <div class="admin-item">
+
+        <div class="admin-item-main">
+
+          <div class="admin-item-title">
+            ${esc(album.title)}
+          </div>
+
+          <div class="admin-item-sub">
+            ${(album.photos || []).length} фото
+          </div>
+
+        </div>
+
+
+        <div class="admin-item-actions">
+
+          <button
+            class="icon-btn delete"
+            onclick="deleteAlbum(${album.id})"
+          >
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+async function deleteAlbum(id) {
+
+  if (!confirm('Удалить альбом?')) {
+    return;
+  }
+
+
+  await supabase
+    .from('albums')
+    .delete()
+    .eq('id',id);
+
+
+  await renderAdminAlbums();
+
+}
+
+
+/* =========================
+   NEWS
+========================= */
+
+async function createNews() {
+
+  const title =
+    document.getElementById('newsTitle')
+      .value
+      .trim();
+
+
+  const text =
+    document.getElementById('newsText')
+      .value
+      .trim();
+
+
+  if (!title || !text) {
+
+    toast('Заполни заголовок и текст');
+
+    return;
+
+  }
+
+
+  let imageUrl = null;
+
+
+  const file =
+    document.getElementById('newsImage')
+      .files?.[0];
+
+
+  if (file) {
+
+    try {
+
+      imageUrl =
+        await uploadFile(
+          file,
+          'news'
+        );
+
+    }
+
+    catch(error) {
+
+      console.error(error);
+
+      toast('Ошибка загрузки');
+
+      return;
+
+    }
+
+  }
+
+
+  const { error } =
+    await supabase
+      .from('news')
+      .insert({
+
+        title,
+
+        content: text,
+
+        tags:
+          document.getElementById('newsTags')
+            .value
+            .split(',')
+            .map(x => x.trim())
+            .filter(Boolean),
+
+        image_url: imageUrl,
+
+        published_at:
+          document.getElementById('newsDate').value
+          ?
+          `${document.getElementById('newsDate').value}T${document.getElementById('newsTime').value || '00:00'}`
+          :
+          new Date().toISOString()
+
+      });
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка публикации');
+
+    return;
+
+  }
+
+
+  clearNewsForm();
+
+  await renderAdminNews();
+
+  toast('Новость опубликована');
+
+}
+
+
+function clearNewsForm() {
+
+  [
+    'newsTitle',
+    'newsText',
+    'newsTags',
+    'newsDate',
+    'newsTime'
+
+  ].forEach(id => {
+
+    document.getElementById(id).value = '';
+
+  });
+
+
+  document.getElementById('newsImage').value = '';
+
+}
+
+
+async function renderAdminNews() {
+
+  const container =
+    document.getElementById(
+      'adminNewsList'
+    );
+
+
+  const { data } =
+    await supabase
+      .from('news')
+      .select('*')
+      .order('published_at',{
+        ascending:false
+      });
+
+
+  if (!data?.length) {
+
+    container.innerHTML =
+      '<div class="admin-item">Новостей нет</div>';
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    data.map(item => `
+
+      <div class="admin-item">
+
+        <div class="admin-item-main">
+
+          <div class="admin-item-title">
+            ${esc(item.title)}
+          </div>
+
+          <div class="admin-item-sub">
+            ${item.published_at || ''}
+          </div>
+
+        </div>
+
+
+        <div class="admin-item-actions">
+
+          <button
+            class="icon-btn delete"
+            onclick="deleteNews(${item.id})"
+          >
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+async function deleteNews(id) {
+
+  if (!confirm('Удалить новость?')) {
+    return;
+  }
+
+
+  await supabase
+    .from('news')
+    .delete()
+    .eq('id',id);
+
+
+  await renderAdminNews();
+
+}
+
+
+/* =========================
+   PRODUCTS
+========================= */
+
+async function createProduct() {
+
+  const name =
+    document.getElementById('productName')
+      .value
+      .trim();
+
+
+  if (!name) {
+
+    toast('Введи название');
+
+    return;
+
+  }
+
+
+  const files =
+    Array.from(
+      document.getElementById('productFiles')
+        .files || []
+    );
+
+
+  const images = [];
+
+
+  for (const file of files) {
+
+    try {
+
+      images.push(
+        await uploadFile(
+          file,
+          'products'
+        )
+      );
+
+    }
+
+    catch(error) {
+
+      console.error(error);
+
+      toast('Ошибка загрузки');
+
+      return;
+
+    }
+
+  }
+
+
+  const { error } =
+    await supabase
+      .from('products')
+      .insert({
+
+        name,
+
+        price:
+          Number(
+            document.getElementById('productPrice').value
+          ) || 0,
+
+        description:
+          document.getElementById('productDescription').value.trim(),
+
+        seller_contact:
+          document.getElementById('productContact').value.trim(),
+
+        images,
+
+        active: true
+
+      });
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  clearProductForm();
+
+  await renderAdminProducts();
+
+  await updateDashboard();
+
+  toast('Товар добавлен');
+
+}
+
+
+function clearProductForm() {
+
+  [
+    'productName',
+    'productPrice',
+    'productDescription',
+    'productContact'
+
+  ].forEach(id => {
+
+    document.getElementById(id).value = '';
+
+  });
+
+
+  document.getElementById('productFiles').value = '';
+
+}
+
+
+async function renderAdminProducts() {
+
+  const container =
+    document.getElementById(
+      'adminProductsList'
+    );
+
+
+  const { data } =
+    await supabase
+      .from('products')
+      .select('*')
+      .order('created_at',{
+        ascending:false
+      });
+
+
+  if (!data?.length) {
+
+    container.innerHTML =
+      '<div class="admin-item">Товаров нет</div>';
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    data.map(product => `
+
+      <div class="admin-item">
+
+        <div class="admin-item-main">
+
+          <div class="admin-item-title">
+
+            ${esc(product.name)}
+
+          </div>
+
+          <div class="admin-item-sub">
+
+            ${Number(product.price || 0)
+              .toLocaleString('ru-RU')}
+            ₽
+
+          </div>
+
+        </div>
+
+
+        <div class="admin-item-actions">
+
+          <button
+            class="icon-btn"
+            onclick="editProduct(${product.id})"
+          >
+            ✎
+          </button>
+
+          <button
+            class="icon-btn delete"
+            onclick="deleteProduct(${product.id})"
+          >
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+async function deleteProduct(id) {
+
+  if (!confirm('Удалить товар?')) {
+    return;
+  }
+
+
+  await supabase
+    .from('products')
+    .delete()
+    .eq('id',id);
+
+
+  await renderAdminProducts();
+
+  await updateDashboard();
+
+}
+
+
+async function editProduct(id) {
+
+  const { data } =
+    await supabase
+      .from('products')
+      .select('*')
+      .eq('id',id)
+      .single();
+
+
+  if (!data) {
+    return;
+  }
+
+
+  showModal(
+    'Редактировать товар',
+    `
+
+      <div class="form-grid">
+
+        <div class="form-group full">
+
+          <label>Название</label>
+
+          <input
+            id="editProductName"
+            value="${esc(data.name || '')}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Цена</label>
+
+          <input
+            id="editProductPrice"
+            type="number"
+            value="${data.price || 0}"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>Контакт</label>
+
+          <input
+            id="editProductContact"
+            value="${esc(data.seller_contact || '')}"
+          >
+
+        </div>
+
+
+        <div class="form-group full">
+
+          <label>Описание</label>
+
+          <textarea id="editProductDescription">${esc(data.description || '')}</textarea>
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="saveProductEdit(${id})"
+        >
+          Сохранить
+        </button>
+
+      </div>
+
+    `
+  );
+
+}
+
+
+async function saveProductEdit(id) {
+
+  const values = {
+
+    name:
+      document.getElementById('editProductName')
+        .value.trim(),
+
+    price:
+      Number(
+        document.getElementById('editProductPrice').value
+      ) || 0,
+
+    description:
+      document.getElementById('editProductDescription')
+        .value.trim(),
+
+    seller_contact:
+      document.getElementById('editProductContact')
+        .value.trim()
+
+  };
+
+
+  const { error } =
+    await supabase
+      .from('products')
+      .update(values)
+      .eq('id',id);
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  closeModal();
+
+  await renderAdminProducts();
+
+  toast('Товар сохранён');
+
+}
+
+
+/* =========================
+   ACHIEVEMENTS
+========================= */
+
+async function createAchievement() {
+
+  const title =
+    document.getElementById('achievementTitle')
+      .value
+      .trim();
+
+
+  if (!title) {
+
+    toast('Введи название');
+
+    return;
+
+  }
+
+
+  const { error } =
+    await supabase
+      .from('achievements')
+      .insert({
+
+        title,
+
+        description:
+          document.getElementById('achievementDescription')
+            .value.trim(),
+
+        sort_order:
+          Number(
+            document.getElementById('achievementOrder').value
+          ) || 0
+
+      });
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  await renderAchievementsAdmin();
+
+  toast('Достижение добавлено');
+
+}
+
+
+async function renderAchievementsAdmin() {
+
+  const container =
+    document.getElementById(
+      'achievementsAdminList'
+    );
+
+
+  const { data } =
+    await supabase
+      .from('achievements')
+      .select('*')
+      .order('sort_order');
+
+
+  if (!data?.length) {
+
+    container.innerHTML =
+      '<div class="admin-item">Достижений нет</div>';
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    data.map(item => `
+
+      <div class="admin-item">
+
+        <div class="admin-item-main">
+
+          <div class="admin-item-title">
+            ${esc(item.title)}
+          </div>
+
+          <div class="admin-item-sub">
+            ${esc(item.description || '')}
+          </div>
+
+        </div>
+
+
+        <button
+          class="icon-btn delete"
+          onclick="deleteAchievement(${item.id})"
+        >
+          ×
+        </button>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+async function deleteAchievement(id) {
+
+  await supabase
+    .from('achievements')
+    .delete()
+    .eq('id',id);
+
+
+  await renderAchievementsAdmin();
+
+}
+
+
+/* =========================
+   BIRTHDAYS
+========================= */
+
+async function createBirthday() {
+
+  const player =
+    document.getElementById('birthdayPlayer').value;
+
+
+  const date =
+    document.getElementById('birthdayDate').value;
+
+
+  if (!player || !date) {
+
+    toast('Заполни поля');
+
+    return;
+
+  }
+
+
+  const { error } =
+    await supabase
+      .from('birthdays')
+      .insert({
+
+        player_id:
+          Number(player),
+
+        birthday:
+          date
+
+      });
+
+
+  if (error) {
+
+    console.error(error);
+
+    toast('Ошибка');
+
+    return;
+
+  }
+
+
+  await renderBirthdaysAdmin();
+
+  toast('День рождения добавлен');
+
+}
+
+
+async function renderBirthdaysAdmin() {
+
+  const container =
+    document.getElementById(
+      'birthdaysAdminList'
+    );
+
+
+  const { data } =
+    await supabase
+      .from('birthdays')
+      .select(`
+        *,
+        players(full_name)
+      `)
+      .order('birthday');
+
+
+  if (!data?.length) {
+
+    container.innerHTML =
+      '<div class="admin-item">Дней рождения нет</div>';
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    data.map(item => `
+
+      <div class="admin-item">
+
+        <div class="admin-item-main">
+
+          <div class="admin-item-title">
+
+            ${esc(item.players?.full_name || '')}
+
+          </div>
+
+          <div class="admin-item-sub">
+
+            ${item.birthday || ''}
+
+          </div>
+
+        </div>
+
+
+        <button
+          class="icon-btn delete"
+          onclick="deleteBirthday(${item.id})"
+        >
+          ×
+        </button>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+async function deleteBirthday(id) {
+
+  await supabase
+    .from('birthdays')
+    .delete()
+    .eq('id',id);
+
+
+  await renderBirthdaysAdmin();
+
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+async function updateDashboard() {
+
+  document.getElementById('countMatches').textContent =
+    MATCHES.length;
+
+
+  document.getElementById('countPlayers').textContent =
+    PLAYERS.filter(
+      p => p.active !== false
+    ).length;
+
+
+  document.getElementById('countTeams').textContent =
+    TEAMS.length;
+
+
+  const { count } =
+    await supabase
+      .from('products')
+      .select('*',{
+        count:'exact',
+        head:true
+      });
+
+
+  document.getElementById('countProducts').textContent =
+    count || 0;
+
+}
+
+
+/* =========================
+   PREVIEW PLAYER PHOTO
+========================= */
+
+document
+  .getElementById('playerPhoto')
+  .addEventListener('change', event => {
+
+    const file =
+      event.target.files?.[0];
+
+
+    if (!file) {
+      return;
+    }
+
+
+    const preview =
+      document.getElementById(
+        'playerPhotoPreview'
+      );
+
+
+    preview.src =
+      URL.createObjectURL(file);
+
+    preview.style.display =
+      'block';
+
+  });
+
+
+/* =========================
+   PREVIEW LOGO
+========================= */
+
+document
+  .getElementById('logoFile')
+  .addEventListener('change', event => {
+
+    const file =
+      event.target.files?.[0];
+
+
+    if (!file) {
+      return;
+    }
+
+
+    const preview =
+      document.getElementById(
+        'logoPreview'
+      );
+
+
+    preview.src =
+      URL.createObjectURL(file);
+
+    preview.style.display =
+      'block';
+
+  });
+
+
+/* =========================
+   INITIALIZATION
+========================= */
+
+async function init() {
+
+  try {
+
+    await loadSettings();
+
+    await loadTeams();
+
+    await loadPlayers();
+
+    await loadMatches();
+
+    await loadStats();
+
+    await updateDashboard();
+
+    await renderAdminStandings();
+
+    await renderAdminAlbums();
+
+    await renderAdminNews();
+
+    await renderAdminProducts();
+
+    await renderAchievementsAdmin();
+
+    await renderBirthdaysAdmin();
+
+  }
+
+  catch(error) {
+
+    console.error(error);
+
+    toast('Ошибка загрузки панели');
+
+  }
+
+}
+
+
+init();
+
+</script>
+
+</body>
+</html>
