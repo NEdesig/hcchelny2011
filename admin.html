@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta name="theme-color" content="#000056">
+
+    <title>Админ-панель — ХК Челны 2011</title>
+
+    <link rel="stylesheet" href="admin.css">
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-top">
+
+            <div class="admin-logo">
+                <div class="admin-logo-mark">Ч</div>
+
+                <div>
+                    <strong>Челны 2011</strong>
+                    <span>АДМИН-ПАНЕЛЬ</span>
+                </div>
+            </div>
+
+        </div>
+
+
+        <nav class="admin-nav">
+
+            <button class="nav-item active" data-section="dashboard">
+                <span class="nav-icon">⌂</span>
+                <span>Главная</span>
+            </button>
+
+
+            <div class="nav-title">
+                КОНТЕНТ
+            </div>
+
+            <button class="nav-item" data-section="news">
+                <span class="nav-icon">▤</span>
+                <span>Новости</span>
+            </button>
+
+            <button class="nav-item" data-section="stories">
+                <span class="nav-icon">◉</span>
+                <span>Истории</span>
+            </button>
+
+            <button class="nav-item" data-section="albums">
+                <span class="nav-icon">▧</span>
+                <span>Фотоальбомы</span>
+            </button>
+
+
+            <div class="nav-title">
+                МАТЧИ
+            </div>
+
+            <button class="nav-item" data-section="matches">
+                <span class="nav-icon">⚑</span>
+                <span>Матчи</span>
+            </button>
+
+            <button class="nav-item" data-section="clubs">
+                <span class="nav-icon">♟</span>
+                <span>Клубы</span>
+            </button>
+
+
+            <div class="nav-title">
+                СТАТИСТИКА
+            </div>
+
+            <button class="nav-item" data-section="table">
+                <span class="nav-icon">☷</span>
+                <span>Турнирная таблица</span>
+            </button>
+
+            <button class="nav-item" data-section="players-stats">
+                <span class="nav-icon">№</span>
+                <span>Статистика игроков</span>
+            </button>
+
+            <button class="nav-item" data-section="leaders">
+                <span class="nav-icon">★</span>
+                <span>Лидеры команды</span>
+            </button>
+
+
+            <div class="nav-title">
+                САЙТ
+            </div>
+
+            <button class="nav-item" data-section="settings">
+                <span class="nav-icon">⚙</span>
+                <span>Настройки</span>
+            </button>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="index.html" target="_blank" class="site-link">
+                <span>↗</span>
+                Открыть сайт
+            </a>
+
+            <button id="logoutBtn" class="logout-btn">
+                <span>⇥</span>
+                Выйти
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================================
+         MAIN
+    ========================================== -->
+
+    <main class="admin-main">
+
+        <!-- HEADER -->
+
+        <header class="admin-header">
+
+            <div>
+
+                <button
+                    class="mobile-menu-btn"
+                    id="mobileMenuBtn"
+                >
+                    ☰
+                </button>
+
+                <h1 id="pageTitle">
+                    Главная
+                </h1>
+
+                <p id="pageDescription">
+                    Управление сайтом ХК Челны 2011
+                </p>
+
+            </div>
+
+
+            <div class="admin-header-right">
+
+                <div class="admin-status">
+                    <span class="status-dot"></span>
+                    Система работает
+                </div>
+
+                <div class="admin-user">
+                    <div class="admin-avatar">
+                        А
+                    </div>
+
+                    <span>Администратор</span>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================================
+             DASHBOARD
+        ========================================== -->
+
+        <section
+            class="admin-section active"
+            id="section-dashboard"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Добро пожаловать</h2>
+                    <p>
+                        Здесь можно управлять всеми разделами сайта.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-grid">
+
+                <div class="dashboard-card">
+
+                    <div class="dashboard-card-icon">
+                        ▤
+                    </div>
+
+                    <div>
+                        <span>Новостей</span>
+                        <strong id="dashboardNewsCount">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-card">
+
+                    <div class="dashboard-card-icon">
+                        ⚑
+                    </div>
+
+                    <div>
+                        <span>Матчей</span>
+                        <strong id="dashboardMatchesCount">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-card">
+
+                    <div class="dashboard-card-icon">
+                        ▧
+                    </div>
+
+                    <div>
+                        <span>Альбомов</span>
+                        <strong id="dashboardAlbumsCount">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-card">
+
+                    <div class="dashboard-card-icon">
+                        ◉
+                    </div>
+
+                    <div>
+                        <span>Историй</span>
+                        <strong id="dashboardStoriesCount">0</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-columns">
+
+                <div class="admin-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h3>Быстрые действия</h3>
+                            <p>Часто используемые функции</p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="quick-actions">
+
+                        <button
+                            class="quick-action"
+                            data-open-section="news"
+                        >
+                            <strong>+</strong>
+                            <span>
+                                <b>Создать новость</b>
+                                <small>Опубликовать новую новость</small>
+                            </span>
+                        </button>
+
+
+                        <button
+                            class="quick-action"
+                            data-open-section="matches"
+                        >
+                            <strong>+</strong>
+                            <span>
+                                <b>Создать матч</b>
+                                <small>Добавить матч в календарь</small>
+                            </span>
+                        </button>
+
+
+                        <button
+                            class="quick-action"
+                            data-open-section="stories"
+                        >
+                            <strong>+</strong>
+                            <span>
+                                <b>Создать историю</b>
+                                <small>Добавить временную историю</small>
+                            </span>
+                        </button>
+
+
+                        <button
+                            class="quick-action"
+                            data-open-section="albums"
+                        >
+                            <strong>+</strong>
+                            <span>
+                                <b>Создать альбом</b>
+                                <small>Загрузить фотографии</small>
+                            </span>
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="admin-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h3>Состояние сайта</h3>
+                            <p>Основная информация</p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="system-info">
+
+                        <div>
+                            <span>Сайт</span>
+                            <b>ХК Челны 2011</b>
+                        </div>
+
+                        <div>
+                            <span>База данных</span>
+                            <b class="green-text">Подключена</b>
+                        </div>
+
+                        <div>
+                            <span>Хранилище</span>
+                            <b class="green-text">Подключено</b>
+                        </div>
+
+                        <div>
+                            <span>Версия панели</span>
+                            <b>1.0</b>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             NEWS
+        ========================================== -->
+
+        <section
+            class="admin-section"
+            id="section-news"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Новости</h2>
+                    <p>
+                        Создание и редактирование новостей.
+                    </p>
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="addNewsBtn"
+                >
+                    + Создать новость
+                </button>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <div class="table-toolbar">
+
+                    <input
+                        type="search"
+                        id="newsSearch"
+                        placeholder="Поиск по новостям..."
+                    >
+
+                    <select id="newsFilter">
+                        <option value="all">Все новости</option>
+                        <option value="published">Опубликованные</option>
+                        <option value="draft">Черновики</option>
+                    </select>
+
+                </div>
+
+
+                <div class="admin-table-wrapper">
+
+                    <table class="admin-table">
+
+                        <thead>
+                        <tr>
+                            <th>Изображение</th>
+                            <th>Заголовок</th>
+                            <th>Тег</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="newsTableBody">
+
+                        <tr class="empty-row">
+                            <td colspan="6">
+                                Новостей пока нет
+                            </td>
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             STORIES
+        ========================================== -->
+
+        <section
+            class="admin-section"
+            id="section-stories"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Истории</h2>
+                    <p>
+                        Истории автоматически удаляются после указанной даты.
+                    </p>
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="addStoryBtn"
+                >
+                    + Добавить историю
+                </button>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <div class="stories-admin-grid" id="storiesGrid">
+
+                    <div class="empty-content">
+                        Историй пока нет
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             ALBUMS
+        ========================================== -->
+
+        <section
+            class="admin-section"
+            id="section-albums"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Фотоальбомы</h2>
+                    <p>
+                        Создание альбомов и загрузка фотографий.
+                    </p>
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="addAlbumBtn"
+                >
+                    + Создать альбом
+                </button>
+
+            </div>
+
+
+            <div
+                class="albums-admin-grid"
+                id="albumsGrid"
+            >
+
+                <div class="empty-content">
+                    Альбомов пока нет
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             MATCHES
+        ========================================== -->
+
+        <section
+            class="admin-section"
+            id="section-matches"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Матчи</h2>
+                    <p>
+                        Календарь, составы, голы и удаления.
+                    </p>
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="addMatchBtn"
+                >
+                    + Создать матч
+                </button>
+
+            </div>
+
+
+            <div class="match-status-tabs">
+
+                <button class="active" data-match-filter="all">
+                    Все
+                </button>
+
+                <button data-match-filter="planned">
+                    Запланированные
+                </button>
+
+                <button data-match-filter="live">
+                    Идут сейчас
+                </button>
+
+                <button data-match-filter="finished">
+                    Завершённые
+                </button>
+
+            </div>
+
+
+            <div
+                class="matches-list"
+                id="matchesList"
+            >
+
+                <div class="empty-content">
+                    Матчей пока нет
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             CLUBS
+        ========================================== -->
+
+        <section
+            class="admin-section"
+            id="section-clubs"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Клубы</h2>
+                    <p>
+                        Реестр команд, доступных для выбора в матчах.
+                    </p>
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="addClubBtn"
+                >
+                    + Добавить клуб
+                </button>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <div
+                    class="clubs-grid"
+                    id="clubsGrid"
+                >
+
+                    <div class="empty-content">
+                        Клубов пока нет
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             TABLE
+        ========================================== -->
+
+        <section
+            class="admin-section"
+            id="section-table"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Турнирная таблица</h2>
+                    <p>
+                        Таблица заполняется вручную.
+                    </p>
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="addTableTeamBtn"
+                >
+                    + Добавить команду
+                </button>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <div class="table-toolbar">
+
+                    <input
+                        type="text"
+                        id="competitionName"
+                        placeholder="Название соревнования"
+                        value="Первенство ПФО. Группа Б2"
+                    >
+
+                    <button
+                        class="secondary-btn"
+                        id="saveCompetitionBtn"
+                    >
+                        Сохранить
+                    </button>
+
+                </div>
+
+
+                <div class="admin-table-wrapper">
+
+                    <table class="admin-table standings-table">
+
+                        <thead>
+
+                        <tr>
+                            <th>Место</th>
+                            <th>Команда</th>
+                            <th>И</th>
+                            <th>В</th>
+                            <th>ВО</th>
+                            <th>ВБ</th>
+                            <th>ПО</th>
+                            <th>ПБ</th>
+                            <th>П</th>
+                            <th>О</th>
+                            <th></th>
+                        </tr>
+
+                        </thead>
+
+                        <tbody id="standingsBody">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             PLAYER STATS
+        ========================================== -->
+
+        <section
+            class="admin-section"
+            id="section-players-stats"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Статистика игроков</h2>
+                    <p>
+                        Бомбардиры, снайперы, защитники и плюс/минус.
+                    </p>
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="addPlayerStatBtn"
+                >
+                    + Добавить игрока
+                </button>
+
+            </div>
+
+
+            <div class="stat-tabs">
+
+                <button
+                    class="active"
+                    data-stat-type="scorers"
+                >
+                    Бомбардиры
+                </button>
+
+                <button data-stat-type="snipers">
+                    Снайперы
+                </button>
+
+                <button data-stat-type="defenders">
+                    Бомбардиры-защитники
+                </button>
+
+                <button data-stat-type="plusminus">
+                    Плюс/минус
+                </button>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <div
+                    class="player-stats-list"
+                    id="playerStatsList"
+                >
+
+                    <div class="empty-content">
+                        Статистика пока не добавлена
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             LEADERS
+        ========================================== -->
+
+        <section
+            class="admin-section"
+            id="section-leaders"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Лидеры команды</h2>
+                    <p>
+                        Большие карточки лучших игроков.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="leaders-admin-grid">
+
+                <div class="leader-admin-card">
+
+                    <span class="leader-admin-title">
+                        Бомбардир
+                    </span>
+
+                    <div class="leader-preview">
+
+                        <div class="leader-number">
+                            90
+                        </div>
+
+                        <div class="leader-image-placeholder">
+                            Фото
+                        </div>
+
+                    </div>
+
+                    <div class="form-grid">
+
+                        <label>
+                            Номер
+                            <input type="number" value="90">
+                        </label>
+
+                        <label>
+                            Имя и фамилия
+                            <input type="text" value="">
+                        </label>
+
+                        <label>
+                            Позиция
+                            <input type="text" value="Нападающий">
+                        </label>
+
+                        <label>
+                            Матчи
+                            <input type="number" value="0">
+                        </label>
+
+                        <label>
+                            Очки
+                            <input type="number" value="0">
+                        </label>
+
+                        <label>
+                            Шайбы
+                            <input type="number" value="0">
+                        </label>
+
+                        <label>
+                            Передачи
+                            <input type="number" value="0">
+                        </label>
+
+                        <label>
+                            Плюс/минус
+                            <input type="number" value="0">
+                        </label>
+
+                    </div>
+
+                    <button class="secondary-btn full-width">
+                        Выбрать изображение
+                    </button>
+
+                    <button class="primary-btn full-width">
+                        Сохранить
+                    </button>
+
+                </div>
+
+
+                <div class="leader-admin-card">
+
+                    <span class="leader-admin-title">
+                        Снайпер
+                    </span>
+
+                    <div class="leader-preview">
+
+                        <div class="leader-number">
+                            0
+                        </div>
+
+                        <div class="leader-image-placeholder">
+                            Фото
+                        </div>
+
+                    </div>
+
+                    <div class="form-grid">
+
+                        <label>
+                            Номер
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Имя и фамилия
+                            <input type="text">
+                        </label>
+
+                        <label>
+                            Позиция
+                            <input type="text">
+                        </label>
+
+                        <label>
+                            Матчи
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Очки
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Шайбы
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Передачи
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Плюс/минус
+                            <input type="number">
+                        </label>
+
+                    </div>
+
+                    <button class="secondary-btn full-width">
+                        Выбрать изображение
+                    </button>
+
+                    <button class="primary-btn full-width">
+                        Сохранить
+                    </button>
+
+                </div>
+
+
+                <div class="leader-admin-card">
+
+                    <span class="leader-admin-title">
+                        Снайпер-защитник
+                    </span>
+
+                    <div class="leader-preview">
+
+                        <div class="leader-number">
+                            0
+                        </div>
+
+                        <div class="leader-image-placeholder">
+                            Фото
+                        </div>
+
+                    </div>
+
+                    <div class="form-grid">
+
+                        <label>
+                            Номер
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Имя и фамилия
+                            <input type="text">
+                        </label>
+
+                        <label>
+                            Позиция
+                            <input type="text" value="Защитник">
+                        </label>
+
+                        <label>
+                            Матчи
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Очки
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Шайбы
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Передачи
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Плюс/минус
+                            <input type="number">
+                        </label>
+
+                    </div>
+
+                    <button class="secondary-btn full-width">
+                        Выбрать изображение
+                    </button>
+
+                    <button class="primary-btn full-width">
+                        Сохранить
+                    </button>
+
+                </div>
+
+
+                <div class="leader-admin-card">
+
+                    <span class="leader-admin-title">
+                        Плюс/минус
+                    </span>
+
+                    <div class="leader-preview">
+
+                        <div class="leader-number">
+                            0
+                        </div>
+
+                        <div class="leader-image-placeholder">
+                            Фото
+                        </div>
+
+                    </div>
+
+                    <div class="form-grid">
+
+                        <label>
+                            Номер
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Имя и фамилия
+                            <input type="text">
+                        </label>
+
+                        <label>
+                            Позиция
+                            <input type="text">
+                        </label>
+
+                        <label>
+                            Матчи
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Очки
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Шайбы
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Передачи
+                            <input type="number">
+                        </label>
+
+                        <label>
+                            Плюс/минус
+                            <input type="number">
+                        </label>
+
+                    </div>
+
+                    <button class="secondary-btn full-width">
+                        Выбрать изображение
+                    </button>
+
+                    <button class="primary-btn full-width">
+                        Сохранить
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             SETTINGS
+        ========================================== -->
+
+        <section
+            class="admin-section"
+            id="section-settings"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Настройки сайта</h2>
+                    <p>
+                        Здесь можно менять внешний вид и основные параметры.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="settings-grid">
+
+                <div class="admin-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h3>Основная информация</h3>
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-column">
+
+                        <label>
+                            Название команды
+
+                            <input
+                                type="text"
+                                id="settingTeamName"
+                                value="Челны 2011"
+                            >
+
+                        </label>
+
+
+                        <label>
+                            Подзаголовок
+
+                            <input
+                                type="text"
+                                id="settingTeamSubtitle"
+                                value="Хоккейный клуб"
+                            >
+
+                        </label>
+
+
+                        <label>
+                            Город
+
+                            <input
+                                type="text"
+                                id="settingCity"
+                                value="Набережные Челны"
+                            >
+
+                        </label>
+
+
+                        <label>
+                            Основной шрифт
+
+                            <input
+                                type="text"
+                                value="Stapel"
+                                disabled
+                            >
+
+                        </label>
+
+
+                        <label>
+                            Вытянутый шрифт
+
+                            <input
+                                type="text"
+                                value="Stengazeta"
+                                disabled
+                            >
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <div class="admin-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h3>Цвета</h3>
+                            <p>
+                                Все основные цвета сайта.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-settings">
+
+                        <label class="color-row">
+
+                            <span>
+                                Основной
+                            </span>
+
+                            <input
+                                type="color"
+                                id="colorPrimary"
+                                value="#000056"
+                            >
+
+                        </label>
+
+
+                        <label class="color-row">
+
+                            <span>
+                                Дополнительный
+                            </span>
+
+                            <input
+                                type="color"
+                                id="colorSecondary"
+                                value="#ffcd00"
+                            >
+
+                        </label>
+
+
+                        <label class="color-row">
+
+                            <span>
+                                Фон
+                            </span>
+
+                            <input
+                                type="color"
+                                id="colorBackground"
+                                value="#ffffff"
+                            >
+
+                        </label>
+
+
+                        <label class="color-row">
+
+                            <span>
+                                Текст
+                            </span>
+
+                            <input
+                                type="color"
+                                id="colorText"
+                                value="#111113"
+                            >
+
+                        </label>
+
+
+                        <label class="color-row">
+
+                            <span>
+                                Акцент
+                            </span>
+
+                            <input
+                                type="color"
+                                id="colorAccent"
+                                value="#041aba"
+                            >
+
+                        </label>
+
+                    </div>
+
+
+                    <button
+                        class="primary-btn full-width"
+                        id="saveColorsBtn"
+                    >
+                        Сохранить цвета
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Логотип</h3>
+                        <p>
+                            Основной логотип команды.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="logo-upload">
+
+                    <div
+                        class="logo-preview"
+                        id="logoPreview"
+                    >
+                        ЛОГО
+                    </div>
+
+                    <div>
+
+                        <input
+                            type="file"
+                            id="logoInput"
+                            accept="image/*"
+                            hidden
+                        >
+
+                        <button
+                            class="secondary-btn"
+                            id="chooseLogoBtn"
+                        >
+                            Выбрать изображение
+                        </button>
+
+                        <p class="field-hint">
+                            PNG с прозрачным фоном рекомендуется.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================
+     MODAL
+========================================== -->
+
+<div
+    class="modal-overlay"
+    id="modalOverlay"
+>
+
+    <div
+        class="modal"
+        id="modal"
+    >
+
+        <div class="modal-header">
+
+            <div>
+                <h3 id="modalTitle">
+                    Новая запись
+                </h3>
+
+                <p id="modalDescription">
+                    Заполните необходимые поля.
+                </p>
+            </div>
+
+            <button
+                class="modal-close"
+                id="modalClose"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            class="modal-body"
+            id="modalBody"
+        >
+
+        </div>
+
+
+        <div class="modal-footer">
+
+            <button
+                class="secondary-btn"
+                id="modalCancel"
+            >
+                Отмена
+            </button>
+
+            <button
+                class="primary-btn"
+                id="modalSave"
+            >
+                Сохранить
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     TOAST
+========================================== -->
+
+<div
+    class="toast"
+    id="toast"
+>
+
+    <span id="toastMessage">
+        Сохранено
+    </span>
+
+</div>
+
+
+<script src="admin.js"></script>
+
+</body>
+</html>
