@@ -1,0 +1,1020 @@
+@font-face {
+    font-family: "Stapel";
+    src: url("../fonts/Stapel-Regular.woff2") format("woff2");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "Stapel";
+    src: url("../fonts/Stapel-Medium.woff2") format("woff2");
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: "Stapel";
+    src: url("../fonts/Stapel-Bold.woff2") format("woff2");
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "Stapel";
+    src: url("../fonts/Stapel-Black.woff2") format("woff2");
+    font-weight: 900;
+}
+
+@font-face {
+    font-family: "Stengazeta";
+    src: url("../fonts/Stengazeta.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Christopher";
+    src: url("../fonts/Christopher.woff2") format("woff2");
+}
+
+
+:root {
+
+    --primary: #000056;
+    --secondary: #0875dc;
+    --accent: #ffcd00;
+
+    --background: #ffffff;
+    --text: #000056;
+
+    --gray: #f1f2f5;
+    --muted: #7c8190;
+
+    --radius: 18px;
+
+}
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+
+    margin: 0;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    font-family: "Stapel", Arial, sans-serif;
+
+}
+
+
+button,
+input,
+textarea,
+select {
+
+    font-family: inherit;
+
+}
+
+
+a {
+
+    color: inherit;
+
+    text-decoration: none;
+
+}
+
+
+.site-header {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 1000;
+
+    background: var(--primary);
+
+    color: white;
+
+}
+
+
+.header-inner {
+
+    min-height: 86px;
+
+    padding: 12px 20px;
+
+    display: grid;
+
+    grid-template-columns: 60px 1fr 50px;
+
+    align-items: center;
+
+    gap: 15px;
+
+}
+
+
+.team-logo {
+
+    width: 55px;
+
+    height: 55px;
+
+    object-fit: contain;
+
+}
+
+
+.team-title {
+
+    text-align: center;
+
+}
+
+
+.team-name {
+
+    font-size: 22px;
+
+    font-weight: 800;
+
+    line-height: 1;
+
+}
+
+
+.team-subtitle {
+
+    margin-top: 5px;
+
+    font-size: 10px;
+
+    text-transform: uppercase;
+
+    opacity: .75;
+
+}
+
+
+.menu-button {
+
+    border: 0;
+
+    background: transparent;
+
+    width: 44px;
+
+    height: 44px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 5px;
+
+    cursor: pointer;
+
+}
+
+
+.menu-button span {
+
+    width: 22px;
+
+    height: 2px;
+
+    background: white;
+
+}
+
+
+.mobile-menu {
+
+    display: none;
+
+    padding: 15px 20px 22px;
+
+    border-top: 1px solid rgba(255,255,255,.15);
+
+}
+
+
+.mobile-menu.open {
+
+    display: grid;
+
+}
+
+
+.mobile-menu a {
+
+    padding: 12px 0;
+
+    font-size: 15px;
+
+}
+
+
+.section {
+
+    padding: 30px 18px;
+
+}
+
+
+.section-heading {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 16px;
+
+}
+
+
+.section-heading h2 {
+
+    margin: 0;
+
+    font-size: 25px;
+
+    font-weight: 900;
+
+}
+
+
+.section-heading a {
+
+    font-size: 12px;
+
+    color: var(--secondary);
+
+}
+
+
+/* NEWS */
+
+.news-slider {
+
+    display: flex;
+
+    overflow-x: auto;
+
+    scroll-snap-type: x mandatory;
+
+    gap: 12px;
+
+    scrollbar-width: none;
+
+}
+
+
+.news-slider::-webkit-scrollbar {
+
+    display: none;
+
+}
+
+
+.news-card {
+
+    position: relative;
+
+    flex: 0 0 88%;
+
+    height: 430px;
+
+    overflow: hidden;
+
+    border-radius: var(--radius);
+
+    scroll-snap-align: center;
+
+    background: var(--primary);
+
+    cursor: pointer;
+
+}
+
+
+.news-card img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+}
+
+
+.news-card::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(0,0,0,.85),
+            rgba(0,0,0,0) 65%
+        );
+
+}
+
+
+.news-content {
+
+    position: absolute;
+
+    z-index: 2;
+
+    left: 20px;
+
+    right: 20px;
+
+    bottom: 20px;
+
+    color: white;
+
+}
+
+
+.news-tag {
+
+    display: inline-block;
+
+    background: var(--accent);
+
+    color: var(--primary);
+
+    padding: 5px 8px;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    margin-bottom: 9px;
+
+}
+
+
+.news-content h3 {
+
+    margin: 0;
+
+    font-size: 24px;
+
+    line-height: 1.05;
+
+}
+
+
+/* STORIES */
+
+.stories-section {
+
+    padding: 5px 18px 30px;
+
+}
+
+
+.stories-slider {
+
+    display: flex;
+
+    gap: 12px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+
+}
+
+
+.stories-slider::-webkit-scrollbar {
+
+    display: none;
+
+}
+
+
+.story {
+
+    flex: 0 0 78px;
+
+    height: 112px;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    border: 2px solid var(--accent);
+
+    cursor: pointer;
+
+}
+
+
+.story img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+}
+
+
+.story-viewer {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 5000;
+
+    display: none;
+
+    background: #000;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+.story-viewer.active {
+
+    display: flex;
+
+}
+
+
+.story-viewer img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: contain;
+
+}
+
+
+/* MATCH */
+
+.matchday-section {
+
+    background: var(--gray);
+
+}
+
+
+.match-date-title {
+
+    font-family: "Stengazeta", sans-serif;
+
+    font-size: 54px;
+
+    text-transform: uppercase;
+
+    line-height: .9;
+
+    margin-bottom: 22px;
+
+}
+
+
+.match-card {
+
+    background: var(--primary);
+
+    color: white;
+
+    border-radius: var(--radius);
+
+    overflow: hidden;
+
+}
+
+
+.match-card-top {
+
+    padding: 18px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    font-size: 11px;
+
+    opacity: .75;
+
+}
+
+
+.match-teams {
+
+    padding: 20px;
+
+    display: grid;
+
+    grid-template-columns: 1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 15px;
+
+    text-align: center;
+
+}
+
+
+.match-team img {
+
+    width: 65px;
+
+    height: 65px;
+
+    object-fit: contain;
+
+}
+
+
+.match-team-name {
+
+    margin-top: 8px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+}
+
+
+.match-score {
+
+    font-family: "Stengazeta";
+
+    font-size: 46px;
+
+}
+
+
+.center-button {
+
+    padding: 0 18px 30px;
+
+    text-align: center;
+
+}
+
+
+.outline-button {
+
+    display: inline-block;
+
+    border: 1px solid var(--primary);
+
+    padding: 13px 22px;
+
+    border-radius: 50px;
+
+    font-size: 12px;
+
+}
+
+
+/* STANDINGS */
+
+.competition-title {
+
+    font-family: "Stengazeta";
+
+    font-size: 30px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 20px;
+
+}
+
+
+.last-matches {
+
+    display: flex;
+
+    gap: 10px;
+
+    overflow-x: auto;
+
+    margin-bottom: 20px;
+
+}
+
+
+.mini-match {
+
+    min-width: 150px;
+
+    background: var(--gray);
+
+    border-radius: 12px;
+
+    padding: 12px;
+
+    font-size: 10px;
+
+}
+
+
+.standings-wrapper {
+
+    overflow-x: auto;
+
+}
+
+
+.standings-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 650px;
+
+}
+
+
+.standings-table th,
+.standings-table td {
+
+    padding: 9px 7px;
+
+    text-align: center;
+
+    border-bottom: 1px solid #e4e5e9;
+
+    font-size: 10px;
+
+}
+
+
+.standings-table th:nth-child(2),
+.standings-table td:nth-child(2) {
+
+    text-align: left;
+
+}
+
+
+/* STATS */
+
+.stats-tabs {
+
+    display: flex;
+
+    gap: 8px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+
+    margin-bottom: 18px;
+
+}
+
+
+.stats-tab {
+
+    flex: 0 0 auto;
+
+    border: 0;
+
+    background: var(--gray);
+
+    color: var(--primary);
+
+    padding: 11px 14px;
+
+    border-radius: 50px;
+
+    font-size: 10px;
+
+    cursor: pointer;
+
+}
+
+
+.stats-tab.active {
+
+    background: var(--primary);
+
+    color: white;
+
+}
+
+
+.stat-row {
+
+    display: grid;
+
+    grid-template-columns: 35px 1fr 50px;
+
+    align-items: center;
+
+    border-bottom: 1px solid #e5e5e5;
+
+    padding: 13px 0;
+
+}
+
+
+.stat-place {
+
+    font-family: "Stengazeta";
+
+    font-size: 20px;
+
+}
+
+
+.stat-value {
+
+    font-size: 18px;
+
+    font-weight: 900;
+
+    text-align: right;
+
+}
+
+
+/* LEADERS */
+
+.leaders-section {
+
+    background: var(--primary);
+
+    color: white;
+
+}
+
+
+.leaders-slider {
+
+    display: flex;
+
+    overflow-x: auto;
+
+    gap: 15px;
+
+    scrollbar-width: none;
+
+}
+
+
+.leader-card {
+
+    flex: 0 0 88%;
+
+    height: 400px;
+
+    position: relative;
+
+    overflow: hidden;
+
+}
+
+
+.leader-number {
+
+    position: absolute;
+
+    left: 0;
+
+    bottom: 0;
+
+    font-family: "Stengazeta";
+
+    font-size: 190px;
+
+    line-height: .75;
+
+    opacity: .15;
+
+}
+
+
+.leader-player {
+
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 0;
+
+    transform: translateX(-50%);
+
+    height: 88%;
+
+    max-width: 90%;
+
+    object-fit: contain;
+
+    z-index: 2;
+
+}
+
+
+.leader-info {
+
+    position: absolute;
+
+    left: 0;
+
+    right: 0;
+
+    top: 15px;
+
+    z-index: 3;
+
+}
+
+
+.leader-type {
+
+    font-size: 10px;
+
+    text-transform: uppercase;
+
+    opacity: .65;
+
+}
+
+
+.leader-name {
+
+    font-size: 24px;
+
+    font-weight: 900;
+
+    margin-top: 4px;
+
+}
+
+
+.leader-stat {
+
+    font-family: "Stengazeta";
+
+    font-size: 48px;
+
+}
+
+
+/* ALBUMS */
+
+.albums-slider {
+
+    display: flex;
+
+    overflow-x: auto;
+
+    gap: 12px;
+
+    scrollbar-width: none;
+
+}
+
+
+.album-card {
+
+    flex: 0 0 78%;
+
+    cursor: pointer;
+
+}
+
+
+.album-cover {
+
+    width: 100%;
+
+    aspect-ratio: 1 / 1;
+
+    object-fit: cover;
+
+    border-radius: var(--radius);
+
+}
+
+
+.album-title {
+
+    margin-top: 10px;
+
+    font-weight: 800;
+
+    font-size: 15px;
+
+}
+
+
+.album-date {
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    margin-top: 4px;
+
+}
+
+
+/* FOOTER */
+
+.site-footer {
+
+    background: var(--primary);
+
+    color: white;
+
+    text-align: center;
+
+    padding: 35px 20px;
+
+}
+
+
+.site-footer .team-subtitle {
+
+    margin-top: 8px;
+
+}
+
+
+/* DESKTOP */
+
+@media (min-width: 800px) {
+
+    .header-inner {
+
+        max-width: 1200px;
+
+        margin: auto;
+
+    }
+
+    main {
+
+        max-width: 1200px;
+
+        margin: auto;
+
+    }
+
+    .news-card {
+
+        flex-basis: 48%;
+
+    }
+
+    .album-card {
+
+        flex-basis: 30%;
+
+    }
+
+    .leader-card {
+
+        flex-basis: 45%;
+
+    }
+
+}
