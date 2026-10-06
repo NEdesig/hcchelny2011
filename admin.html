@@ -2,7 +2,6 @@
 <html lang="ru">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -17,633 +16,346 @@
 
     <title>Админ-панель — ХК Челны 2011</title>
 
-    <link
-        rel="stylesheet"
-        href="admin.css"
-    >
+    <link rel="stylesheet" href="admin.css">
 
-    <script src="config.js"></script>
-
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 </head>
-
 
 <body>
 
-    <!-- =====================================================
-         LOADER
-         ===================================================== -->
+<div class="app">
 
-    <div
-        id="adminLoader"
-        class="admin-loader"
-    >
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
 
-        <div class="loader-logo">
-            ХК
-        </div>
+    <aside class="sidebar">
 
-        <div class="loader-text">
-            Загрузка админ-панели...
-        </div>
+        <div class="sidebar-top">
 
-    </div>
+            <div class="admin-brand">
 
-
-    <!-- =====================================================
-         LOGIN
-         ===================================================== -->
-
-    <section
-        id="loginScreen"
-        class="login-screen hidden"
-    >
-
-        <div class="login-card">
-
-            <div class="login-logo">
-                ХК
-            </div>
-
-            <div class="login-title">
-                Админ-панель
-            </div>
-
-            <div class="login-subtitle">
-                ХК Челны 2011
-            </div>
-
-            <form id="loginForm">
-
-                <div class="form-group">
-
-                    <label for="loginEmail">
-                        Email
-                    </label>
-
-                    <input
-                        id="loginEmail"
-                        type="email"
-                        autocomplete="email"
-                        placeholder="admin@example.com"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="loginPassword">
-                        Пароль
-                    </label>
-
-                    <input
-                        id="loginPassword"
-                        type="password"
-                        autocomplete="current-password"
-                        placeholder="Введите пароль"
-                        required
-                    >
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    Войти
-                </button>
-
-
-                <div
-                    id="loginError"
-                    class="form-error"
-                ></div>
-
-            </form>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         APP
-         ===================================================== -->
-
-    <div
-        id="adminApp"
-        class="admin-app hidden"
-    >
-
-
-        <!-- =================================================
-             SIDEBAR
-             ================================================= -->
-
-        <aside
-            id="adminSidebar"
-            class="admin-sidebar"
-        >
-
-            <div class="sidebar-header">
-
-                <div class="sidebar-logo">
-                    ХК
+                <div class="admin-logo">
+                    Х
                 </div>
 
                 <div>
-
-                    <div class="sidebar-team-name">
-                        ХК Челны 2011
-                    </div>
-
-                    <div class="sidebar-label">
-                        ADMIN PANEL
-                    </div>
-
+                    <strong>ХК Челны 2011</strong>
+                    <span>Админ-панель</span>
                 </div>
 
             </div>
 
+            <button
+                class="sidebar-close"
+                id="sidebarClose"
+                type="button"
+            >
+                ×
+            </button>
 
-            <nav class="sidebar-nav">
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <button
+                class="nav-item active"
+                data-tab="dashboard"
+                type="button"
+            >
+                <span class="nav-icon">⌂</span>
+                <span>Главная</span>
+            </button>
+
+            <button
+                class="nav-item"
+                data-tab="matches"
+                type="button"
+            >
+                <span class="nav-icon">▣</span>
+                <span>Матчи</span>
+            </button>
+
+            <button
+                class="nav-item"
+                data-tab="players"
+                type="button"
+            >
+                <span class="nav-icon">♙</span>
+                <span>Игроки</span>
+            </button>
+
+            <button
+                class="nav-item"
+                data-tab="news"
+                type="button"
+            >
+                <span class="nav-icon">▤</span>
+                <span>Новости</span>
+            </button>
+
+            <button
+                class="nav-item"
+                data-tab="media"
+                type="button"
+            >
+                <span class="nav-icon">▧</span>
+                <span>Медиа</span>
+            </button>
+
+            <button
+                class="nav-item"
+                data-tab="standings"
+                type="button"
+            >
+                <span class="nav-icon">≡</span>
+                <span>Таблица</span>
+            </button>
+
+            <button
+                class="nav-item"
+                data-tab="products"
+                type="button"
+            >
+                <span class="nav-icon">□</span>
+                <span>Магазин</span>
+            </button>
+
+            <button
+                class="nav-item"
+                data-tab="extras"
+                type="button"
+            >
+                <span class="nav-icon">✦</span>
+                <span>Дополнительно</span>
+            </button>
+
+            <div class="nav-divider"></div>
+
+            <button
+                class="nav-item"
+                data-tab="design"
+                type="button"
+            >
+                <span class="nav-icon">◈</span>
+                <span>Дизайн</span>
+            </button>
+
+            <button
+                class="nav-item"
+                data-tab="settings"
+                type="button"
+            >
+                <span class="nav-icon">⚙</span>
+                <span>Настройки</span>
+            </button>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="connection-status">
+
+                <span
+                    class="connection-dot"
+                    id="connectionDot"
+                ></span>
+
+                <span id="connectionText">
+                    Подключение...
+                </span>
+
+            </div>
+
+            <div class="sidebar-version">
+                ХК Челны 2011 · Admin
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================================
+         MAIN
+    ========================================== -->
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <button
+                class="mobile-menu"
+                id="mobileMenu"
+                type="button"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+
+            <div class="topbar-title">
+
+                <span id="pageEyebrow">
+                    Панель управления
+                </span>
+
+                <h1 id="pageTitle">
+                    Главная
+                </h1>
+
+            </div>
+
+
+            <div class="topbar-actions">
 
                 <button
-                    class="sidebar-item active"
-                    data-section="dashboard"
+                    class="topbar-site"
+                    id="openSite"
                     type="button"
                 >
-
-                    <span class="sidebar-icon">
-                        ◈
-                    </span>
-
-                    <span>
-                        Главная
-                    </span>
-
+                    Открыть сайт
                 </button>
 
-
                 <button
-                    class="sidebar-item"
-                    data-section="homepage"
+                    class="topbar-refresh"
+                    id="refreshData"
                     type="button"
+                    title="Обновить"
                 >
-
-                    <span class="sidebar-icon">
-                        ⌂
-                    </span>
-
-                    <span>
-                        Главная сайта
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="matches"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        🏒
-                    </span>
-
-                    <span>
-                        Матчи
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="players"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        👤
-                    </span>
-
-                    <span>
-                        Состав
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="stats"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        #
-                    </span>
-
-                    <span>
-                        Статистика
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="news"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        N
-                    </span>
-
-                    <span>
-                        Новости
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="media"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        ▣
-                    </span>
-
-                    <span>
-                        Медиа
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="products"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        ₽
-                    </span>
-
-                    <span>
-                        Товары
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="standings"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        ☷
-                    </span>
-
-                    <span>
-                        Таблица
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="birthdays"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        ★
-                    </span>
-
-                    <span>
-                        Дни рождения
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="achievements"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        🏆
-                    </span>
-
-                    <span>
-                        Достижения
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="registry"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        ◫
-                    </span>
-
-                    <span>
-                        Реестры
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="sidebar-item"
-                    data-section="design"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        ✦
-                    </span>
-
-                    <span>
-                        Дизайн
-                    </span>
-
-                </button>
-
-            </nav>
-
-
-            <div class="sidebar-bottom">
-
-                <a
-                    href="index.html"
-                    class="sidebar-item"
-                >
-
-                    <span class="sidebar-icon">
-                        ↗
-                    </span>
-
-                    <span>
-                        Открыть сайт
-                    </span>
-
-                </a>
-
-
-                <button
-                    id="logoutButton"
-                    class="sidebar-item logout-item"
-                    type="button"
-                >
-
-                    <span class="sidebar-icon">
-                        ⇥
-                    </span>
-
-                    <span>
-                        Выйти
-                    </span>
-
+                    ↻
                 </button>
 
             </div>
 
-        </aside>
+        </header>
 
 
-        <!-- =================================================
-             MAIN
-             ================================================= -->
+        <!-- =====================================
+             CONTENT
+        ====================================== -->
 
-        <main class="admin-main">
-
-
-            <!-- =============================================
-                 TOPBAR
-                 ============================================= -->
-
-            <header class="admin-topbar">
-
-                <button
-                    id="mobileMenuButton"
-                    class="mobile-menu-button"
-                    type="button"
-                    aria-label="Меню"
-                >
-                    ☰
-                </button>
+        <div class="content">
 
 
-                <div>
+            <!-- =================================
+                 DASHBOARD
+            ================================== -->
 
-                    <div
-                        id="currentSectionTitle"
-                        class="topbar-title"
-                    >
-                        Главная
-                    </div>
-
-                    <div
-                        id="currentSectionSubtitle"
-                        class="topbar-subtitle"
-                    >
-                        Управление сайтом
-                    </div>
-
-                </div>
-
-
-                <div class="topbar-actions">
-
-                    <button
-                        id="refreshButton"
-                        class="icon-button"
-                        type="button"
-                        title="Обновить"
-                    >
-                        ↻
-                    </button>
-
-
-                    <div
-                        id="adminUserEmail"
-                        class="admin-user-email"
-                    ></div>
-
-                </div>
-
-            </header>
-
-
-            <!-- =============================================
-                 CONTENT
-                 ============================================= -->
-
-            <div
-                id="adminContent"
-                class="admin-content"
+            <section
+                class="tab-panel active"
+                id="tab-dashboard"
             >
 
+                <div class="welcome-card">
 
-                <!-- =========================================
-                     DASHBOARD
-                     ========================================= -->
+                    <div>
 
-                <section
-                    id="section-dashboard"
-                    class="admin-section active"
-                >
+                        <span class="section-label">
+                            ХК ЧЕЛНЫ 2011
+                        </span>
 
-                    <div class="section-heading">
+                        <h2>
+                            Управляй сайтом
+                            команды в одном месте.
+                        </h2>
 
-                        <div>
+                        <p>
+                            Матчи, игроки, новости, медиа,
+                            магазин и оформление сайта.
+                        </p>
 
-                            <div class="eyebrow">
-                                CONTROL CENTER
-                            </div>
+                    </div>
 
-                            <h1>
-                                Панель управления
-                            </h1>
+                    <div class="welcome-mark">
+                        Х
+                    </div>
 
-                            <p>
-                                Управляй всем содержимым сайта
-                                ХК Челны 2011 из одного места.
-                            </p>
+                </div>
 
-                        </div>
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <span>Матчи</span>
+
+                        <strong id="statMatches">
+                            —
+                        </strong>
+
+                        <small>
+                            всего
+                        </small>
 
                     </div>
 
 
-                    <div
-                        id="dashboardStats"
-                        class="dashboard-stats"
-                    ></div>
+                    <div class="stat-card">
 
+                        <span>Игроки</span>
 
-                    <div class="dashboard-grid">
+                        <strong id="statPlayers">
+                            —
+                        </strong>
 
-
-                        <div class="admin-card dashboard-card">
-
-                            <div class="card-icon">
-                                🏒
-                            </div>
-
-                            <div class="card-title">
-                                Ближайший матч
-                            </div>
-
-                            <div
-                                id="dashboardNextMatch"
-                                class="dashboard-card-content"
-                            >
-                                Загрузка...
-                            </div>
-
-                        </div>
-
-
-                        <div class="admin-card dashboard-card">
-
-                            <div class="card-icon">
-                                👥
-                            </div>
-
-                            <div class="card-title">
-                                Состав
-                            </div>
-
-                            <div
-                                id="dashboardPlayers"
-                                class="dashboard-card-content"
-                            >
-                                Загрузка...
-                            </div>
-
-                        </div>
-
-
-                        <div class="admin-card dashboard-card">
-
-                            <div class="card-icon">
-                                N
-                            </div>
-
-                            <div class="card-title">
-                                Новости
-                            </div>
-
-                            <div
-                                id="dashboardNews"
-                                class="dashboard-card-content"
-                            >
-                                Загрузка...
-                            </div>
-
-                        </div>
-
-
-                        <div class="admin-card dashboard-card">
-
-                            <div class="card-icon">
-                                ▣
-                            </div>
-
-                            <div class="card-title">
-                                Медиа
-                            </div>
-
-                            <div
-                                id="dashboardAlbums"
-                                class="dashboard-card-content"
-                            >
-                                Загрузка...
-                            </div>
-
-                        </div>
+                        <small>
+                            в составе
+                        </small>
 
                     </div>
 
 
-                    <div class="admin-card">
+                    <div class="stat-card">
 
-                        <div class="card-header">
+                        <span>Новости</span>
+
+                        <strong id="statNews">
+                            —
+                        </strong>
+
+                        <small>
+                            публикаций
+                        </small>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <span>Альбомы</span>
+
+                        <strong id="statAlbums">
+                            —
+                        </strong>
+
+                        <small>
+                            медиа
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-grid">
+
+                    <div class="panel">
+
+                        <div class="panel-head">
 
                             <div>
+                                <span class="section-label">
+                                    БЫСТРЫЕ ДЕЙСТВИЯ
+                                </span>
 
-                                <div class="card-title">
-                                    Быстрые действия
-                                </div>
-
-                                <div class="card-description">
-                                    Часто используемые функции
-                                </div>
-
+                                <h3>
+                                    Добавить
+                                </h3>
                             </div>
 
                         </div>
@@ -652,322 +364,856 @@
                         <div class="quick-actions">
 
                             <button
-                                class="quick-action"
-                                data-section="matches"
                                 type="button"
+                                class="quick-action"
+                                data-open-tab="matches"
                             >
-                                <span>
-                                    🏒
-                                </span>
-                                Добавить матч
+                                <span>▣</span>
+                                <strong>Матч</strong>
+                                <small>Создать матч</small>
                             </button>
 
 
                             <button
-                                class="quick-action"
-                                data-section="players"
                                 type="button"
+                                class="quick-action"
+                                data-open-tab="news"
                             >
-                                <span>
-                                    +
-                                </span>
-                                Добавить игрока
+                                <span>▤</span>
+                                <strong>Новость</strong>
+                                <small>Опубликовать</small>
                             </button>
 
 
                             <button
-                                class="quick-action"
-                                data-section="news"
                                 type="button"
+                                class="quick-action"
+                                data-open-tab="players"
                             >
-                                <span>
-                                    N
-                                </span>
-                                Добавить новость
+                                <span>♙</span>
+                                <strong>Игрок</strong>
+                                <small>Добавить игрока</small>
                             </button>
 
 
                             <button
-                                class="quick-action"
-                                data-section="media"
                                 type="button"
-                            >
-                                <span>
-                                    +
-                                </span>
-                                Создать альбом
-                            </button>
-
-
-                            <button
                                 class="quick-action"
-                                data-section="products"
-                                type="button"
+                                data-open-tab="media"
                             >
-                                <span>
-                                    ₽
-                                </span>
-                                Добавить товар
+                                <span>▧</span>
+                                <strong>Фото</strong>
+                                <small>Создать альбом</small>
                             </button>
 
                         </div>
 
                     </div>
 
-                </section>
 
+                    <div class="panel">
 
-                <!-- =========================================
-                     HOMEPAGE
-                     ========================================= -->
+                        <div class="panel-head">
 
-                <section
-                    id="section-homepage"
-                    class="admin-section"
-                >
+                            <div>
 
-                    <div class="section-heading">
+                                <span class="section-label">
+                                    САЙТ
+                                </span>
 
-                        <div>
+                                <h3>
+                                    Состояние
+                                </h3>
 
-                            <div class="eyebrow">
-                                HOMEPAGE
                             </div>
-
-                            <h1>
-                                Главная сайта
-                            </h1>
-
-                            <p>
-                                Выбери, что будет отображаться
-                                на главной странице.
-                            </p>
 
                         </div>
 
 
+                        <div class="system-list">
+
+                            <div class="system-row">
+
+                                <span>
+                                    Supabase
+                                </span>
+
+                                <b
+                                    id="systemSupabase"
+                                    class="status-badge pending"
+                                >
+                                    Проверка
+                                </b>
+
+                            </div>
+
+
+                            <div class="system-row">
+
+                                <span>
+                                    Хранилище
+                                </span>
+
+                                <b
+                                    id="systemStorage"
+                                    class="status-badge pending"
+                                >
+                                    Проверка
+                                </b>
+
+                            </div>
+
+
+                            <div class="system-row">
+
+                                <span>
+                                    Данные
+                                </span>
+
+                                <b
+                                    id="systemData"
+                                    class="status-badge pending"
+                                >
+                                    Проверка
+                                </b>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-head">
+
+                        <div>
+
+                            <span class="section-label">
+                                ПОСЛЕДНИЙ МАТЧ
+                            </span>
+
+                            <h3>
+                                Последний сыгранный
+                            </h3>
+
+                        </div>
+
                         <button
-                            id="saveHomepageButton"
-                            class="primary-button"
+                            class="text-button"
                             type="button"
+                            data-open-tab="matches"
                         >
-                            Сохранить
+                            Все матчи →
                         </button>
 
                     </div>
 
 
-                    <div class="admin-grid-2">
+                    <div id="latestMatchDashboard">
+
+                        <div class="empty-state">
+                            Загрузка...
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
 
 
-                        <div class="admin-card">
 
-                            <div class="card-header">
+            <!-- =================================
+                 MATCHES
+            ================================== -->
 
-                                <div>
+            <section
+                class="tab-panel"
+                id="tab-matches"
+            >
 
-                                    <div class="card-title">
-                                        Главный матч
-                                    </div>
+                <div class="section-header">
 
-                                    <div class="card-description">
-                                        Матч, который будет показан
-                                        в большом блоке сверху.
-                                    </div>
+                    <div>
 
-                                </div>
+                        <span class="section-label">
+                            СПОРТИВНАЯ ЧАСТЬ
+                        </span>
+
+                        <h2>
+                            Матчи
+                        </h2>
+
+                        <p>
+                            Управление расписанием и результатами.
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="primary-button"
+                        id="addMatchButton"
+                        type="button"
+                    >
+                        + Добавить матч
+                    </button>
+
+                </div>
+
+
+                <div class="filter-bar">
+
+                    <input
+                        type="search"
+                        id="matchSearch"
+                        placeholder="Поиск команды..."
+                    >
+
+                    <select id="matchFilter">
+
+                        <option value="all">
+                            Все
+                        </option>
+
+                        <option value="upcoming">
+                            Предстоящие
+                        </option>
+
+                        <option value="played">
+                            Сыгранные
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    class="cards-list"
+                    id="matchesList"
+                ></div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 PLAYERS
+            ================================== -->
+
+            <section
+                class="tab-panel"
+                id="tab-players"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            СОСТАВ
+                        </span>
+
+                        <h2>
+                            Игроки
+                        </h2>
+
+                        <p>
+                            Состав команды и индивидуальная статистика.
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="primary-button"
+                        id="addPlayerButton"
+                        type="button"
+                    >
+                        + Добавить игрока
+                    </button>
+
+                </div>
+
+
+                <div class="filter-bar">
+
+                    <input
+                        type="search"
+                        id="playerSearch"
+                        placeholder="Поиск игрока..."
+                    >
+
+                    <select id="playerPositionFilter">
+
+                        <option value="all">
+                            Все позиции
+                        </option>
+
+                        <option value="Вратарь">
+                            Вратари
+                        </option>
+
+                        <option value="Защитник">
+                            Защитники
+                        </option>
+
+                        <option value="Нападающий">
+                            Нападающие
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    class="players-grid"
+                    id="playersList"
+                ></div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 NEWS
+            ================================== -->
+
+            <section
+                class="tab-panel"
+                id="tab-news"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            КОНТЕНТ
+                        </span>
+
+                        <h2>
+                            Новости
+                        </h2>
+
+                        <p>
+                            Публикации, которые отображаются на сайте.
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="primary-button"
+                        id="addNewsButton"
+                        type="button"
+                    >
+                        + Добавить новость
+                    </button>
+
+                </div>
+
+
+                <div class="filter-bar">
+
+                    <input
+                        type="search"
+                        id="newsSearch"
+                        placeholder="Поиск по новостям..."
+                    >
+
+                    <select id="newsStatusFilter">
+
+                        <option value="all">
+                            Все
+                        </option>
+
+                        <option value="published">
+                            Опубликованные
+                        </option>
+
+                        <option value="hidden">
+                            Скрытые
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    class="cards-list"
+                    id="newsList"
+                ></div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 MEDIA
+            ================================== -->
+
+            <section
+                class="tab-panel"
+                id="tab-media"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            ФОТО И ВИДЕО
+                        </span>
+
+                        <h2>
+                            Медиа
+                        </h2>
+
+                        <p>
+                            Альбомы и фотографии команды.
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="primary-button"
+                        id="addAlbumButton"
+                        type="button"
+                    >
+                        + Создать альбом
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="albums-grid"
+                    id="albumsList"
+                ></div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 STANDINGS
+            ================================== -->
+
+            <section
+                class="tab-panel"
+                id="tab-standings"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            ЧЕМПИОНАТ
+                        </span>
+
+                        <h2>
+                            Турнирная таблица
+                        </h2>
+
+                        <p>
+                            Управление командами и очками.
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="primary-button"
+                        id="addStandingButton"
+                        type="button"
+                    >
+                        + Добавить команду
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="standings-list"
+                    id="standingsList"
+                ></div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 PRODUCTS
+            ================================== -->
+
+            <section
+                class="tab-panel"
+                id="tab-products"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            МАГАЗИН
+                        </span>
+
+                        <h2>
+                            Товары
+                        </h2>
+
+                        <p>
+                            Товары, изображения и ссылки магазина.
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="primary-button"
+                        id="addProductButton"
+                        type="button"
+                    >
+                        + Добавить товар
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="products-grid"
+                    id="productsList"
+                ></div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 EXTRAS
+            ================================== -->
+
+            <section
+                class="tab-panel"
+                id="tab-extras"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            ДОПОЛНИТЕЛЬНО
+                        </span>
+
+                        <h2>
+                            Дополнительные разделы
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="extras-grid">
+
+
+                    <div class="panel">
+
+                        <div class="panel-head">
+
+                            <div>
+
+                                <span class="section-label">
+                                    ДОСТИЖЕНИЯ
+                                </span>
+
+                                <h3>
+                                    Достижения
+                                </h3>
 
                             </div>
 
+                            <button
+                                class="small-primary"
+                                id="addAchievementButton"
+                                type="button"
+                            >
+                                +
+                            </button>
 
-                            <div class="form-group">
+                        </div>
 
-                                <label for="homepageHeroMatch">
-                                    Матч
-                                </label>
+                        <div
+                            id="achievementsList"
+                            class="mini-list"
+                        ></div>
 
-                                <select
-                                    id="homepageHeroMatch"
-                                >
+                    </div>
 
-                                    <option value="">
-                                        Автоматически
-                                    </option>
 
-                                </select>
+                    <div class="panel">
+
+                        <div class="panel-head">
+
+                            <div>
+
+                                <span class="section-label">
+                                    ДНИ РОЖДЕНИЯ
+                                </span>
+
+                                <h3>
+                                    Дни рождения
+                                </h3>
+
+                            </div>
+
+                            <button
+                                class="small-primary"
+                                id="addBirthdayButton"
+                                type="button"
+                            >
+                                +
+                            </button>
+
+                        </div>
+
+                        <div
+                            id="birthdaysList"
+                            class="mini-list"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div class="panel-head">
+
+                            <div>
+
+                                <span class="section-label">
+                                    СОБЫТИЯ
+                                </span>
+
+                                <h3>
+                                    События матчей
+                                </h3>
+
+                            </div>
+
+                            <button
+                                class="small-primary"
+                                id="addEventButton"
+                                type="button"
+                            >
+                                +
+                            </button>
+
+                        </div>
+
+                        <div
+                            id="eventsList"
+                            class="mini-list"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div class="panel-head">
+
+                            <div>
+
+                                <span class="section-label">
+                                    ПЕРИОДЫ
+                                </span>
+
+                                <h3>
+                                    Периоды матчей
+                                </h3>
+
+                            </div>
+
+                            <button
+                                class="small-primary"
+                                id="addPeriodButton"
+                                type="button"
+                            >
+                                +
+                            </button>
+
+                        </div>
+
+                        <div
+                            id="periodsList"
+                            class="mini-list"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 DESIGN
+            ================================== -->
+
+            <section
+                class="tab-panel"
+                id="tab-design"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            ВНЕШНИЙ ВИД
+                        </span>
+
+                        <h2>
+                            Дизайн сайта
+                        </h2>
+
+                        <p>
+                            Основные цвета, шрифты и изображения.
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="primary-button"
+                        id="saveDesignButton"
+                        type="button"
+                    >
+                        Сохранить дизайн
+                    </button>
+
+                </div>
+
+
+                <div class="design-grid">
+
+
+                    <div class="panel">
+
+                        <div class="panel-head">
+
+                            <div>
+
+                                <span class="section-label">
+                                    ЦВЕТА
+                                </span>
+
+                                <h3>
+                                    Палитра
+                                </h3>
 
                             </div>
 
                         </div>
 
 
-                        <div class="admin-card">
+                        <div class="color-grid">
 
-                            <div class="card-header">
+                            <label class="color-field">
+
+                                <span>
+                                    Основной
+                                </span>
 
                                 <div>
-
-                                    <div class="card-title">
-                                        Последний матч
-                                    </div>
-
-                                    <div class="card-description">
-                                        Обычно определяется
-                                        автоматически.
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="form-group">
-
-                                <label>
-                                    Отображать
-                                </label>
-
-                                <label class="switch-row">
-
                                     <input
-                                        id="homepageShowLastMatch"
-                                        type="checkbox"
-                                        checked
+                                        type="color"
+                                        id="colorPrimary"
+                                        value="#000056"
                                     >
 
-                                    <span>
-                                        Показывать последний сыгранный матч
-                                    </span>
-
-                                </label>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="admin-card">
-
-                            <div class="card-header">
-
-                                <div>
-
-                                    <div class="card-title">
-                                        Новости
-                                    </div>
-
+                                    <input
+                                        type="text"
+                                        id="colorPrimaryText"
+                                        value="#000056"
+                                    >
                                 </div>
-
-                            </div>
-
-
-                            <label class="switch-row">
-
-                                <input
-                                    id="homepageShowNews"
-                                    type="checkbox"
-                                    checked
-                                >
-
-                                <span>
-                                    Показывать новости
-                                </span>
 
                             </label>
 
-                        </div>
 
-
-                        <div class="admin-card">
-
-                            <div class="card-header">
-
-                                <div>
-
-                                    <div class="card-title">
-                                        Лидеры
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <label class="switch-row">
-
-                                <input
-                                    id="homepageShowLeaders"
-                                    type="checkbox"
-                                    checked
-                                >
+                            <label class="color-field">
 
                                 <span>
-                                    Показывать ТОП-3
+                                    Акцент
                                 </span>
+
+                                <div>
+                                    <input
+                                        type="color"
+                                        id="colorAccent"
+                                        value="#ffcd00"
+                                    >
+
+                                    <input
+                                        type="text"
+                                        id="colorAccentText"
+                                        value="#ffcd00"
+                                    >
+                                </div>
 
                             </label>
 
-                        </div>
 
-
-                        <div class="admin-card">
-
-                            <div class="card-header">
-
-                                <div>
-
-                                    <div class="card-title">
-                                        Достижения
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <label class="switch-row">
-
-                                <input
-                                    id="homepageShowAchievements"
-                                    type="checkbox"
-                                    checked
-                                >
+                            <label class="color-field">
 
                                 <span>
-                                    Показывать достижения
+                                    Тёмный
                                 </span>
+
+                                <div>
+                                    <input
+                                        type="color"
+                                        id="colorDark"
+                                        value="#050b22"
+                                    >
+
+                                    <input
+                                        type="text"
+                                        id="colorDarkText"
+                                        value="#050b22"
+                                    >
+                                </div>
 
                             </label>
 
-                        </div>
 
-
-                        <div class="admin-card">
-
-                            <div class="card-header">
-
-                                <div>
-
-                                    <div class="card-title">
-                                        Дни рождения
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <label class="switch-row">
-
-                                <input
-                                    id="homepageShowBirthdays"
-                                    type="checkbox"
-                                    checked
-                                >
+                            <label class="color-field">
 
                                 <span>
-                                    Показывать дни рождения
+                                    Вторичный
                                 </span>
+
+                                <div>
+                                    <input
+                                        type="color"
+                                        id="colorSecondary"
+                                        value="#0d1738"
+                                    >
+
+                                    <input
+                                        type="text"
+                                        id="colorSecondaryText"
+                                        value="#0d1738"
+                                    >
+                                </div>
 
                             </label>
 
@@ -976,21 +1222,19 @@
                     </div>
 
 
-                    <div class="admin-card">
+                    <div class="panel">
 
-                        <div class="card-header">
+                        <div class="panel-head">
 
                             <div>
 
-                                <div class="card-title">
-                                    Порядок блоков
-                                </div>
+                                <span class="section-label">
+                                    ЛОГОТИП
+                                </span>
 
-                                <div class="card-description">
-                                    Здесь позже можно будет
-                                    менять порядок блоков
-                                    главной страницы.
-                                </div>
+                                <h3>
+                                    Логотип сайта
+                                </h3>
 
                             </div>
 
@@ -998,1178 +1242,701 @@
 
 
                         <div
-                            id="homepageBlocks"
-                            class="homepage-blocks"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =========================================
-                     MATCHES
-                     ========================================= -->
-
-                <section
-                    id="section-matches"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                MATCH CENTER
-                            </div>
-
-                            <h1>
-                                Матчи
-                            </h1>
-
-                            <p>
-                                Расписание, составы,
-                                события и судейская бригада.
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="addMatchButton"
-                            class="primary-button"
-                            type="button"
+                            class="upload-box"
+                            id="logoUploadBox"
                         >
-                            + Добавить матч
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="matchesAdminList"
-                        class="admin-list"
-                    ></div>
-
-                </section>
-
-
-                <!-- =========================================
-                     PLAYERS
-                     ========================================= -->
-
-                <section
-                    id="section-players"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                ROSTER
-                            </div>
-
-                            <h1>
-                                Состав
-                            </h1>
-
-                            <p>
-                                Игроки, фотографии,
-                                характеристики и статистика.
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="addPlayerButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            + Добавить игрока
-                        </button>
-
-                    </div>
-
-
-                    <div class="players-admin-tabs">
-
-                        <button
-                            class="admin-filter active"
-                            data-player-filter="all"
-                            type="button"
-                        >
-                            Все
-                        </button>
-
-                        <button
-                            class="admin-filter"
-                            data-player-filter="goalie"
-                            type="button"
-                        >
-                            Вратари
-                        </button>
-
-                        <button
-                            class="admin-filter"
-                            data-player-filter="defense"
-                            type="button"
-                        >
-                            Защитники
-                        </button>
-
-                        <button
-                            class="admin-filter"
-                            data-player-filter="forward"
-                            type="button"
-                        >
-                            Нападающие
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="playersAdminList"
-                        class="players-admin-grid"
-                    ></div>
-
-                </section>
-
-
-                <!-- =========================================
-                     STATS
-                     ========================================= -->
-
-                <section
-                    id="section-stats"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                STATISTICS
-                            </div>
-
-                            <h1>
-                                Статистика
-                            </h1>
-
-                            <p>
-                                Голы, передачи, очки,
-                                штрафы и вратарская статистика.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="stats-actions">
-
-                        <button
-                            id="addGoalButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            + Добавить гол
-                        </button>
-
-
-                        <button
-                            id="addAssistButton"
-                            class="secondary-button"
-                            type="button"
-                        >
-                            + Добавить передачу
-                        </button>
-
-
-                        <button
-                            id="addPenaltyButton"
-                            class="secondary-button"
-                            type="button"
-                        >
-                            + Добавить штраф
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="statsAdminList"
-                        class="admin-card"
-                    ></div>
-
-                </section>
-
-
-                <!-- =========================================
-                     NEWS
-                     ========================================= -->
-
-                <section
-                    id="section-news"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                NEWSROOM
-                            </div>
-
-                            <h1>
-                                Новости
-                            </h1>
-
-                            <p>
-                                Публикации команды.
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="addNewsButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            + Добавить новость
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="newsAdminList"
-                        class="admin-list"
-                    ></div>
-
-                </section>
-
-
-                <!-- =========================================
-                     MEDIA
-                     ========================================= -->
-
-                <section
-                    id="section-media"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                MEDIA
-                            </div>
-
-                            <h1>
-                                Медиа
-                            </h1>
-
-                            <p>
-                                Фотоальбомы и фотографии матчей.
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="addAlbumButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            + Создать альбом
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="albumsAdminList"
-                        class="album-admin-grid"
-                    ></div>
-
-                </section>
-
-
-                <!-- =========================================
-                     PRODUCTS
-                     ========================================= -->
-
-                <section
-                    id="section-products"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                SHOP
-                            </div>
-
-                            <h1>
-                                Товары
-                            </h1>
-
-                            <p>
-                                Атрибутика и товары команды.
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="addProductButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            + Добавить товар
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="productsAdminList"
-                        class="products-admin-grid"
-                    ></div>
-
-                </section>
-
-
-                <!-- =========================================
-                     STANDINGS
-                     ========================================= -->
-
-                <section
-                    id="section-standings"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                LEAGUE TABLE
-                            </div>
-
-                            <h1>
-                                Таблица
-                            </h1>
-
-                            <p>
-                                Заполни турнирную таблицу вручную.
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="addStandingButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            + Добавить команду
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="standingsAdminList"
-                        class="admin-card"
-                    ></div>
-
-                </section>
-
-
-                <!-- =========================================
-                     BIRTHDAYS
-                     ========================================= -->
-
-                <section
-                    id="section-birthdays"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                BIRTHDAYS
-                            </div>
-
-                            <h1>
-                                Дни рождения
-                            </h1>
-
-                            <p>
-                                Игроки, которых нужно поздравить
-                                на главной.
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="addBirthdayButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            + Добавить
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="birthdaysAdminList"
-                        class="admin-list"
-                    ></div>
-
-                </section>
-
-
-                <!-- =========================================
-                     ACHIEVEMENTS
-                     ========================================= -->
-
-                <section
-                    id="section-achievements"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                ACHIEVEMENTS
-                            </div>
-
-                            <h1>
-                                Достижения
-                            </h1>
-
-                            <p>
-                                Кубки, турниры и достижения команды.
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="addAchievementButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            + Добавить
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="achievementsAdminList"
-                        class="achievements-admin-list"
-                    ></div>
-
-                </section>
-
-
-                <!-- =========================================
-                     REGISTRY
-                     ========================================= -->
-
-                <section
-                    id="section-registry"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                REGISTRY
-                            </div>
-
-                            <h1>
-                                Реестры
-                            </h1>
-
-                            <p>
-                                Команды, арены и другие данные,
-                                которые используются при создании матчей.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="admin-grid-2">
-
-
-                        <div class="admin-card">
-
-                            <div class="card-header">
-
-                                <div>
-
-                                    <div class="card-title">
-                                        Команды
-                                    </div>
-
-                                    <div class="card-description">
-                                        Реестр соперников.
-                                    </div>
-
-                                </div>
-
-                                <button
-                                    id="addRegistryTeamButton"
-                                    class="small-button"
-                                    type="button"
-                                >
-                                    + Добавить
-                                </button>
-
-                            </div>
-
 
                             <div
-                                id="registryTeamsList"
-                                class="registry-list"
-                            ></div>
-
-                        </div>
-
-
-                        <div class="admin-card">
-
-                            <div class="card-header">
-
-                                <div>
-
-                                    <div class="card-title">
-                                        Арены
-                                    </div>
-
-                                    <div class="card-description">
-                                        Места проведения матчей.
-                                    </div>
-
-                                </div>
-
-                                <button
-                                    id="addRegistryVenueButton"
-                                    class="small-button"
-                                    type="button"
-                                >
-                                    + Добавить
-                                </button>
-
-                            </div>
-
-
-                            <div
-                                id="registryVenuesList"
-                                class="registry-list"
-                            ></div>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =========================================
-                     DESIGN
-                     ========================================= -->
-
-                <section
-                    id="section-design"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                VISUAL SYSTEM
-                            </div>
-
-                            <h1>
-                                Дизайн
-                            </h1>
-
-                            <p>
-                                Цвета, логотипы, иконки и шрифты.
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="saveDesignButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            Сохранить
-                        </button>
-
-                    </div>
-
-
-                    <div class="admin-grid-2">
-
-
-                        <div class="admin-card">
-
-                            <div class="card-header">
-
-                                <div>
-
-                                    <div class="card-title">
-                                        Основные цвета
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="color-grid">
-
-
-                                <div class="color-field">
-
-                                    <label for="colorPrimary">
-                                        Основной
-                                    </label>
-
-                                    <div class="color-input">
-
-                                        <input
-                                            id="colorPrimary"
-                                            type="color"
-                                            value="#000056"
-                                        >
-
-                                        <input
-                                            id="colorPrimaryHex"
-                                            type="text"
-                                            value="#000056"
-                                            maxlength="7"
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="color-field">
-
-                                    <label for="colorAccent">
-                                        Акцент
-                                    </label>
-
-                                    <div class="color-input">
-
-                                        <input
-                                            id="colorAccent"
-                                            type="color"
-                                            value="#ffcd00"
-                                        >
-
-                                        <input
-                                            id="colorAccentHex"
-                                            type="text"
-                                            value="#ffcd00"
-                                            maxlength="7"
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="color-field">
-
-                                    <label for="colorBackground">
-                                        Фон
-                                    </label>
-
-                                    <div class="color-input">
-
-                                        <input
-                                            id="colorBackground"
-                                            type="color"
-                                            value="#050b22"
-                                        >
-
-                                        <input
-                                            id="colorBackgroundHex"
-                                            type="text"
-                                            value="#050b22"
-                                            maxlength="7"
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="color-field">
-
-                                    <label for="colorSurface">
-                                        Карточки
-                                    </label>
-
-                                    <div class="color-input">
-
-                                        <input
-                                            id="colorSurface"
-                                            type="color"
-                                            value="#0d1738"
-                                        >
-
-                                        <input
-                                            id="colorSurfaceHex"
-                                            type="text"
-                                            value="#0d1738"
-                                            maxlength="7"
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="color-field">
-
-                                    <label for="colorText">
-                                        Текст
-                                    </label>
-
-                                    <div class="color-input">
-
-                                        <input
-                                            id="colorText"
-                                            type="color"
-                                            value="#ffffff"
-                                        >
-
-                                        <input
-                                            id="colorTextHex"
-                                            type="text"
-                                            value="#ffffff"
-                                            maxlength="7"
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="color-field">
-
-                                    <label for="colorMuted">
-                                        Вторичный текст
-                                    </label>
-
-                                    <div class="color-input">
-
-                                        <input
-                                            id="colorMuted"
-                                            type="color"
-                                            value="#aab5d5"
-                                        >
-
-                                        <input
-                                            id="colorMutedHex"
-                                            type="text"
-                                            value="#aab5d5"
-                                            maxlength="7"
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="color-field">
-
-                                    <label for="colorBorder">
-                                        Границы
-                                    </label>
-
-                                    <div class="color-input">
-
-                                        <input
-                                            id="colorBorder"
-                                            type="color"
-                                            value="#26345f"
-                                        >
-
-                                        <input
-                                            id="colorBorderHex"
-                                            type="text"
-                                            value="#26345f"
-                                            maxlength="7"
-                                        >
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="admin-card">
-
-                            <div class="card-header">
-
-                                <div>
-
-                                    <div class="card-title">
-                                        Логотип
-                                    </div>
-
-                                    <div class="card-description">
-                                        Загрузи изображение
-                                        прямо с телефона.
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <div
+                                class="upload-preview"
                                 id="logoPreview"
-                                class="image-preview logo-preview"
-                            ></div>
-
-
-                            <label
-                                class="upload-button"
-                                for="logoUpload"
                             >
-                                Выбрать изображение
-                            </label>
+                                ЛОГО
+                            </div>
+
+                            <div class="upload-info">
+
+                                <strong>
+                                    Загрузить логотип
+                                </strong>
+
+                                <span>
+                                    PNG, JPG, WEBP, SVG
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="secondary-button"
+                                    id="logoUploadButton"
+                                >
+                                    Выбрать файл
+                                </button>
+
+                            </div>
 
                             <input
-                                id="logoUpload"
                                 type="file"
-                                accept="image/*"
+                                id="logoFile"
+                                accept="image/*,.svg"
                                 hidden
                             >
 
                         </div>
 
-
-                        <div class="admin-card">
-
-                            <div class="card-header">
-
-                                <div>
-
-                                    <div class="card-title">
-                                        Заголовок сайта
-                                    </div>
-
-                                </div>
-
-                            </div>
+                    </div>
 
 
-                            <div class="form-group">
+                    <div class="panel">
 
-                                <label for="designTeamName">
-                                    Название
-                                </label>
+                        <div class="panel-head">
 
-                                <input
-                                    id="designTeamName"
-                                    type="text"
-                                    placeholder="ХК Челны 2011"
-                                >
+                            <div>
 
-                            </div>
+                                <span class="section-label">
+                                    ШРИФТЫ
+                                </span>
 
-
-                            <div class="form-group">
-
-                                <label for="designSubtitle">
-                                    Нижняя строка
-                                </label>
-
-                                <input
-                                    id="designSubtitle"
-                                    type="text"
-                                    placeholder="НАБЕРЕЖНЫЕ ЧЕЛНЫ"
-                                >
-
-                            </div>
-
-
-                            <div class="form-group">
-
-                                <label for="designTitleSize">
-                                    Размер заголовка
-                                </label>
-
-                                <input
-                                    id="designTitleSize"
-                                    type="number"
-                                    min="12"
-                                    max="60"
-                                    value="24"
-                                >
+                                <h3>
+                                    Шрифты
+                                </h3>
 
                             </div>
 
                         </div>
 
 
-                        <div class="admin-card">
+                        <div class="font-list">
 
-                            <div class="card-header">
+
+                            <div class="font-upload">
 
                                 <div>
+                                    <strong>
+                                        Stapel
+                                    </strong>
 
-                                    <div class="card-title">
-                                        Иконки
-                                    </div>
-
-                                    <div class="card-description">
-                                        Пользовательские иконки
-                                        для сайта.
-                                    </div>
-
+                                    <span>
+                                        Основной шрифт
+                                    </span>
                                 </div>
 
                                 <button
-                                    id="addIconButton"
-                                    class="small-button"
+                                    class="secondary-button"
                                     type="button"
+                                    data-font="stapel"
                                 >
-                                    + Добавить
+                                    Загрузить
                                 </button>
 
+                                <input
+                                    type="file"
+                                    class="font-input"
+                                    data-font-input="stapel"
+                                    accept=".woff,.woff2,.ttf,.otf"
+                                    hidden
+                                >
+
                             </div>
 
 
-                            <div
-                                id="iconsAdminList"
-                                class="icons-admin-list"
-                            ></div>
+                            <div class="font-upload">
 
-                        </div>
+                                <div>
+                                    <strong>
+                                        Stengazeta
+                                    </strong>
 
-                    </div>
+                                    <span>
+                                        Заголовки
+                                    </span>
+                                </div>
 
-                </section>
+                                <button
+                                    class="secondary-button"
+                                    type="button"
+                                    data-font="stengazeta"
+                                >
+                                    Загрузить
+                                </button>
 
+                                <input
+                                    type="file"
+                                    class="font-input"
+                                    data-font-input="stengazeta"
+                                    accept=".woff,.woff2,.ttf,.otf"
+                                    hidden
+                                >
 
-                <!-- =========================================
-                     SETTINGS
-                     ========================================= -->
-
-                <section
-                    id="section-settings"
-                    class="admin-section"
-                >
-
-                    <div class="section-heading">
-
-                        <div>
-
-                            <div class="eyebrow">
-                                SETTINGS
                             </div>
 
-                            <h1>
-                                Настройки
-                            </h1>
 
-                            <p>
-                                Общие параметры сайта.
-                            </p>
+                            <div class="font-upload">
 
-                        </div>
+                                <div>
+                                    <strong>
+                                        Christopher
+                                    </strong>
 
+                                    <span>
+                                        Акцентный
+                                    </span>
+                                </div>
 
-                        <button
-                            id="saveSettingsButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            Сохранить
-                        </button>
+                                <button
+                                    class="secondary-button"
+                                    type="button"
+                                    data-font="christopher"
+                                >
+                                    Загрузить
+                                </button>
 
-                    </div>
+                                <input
+                                    type="file"
+                                    class="font-input"
+                                    data-font-input="christopher"
+                                    accept=".woff,.woff2,.ttf,.otf"
+                                    hidden
+                                >
 
-
-                    <div class="admin-card">
-
-                        <div class="form-group">
-
-                            <label for="settingsTeamName">
-                                Название команды
-                            </label>
-
-                            <input
-                                id="settingsTeamName"
-                                type="text"
-                                value="ХК Челны 2011"
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="settingsSubtitle">
-                                Подзаголовок
-                            </label>
-
-                            <input
-                                id="settingsSubtitle"
-                                type="text"
-                                value="НАБЕРЕЖНЫЕ ЧЕЛНЫ"
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="settingsTimezone">
-                                Часовой пояс
-                            </label>
-
-                            <input
-                                id="settingsTimezone"
-                                type="text"
-                                value="Europe/Moscow"
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="settingsAdminEmail">
-                                Email администратора
-                            </label>
-
-                            <input
-                                id="settingsAdminEmail"
-                                type="email"
-                                placeholder="admin@example.com"
-                            >
+                            </div>
 
                         </div>
 
                     </div>
 
-                </section>
+
+                    <div class="panel">
+
+                        <div class="panel-head">
+
+                            <div>
+
+                                <span class="section-label">
+                                    ИКОНКИ
+                                </span>
+
+                                <h3>
+                                    Иконки сайта
+                                </h3>
+
+                            </div>
+
+                        </div>
 
 
-            </div>
+                        <div class="icons-grid">
 
-        </main>
+                            <div class="icon-upload">
 
-    </div>
+                                <span>
+                                    Favicon
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="secondary-button"
+                                    data-icon="favicon"
+                                >
+                                    Загрузить
+                                </button>
+
+                                <input
+                                    type="file"
+                                    class="icon-input"
+                                    data-icon-input="favicon"
+                                    accept="image/*,.svg"
+                                    hidden
+                                >
+
+                            </div>
 
 
-    <!-- =====================================================
-         MODAL
-         ===================================================== -->
+                            <div class="icon-upload">
 
-    <div
-        id="adminModal"
-        class="admin-modal hidden"
-    >
+                                <span>
+                                    Иконка меню
+                                </span>
 
-        <div
-            id="adminModalBackdrop"
-            class="admin-modal-backdrop"
-        ></div>
+                                <button
+                                    type="button"
+                                    class="secondary-button"
+                                    data-icon="menu"
+                                >
+                                    Загрузить
+                                </button>
+
+                                <input
+                                    type="file"
+                                    class="icon-input"
+                                    data-icon-input="menu"
+                                    accept="image/*,.svg"
+                                    hidden
+                                >
+
+                            </div>
 
 
-        <div class="admin-modal-window">
+                            <div class="icon-upload">
 
-            <div class="admin-modal-header">
+                                <span>
+                                    Иконка сайта
+                                </span>
 
-                <div
-                    id="adminModalTitle"
-                    class="admin-modal-title"
-                >
-                    Редактирование
+                                <button
+                                    type="button"
+                                    class="secondary-button"
+                                    data-icon="site"
+                                >
+                                    Загрузить
+                                </button>
+
+                                <input
+                                    type="file"
+                                    class="icon-input"
+                                    data-icon-input="site"
+                                    accept="image/*,.svg"
+                                    hidden
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================
+                 SETTINGS
+            ================================== -->
+
+            <section
+                class="tab-panel"
+                id="tab-settings"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            СИСТЕМА
+                        </span>
+
+                        <h2>
+                            Настройки
+                        </h2>
+
+                        <p>
+                            Общие настройки сайта.
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="primary-button"
+                        id="saveSettingsButton"
+                        type="button"
+                    >
+                        Сохранить
+                    </button>
+
                 </div>
 
 
-                <button
-                    id="adminModalClose"
-                    class="modal-close"
-                    type="button"
+                <div class="settings-grid">
+
+
+                    <div class="panel">
+
+                        <div class="panel-head">
+
+                            <div>
+                                <span class="section-label">
+                                    КОМАНДА
+                                </span>
+
+                                <h3>
+                                    Основная информация
+                                </h3>
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-grid">
+
+                            <label class="field">
+
+                                <span>
+                                    Название
+                                </span>
+
+                                <input
+                                    id="settingTeamName"
+                                    type="text"
+                                    value="ХК Челны 2011"
+                                >
+
+                            </label>
+
+
+                            <label class="field">
+
+                                <span>
+                                    Город
+                                </span>
+
+                                <input
+                                    id="settingCity"
+                                    type="text"
+                                    value="Набережные Челны"
+                                >
+
+                            </label>
+
+
+                            <label class="field field-full">
+
+                                <span>
+                                    Описание
+                                </span>
+
+                                <textarea
+                                    id="settingDescription"
+                                    rows="4"
+                                ></textarea>
+
+                            </label>
+
+
+                            <label class="field">
+
+                                <span>
+                                    Telegram
+                                </span>
+
+                                <input
+                                    id="settingTelegram"
+                                    type="text"
+                                >
+
+                            </label>
+
+
+                            <label class="field">
+
+                                <span>
+                                    VK
+                                </span>
+
+                                <input
+                                    id="settingVk"
+                                    type="text"
+                                >
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div class="panel-head">
+
+                            <div>
+                                <span class="section-label">
+                                    ГЛАВНАЯ
+                                </span>
+
+                                <h3>
+                                    Блоки главной страницы
+                                </h3>
+                            </div>
+
+                        </div>
+
+
+                        <div class="toggle-list">
+
+                            <label class="toggle-row">
+
+                                <div>
+                                    <strong>
+                                        Ближайший матч
+                                    </strong>
+
+                                    <span>
+                                        Показывать карточку следующей игры
+                                    </span>
+                                </div>
+
+                                <input
+                                    type="checkbox"
+                                    id="homeMatch"
+                                    checked
+                                >
+
+                                <i></i>
+
+                            </label>
+
+
+                            <label class="toggle-row">
+
+                                <div>
+                                    <strong>
+                                        Новости
+                                    </strong>
+
+                                    <span>
+                                        Показывать последние новости
+                                    </span>
+                                </div>
+
+                                <input
+                                    type="checkbox"
+                                    id="homeNews"
+                                    checked
+                                >
+
+                                <i></i>
+
+                            </label>
+
+
+                            <label class="toggle-row">
+
+                                <div>
+                                    <strong>
+                                        Медиа
+                                    </strong>
+
+                                    <span>
+                                        Показывать последние фото
+                                    </span>
+                                </div>
+
+                                <input
+                                    type="checkbox"
+                                    id="homeMedia"
+                                    checked
+                                >
+
+                                <i></i>
+
+                            </label>
+
+
+                            <label class="toggle-row">
+
+                                <div>
+                                    <strong>
+                                        Турнирная таблица
+                                    </strong>
+
+                                    <span>
+                                        Показывать положение команды
+                                    </span>
+                                </div>
+
+                                <input
+                                    type="checkbox"
+                                    id="homeStandings"
+                                    checked
+                                >
+
+                                <i></i>
+
+                            </label>
+
+
+                            <label class="toggle-row">
+
+                                <div>
+                                    <strong>
+                                        Магазин
+                                    </strong>
+
+                                    <span>
+                                        Показывать товары
+                                    </span>
+                                </div>
+
+                                <input
+                                    type="checkbox"
+                                    id="homeProducts"
+                                    checked
+                                >
+
+                                <i></i>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+
+<!-- =========================================
+     MOBILE BOTTOM NAV
+========================================== -->
+
+<nav class="mobile-bottom-nav">
+
+    <button
+        class="mobile-nav-item active"
+        data-tab="dashboard"
+        type="button"
+    >
+        <span>⌂</span>
+        <small>Главная</small>
+    </button>
+
+    <button
+        class="mobile-nav-item"
+        data-tab="matches"
+        type="button"
+    >
+        <span>▣</span>
+        <small>Матчи</small>
+    </button>
+
+    <button
+        class="mobile-nav-item"
+        data-tab="players"
+        type="button"
+    >
+        <span>♙</span>
+        <small>Игроки</small>
+    </button>
+
+    <button
+        class="mobile-nav-item"
+        data-tab="news"
+        type="button"
+    >
+        <span>▤</span>
+        <small>Новости</small>
+    </button>
+
+    <button
+        class="mobile-nav-item"
+        id="mobileMore"
+        type="button"
+    >
+        <span>•••</span>
+        <small>Ещё</small>
+    </button>
+
+</nav>
+
+
+
+<!-- =========================================
+     OVERLAY
+========================================== -->
+
+<div
+    class="modal-overlay"
+    id="modalOverlay"
+    aria-hidden="true"
+>
+
+    <div
+        class="modal"
+        id="modal"
+        role="dialog"
+        aria-modal="true"
+    >
+
+        <div class="modal-head">
+
+            <div>
+
+                <span
+                    class="section-label"
+                    id="modalLabel"
                 >
-                    ×
-                </button>
+                    РЕДАКТИРОВАНИЕ
+                </span>
+
+                <h3 id="modalTitle">
+                    Добавить
+                </h3>
 
             </div>
 
+            <button
+                class="modal-close"
+                id="modalClose"
+                type="button"
+            >
+                ×
+            </button>
 
-            <div
-                id="adminModalContent"
-                class="admin-modal-content"
-            ></div>
+        </div>
+
+
+        <div
+            class="modal-body"
+            id="modalBody"
+        ></div>
+
+
+        <div class="modal-foot">
+
+            <button
+                class="secondary-button"
+                id="modalCancel"
+                type="button"
+            >
+                Отмена
+            </button>
+
+            <button
+                class="primary-button"
+                id="modalSave"
+                type="button"
+            >
+                Сохранить
+            </button>
 
         </div>
 
     </div>
 
-
-    <!-- =====================================================
-         TOAST
-         ===================================================== -->
-
-    <div
-        id="adminToast"
-        class="admin-toast"
-    ></div>
+</div>
 
 
-    <!-- =====================================================
-         SCRIPTS
-         ===================================================== -->
 
-    <script src="admin.js"></script>
+<!-- =========================================
+     TOAST
+========================================== -->
+
+<div
+    class="toast-container"
+    id="toastContainer"
+></div>
+
+
+<script src="admin.js"></script>
 
 </body>
-
 </html>
