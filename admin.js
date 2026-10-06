@@ -1,6693 +1,5396 @@
 /* =========================================================
-   ХК ЧЕЛНЫ 2011 — ADMIN PANEL
-   admin.js
+   ХК ЧЕЛНЫ 2011
+   ADMIN PANEL
    ========================================================= */
 
-(() => {
-    "use strict";
+"use strict";
 
-    /* =====================================================
-       CONFIG
-       ===================================================== */
 
-    const CONFIG = window.SITE_CONFIG || {};
+/* =========================================================
+   SUPABASE
+========================================================= */
 
-    const SUPABASE_URL =
-        CONFIG.SUPABASE_URL ||
-        CONFIG.supabaseUrl;
+const SUPABASE_URL =
+    "https://jxlbojosxaaqnyuzohnw.supabase.co";
 
-    const SUPABASE_KEY =
-        CONFIG.SUPABASE_KEY ||
-        CONFIG.supabaseKey;
+const SUPABASE_KEY =
+    "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
 
-    const STORAGE_BUCKET =
-        CONFIG.STORAGE_BUCKET ||
-        "site-media";
+const STORAGE_BUCKET =
+    "site-media";
 
-    const DEFAULTS = {
-        teamName: "ХК Челны 2011",
-        subtitle: "НАБЕРЕЖНЫЕ ЧЕЛНЫ",
-        colors: {
-            primary: "#000056",
-            accent: "#ffcd00",
-            background: "#050b22",
-            surface: "#0d1738",
-            text: "#ffffff",
-            muted: "#aab5d5",
-            border: "#26345f"
-        }
-    };
 
-    let db = null;
-    let currentUser = null;
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
-    let state = {
-        settings: null,
+
+/* =========================================================
+   DEFAULTS
+========================================================= */
+
+const DEFAULT_COLORS = {
+
+    primary: "#000056",
+
+    accent: "#ffcd00",
+
+    dark: "#050b22",
+
+    secondary: "#0d1738"
+
+};
+
+
+const TABLES = {
+
+    teams: "teams",
+
+    matches: "matches",
+
+    news: "news",
+
+    players: "players",
+
+    stats: "player_season_stats",
+
+    albums: "albums",
+
+    achievements: "achievements",
+
+    birthdays: "birthdays",
+
+    settings: "settings",
+
+    events: "match_events",
+
+    periods: "match_periods",
+
+    products: "products"
+
+};
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+const state = {
+
+    currentTab: "dashboard",
+
+    editing: null,
+
+    data: {
+
         teams: [],
-        venues: [],
+
         matches: [],
-        players: [],
-        stats: [],
+
         news: [],
+
+        players: [],
+
+        stats: [],
+
         albums: [],
-        products: [],
-        standings: [],
-        birthdays: [],
+
         achievements: [],
-        icons: []
-    };
 
-    let currentPlayerFilter = "all";
+        birthdays: [],
 
+        settings: [],
 
-    /* =====================================================
-       DOM
-       ===================================================== */
+        events: [],
 
-    const $ = (id) => document.getElementById(id);
+        periods: [],
 
-    const $$ = (selector, root = document) =>
-        Array.from(root.querySelectorAll(selector));
+        products: []
 
-
-    /* =====================================================
-       BASIC HELPERS
-       ===================================================== */
-
-    function escapeHTML(value) {
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
     }
 
-
-    function formatDate(value) {
-        if (!value) return "—";
-
-        const date = new Date(value);
-
-        if (Number.isNaN(date.getTime())) {
-            return value;
-        }
-
-        return date.toLocaleDateString("ru-RU", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric"
-        });
-    }
+};
 
 
-    function formatDateTime(date, time) {
-        if (!date) return "—";
+/* =========================================================
+   DOM
+========================================================= */
 
-        return `${formatDate(date)}${time ? ` · ${String(time).slice(0, 5)}` : ""}`;
-    }
-
-
-    function formatMoney(value) {
-        return `${Number(value || 0).toLocaleString("ru-RU")} ₽`;
-    }
+const $ = (selector, parent = document) =>
+    parent.querySelector(selector);
 
 
-    function getTeam(id) {
-        return state.teams.find(
-            team => String(team.id) === String(id)
-        );
-    }
+const $$ = (selector, parent = document) =>
+    [...parent.querySelectorAll(selector)];
 
 
-    function getPlayer(id) {
-        return state.players.find(
-            player => String(player.id) === String(id)
-        );
-    }
+/* =========================================================
+   HELPERS
+========================================================= */
 
+function escapeHTML(value) {
 
-    function getMatch(id) {
-        return state.matches.find(
-            match => String(match.id) === String(id)
-        );
-    }
-
-
-    function getTeamName(id) {
-        return getTeam(id)?.name || "—";
-    }
-
-
-    function positionName(position) {
-        const names = {
-            goalie: "Вратарь",
-            defense: "Защитник",
-            forward: "Нападающий"
-        };
-
-        return names[position] || position || "—";
-    }
-
-
-    function statusName(status) {
-        const names = {
-            scheduled: "Запланирован",
-            live: "Идёт",
-            finished: "Завершён",
-            cancelled: "Отменён"
-        };
-
-        return names[status] || status || "—";
-    }
-
-
-    function playerRoleName(role) {
-        if (role === "K") return "К";
-        if (role === "A") return "А";
+    if (value === null || value === undefined) {
         return "";
     }
 
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
 
-    /* =====================================================
-       TOAST
-       ===================================================== */
 
-    function toast(message, type = "success") {
-        const element = $("adminToast");
+function safeURL(url) {
 
-        if (!element) return;
-
-        element.textContent = message;
-
-        element.classList.remove(
-            "show",
-            "success",
-            "error",
-            "warning"
-        );
-
-        element.classList.add("show", type);
-
-        clearTimeout(toast.timer);
-
-        toast.timer = setTimeout(() => {
-            element.classList.remove("show");
-        }, 3000);
+    if (!url) {
+        return "";
     }
 
+    try {
 
-    /* =====================================================
-       MODAL
-       ===================================================== */
+        const parsed =
+            new URL(url, window.location.href);
 
-    function openModal(title, content) {
-        const modal = $("adminModal");
-        const modalTitle = $("adminModalTitle");
-        const modalContent = $("adminModalContent");
-
-        if (!modal || !modalTitle || !modalContent) return;
-
-        modalTitle.textContent = title;
-        modalContent.innerHTML = content;
-
-        modal.classList.remove("hidden");
-        document.body.classList.add("modal-open");
-    }
-
-
-    function closeModal() {
-        const modal = $("adminModal");
-
-        if (!modal) return;
-
-        modal.classList.add("hidden");
-        document.body.classList.remove("modal-open");
-    }
-
-
-    window.closeAdminModal = closeModal;
-
-
-    /* =====================================================
-       SUPABASE
-       ===================================================== */
-
-    function initSupabase() {
-        if (!SUPABASE_URL || !SUPABASE_KEY) {
-            throw new Error(
-                "Не найдены SUPABASE_URL или SUPABASE_KEY в config.js"
-            );
+        if (
+            parsed.protocol === "http:" ||
+            parsed.protocol === "https:"
+        ) {
+            return parsed.href;
         }
 
-        if (!window.supabase) {
-            throw new Error(
-                "Supabase JS не загрузился."
-            );
+    } catch (_) {}
+
+    return "";
+}
+
+
+function formatDate(date) {
+
+    if (!date) {
+        return "—";
+    }
+
+    const d = new Date(date);
+
+    if (Number.isNaN(d.getTime())) {
+        return String(date);
+    }
+
+    return d.toLocaleDateString(
+        "ru-RU",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
         }
+    );
+}
 
-        db = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
+
+function formatDateTime(date) {
+
+    if (!date) {
+        return "—";
     }
 
+    const d = new Date(date);
 
-    async function select(table, query = "*") {
-        const { data, error } = await db
-            .from(table)
-            .select(query);
-
-        if (error) throw error;
-
-        return data || [];
+    if (Number.isNaN(d.getTime())) {
+        return String(date);
     }
 
-
-    async function insert(table, values) {
-        const { data, error } = await db
-            .from(table)
-            .insert(values)
-            .select();
-
-        if (error) throw error;
-
-        return data || [];
-    }
-
-
-    async function update(table, id, values) {
-        const { data, error } = await db
-            .from(table)
-            .update(values)
-            .eq("id", id)
-            .select();
-
-        if (error) throw error;
-
-        return data || [];
-    }
-
-
-    async function remove(table, id) {
-        const { error } = await db
-            .from(table)
-            .delete()
-            .eq("id", id);
-
-        if (error) throw error;
-    }
-
-
-    /* =====================================================
-       AUTH
-       ===================================================== */
-
-    async function checkAuth() {
-        const {
-            data: {
-                session
-            }
-        } = await db.auth.getSession();
-
-        if (session?.user) {
-            currentUser = session.user;
-            showAdmin();
-        } else {
-            showLogin();
+    return d.toLocaleString(
+        "ru-RU",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
         }
+    );
+}
 
-        db.auth.onAuthStateChange(
-            async (event, sessionData) => {
 
-                if (sessionData?.user) {
-                    currentUser = sessionData.user;
-                    showAdmin();
-                } else {
-                    currentUser = null;
-                    showLogin();
-                }
-            }
-        );
+function todayISO() {
+
+    return new Date()
+        .toISOString()
+        .slice(0, 10);
+}
+
+
+function getId(item) {
+
+    return (
+        item?.id ??
+        item?.uuid ??
+        item?.match_id ??
+        item?.player_id ??
+        null
+    );
+}
+
+
+function getImage(item) {
+
+    return (
+        item?.image_url ||
+        item?.image ||
+        item?.photo_url ||
+        item?.photo ||
+        item?.cover_url ||
+        item?.avatar_url ||
+        ""
+    );
+}
+
+
+function getName(item) {
+
+    return (
+        item?.name ||
+        item?.title ||
+        item?.full_name ||
+        item?.team_name ||
+        "Без названия"
+    );
+}
+
+
+function boolValue(value) {
+
+    return (
+        value === true ||
+        value === "true" ||
+        value === 1 ||
+        value === "1"
+    );
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function toast(message, type = "success") {
+
+    const container =
+        $("#toastContainer");
+
+    if (!container) {
+        return;
     }
 
+    const item =
+        document.createElement("div");
 
-    function showLogin() {
-        $("adminLoader")?.classList.add("hidden");
-        $("adminApp")?.classList.add("hidden");
-        $("loginScreen")?.classList.remove("hidden");
+    item.className =
+        `toast ${type}`;
+
+    item.textContent =
+        message;
+
+    container.appendChild(item);
+
+    setTimeout(() => {
+
+        item.style.opacity = "0";
+
+        item.style.transform =
+            "translateY(5px)";
+
+        setTimeout(() => {
+
+            item.remove();
+
+        }, 200);
+
+    }, 3200);
+}
+
+
+/* =========================================================
+   CONNECTION
+========================================================= */
+
+function setConnection(
+    status,
+    text
+) {
+
+    const dot =
+        $("#connectionDot");
+
+    const label =
+        $("#connectionText");
+
+    if (!dot || !label) {
+        return;
     }
 
+    dot.className =
+        "connection-dot";
 
-    async function showAdmin() {
-        $("loginScreen")?.classList.add("hidden");
-        $("adminLoader")?.classList.add("hidden");
-        $("adminApp")?.classList.remove("hidden");
-
-        if ($("adminUserEmail")) {
-            $("adminUserEmail").textContent =
-                currentUser?.email || "";
-        }
-
-        await loadEverything();
+    if (status === "online") {
+        dot.classList.add("online");
     }
 
-
-    async function login(event) {
-        event?.preventDefault();
-
-        const email = $("loginEmail")?.value.trim();
-        const password = $("loginPassword")?.value;
-
-        const errorElement = $("loginError");
-
-        if (errorElement) {
-            errorElement.textContent = "";
-        }
-
-        if (!email || !password) {
-            if (errorElement) {
-                errorElement.textContent =
-                    "Введите email и пароль.";
-            }
-
-            return;
-        }
-
-        try {
-            const {
-                error
-            } = await db.auth.signInWithPassword({
-                email,
-                password
-            });
-
-            if (error) throw error;
-
-        } catch (error) {
-
-            console.error(error);
-
-            if (errorElement) {
-                errorElement.textContent =
-                    error.message ||
-                    "Не удалось войти.";
-            }
-        }
+    if (status === "offline") {
+        dot.classList.add("offline");
     }
 
+    label.textContent =
+        text;
+}
 
-    async function logout() {
-        try {
-            await db.auth.signOut();
-        } catch (error) {
-            console.error(error);
-        }
+
+function setSystem(
+    id,
+    success,
+    text
+) {
+
+    const el = $(`#${id}`);
+
+    if (!el) {
+        return;
     }
 
+    el.className =
+        `status-badge ${
+            success
+                ? "success"
+                : "error"
+        }`;
 
-    /* =====================================================
-       LOADING
-       ===================================================== */
+    el.textContent =
+        text;
+}
 
-    async function loadEverything() {
 
-        setLoaderText("Загрузка данных...");
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
-        try {
+const TAB_TITLES = {
 
-            const results = await Promise.allSettled([
-                loadSettings(),
-                loadTeams(),
-                loadMatches(),
-                loadPlayers(),
-                loadStats(),
-                loadNews(),
-                loadAlbums(),
-                loadProducts(),
-                loadStandings(),
-                loadBirthdays(),
-                loadAchievements()
-            ]);
+    dashboard: "Главная",
 
-            results.forEach(result => {
-                if (result.status === "rejected") {
-                    console.error(
-                        "Ошибка загрузки:",
-                        result.reason
-                    );
-                }
-            });
+    matches: "Матчи",
 
-            await renderEverything();
+    players: "Игроки",
 
-        } catch (error) {
-            console.error(error);
-            toast(
-                "Не удалось загрузить данные.",
-                "error"
-            );
-        }
+    news: "Новости",
 
-        setLoaderText("");
+    media: "Медиа",
+
+    standings: "Турнирная таблица",
+
+    products: "Магазин",
+
+    extras: "Дополнительно",
+
+    design: "Дизайн",
+
+    settings: "Настройки"
+
+};
+
+
+function openTab(tab) {
+
+    if (!TAB_TITLES[tab]) {
+        tab = "dashboard";
     }
 
+    state.currentTab =
+        tab;
 
-    function setLoaderText(text) {
-        const element = document.querySelector(".loader-text");
+    $$(".tab-panel")
+        .forEach(panel => {
 
-        if (element) {
-            element.textContent =
-                text || "Загрузка админ-панели...";
-        }
-    }
-
-
-    /* =====================================================
-       SETTINGS
-       ===================================================== */
-
-    async function loadSettings() {
-
-        try {
-
-            const rows = await select(
-                "settings",
-                "*"
+            panel.classList.toggle(
+                "active",
+                panel.id === `tab-${tab}`
             );
 
-            state.settings =
-                rows[0] || {
-                    id: 1,
-                    team_name: DEFAULTS.teamName,
-                    logo_url: null,
-                    primary_color: DEFAULTS.colors.primary,
-                    accent_color: DEFAULTS.colors.accent,
-                    background_color: DEFAULTS.colors.background,
-                    text_color: DEFAULTS.colors.text,
-                    font_main: "Stapel",
-                    font_heading: "Stapel",
-                    font_secondary: "Stengazeta",
-                    icons: {},
-                    homepage: {}
-                };
+        });
 
-        } catch (error) {
 
-            console.error(
-                "settings:",
-                error
+    $$(".nav-item")
+        .forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.tab === tab
             );
 
-            state.settings = {
-                id: 1,
-                team_name: DEFAULTS.teamName,
-                logo_url: null,
-                primary_color: DEFAULTS.colors.primary,
-                accent_color: DEFAULTS.colors.accent,
-                background_color: DEFAULTS.colors.background,
-                text_color: DEFAULTS.colors.text,
-                icons: {},
-                homepage: {}
-            };
-        }
+        });
+
+
+    $$(".mobile-nav-item")
+        .forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.tab === tab
+            );
+
+        });
+
+
+    const title =
+        $("#pageTitle");
+
+    if (title) {
+        title.textContent =
+            TAB_TITLES[tab];
     }
 
 
-    async function saveSettingsData(values) {
+    const sidebar =
+        $(".sidebar");
 
-        const {
-            error
-        } = await db
-            .from("settings")
-            .upsert({
-                id: 1,
-                ...values,
-                updated_at: new Date().toISOString()
-            });
-
-        if (error) throw error;
-
-        await loadSettings();
+    if (sidebar) {
+        sidebar.classList.remove("open");
     }
 
 
-    /* =====================================================
-       LOAD DATA
-       ===================================================== */
-
-    async function loadTeams() {
-        state.teams = await select(
-            "teams",
-            "*"
-        );
-    }
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
 
 
-    async function loadMatches() {
-        state.matches = await select(
-            "matches",
-            "*"
-        );
-
-        state.matches.sort(
-            (a, b) => {
-
-                const da =
-                    `${a.match_date} ${a.match_time || ""}`;
-
-                const db =
-                    `${b.match_date} ${b.match_time || ""}`;
-
-                return da.localeCompare(db);
-            }
-        );
-    }
-
-
-    async function loadPlayers() {
-        state.players = await select(
-            "players",
-            "*"
-        );
-
-        state.players.sort(
-            (a, b) =>
-                Number(a.number || 999) -
-                Number(b.number || 999)
-        );
-    }
-
-
-    async function loadStats() {
-        state.stats = await select(
-            "player_season_stats",
-            "*"
-        );
-    }
-
-
-    async function loadNews() {
-        state.news = await select(
-            "news",
-            "*"
-        );
-
-        state.news.sort(
-            (a, b) =>
-                new Date(b.published_at || b.created_at) -
-                new Date(a.published_at || a.created_at)
-        );
-    }
-
-
-    async function loadAlbums() {
-        state.albums = await select(
-            "albums",
-            "*"
-        );
-    }
-
-
-    async function loadProducts() {
-        state.products = await select(
-            "products",
-            "*"
-        );
-
-        state.products.sort(
-            (a, b) =>
-                new Date(b.created_at) -
-                new Date(a.created_at)
-        );
-    }
-
-
-    async function loadStandings() {
-        state.standings = await select(
-            "standings",
-            "*"
-        );
-
-        state.standings.sort(
-            (a, b) =>
-                Number(a.place || 999) -
-                Number(b.place || 999)
-        );
-    }
-
-
-    async function loadBirthdays() {
-        state.birthdays = await select(
-            "birthdays",
-            "*"
-        );
-    }
-
-
-    async function loadAchievements() {
-        state.achievements = await select(
-            "achievements",
-            "*"
-        );
-
-        state.achievements.sort(
-            (a, b) =>
-                Number(a.sort_order || 0) -
-                Number(b.sort_order || 0)
-        );
-    }
-
-
-    /* =====================================================
-       RENDER EVERYTHING
-       ===================================================== */
-
-    async function renderEverything() {
-
-        renderDashboard();
-
-        renderHomepage();
-
+    if (tab === "matches") {
         renderMatches();
+    }
 
+    if (tab === "players") {
         renderPlayers();
+    }
 
-        renderStats();
-
+    if (tab === "news") {
         renderNews();
+    }
 
+    if (tab === "media") {
         renderAlbums();
+    }
 
-        renderProducts();
-
+    if (tab === "standings") {
         renderStandings();
-
-        renderBirthdays();
-
-        renderAchievements();
-
-        renderRegistry();
-
-        renderDesign();
-
-        renderHomepageSelects();
     }
 
-
-    /* =====================================================
-       DASHBOARD
-       ===================================================== */
-
-    function renderDashboard() {
-
-        const statsElement =
-            $("dashboardStats");
-
-        if (statsElement) {
-
-            statsElement.innerHTML = `
-
-                <div class="dashboard-stat">
-                    <strong>${state.matches.length}</strong>
-                    <span>Матчей</span>
-                </div>
-
-                <div class="dashboard-stat">
-                    <strong>${state.players.length}</strong>
-                    <span>Игроков</span>
-                </div>
-
-                <div class="dashboard-stat">
-                    <strong>${state.news.length}</strong>
-                    <span>Новостей</span>
-                </div>
-
-                <div class="dashboard-stat">
-                    <strong>${state.albums.length}</strong>
-                    <span>Альбомов</span>
-                </div>
-
-            `;
-        }
-
-
-        const now = new Date();
-
-        const future =
-            state.matches
-                .filter(match =>
-                    new Date(
-                        `${match.match_date}T${match.match_time || "00:00"}`
-                    ) >= now
-                )
-                .sort(
-                    (a, b) =>
-                        new Date(`${a.match_date}T${a.match_time || "00:00"}`) -
-                        new Date(`${b.match_date}T${b.match_time || "00:00"}`)
-                )[0];
-
-
-        if ($("dashboardNextMatch")) {
-
-            if (!future) {
-
-                $("dashboardNextMatch").textContent =
-                    "Ближайших матчей нет.";
-
-            } else {
-
-                $("dashboardNextMatch").innerHTML = `
-                    <strong>
-                        ${escapeHTML(matchTeamsText(future))}
-                    </strong>
-                    <br>
-                    ${formatDateTime(
-                        future.match_date,
-                        future.match_time
-                    )}
-                    ${future.tournament
-                        ? `<br>${escapeHTML(future.tournament)}`
-                        : ""}
-                `;
-            }
-        }
-
-
-        if ($("dashboardPlayers")) {
-            $("dashboardPlayers").textContent =
-                `${state.players.length} игроков`;
-        }
-
-
-        if ($("dashboardNews")) {
-            $("dashboardNews").textContent =
-                `${state.news.length} публикаций`;
-        }
-
-
-        if ($("dashboardAlbums")) {
-            $("dashboardAlbums").textContent =
-                `${state.albums.length} альбомов`;
-        }
+    if (tab === "products") {
+        renderProducts();
     }
 
-
-    function matchTeamsText(match) {
-
-        const home =
-            getTeamName(match.home_team_id);
-
-        const away =
-            getTeamName(match.away_team_id);
-
-        return `${home} — ${away}`;
+    if (tab === "extras") {
+        renderExtras();
     }
 
-
-    /* =====================================================
-       HOMEPAGE
-       ===================================================== */
-
-    function renderHomepage() {
-
-        const homepage =
-            state.settings?.homepage || {};
-
-        if ($("homepageShowLastMatch")) {
-            $("homepageShowLastMatch").checked =
-                homepage.showLastMatch !== false;
-        }
-
-        if ($("homepageShowNews")) {
-            $("homepageShowNews").checked =
-                homepage.showNews !== false;
-        }
-
-        if ($("homepageShowLeaders")) {
-            $("homepageShowLeaders").checked =
-                homepage.showLeaders !== false;
-        }
-
-        if ($("homepageShowAchievements")) {
-            $("homepageShowAchievements").checked =
-                homepage.showAchievements !== false;
-        }
-
-        if ($("homepageShowBirthdays")) {
-            $("homepageShowBirthdays").checked =
-                homepage.showBirthdays !== false;
-        }
-
-
-        const blocks =
-            $("homepageBlocks");
-
-        if (blocks) {
-
-            blocks.innerHTML = `
-
-                <div class="admin-list-item">
-                    <strong>Главный матч</strong>
-                    <span>Верхняя карточка</span>
-                </div>
-
-                <div class="admin-list-item">
-                    <strong>Последний матч</strong>
-                    <span>Последняя сыгранная встреча</span>
-                </div>
-
-                <div class="admin-list-item">
-                    <strong>ТОП-3</strong>
-                    <span>Лидеры команды</span>
-                </div>
-
-                <div class="admin-list-item">
-                    <strong>Новости</strong>
-                    <span>Последние публикации</span>
-                </div>
-
-                <div class="admin-list-item">
-                    <strong>Достижения</strong>
-                    <span>Кубки и турниры</span>
-                </div>
-
-                <div class="admin-list-item">
-                    <strong>Дни рождения</strong>
-                    <span>Поздравления игроков</span>
-                </div>
-
-            `;
-        }
+    if (tab === "design") {
+        loadDesignIntoForm();
     }
 
-
-    function renderHomepageSelects() {
-
-        const selectElement =
-            $("homepageHeroMatch");
-
-        if (!selectElement) return;
-
-        const current =
-            state.settings?.homepage?.featuredMatchId ||
-            "";
-
-        selectElement.innerHTML = `
-            <option value="">Автоматически</option>
-            ${state.matches.map(match => `
-                <option
-                    value="${match.id}"
-                    ${String(current) === String(match.id) ? "selected" : ""}
-                >
-                    ${escapeHTML(matchTeamsText(match))}
-                    · ${formatDateTime(
-                        match.match_date,
-                        match.match_time
-                    )}
-                </option>
-            `).join("")}
-        `;
+    if (tab === "settings") {
+        loadSettingsIntoForm();
     }
+}
 
 
-    async function saveHomepage() {
+/* =========================================================
+   DATABASE
+========================================================= */
 
-        try {
+async function getTable(table) {
 
-            const homepage = {
-                ...(state.settings?.homepage || {}),
+    try {
 
-                featuredMatchId:
-                    $("homepageHeroMatch")?.value || null,
-
-                showLastMatch:
-                    $("homepageShowLastMatch")?.checked !== false,
-
-                showNews:
-                    $("homepageShowNews")?.checked !== false,
-
-                showLeaders:
-                    $("homepageShowLeaders")?.checked !== false,
-
-                showAchievements:
-                    $("homepageShowAchievements")?.checked !== false,
-
-                showBirthdays:
-                    $("homepageShowBirthdays")?.checked !== false
-            };
-
-            await saveSettingsData({
-                homepage
-            });
-
-            toast(
-                "Настройки главной сохранены."
-            );
-
-        } catch (error) {
-
-            console.error(error);
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
-    }
-
-
-    /* =====================================================
-       MATCHES
-       ===================================================== */
-
-    function renderMatches() {
-
-        const container =
-            $("matchesAdminList");
-
-        if (!container) return;
-
-
-        if (!state.matches.length) {
-
-            container.innerHTML = `
-                <div class="admin-card">
-                    Матчей пока нет.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        container.innerHTML =
-            state.matches
-                .slice()
-                .reverse()
-                .map(match => `
-
-                    <div class="admin-card">
-
-                        <div class="card-header">
-
-                            <div>
-
-                                <div class="card-title">
-                                    ${escapeHTML(
-                                        matchTeamsText(match)
-                                    )}
-                                </div>
-
-                                <div class="card-description">
-
-                                    ${formatDateTime(
-                                        match.match_date,
-                                        match.match_time
-                                    )}
-
-                                    ${match.tournament
-                                        ? ` · ${escapeHTML(match.tournament)}`
-                                        : ""}
-
-                                    ${match.venue
-                                        ? ` · ${escapeHTML(match.venue)}`
-                                        : ""}
-
-                                </div>
-
-                            </div>
-
-                            <span class="admin-status">
-                                ${escapeHTML(
-                                    statusName(match.status)
-                                )}
-                            </span>
-
-                        </div>
-
-                        <div class="admin-actions">
-
-                            <button
-                                class="small-button"
-                                type="button"
-                                data-action="edit-match"
-                                data-id="${match.id}"
-                            >
-                                Изменить
-                            </button>
-
-                            <button
-                                class="small-button"
-                                type="button"
-                                data-action="match-center"
-                                data-id="${match.id}"
-                            >
-                                Матч-центр
-                            </button>
-
-                            <button
-                                class="small-button danger"
-                                type="button"
-                                data-action="delete-match"
-                                data-id="${match.id}"
-                            >
-                                Удалить
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                `)
-                .join("");
-    }
-
-
-    function openMatchForm(match = null) {
-
-        const isEdit = !!match;
-
-        const teamOptions =
-            state.teams
-                .map(team => `
-                    <option
-                        value="${team.id}"
-                        ${String(match?.home_team_id) === String(team.id)
-                            ? "selected"
-                            : ""}
-                    >
-                        ${escapeHTML(team.name)}
-                    </option>
-                `)
-                .join("");
-
-
-        const awayOptions =
-            state.teams
-                .map(team => `
-                    <option
-                        value="${team.id}"
-                        ${String(match?.away_team_id) === String(team.id)
-                            ? "selected"
-                            : ""}
-                    >
-                        ${escapeHTML(team.name)}
-                    </option>
-                `)
-                .join("");
-
-
-        openModal(
-            isEdit
-                ? "Редактирование матча"
-                : "Добавить матч",
-
-            `
-
-            <form id="matchForm">
-
-                <div class="form-group">
-
-                    <label>Дата</label>
-
-                    <input
-                        id="matchDate"
-                        type="date"
-                        value="${match?.match_date || ""}"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Время</label>
-
-                    <input
-                        id="matchTime"
-                        type="time"
-                        value="${String(match?.match_time || "").slice(0,5)}"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Турнир</label>
-
-                    <input
-                        id="matchTournament"
-                        type="text"
-                        value="${escapeHTML(match?.tournament || "")}"
-                        placeholder="Первенство ПФО"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Хозяева</label>
-
-                    <select id="matchHomeTeam">
-                        ${teamOptions}
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Гости</label>
-
-                    <select id="matchAwayTeam">
-                        ${awayOptions}
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Арена</label>
-
-                    <input
-                        id="matchVenue"
-                        type="text"
-                        value="${escapeHTML(match?.venue || "")}"
-                        placeholder="ЛД «Челны»"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Статус</label>
-
-                    <select id="matchStatus">
-
-                        <option
-                            value="scheduled"
-                            ${match?.status === "scheduled" ? "selected" : ""}
-                        >
-                            Запланирован
-                        </option>
-
-                        <option
-                            value="live"
-                            ${match?.status === "live" ? "selected" : ""}
-                        >
-                            Идёт
-                        </option>
-
-                        <option
-                            value="finished"
-                            ${match?.status === "finished" ? "selected" : ""}
-                        >
-                            Завершён
-                        </option>
-
-                        <option
-                            value="cancelled"
-                            ${match?.status === "cancelled" ? "selected" : ""}
-                        >
-                            Отменён
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Ссылка на трансляцию</label>
-
-                    <input
-                        id="matchStream"
-                        type="url"
-                        value="${escapeHTML(match?.stream_url || "")}"
-                        placeholder="https://..."
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Главный судья</label>
-
-                    <input
-                        id="matchChiefReferee"
-                        type="text"
-                        value="${escapeHTML(match?.chief_referee || "")}"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Линейный судья №1</label>
-
-                    <input
-                        id="matchLinesman1"
-                        type="text"
-                        value="${escapeHTML(match?.linesman1 || "")}"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Линейный судья №2</label>
-
-                    <input
-                        id="matchLinesman2"
-                        type="text"
-                        value="${escapeHTML(match?.linesman2 || "")}"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Состав на матч</label>
-
-                    <textarea
-                        id="matchLineup"
-                        rows="7"
-                        placeholder="12 - 13 - 14&#10;Фамилия - Фамилия - Фамилия&#10;&#10;15 - 16&#10;Фамилия - Фамилия"
-                    >${escapeHTML(
-                        Array.isArray(match?.lineup)
-                            ? match.lineup.join("\n")
-                            : ""
-                    )}</textarea>
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    ${isEdit ? "Сохранить" : "Добавить матч"}
-                </button>
-
-            </form>
-
-            `
-        );
-
-
-        $("matchForm")?.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                try {
-
-                    const values = {
-
-                        match_date:
-                            $("matchDate").value,
-
-                        match_time:
-                            $("matchTime").value || null,
-
-                        tournament:
-                            $("matchTournament").value.trim() || null,
-
-                        home_team_id:
-                            $("matchHomeTeam").value
-                                ? Number($("matchHomeTeam").value)
-                                : null,
-
-                        away_team_id:
-                            $("matchAwayTeam").value
-                                ? Number($("matchAwayTeam").value)
-                                : null,
-
-                        venue:
-                            $("matchVenue").value.trim() || null,
-
-                        status:
-                            $("matchStatus").value,
-
-                        stream_url:
-                            $("matchStream").value.trim() || null,
-
-                        chief_referee:
-                            $("matchChiefReferee").value.trim() || null,
-
-                        linesman1:
-                            $("matchLinesman1").value.trim() || null,
-
-                        linesman2:
-                            $("matchLinesman2").value.trim() || null,
-
-                        lineup:
-                            $("matchLineup").value
-                                .split("\n")
-                                .map(line => line.trim())
-                                .filter(Boolean)
-                    };
-
-
-                    if (isEdit) {
-
-                        await update(
-                            "matches",
-                            match.id,
-                            values
-                        );
-
-                        toast(
-                            "Матч сохранён."
-                        );
-
-                    } else {
-
-                        await insert(
-                            "matches",
-                            values
-                        );
-
-                        toast(
-                            "Матч добавлен."
-                        );
-                    }
-
-
-                    closeModal();
-
-                    await loadMatches();
-
-                    renderMatches();
-
-                    renderHomepageSelects();
-
-                    renderDashboard();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
-                    );
-                }
-
-            }
-        );
-    }
-
-
-    async function deleteMatch(id) {
-
-        if (!confirm(
-            "Удалить этот матч?"
-        )) return;
-
-        try {
-
-            await remove(
-                "matches",
-                id
-            );
-
-            toast(
-                "Матч удалён."
-            );
-
-            await loadMatches();
-
-            renderMatches();
-
-            renderHomepageSelects();
-
-            renderDashboard();
-
-        } catch (error) {
-
-            console.error(error);
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
-    }
-
-
-    /* =====================================================
-       MATCH CENTER
-       ===================================================== */
-
-    async function openMatchCenter(id) {
-
-        const match = getMatch(id);
-
-        if (!match) return;
-
-
-        let periods = [];
-
-        let events = [];
-
-        try {
-
-            periods = await db
-                .from("match_periods")
+        const result =
+            await supabaseClient
+                .from(table)
                 .select("*")
-                .eq("match_id", id)
-                .order("period")
-                .then(result => {
-                    if (result.error) throw result.error;
-                    return result.data || [];
-                });
+                .limit(1000);
 
+        if (result.error) {
 
-            events = await db
-                .from("match_events")
-                .select("*")
-                .eq("match_id", id)
-                .order("id")
-                .then(result => {
-                    if (result.error) throw result.error;
-                    return result.data || [];
-                });
+            console.warn(
+                `Ошибка ${table}:`,
+                result.error
+            );
 
-        } catch (error) {
-
-            console.error(error);
+            return [];
         }
 
+        return result.data || [];
 
-        openModal(
-            "Матч-центр",
-            `
+    } catch (error) {
 
-            <div class="admin-card">
+        console.error(error);
 
-                <div class="card-title">
-                    ${escapeHTML(matchTeamsText(match))}
-                </div>
-
-                <div class="card-description">
-                    ${formatDateTime(
-                        match.match_date,
-                        match.match_time
-                    )}
-                </div>
-
-            </div>
-
-
-            <form id="matchCenterForm">
-
-                <div class="form-group">
-
-                    <label>Статус</label>
-
-                    <select id="centerStatus">
-
-                        <option value="scheduled"
-                            ${match.status === "scheduled" ? "selected" : ""}
-                        >
-                            Запланирован
-                        </option>
-
-                        <option value="live"
-                            ${match.status === "live" ? "selected" : ""}
-                        >
-                            Матч идёт
-                        </option>
-
-                        <option value="finished"
-                            ${match.status === "finished" ? "selected" : ""}
-                        >
-                            Завершён
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Трансляция</label>
-
-                    <input
-                        id="centerStream"
-                        type="url"
-                        value="${escapeHTML(match.stream_url || "")}"
-                        placeholder="https://..."
-                    >
-
-                </div>
-
-
-                <div class="card-title">
-                    Периоды
-                </div>
-
-
-                ${[1,2,3,4].map(period => {
-
-                    const row =
-                        periods.find(
-                            item =>
-                                Number(item.period) === period
-                        );
-
-                    return `
-
-                        <div class="admin-grid-2">
-
-                            <div class="form-group">
-
-                                <label>
-                                    ${period === 4
-                                        ? "Овертайм / доп."
-                                        : `${period}-й период`}
-                                </label>
-
-                                <input
-                                    id="period${period}Home"
-                                    type="number"
-                                    min="0"
-                                    value="${row?.home_score ?? 0}"
-                                >
-
-                            </div>
-
-
-                            <div class="form-group">
-
-                                <label>
-                                    Шайбы соперника
-                                </label>
-
-                                <input
-                                    id="period${period}Away"
-                                    type="number"
-                                    min="0"
-                                    value="${row?.away_score ?? 0}"
-                                >
-
-                            </div>
-
-                        </div>
-
-                    `;
-
-                }).join("")}
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    Сохранить матч-центр
-                </button>
-
-            </form>
-
-
-            <div class="admin-card">
-
-                <div class="card-title">
-                    События
-                </div>
-
-                <div class="admin-list">
-
-                    ${
-                        events.length
-                        ? events.map(event => `
-                            <div class="admin-list-item">
-
-                                <strong>
-                                    ${
-                                        event.event_type === "goal"
-                                            ? "ГОЛ"
-                                            : "ШТРАФ"
-                                    }
-                                </strong>
-
-                                <span>
-                                    ${event.event_time || ""}
-                                    · период ${event.period}
-                                    ${
-                                        event.penalty_minutes
-                                            ? ` · ${event.penalty_minutes} мин.`
-                                            : ""
-                                    }
-                                </span>
-
-                            </div>
-                        `).join("")
-                        : "<div>Событий пока нет.</div>"
-                    }
-
-                </div>
-
-            </div>
-
-
-            <div class="stats-actions">
-
-                <button
-                    class="primary-button"
-                    type="button"
-                    id="centerGoalButton"
-                >
-                    + Гол
-                </button>
-
-                <button
-                    class="secondary-button"
-                    type="button"
-                    id="centerPenaltyButton"
-                >
-                    + Штраф
-                </button>
-
-            </div>
-
-            `
-        );
-
-
-        $("matchCenterForm")?.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                try {
-
-                    await update(
-                        "matches",
-                        id,
-                        {
-                            status:
-                                $("centerStatus").value,
-
-                            stream_url:
-                                $("centerStream").value.trim() || null
-                        }
-                    );
-
-
-                    for (let period = 1; period <= 4; period++) {
-
-                        const home =
-                            Number(
-                                $(`period${period}Home`).value || 0
-                            );
-
-                        const away =
-                            Number(
-                                $(`period${period}Away`).value || 0
-                            );
-
-
-                        const existing =
-                            periods.find(
-                                row =>
-                                    Number(row.period) === period
-                            );
-
-
-                        if (
-                            existing ||
-                            home !== 0 ||
-                            away !== 0
-                        ) {
-
-                            if (existing) {
-
-                                await db
-                                    .from("match_periods")
-                                    .update({
-                                        home_score: home,
-                                        away_score: away
-                                    })
-                                    .eq(
-                                        "id",
-                                        existing.id
-                                    );
-
-                            } else {
-
-                                await insert(
-                                    "match_periods",
-                                    {
-                                        match_id: id,
-                                        period,
-                                        home_score: home,
-                                        away_score: away
-                                    }
-                                );
-                            }
-                        }
-                    }
-
-
-                    toast(
-                        "Матч-центр сохранён."
-                    );
-
-                    closeModal();
-
-                    await loadMatches();
-
-                    renderMatches();
-
-                    renderDashboard();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
-                    );
-                }
-            }
-        );
-
-
-        $("centerGoalButton")?.addEventListener(
-            "click",
-            () => openGoalEventForm(id)
-        );
-
-
-        $("centerPenaltyButton")?.addEventListener(
-            "click",
-            () => openPenaltyEventForm(id)
-        );
+        return [];
     }
+}
 
 
-    function openGoalEventForm(matchId) {
+async function loadAllData() {
 
-        const players =
-            state.players
-                .filter(player => player.active !== false);
-
-
-        openModal(
-            "Добавить гол",
-
-            `
-
-            <form id="goalEventForm">
-
-                <div class="form-group">
-
-                    <label>Автор гола</label>
-
-                    <select id="goalPlayer" required>
-
-                        <option value="">
-                            Выберите игрока
-                        </option>
-
-                        ${players.map(player => `
-                            <option value="${player.id}">
-                                #${player.number ?? "—"}
-                                ${escapeHTML(player.full_name)}
-                            </option>
-                        `).join("")}
-
-                    </select>
-
-                </div>
+    setConnection(
+        "pending",
+        "Загрузка данных..."
+    );
 
 
-                <div class="form-group">
-
-                    <label>Передача №1</label>
-
-                    <select id="goalAssist1">
-
-                        <option value="">
-                            Без передачи
-                        </option>
-
-                        ${players.map(player => `
-                            <option value="${player.id}">
-                                #${player.number ?? "—"}
-                                ${escapeHTML(player.full_name)}
-                            </option>
-                        `).join("")}
-
-                    </select>
-
-                </div>
+    const tableNames =
+        Object.keys(TABLES);
 
 
-                <div class="form-group">
-
-                    <label>Передача №2</label>
-
-                    <select id="goalAssist2">
-
-                        <option value="">
-                            Без передачи
-                        </option>
-
-                        ${players.map(player => `
-                            <option value="${player.id}">
-                                #${player.number ?? "—"}
-                                ${escapeHTML(player.full_name)}
-                            </option>
-                        `).join("")}
-
-                    </select>
-
-                </div>
-
-
-                <div class="admin-grid-2">
-
-                    <div class="form-group">
-
-                        <label>Период</label>
-
-                        <select id="goalPeriod">
-
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">ОТ</option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>Время</label>
-
-                        <input
-                            id="goalTime"
-                            type="text"
-                            placeholder="12:34"
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    Добавить гол
-                </button>
-
-            </form>
-
-            `
+    const results =
+        await Promise.all(
+            tableNames.map(
+                table =>
+                    getTable(TABLES[table])
+            )
         );
 
 
-        $("goalEventForm")?.addEventListener(
-            "submit",
-            async event => {
+    tableNames.forEach(
+        (name, index) => {
 
-                event.preventDefault();
+            state.data[name] =
+                results[index] || [];
 
-                try {
-
-                    const playerId =
-                        Number($("goalPlayer").value);
-
-                    const assist1 =
-                        $("goalAssist1").value
-                            ? Number($("goalAssist1").value)
-                            : null;
-
-                    const assist2 =
-                        $("goalAssist2").value
-                            ? Number($("goalAssist2").value)
-                            : null;
-
-
-                    const chelny =
-                        state.teams.find(
-                            team =>
-                                team.name
-                                    ?.toLowerCase()
-                                    .includes("челны")
-                        );
-
-
-                    await insert(
-                        "match_events",
-                        {
-                            match_id: matchId,
-                            event_type: "goal",
-                            period:
-                                Number($("goalPeriod").value),
-                            event_time:
-                                $("goalTime").value.trim() || null,
-                            team_id:
-                                chelny?.id || null,
-                            player_id: playerId,
-                            assist1_player_id: assist1,
-                            assist2_player_id: assist2
-                        }
-                    );
-
-
-                    await updatePlayerStats(
-                        playerId,
-                        {
-                            goals: 1,
-                            points: 1
-                        }
-                    );
-
-
-                    if (assist1) {
-                        await updatePlayerStats(
-                            assist1,
-                            {
-                                assists: 1,
-                                points: 1
-                            }
-                        );
-                    }
-
-
-                    if (
-                        assist2 &&
-                        assist2 !== assist1
-                    ) {
-                        await updatePlayerStats(
-                            assist2,
-                            {
-                                assists: 1,
-                                points: 1
-                            }
-                        );
-                    }
-
-
-                    toast(
-                        "Гол добавлен."
-                    );
-
-                    closeModal();
-
-                    await loadStats();
-
-                    renderStats();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
-                    );
-                }
-            }
-        );
-    }
-
-
-    function openPenaltyEventForm(matchId) {
-
-        openModal(
-            "Добавить штраф",
-
-            `
-
-            <form id="penaltyEventForm">
-
-                <div class="form-group">
-
-                    <label>Игрок</label>
-
-                    <select id="penaltyPlayer" required>
-
-                        <option value="">
-                            Выберите игрока
-                        </option>
-
-                        ${state.players.map(player => `
-                            <option value="${player.id}">
-                                #${player.number ?? "—"}
-                                ${escapeHTML(player.full_name)}
-                            </option>
-                        `).join("")}
-
-                    </select>
-
-                </div>
-
-
-                <div class="admin-grid-2">
-
-                    <div class="form-group">
-
-                        <label>Период</label>
-
-                        <select id="penaltyPeriod">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">ОТ</option>
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>Минуты</label>
-
-                        <input
-                            id="penaltyMinutes"
-                            type="number"
-                            min="1"
-                            value="2"
-                            required
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Время</label>
-
-                    <input
-                        id="penaltyTime"
-                        type="text"
-                        placeholder="12:34"
-                    >
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    Добавить штраф
-                </button>
-
-            </form>
-
-            `
-        );
-
-
-        $("penaltyEventForm")?.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                try {
-
-                    const playerId =
-                        Number($("penaltyPlayer").value);
-
-                    const minutes =
-                        Number($("penaltyMinutes").value || 2);
-
-
-                    await insert(
-                        "match_events",
-                        {
-                            match_id: matchId,
-                            event_type: "penalty",
-                            period:
-                                Number($("penaltyPeriod").value),
-                            event_time:
-                                $("penaltyTime").value.trim() || null,
-                            player_id: playerId,
-                            penalty_minutes: minutes
-                        }
-                    );
-
-
-                    await updatePlayerStats(
-                        playerId,
-                        {
-                            pim: minutes
-                        }
-                    );
-
-
-                    toast(
-                        "Штраф добавлен."
-                    );
-
-                    closeModal();
-
-                    await loadStats();
-
-                    renderStats();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
-                    );
-                }
-            }
-        );
-    }
-
-
-    /* =====================================================
-       PLAYERS
-       ===================================================== */
-
-    function renderPlayers() {
-
-        const container =
-            $("playersAdminList");
-
-        if (!container) return;
-
-
-        let players =
-            state.players.filter(
-                player => {
-
-                    if (
-                        currentPlayerFilter === "all"
-                    ) return true;
-
-                    return (
-                        player.position ===
-                        currentPlayerFilter
-                    );
-                }
-            );
-
-
-        if (!players.length) {
-
-            container.innerHTML = `
-                <div class="admin-card">
-                    Игроков нет.
-                </div>
-            `;
-
-            return;
         }
+    );
 
 
-        container.innerHTML =
-            players.map(player => `
-
-                <div class="admin-card">
-
-                    ${
-                        player.photo_url
-                            ? `
-                                <img
-                                    src="${escapeHTML(player.photo_url)}"
-                                    alt=""
-                                    style="
-                                        width:100%;
-                                        aspect-ratio:1;
-                                        object-fit:cover;
-                                        border-radius:16px;
-                                        margin-bottom:14px;
-                                    "
-                                >
-                              `
-                            : ""
-                    }
-
-
-                    <div class="card-title">
-
-                        ${
-                            player.number !== null &&
-                            player.number !== undefined
-                                ? `#${player.number} `
-                                : ""
-                        }
-
-                        ${escapeHTML(player.full_name)}
-
-                        ${
-                            player.role
-                                ? ` · ${playerRoleName(player.role)}`
-                                : ""
-                        }
-
-                    </div>
-
-
-                    <div class="card-description">
-
-                        ${positionName(player.position)}
-
-                        ${
-                            player.birth_date
-                                ? ` · ${formatDate(player.birth_date)}`
-                                : ""
-                        }
-
-                        ${
-                            player.height_cm
-                                ? ` · ${player.height_cm} см`
-                                : ""
-                        }
-
-                        ${
-                            player.weight_kg
-                                ? ` · ${player.weight_kg} кг`
-                                : ""
-                        }
-
-                    </div>
-
-
-                    <div class="admin-actions">
-
-                        <button
-                            class="small-button"
-                            type="button"
-                            data-action="edit-player"
-                            data-id="${player.id}"
-                        >
-                            Изменить
-                        </button>
-
-                        <button
-                            class="small-button danger"
-                            type="button"
-                            data-action="delete-player"
-                            data-id="${player.id}"
-                        >
-                            Удалить
-                        </button>
-
-                    </div>
-
-                </div>
-
-            `)
-            .join("");
-    }
-
-
-    function openPlayerForm(player = null) {
-
-        const isEdit =
-            Boolean(player);
-
-
-        openModal(
-            isEdit
-                ? "Редактирование игрока"
-                : "Добавить игрока",
-
-            `
-
-            <form id="playerForm">
-
-                <div class="form-group">
-
-                    <label>Фамилия и имя</label>
-
-                    <input
-                        id="playerFullName"
-                        type="text"
-                        value="${escapeHTML(player?.full_name || "")}"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="admin-grid-2">
-
-                    <div class="form-group">
-
-                        <label>Номер</label>
-
-                        <input
-                            id="playerNumber"
-                            type="number"
-                            min="0"
-                            value="${player?.number ?? ""}"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>Амплуа</label>
-
-                        <select id="playerPosition">
-
-                            <option
-                                value="forward"
-                                ${player?.position === "forward" ? "selected" : ""}
-                            >
-                                Нападающий
-                            </option>
-
-                            <option
-                                value="defense"
-                                ${player?.position === "defense" ? "selected" : ""}
-                            >
-                                Защитник
-                            </option>
-
-                            <option
-                                value="goalie"
-                                ${player?.position === "goalie" ? "selected" : ""}
-                            >
-                                Вратарь
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Роль</label>
-
-                    <select id="playerRole">
-
-                        <option value="">
-                            Нет
-                        </option>
-
-                        <option
-                            value="K"
-                            ${player?.role === "K" ? "selected" : ""}
-                        >
-                            Капитан (К)
-                        </option>
-
-                        <option
-                            value="A"
-                            ${player?.role === "A" ? "selected" : ""}
-                        >
-                            Ассистент капитана (А)
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Дата рождения</label>
-
-                    <input
-                        id="playerBirthDate"
-                        type="date"
-                        value="${player?.birth_date || ""}"
-                    >
-
-                </div>
-
-
-                <div class="admin-grid-2">
-
-                    <div class="form-group">
-
-                        <label>Рост, см</label>
-
-                        <input
-                            id="playerHeight"
-                            type="number"
-                            value="${player?.height_cm ?? ""}"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>Вес, кг</label>
-
-                        <input
-                            id="playerWeight"
-                            type="number"
-                            step="0.1"
-                            value="${player?.weight_kg ?? ""}"
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Фото</label>
-
-                    <input
-                        id="playerPhoto"
-                        type="file"
-                        accept="image/*"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label class="switch-row">
-
-                        <input
-                            id="playerActive"
-                            type="checkbox"
-                            ${player?.active !== false ? "checked" : ""}
-                        >
-
-                        <span>
-                            Игрок активен
-                        </span>
-
-                    </label>
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    ${isEdit ? "Сохранить" : "Добавить"}
-                </button>
-
-            </form>
-
-            `
+    const connected =
+        results.some(
+            array =>
+                Array.isArray(array)
         );
 
 
-        $("playerForm")?.addEventListener(
-            "submit",
-            async event => {
+    if (connected) {
 
-                event.preventDefault();
-
-                try {
-
-                    let photoUrl =
-                        player?.photo_url ||
-                        null;
-
-
-                    const file =
-                        $("playerPhoto")
-                            ?.files?.[0];
-
-
-                    if (file) {
-                        photoUrl =
-                            await uploadFile(
-                                file,
-                                "players"
-                            );
-                    }
-
-
-                    const values = {
-
-                        full_name:
-                            $("playerFullName")
-                                .value.trim(),
-
-                        number:
-                            $("playerNumber").value
-                                ? Number($("playerNumber").value)
-                                : null,
-
-                        position:
-                            $("playerPosition").value,
-
-                        role:
-                            $("playerRole").value || null,
-
-                        birth_date:
-                            $("playerBirthDate").value || null,
-
-                        height_cm:
-                            $("playerHeight").value
-                                ? Number($("playerHeight").value)
-                                : null,
-
-                        weight_kg:
-                            $("playerWeight").value
-                                ? Number($("playerWeight").value)
-                                : null,
-
-                        photo_url:
-                            photoUrl,
-
-                        active:
-                            $("playerActive").checked
-                    };
-
-
-                    if (isEdit) {
-
-                        await update(
-                            "players",
-                            player.id,
-                            values
-                        );
-
-                        toast(
-                            "Игрок сохранён."
-                        );
-
-                    } else {
-
-                        await insert(
-                            "players",
-                            values
-                        );
-
-                        toast(
-                            "Игрок добавлен."
-                        );
-                    }
-
-
-                    closeModal();
-
-                    await loadPlayers();
-
-                    renderPlayers();
-
-                    renderBirthdays();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
-                    );
-                }
-            }
+        setConnection(
+            "online",
+            "Supabase подключён"
         );
-    }
 
-
-    async function deletePlayer(id) {
-
-        if (!confirm(
-            "Удалить игрока?"
-        )) return;
-
-        try {
-
-            await remove(
-                "players",
-                id
-            );
-
-            toast(
-                "Игрок удалён."
-            );
-
-            await loadPlayers();
-
-            await loadStats();
-
-            renderPlayers();
-
-            renderStats();
-
-        } catch (error) {
-
-            console.error(error);
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
-    }
-
-
-    /* =====================================================
-       PLAYER STATS
-       ===================================================== */
-
-    async function updatePlayerStats(
-        playerId,
-        changes
-    ) {
-
-        const season =
-            "2026/27";
-
-
-        const existing =
-            state.stats.find(
-                row =>
-                    String(row.player_id) ===
-                    String(playerId) &&
-                    row.season === season
-            );
-
-
-        if (!existing) {
-
-            const values = {
-
-                player_id:
-                    Number(playerId),
-
-                season,
-
-                games: 0,
-
-                goals:
-                    Number(changes.goals || 0),
-
-                assists:
-                    Number(changes.assists || 0),
-
-                points:
-                    Number(changes.points || 0),
-
-                plus_minus:
-                    Number(changes.plus_minus || 0),
-
-                pim:
-                    Number(changes.pim || 0),
-
-                goalie_games: 0,
-
-                goals_against: 0,
-
-                gaa: 0
-            };
-
-
-            await insert(
-                "player_season_stats",
-                values
-            );
-
-            return;
-        }
-
-
-        const values = {
-
-            goals:
-                Number(existing.goals || 0) +
-                Number(changes.goals || 0),
-
-            assists:
-                Number(existing.assists || 0) +
-                Number(changes.assists || 0),
-
-            points:
-                Number(existing.points || 0) +
-                Number(changes.points || 0),
-
-            plus_minus:
-                Number(existing.plus_minus || 0) +
-                Number(changes.plus_minus || 0),
-
-            pim:
-                Number(existing.pim || 0) +
-                Number(changes.pim || 0),
-
-            games:
-                Number(existing.games || 0) +
-                Number(changes.games || 0),
-
-            goalie_games:
-                Number(existing.goalie_games || 0) +
-                Number(changes.goalie_games || 0),
-
-            goals_against:
-                Number(existing.goals_against || 0) +
-                Number(changes.goals_against || 0)
-        };
-
-
-        await update(
-            "player_season_stats",
-            existing.id,
-            values
+        setSystem(
+            "systemSupabase",
+            true,
+            "Работает"
         );
+
+        setSystem(
+            "systemData",
+            true,
+            "Доступны"
+        );
+
+    } else {
+
+        setConnection(
+            "offline",
+            "Ошибка подключения"
+        );
+
+        setSystem(
+            "systemSupabase",
+            false,
+            "Ошибка"
+        );
+
+        setSystem(
+            "systemData",
+            false,
+            "Нет данных"
+        );
+
     }
 
 
-    function renderStats() {
-
-        const container =
-            $("statsAdminList");
-
-        if (!container) return;
+    await checkStorage();
 
 
-        const rows =
-            state.players
-                .map(player => {
-
-                    const stat =
-                        state.stats.find(
-                            row =>
-                                String(row.player_id) ===
-                                String(player.id)
-                        ) || {};
+    renderEverything();
+}
 
 
-                    return {
-                        player,
-                        stat
-                    };
-                })
-                .sort(
-                    (a, b) =>
-                        Number(b.stat.points || 0) -
-                        Number(a.stat.points || 0)
+async function checkStorage() {
+
+    try {
+
+        const result =
+            await supabaseClient
+                .storage
+                .from(STORAGE_BUCKET)
+                .list(
+                    "",
+                    {
+                        limit: 1
+                    }
                 );
 
 
-        container.innerHTML = `
+        if (result.error) {
 
-            <div class="card-header">
+            setSystem(
+                "systemStorage",
+                false,
+                "Ошибка"
+            );
 
-                <div>
-
-                    <div class="card-title">
-                        Статистика игроков
-                    </div>
-
-                    <div class="card-description">
-                        Сезон 2026/27
-                    </div>
-
-                </div>
-
-            </div>
+            return false;
+        }
 
 
-            <div class="admin-list">
+        setSystem(
+            "systemStorage",
+            true,
+            "Работает"
+        );
 
-                ${
-                    rows.length
-                    ? rows.map(row => `
+        return true;
 
-                        <div class="admin-list-item">
+    } catch (_) {
 
-                            <strong>
-                                #${row.player.number ?? "—"}
-                                ${escapeHTML(row.player.full_name)}
-                            </strong>
+        setSystem(
+            "systemStorage",
+            false,
+            "Ошибка"
+        );
 
-                            <span>
-                                И: ${row.stat.games || 0}
-                                · Г: ${row.stat.goals || 0}
-                                · П: ${row.stat.assists || 0}
-                                · О: ${row.stat.points || 0}
-                                · +/-: ${row.stat.plus_minus || 0}
-                                · Ш: ${row.stat.pim || 0}
-                            </span>
+        return false;
+    }
+}
 
-                        </div>
 
-                    `).join("")
-                    : "Статистики пока нет."
-                }
+/* =========================================================
+   GENERIC CRUD
+========================================================= */
 
-            </div>
+async function insertRow(
+    table,
+    payload
+) {
+
+    try {
+
+        const result =
+            await supabaseClient
+                .from(table)
+                .insert(payload)
+                .select()
+                .single();
+
+
+        if (result.error) {
+
+            throw result.error;
+        }
+
+
+        return result.data;
+
+    } catch (error) {
+
+        console.error(
+            `Insert ${table}`,
+            error
+        );
+
+        throw error;
+    }
+}
+
+
+async function updateRow(
+    table,
+    id,
+    payload
+) {
+
+    try {
+
+        const result =
+            await supabaseClient
+                .from(table)
+                .update(payload)
+                .eq("id", id)
+                .select()
+                .single();
+
+
+        if (result.error) {
+
+            throw result.error;
+        }
+
+
+        return result.data;
+
+    } catch (error) {
+
+        console.error(
+            `Update ${table}`,
+            error
+        );
+
+        throw error;
+    }
+}
+
+
+async function deleteRow(
+    table,
+    id
+) {
+
+    try {
+
+        const result =
+            await supabaseClient
+                .from(table)
+                .delete()
+                .eq("id", id);
+
+
+        if (result.error) {
+
+            throw result.error;
+        }
+
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            `Delete ${table}`,
+            error
+        );
+
+        throw error;
+    }
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function openModal({
+    title,
+    label = "РЕДАКТИРОВАНИЕ",
+    body,
+    save,
+    saveText = "Сохранить"
+}) {
+
+    const overlay =
+        $("#modalOverlay");
+
+    const titleElement =
+        $("#modalTitle");
+
+    const labelElement =
+        $("#modalLabel");
+
+    const bodyElement =
+        $("#modalBody");
+
+    const saveButton =
+        $("#modalSave");
+
+
+    titleElement.textContent =
+        title;
+
+    labelElement.textContent =
+        label;
+
+    bodyElement.innerHTML =
+        body;
+
+    saveButton.textContent =
+        saveText;
+
+
+    state.editing = {
+        save
+    };
+
+
+    overlay.classList.add(
+        "open"
+    );
+
+    overlay.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+
+    setTimeout(() => {
+
+        const firstInput =
+            bodyElement.querySelector(
+                "input, textarea, select"
+            );
+
+        if (firstInput) {
+            firstInput.focus();
+        }
+
+    }, 30);
+}
+
+
+function closeModal() {
+
+    const overlay =
+        $("#modalOverlay");
+
+    overlay.classList.remove(
+        "open"
+    );
+
+    overlay.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    document.body.style.overflow =
+        "";
+
+
+    state.editing =
+        null;
+}
+
+
+async function saveModal() {
+
+    if (
+        !state.editing ||
+        typeof state.editing.save !== "function"
+    ) {
+        return;
+    }
+
+
+    const button =
+        $("#modalSave");
+
+
+    button.disabled =
+        true;
+
+    button.textContent =
+        "Сохранение...";
+
+
+    try {
+
+        await state.editing.save();
+
+        closeModal();
+
+    } catch (error) {
+
+        console.error(error);
+
+        toast(
+            error.message ||
+            "Не удалось сохранить",
+            "error"
+        );
+
+    } finally {
+
+        button.disabled =
+            false;
+
+        button.textContent =
+            "Сохранить";
+    }
+}
+
+
+/* =========================================================
+   FORM HELPERS
+========================================================= */
+
+function field(
+    label,
+    id,
+    value = "",
+    type = "text",
+    options = {}
+) {
+
+    const required =
+        options.required
+            ? "required"
+            : "";
+
+    const placeholder =
+        options.placeholder || "";
+
+
+    if (type === "textarea") {
+
+        return `
+            <label class="field field-full">
+                <span>${escapeHTML(label)}</span>
+
+                <textarea
+                    id="${id}"
+                    rows="${options.rows || 4}"
+                    placeholder="${escapeHTML(placeholder)}"
+                    ${required}
+                >${escapeHTML(value)}</textarea>
+            </label>
         `;
     }
 
 
-    async function openQuickStatForm(type) {
-
-        const labels = {
-            goal: "Добавить гол",
-            assist: "Добавить передачу",
-            penalty: "Добавить штраф"
-        };
-
-
-        openModal(
-            labels[type],
-
-            `
-
-            <form id="quickStatForm">
-
-                <div class="form-group">
-
-                    <label>Игрок</label>
-
-                    <select id="quickStatPlayer" required>
-
-                        <option value="">
-                            Выберите игрока
-                        </option>
-
-                        ${state.players.map(player => `
-                            <option value="${player.id}">
-                                #${player.number ?? "—"}
-                                ${escapeHTML(player.full_name)}
-                            </option>
-                        `).join("")}
-
-                    </select>
-
-                </div>
-
-
-                ${
-                    type === "penalty"
-                    ? `
-                        <div class="form-group">
-
-                            <label>Штраф, минут</label>
-
-                            <input
-                                id="quickStatValue"
-                                type="number"
-                                min="1"
-                                value="2"
-                                required
-                            >
-
-                        </div>
-                    `
-                    : ""
-                }
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    Добавить
-                </button>
-
-            </form>
-
-            `
-        );
-
-
-        $("quickStatForm")?.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                try {
-
-                    const playerId =
-                        Number(
-                            $("quickStatPlayer").value
-                        );
-
-
-                    if (type === "goal") {
-
-                        await updatePlayerStats(
-                            playerId,
-                            {
-                                goals: 1,
-                                points: 1
-                            }
-                        );
-
-                    }
-
-
-                    if (type === "assist") {
-
-                        await updatePlayerStats(
-                            playerId,
-                            {
-                                assists: 1,
-                                points: 1
-                            }
-                        );
-
-                    }
-
-
-                    if (type === "penalty") {
-
-                        await updatePlayerStats(
-                            playerId,
-                            {
-                                pim:
-                                    Number(
-                                        $("quickStatValue").value
-                                    )
-                            }
-                        );
-                    }
-
-
-                    toast(
-                        "Статистика обновлена."
-                    );
-
-                    closeModal();
-
-                    await loadStats();
-
-                    renderStats();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
-                    );
-                }
-            }
-        );
-    }
-
-
-    /* =====================================================
-       NEWS
-       ===================================================== */
-
-    function renderNews() {
-
-        const container =
-            $("newsAdminList");
-
-        if (!container) return;
-
-
-        if (!state.news.length) {
-
-            container.innerHTML = `
-                <div class="admin-card">
-                    Новостей пока нет.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        container.innerHTML =
-            state.news.map(news => `
-
-                <div class="admin-card">
-
-                    ${
-                        news.image_url
-                            ? `
-                                <img
-                                    src="${escapeHTML(news.image_url)}"
-                                    alt=""
-                                    style="
-                                        width:100%;
-                                        max-height:240px;
-                                        object-fit:cover;
-                                        border-radius:16px;
-                                        margin-bottom:14px;
-                                    "
-                                >
-                              `
-                            : ""
-                    }
-
-
-                    <div class="card-title">
-                        ${escapeHTML(news.title)}
-                    </div>
-
-
-                    <div class="card-description">
-
-                        ${formatDate(news.published_at)}
-
-                        ${
-                            Array.isArray(news.tags) &&
-                            news.tags.length
-                                ? ` · ${news.tags.map(
-                                    tag =>
-                                        `#${escapeHTML(tag)}`
-                                ).join(" ")}`
-                                : ""
-                        }
-
-                    </div>
-
-
-                    <div class="admin-actions">
-
-                        <button
-                            class="small-button"
-                            type="button"
-                            data-action="edit-news"
-                            data-id="${news.id}"
+    if (type === "select") {
+
+        const optionsHTML =
+            (options.items || [])
+                .map(item => {
+
+                    const selected =
+                        String(item.value) ===
+                        String(value)
+                            ? "selected"
+                            : "";
+
+                    return `
+                        <option
+                            value="${escapeHTML(item.value)}"
+                            ${selected}
                         >
-                            Изменить
-                        </button>
-
-                        <button
-                            class="small-button danger"
-                            type="button"
-                            data-action="delete-news"
-                            data-id="${news.id}"
-                        >
-                            Удалить
-                        </button>
-
-                    </div>
-
-                </div>
-
-            `).join("");
-    }
-
-
-    function openNewsForm(news = null) {
-
-        const isEdit =
-            Boolean(news);
-
-
-        openModal(
-            isEdit
-                ? "Редактирование новости"
-                : "Добавить новость",
-
-            `
-
-            <form id="newsForm">
-
-                <div class="form-group">
-
-                    <label>Заголовок</label>
-
-                    <input
-                        id="newsTitle"
-                        type="text"
-                        value="${escapeHTML(news?.title || "")}"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Текст</label>
-
-                    <textarea
-                        id="newsBody"
-                        rows="9"
-                    >${escapeHTML(news?.body || "")}</textarea>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Теги</label>
-
-                    <input
-                        id="newsTags"
-                        type="text"
-                        value="${
-                            Array.isArray(news?.tags)
-                                ? news.tags.join(", ")
-                                : ""
-                        }"
-                        placeholder="матч, команда, победа"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Фото</label>
-
-                    <input
-                        id="newsImage"
-                        type="file"
-                        accept="image/*"
-                    >
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    ${isEdit ? "Сохранить" : "Опубликовать"}
-                </button>
-
-            </form>
-
-            `
-        );
-
-
-        $("newsForm")?.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                try {
-
-                    let imageUrl =
-                        news?.image_url ||
-                        null;
-
-
-                    const file =
-                        $("newsImage")
-                            ?.files?.[0];
-
-
-                    if (file) {
-
-                        imageUrl =
-                            await uploadFile(
-                                file,
-                                "news"
-                            );
-                    }
-
-
-                    const tags =
-                        $("newsTags")
-                            .value
-                            .split(",")
-                            .map(tag => tag.trim())
-                            .filter(Boolean);
-
-
-                    const values = {
-
-                        title:
-                            $("newsTitle")
-                                .value.trim(),
-
-                        body:
-                            $("newsBody")
-                                .value.trim() || null,
-
-                        image_url:
-                            imageUrl,
-
-                        tags,
-
-                        published_at:
-                            news?.published_at ||
-                            new Date().toISOString()
-                    };
-
-
-                    if (isEdit) {
-
-                        await update(
-                            "news",
-                            news.id,
-                            values
-                        );
-
-                        toast(
-                            "Новость сохранена."
-                        );
-
-                    } else {
-
-                        await insert(
-                            "news",
-                            values
-                        );
-
-                        toast(
-                            "Новость опубликована."
-                        );
-                    }
-
-
-                    closeModal();
-
-                    await loadNews();
-
-                    renderNews();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
-                    );
-                }
-            }
-        );
-    }
-
-
-    async function deleteNews(id) {
-
-        if (!confirm(
-            "Удалить новость?"
-        )) return;
-
-        try {
-
-            await remove(
-                "news",
-                id
-            );
-
-            toast(
-                "Новость удалена."
-            );
-
-            await loadNews();
-
-            renderNews();
-
-        } catch (error) {
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
-    }
-
-
-    /* =====================================================
-       MEDIA
-       ===================================================== */
-
-    function renderAlbums() {
-
-        const container =
-            $("albumsAdminList");
-
-        if (!container) return;
-
-
-        if (!state.albums.length) {
-
-            container.innerHTML = `
-                <div class="admin-card">
-                    Альбомов пока нет.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        container.innerHTML =
-            state.albums.map(album => {
-
-                const photos =
-                    Array.isArray(album.photos)
-                        ? album.photos
-                        : [];
-
-
-                return `
-
-                    <div class="admin-card">
-
-                        ${
-                            photos[0]
-                                ? `
-                                    <img
-                                        src="${escapeHTML(photos[0])}"
-                                        alt=""
-                                        style="
-                                            width:100%;
-                                            aspect-ratio:16/10;
-                                            object-fit:cover;
-                                            border-radius:16px;
-                                            margin-bottom:14px;
-                                        "
-                                    >
-                                  `
-                                : ""
-                        }
-
-
-                        <div class="card-title">
-                            ${escapeHTML(album.title)}
-                        </div>
-
-
-                        <div class="card-description">
-                            ${photos.length} фото
-                        </div>
-
-
-                        <div class="admin-actions">
-
-                            <button
-                                class="small-button"
-                                type="button"
-                                data-action="edit-album"
-                                data-id="${album.id}"
-                            >
-                                Изменить
-                            </button>
-
-                            <button
-                                class="small-button danger"
-                                type="button"
-                                data-action="delete-album"
-                                data-id="${album.id}"
-                            >
-                                Удалить
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                `;
-            }).join("");
-    }
-
-
-    function openAlbumForm(album = null) {
-
-        const isEdit =
-            Boolean(album);
-
-
-        openModal(
-            isEdit
-                ? "Редактирование альбома"
-                : "Создать альбом",
-
-            `
-
-            <form id="albumForm">
-
-                <div class="form-group">
-
-                    <label>Название</label>
-
-                    <input
-                        id="albumTitle"
-                        type="text"
-                        value="${escapeHTML(album?.title || "")}"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Матч</label>
-
-                    <select id="albumMatch">
-
-                        <option value="">
-                            Без привязки
+                            ${escapeHTML(item.label)}
                         </option>
+                    `;
 
-                        ${state.matches.map(match => `
-                            <option
-                                value="${match.id}"
-                                ${String(album?.match_id) === String(match.id)
-                                    ? "selected"
-                                    : ""}
-                            >
-                                ${escapeHTML(matchTeamsText(match))}
-                                · ${formatDate(match.match_date)}
-                            </option>
-                        `).join("")}
-
-                    </select>
-
-                </div>
+                })
+                .join("");
 
 
-                <div class="form-group">
+        return `
+            <label class="field">
+                <span>${escapeHTML(label)}</span>
 
-                    <label>
-                        Фотографии
-                    </label>
-
-                    <input
-                        id="albumPhotos"
-                        type="file"
-                        accept="image/*"
-                        multiple
-                    >
-
-                </div>
-
-
-                ${
-                    Array.isArray(album?.photos) &&
-                    album.photos.length
-                        ? `
-                            <div class="card-description">
-                                В альбоме сейчас:
-                                ${album.photos.length} фото.
-                                Новые фотографии будут добавлены
-                                к существующим.
-                            </div>
-                          `
-                        : ""
-                }
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
+                <select
+                    id="${id}"
+                    ${required}
                 >
-                    ${isEdit ? "Сохранить" : "Создать альбом"}
-                </button>
-
-            </form>
-
-            `
-        );
-
-
-        $("albumForm")?.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                try {
-
-                    let photos =
-                        Array.isArray(album?.photos)
-                            ? [...album.photos]
-                            : [];
-
-
-                    const files =
-                        Array.from(
-                            $("albumPhotos")
-                                ?.files || []
-                        );
-
-
-                    for (const file of files) {
-
-                        const url =
-                            await uploadFile(
-                                file,
-                                "albums"
-                            );
-
-                        photos.push(url);
-                    }
-
-
-                    const values = {
-
-                        title:
-                            $("albumTitle")
-                                .value.trim(),
-
-                        match_id:
-                            $("albumMatch").value
-                                ? Number($("albumMatch").value)
-                                : null,
-
-                        photos
-                    };
-
-
-                    if (isEdit) {
-
-                        await update(
-                            "albums",
-                            album.id,
-                            values
-                        );
-
-                        toast(
-                            "Альбом сохранён."
-                        );
-
-                    } else {
-
-                        await insert(
-                            "albums",
-                            values
-                        );
-
-                        toast(
-                            "Альбом создан."
-                        );
-                    }
-
-
-                    closeModal();
-
-                    await loadAlbums();
-
-                    renderAlbums();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
-                    );
-                }
-            }
-        );
+                    ${optionsHTML}
+                </select>
+            </label>
+        `;
     }
 
 
-    async function deleteAlbum(id) {
+    return `
+        <label class="field">
+            <span>${escapeHTML(label)}</span>
 
-        if (!confirm(
-            "Удалить альбом?"
-        )) return;
+            <input
+                id="${id}"
+                type="${type}"
+                value="${escapeHTML(value)}"
+                placeholder="${escapeHTML(placeholder)}"
+                ${required}
+            >
+        </label>
+    `;
+}
 
-        try {
 
-            await remove(
-                "albums",
-                id
-            );
+function getValue(id) {
 
-            toast(
-                "Альбом удалён."
-            );
+    const el =
+        document.getElementById(id);
 
-            await loadAlbums();
+    return el
+        ? el.value.trim()
+        : "";
+}
 
-            renderAlbums();
 
-        } catch (error) {
+function getChecked(id) {
 
-            toast(
-                error.message,
-                "error"
-            );
-        }
+    const el =
+        document.getElementById(id);
+
+    return !!el?.checked;
+}
+
+
+/* =========================================================
+   MATCHES
+========================================================= */
+
+function isMatchPlayed(match) {
+
+    if (
+        match.status === "played" ||
+        match.status === "finished" ||
+        match.status === "completed"
+    ) {
+        return true;
     }
 
 
-    /* =====================================================
-       PRODUCTS
-       ===================================================== */
-
-    function renderProducts() {
-
-        const container =
-            $("productsAdminList");
-
-        if (!container) return;
+    const date =
+        match.date ||
+        match.match_date ||
+        match.datetime ||
+        match.start_time;
 
 
-        if (!state.products.length) {
+    if (!date) {
+        return false;
+    }
 
-            container.innerHTML = `
-                <div class="admin-card">
-                    Товаров пока нет.
-                </div>
-            `;
 
-            return;
-        }
+    return new Date(date) < new Date();
+}
 
+
+function matchDate(match) {
+
+    return (
+        match.date ||
+        match.match_date ||
+        match.datetime ||
+        match.start_time ||
+        ""
+    );
+}
+
+
+function homeTeam(match) {
+
+    return (
+        match.home_team ||
+        match.home_team_name ||
+        match.home ||
+        match.team_home ||
+        "Хозяева"
+    );
+}
+
+
+function awayTeam(match) {
+
+    return (
+        match.away_team ||
+        match.away_team_name ||
+        match.away ||
+        match.team_away ||
+        "Гости"
+    );
+}
+
+
+function scoreText(match) {
+
+    if (
+        match.score !== undefined &&
+        match.score !== null &&
+        match.score !== ""
+    ) {
+        return match.score;
+    }
+
+
+    if (
+        match.home_score !== undefined &&
+        match.away_score !== undefined
+    ) {
+
+        return `${match.home_score}:${match.away_score}`;
+    }
+
+
+    return "—";
+}
+
+
+function renderMatches() {
+
+    const container =
+        $("#matchesList");
+
+    if (!container) {
+        return;
+    }
+
+
+    let matches =
+        [...state.data.matches];
+
+
+    const search =
+        (
+            $("#matchSearch")?.value ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const filter =
+        $("#matchFilter")?.value ||
+        "all";
+
+
+    if (search) {
+
+        matches =
+            matches.filter(match => {
+
+                const text =
+                    `${homeTeam(match)}
+                    ${awayTeam(match)}
+                    ${match.arena || ""}
+                    ${match.city || ""}`
+                        .toLowerCase();
+
+                return text.includes(search);
+            });
+    }
+
+
+    if (filter === "played") {
+
+        matches =
+            matches.filter(
+                isMatchPlayed
+            );
+    }
+
+
+    if (filter === "upcoming") {
+
+        matches =
+            matches.filter(
+                match =>
+                    !isMatchPlayed(match)
+            );
+    }
+
+
+    matches.sort(
+        (a, b) =>
+            new Date(matchDate(b) || 0) -
+            new Date(matchDate(a) || 0)
+    );
+
+
+    if (!matches.length) {
 
         container.innerHTML =
-            state.products.map(product => {
+            emptyHTML(
+                "Матчей пока нет"
+            );
 
-                const images =
-                    Array.isArray(product.images)
-                        ? product.images
-                        : [];
-
-
-                return `
-
-                    <div class="admin-card">
-
-                        ${
-                            images[0]
-                                ? `
-                                    <img
-                                        src="${escapeHTML(images[0])}"
-                                        alt=""
-                                        style="
-                                            width:100%;
-                                            aspect-ratio:1;
-                                            object-fit:cover;
-                                            border-radius:16px;
-                                            margin-bottom:14px;
-                                        "
-                                    >
-                                  `
-                                : ""
-                        }
-
-
-                        <div class="card-title">
-                            ${escapeHTML(product.name)}
-                        </div>
-
-
-                        <div class="card-description">
-                            ${formatMoney(product.price)}
-                        </div>
-
-
-                        <div class="card-description">
-
-                            ${
-                                product.active
-                                    ? "Активен"
-                                    : "Скрыт"
-                            }
-
-                        </div>
-
-
-                        <div class="admin-actions">
-
-                            <button
-                                class="small-button"
-                                type="button"
-                                data-action="edit-product"
-                                data-id="${product.id}"
-                            >
-                                Изменить
-                            </button>
-
-                            <button
-                                class="small-button danger"
-                                type="button"
-                                data-action="delete-product"
-                                data-id="${product.id}"
-                            >
-                                Удалить
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                `;
-            }).join("");
+        return;
     }
 
 
-    function openProductForm(product = null) {
+    container.innerHTML =
+        matches.map(match => {
 
-        const isEdit =
-            Boolean(product);
+            const id =
+                getId(match);
 
 
-        openModal(
-            isEdit
-                ? "Редактирование товара"
-                : "Добавить товар",
+            const played =
+                isMatchPlayed(match);
 
-            `
 
-            <form id="productForm">
+            return `
+                <article class="data-card">
 
-                <div class="form-group">
+                    <div class="data-card-main">
 
-                    <label>Название</label>
+                        <div class="data-card-title">
 
-                    <input
-                        id="productName"
-                        type="text"
-                        value="${escapeHTML(product?.name || "")}"
-                        required
-                    >
+                            ${escapeHTML(
+                                homeTeam(match)
+                            )}
 
-                </div>
+                            <span style="color:#9aa1b3">
+                                —
+                            </span>
 
+                            ${escapeHTML(
+                                awayTeam(match)
+                            )}
 
-                <div class="form-group">
+                        </div>
 
-                    <label>Цена</label>
+                        <div class="data-card-meta">
 
-                    <input
-                        id="productPrice"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value="${product?.price ?? 0}"
-                        required
-                    >
+                            <span>
+                                ${formatDateTime(
+                                    matchDate(match)
+                                )}
+                            </span>
 
-                </div>
+                            <span>·</span>
 
+                            <span>
+                                ${escapeHTML(
+                                    match.arena ||
+                                    match.location ||
+                                    "Арена не указана"
+                                )}
+                            </span>
 
-                <div class="form-group">
-
-                    <label>Описание</label>
-
-                    <textarea
-                        id="productDescription"
-                        rows="7"
-                    >${escapeHTML(product?.description || "")}</textarea>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Контакт продавца</label>
-
-                    <input
-                        id="productContact"
-                        type="text"
-                        value="${escapeHTML(product?.seller_contact || "")}"
-                        placeholder="@username / телефон"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Фото</label>
-
-                    <input
-                        id="productImages"
-                        type="file"
-                        accept="image/*"
-                        multiple
-                    >
-
-                </div>
-
-
-                <label class="switch-row">
-
-                    <input
-                        id="productActive"
-                        type="checkbox"
-                        ${product?.active !== false ? "checked" : ""}
-                    >
-
-                    <span>
-                        Показывать товар на сайте
-                    </span>
-
-                </label>
-
-
-                <br>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    ${isEdit ? "Сохранить" : "Добавить"}
-                </button>
-
-            </form>
-
-            `
-        );
-
-
-        $("productForm")?.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                try {
-
-                    let images =
-                        Array.isArray(product?.images)
-                            ? [...product.images]
-                            : [];
-
-
-                    const files =
-                        Array.from(
-                            $("productImages")
-                                ?.files || []
-                        );
-
-
-                    for (const file of files) {
-
-                        const url =
-                            await uploadFile(
-                                file,
-                                "products"
-                            );
-
-                        images.push(url);
-                    }
-
-
-                    const values = {
-
-                        name:
-                            $("productName")
-                                .value.trim(),
-
-                        price:
-                            Number(
-                                $("productPrice").value || 0
-                            ),
-
-                        description:
-                            $("productDescription")
-                                .value.trim() || null,
-
-                        seller_contact:
-                            $("productContact")
-                                .value.trim() || null,
-
-                        images,
-
-                        active:
-                            $("productActive").checked
-                    };
-
-
-                    if (isEdit) {
-
-                        await update(
-                            "products",
-                            product.id,
-                            values
-                        );
-
-                        toast(
-                            "Товар сохранён."
-                        );
-
-                    } else {
-
-                        await insert(
-                            "products",
-                            values
-                        );
-
-                        toast(
-                            "Товар добавлен."
-                        );
-                    }
-
-
-                    closeModal();
-
-                    await loadProducts();
-
-                    renderProducts();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
-                    );
-                }
-            }
-        );
-    }
-
-
-    async function deleteProduct(id) {
-
-        if (!confirm(
-            "Удалить товар?"
-        )) return;
-
-        try {
-
-            await remove(
-                "products",
-                id
-            );
-
-            toast(
-                "Товар удалён."
-            );
-
-            await loadProducts();
-
-            renderProducts();
-
-        } catch (error) {
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
-    }
-
-
-    /* =====================================================
-       STANDINGS
-       ===================================================== */
-
-    function renderStandings() {
-
-        const container =
-            $("standingsAdminList");
-
-        if (!container) return;
-
-
-        container.innerHTML = `
-
-            <div class="admin-list">
-
-                ${
-                    state.standings.length
-                    ? state.standings.map(row => `
-
-                        <div class="admin-list-item">
+                            <span>·</span>
 
                             <strong>
-                                ${row.place || "—"}.
                                 ${escapeHTML(
-                                    getTeamName(row.team_id)
+                                    scoreText(match)
                                 )}
                             </strong>
 
                             <span>
-                                И ${row.games || 0}
-                                · В ${row.wins || 0}
-                                · ВО ${row.overtime_wins || 0}
-                                · ВБ ${row.shootout_wins || 0}
-                                · П ${row.losses || 0}
-                                · ПБ ${row.overtime_losses || 0}
-                                · О ${row.points || 0}
+                                ${played
+                                    ? "Сыгран"
+                                    : "Предстоящий"}
                             </span>
 
-                            <div class="admin-actions">
-
-                                <button
-                                    class="small-button"
-                                    type="button"
-                                    data-action="edit-standing"
-                                    data-id="${row.id}"
-                                >
-                                    Изменить
-                                </button>
-
-                                <button
-                                    class="small-button danger"
-                                    type="button"
-                                    data-action="delete-standing"
-                                    data-id="${row.id}"
-                                >
-                                    Удалить
-                                </button>
-
-                            </div>
-
                         </div>
 
-                    `).join("")
-                    : "Таблица пока пуста."
+                    </div>
+
+                    <div class="data-card-actions">
+
+                        <button
+                            class="card-action"
+                            type="button"
+                            data-edit-match="${escapeHTML(id)}"
+                        >
+                            ✎
+                        </button>
+
+                        <button
+                            class="card-action delete"
+                            type="button"
+                            data-delete-match="${escapeHTML(id)}"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                </article>
+            `;
+
+        }).join("");
+}
+
+
+function matchForm(match = {}) {
+
+    const isEdit =
+        !!getId(match);
+
+
+    return `
+        <div class="form-grid">
+
+            ${field(
+                "Домашняя команда",
+                "formHomeTeam",
+                homeTeam(match),
+                "text",
+                {
+                    required: true
                 }
+            )}
 
-            </div>
+            ${field(
+                "Гостевая команда",
+                "formAwayTeam",
+                awayTeam(match),
+                "text",
+                {
+                    required: true
+                }
+            )}
 
-        `;
-    }
+            ${field(
+                "Дата и время",
+                "formMatchDate",
+                matchDate(match)
+                    ? new Date(
+                        matchDate(match)
+                    )
+                        .toISOString()
+                        .slice(0,16)
+                    : "",
+                "datetime-local",
+                {
+                    required: true
+                }
+            )}
 
+            ${field(
+                "Арена",
+                "formArena",
+                match.arena ||
+                match.location ||
+                ""
+            )}
 
-    function openStandingForm(standing = null) {
+            ${field(
+                "Счёт",
+                "formScore",
+                scoreText(match) === "—"
+                    ? ""
+                    : scoreText(match),
+                "text",
+                {
+                    placeholder: "4:1"
+                }
+            )}
 
-        const isEdit =
-            Boolean(standing);
+            ${field(
+                "Статус",
+                "formMatchStatus",
+                match.status ||
+                (
+                    isMatchPlayed(match)
+                        ? "played"
+                        : "upcoming"
+                ),
+                "select",
+                {
+                    items: [
+                        {
+                            value: "upcoming",
+                            label: "Предстоящий"
+                        },
+                        {
+                            value: "played",
+                            label: "Сыгран"
+                        }
+                    ]
+                }
+            )}
 
+            ${field(
+                "Ссылка на билеты",
+                "formTickets",
+                match.tickets_url ||
+                match.ticket_url ||
+                ""
+            )}
 
-        openModal(
-            isEdit
-                ? "Редактирование команды"
-                : "Добавить команду",
+            ${field(
+                "Описание",
+                "formMatchDescription",
+                match.description ||
+                "",
+                "textarea"
+            )}
 
-            `
-
-            <form id="standingForm">
-
-                <div class="form-group">
-
-                    <label>Команда</label>
-
-                    <select id="standingTeam" required>
-
-                        <option value="">
-                            Выберите команду
-                        </option>
-
-                        ${state.teams.map(team => `
-                            <option
-                                value="${team.id}"
-                                ${String(standing?.team_id) === String(team.id)
-                                    ? "selected"
-                                    : ""}
-                            >
-                                ${escapeHTML(team.name)}
-                            </option>
-                        `).join("")}
-
-                    </select>
-
-                </div>
-
-
-                <div class="admin-grid-2">
-
-                    <div class="form-group">
-                        <label>Место</label>
-                        <input
-                            id="standingPlace"
-                            type="number"
-                            value="${standing?.place ?? ""}"
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label>Игр</label>
-                        <input
-                            id="standingGames"
-                            type="number"
-                            value="${standing?.games ?? 0}"
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label>Победы</label>
-                        <input
-                            id="standingWins"
-                            type="number"
-                            value="${standing?.wins ?? 0}"
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label>ВО</label>
-                        <input
-                            id="standingOvertimeWins"
-                            type="number"
-                            value="${standing?.overtime_wins ?? 0}"
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label>ВБ</label>
-                        <input
-                            id="standingShootoutWins"
-                            type="number"
-                            value="${standing?.shootout_wins ?? 0}"
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label>П</label>
-                        <input
-                            id="standingLosses"
-                            type="number"
-                            value="${standing?.losses ?? 0}"
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label>ПБ</label>
-                        <input
-                            id="standingShootoutLosses"
-                            type="number"
-                            value="${standing?.shootout_losses ?? 0}"
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label>Очки</label>
-                        <input
-                            id="standingPoints"
-                            type="number"
-                            value="${standing?.points ?? 0}"
-                        >
-                    </div>
-
-                </div>
+        </div>
+    `;
+}
 
 
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    ${isEdit ? "Сохранить" : "Добавить"}
-                </button>
+function openMatchModal(match = null) {
 
-            </form>
-
-            `
-        );
+    const editing =
+        !!match;
 
 
-        $("standingForm")?.addEventListener(
-            "submit",
-            async event => {
+    openModal({
 
-                event.preventDefault();
+        title:
+            editing
+                ? "Редактировать матч"
+                : "Добавить матч",
 
-                try {
+        label:
+            "МАТЧ",
 
-                    const values = {
+        body:
+            matchForm(match || {}),
 
-                        team_id:
-                            Number(
-                                $("standingTeam").value
-                            ),
+        save:
+            async () => {
 
-                        place:
-                            Number(
-                                $("standingPlace").value || 0
-                            ),
+                const payload = {
 
-                        games:
-                            Number(
-                                $("standingGames").value || 0
-                            ),
+                    home_team:
+                        getValue("formHomeTeam"),
 
-                        wins:
-                            Number(
-                                $("standingWins").value || 0
-                            ),
+                    away_team:
+                        getValue("formAwayTeam"),
 
-                        overtime_wins:
-                            Number(
-                                $("standingOvertimeWins").value || 0
-                            ),
+                    match_date:
+                        getValue("formMatchDate"),
 
-                        shootout_wins:
-                            Number(
-                                $("standingShootoutWins").value || 0
-                            ),
+                    arena:
+                        getValue("formArena"),
 
-                        losses:
-                            Number(
-                                $("standingLosses").value || 0
-                            ),
+                    score:
+                        getValue("formScore"),
 
-                        shootout_losses:
-                            Number(
-                                $("standingShootoutLosses").value || 0
-                            ),
+                    status:
+                        getValue("formMatchStatus"),
 
-                        points:
-                            Number(
-                                $("standingPoints").value || 0
-                            )
-                    };
+                    tickets_url:
+                        getValue("formTickets"),
+
+                    description:
+                        getValue(
+                            "formMatchDescription"
+                        )
+
+                };
 
 
-                    if (isEdit) {
+                if (
+                    !payload.home_team ||
+                    !payload.away_team ||
+                    !payload.match_date
+                ) {
 
-                        await update(
-                            "standings",
-                            standing.id,
-                            values
-                        );
-
-                    } else {
-
-                        await insert(
-                            "standings",
-                            values
-                        );
-                    }
-
-
-                    toast(
-                        "Таблица обновлена."
-                    );
-
-                    closeModal();
-
-                    await loadStandings();
-
-                    renderStandings();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
+                    throw new Error(
+                        "Заполни команды и дату матча"
                     );
                 }
+
+
+                if (editing) {
+
+                    await updateRow(
+                        TABLES.matches,
+                        getId(match),
+                        payload
+                    );
+
+                    toast(
+                        "Матч обновлён"
+                    );
+
+                } else {
+
+                    await insertRow(
+                        TABLES.matches,
+                        payload
+                    );
+
+                    toast(
+                        "Матч добавлен"
+                    );
+                }
+
+
+                await loadAllData();
             }
-        );
+
+    });
+}
+
+
+/* =========================================================
+   PLAYERS
+========================================================= */
+
+function playerName(player) {
+
+    return (
+        player.full_name ||
+        player.name ||
+        (
+            `${player.first_name || ""}
+            ${player.last_name || ""}`
+        ).trim() ||
+        "Игрок"
+    );
+}
+
+
+function playerPosition(player) {
+
+    return (
+        player.position ||
+        player.role ||
+        "Позиция не указана"
+    );
+}
+
+
+function renderPlayers() {
+
+    const container =
+        $("#playersList");
+
+    if (!container) {
+        return;
     }
 
 
-    async function deleteStanding(id) {
+    let players =
+        [...state.data.players];
 
-        if (!confirm(
-            "Удалить строку таблицы?"
-        )) return;
 
-        try {
+    const search =
+        (
+            $("#playerSearch")?.value ||
+            ""
+        )
+            .toLowerCase()
+            .trim();
 
-            await remove(
-                "standings",
-                id
+
+    const position =
+        $("#playerPositionFilter")?.value ||
+        "all";
+
+
+    if (search) {
+
+        players =
+            players.filter(player =>
+                playerName(player)
+                    .toLowerCase()
+                    .includes(search)
             );
-
-            await loadStandings();
-
-            renderStandings();
-
-            toast(
-                "Команда удалена из таблицы."
-            );
-
-        } catch (error) {
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
     }
 
 
-    /* =====================================================
-       BIRTHDAYS
-       ===================================================== */
+    if (position !== "all") {
 
-    function renderBirthdays() {
+        players =
+            players.filter(player =>
+                playerPosition(player)
+                    .toLowerCase()
+                    .includes(
+                        position.toLowerCase()
+                    )
+            );
+    }
 
-        const container =
-            $("birthdaysAdminList");
 
-        if (!container) return;
-
+    if (!players.length) {
 
         container.innerHTML =
-            state.birthdays.length
-            ? state.birthdays.map(birthday => {
+            emptyHTML(
+                "Игроков пока нет"
+            );
 
-                const player =
-                    getPlayer(
-                        birthday.player_id
-                    );
+        return;
+    }
 
 
-                return `
+    container.innerHTML =
+        players.map(player => {
 
-                    <div class="admin-card">
+            const image =
+                safeURL(
+                    getImage(player)
+                );
 
-                        <div class="card-title">
 
-                            ${
-                                player
-                                    ? `#${player.number ?? "—"}
-                                       ${escapeHTML(player.full_name)}`
-                                    : "Игрок не найден"
-                            }
+            const id =
+                getId(player);
 
-                        </div>
 
-                        <div class="card-description">
+            return `
+                <article class="player-card">
 
-                            ${formatDate(
-                                birthday.birthday
+                    <div class="player-image">
+
+                        ${
+                            image
+                                ? `
+                                    <img
+                                        src="${escapeHTML(image)}"
+                                        alt=""
+                                    >
+                                `
+                                : ""
+                        }
+
+                        <div class="player-number">
+
+                            #${escapeHTML(
+                                player.number ||
+                                player.jersey_number ||
+                                ""
                             )}
 
-                            ${
-                                birthday.note
-                                    ? ` · ${escapeHTML(birthday.note)}`
-                                    : ""
-                            }
-
                         </div>
 
+                    </div>
 
-                        <div class="admin-actions">
+
+                    <div class="player-body">
+
+                        <h3>
+                            ${escapeHTML(
+                                playerName(player)
+                            )}
+                        </h3>
+
+                        <p>
+                            ${escapeHTML(
+                                playerPosition(player)
+                            )}
+                        </p>
+
+
+                        <div class="player-actions">
 
                             <button
-                                class="small-button"
+                                class="secondary-button"
                                 type="button"
-                                data-action="edit-birthday"
-                                data-id="${birthday.id}"
+                                data-edit-player="${escapeHTML(id)}"
                             >
                                 Изменить
                             </button>
 
                             <button
-                                class="small-button danger"
+                                class="card-action delete"
                                 type="button"
-                                data-action="delete-birthday"
-                                data-id="${birthday.id}"
+                                data-delete-player="${escapeHTML(id)}"
                             >
-                                Удалить
+                                ×
                             </button>
 
                         </div>
 
                     </div>
 
-                `;
-
-            }).join("")
-            : `
-                <div class="admin-card">
-                    Дней рождения пока нет.
-                </div>
+                </article>
             `;
-    }
+
+        }).join("");
+}
 
 
-    function openBirthdayForm(birthday = null) {
+function playerForm(player = {}) {
 
-        const isEdit =
-            Boolean(birthday);
+    return `
+        <div class="form-grid">
 
+            ${field(
+                "ФИО",
+                "formPlayerName",
+                playerName(player),
+                "text",
+                {
+                    required: true
+                }
+            )}
 
-        openModal(
-            isEdit
-                ? "Редактирование дня рождения"
-                : "Добавить день рождения",
+            ${field(
+                "Номер",
+                "formPlayerNumber",
+                player.number ||
+                player.jersey_number ||
+                "",
+                "number"
+            )}
 
-            `
+            ${field(
+                "Позиция",
+                "formPlayerPosition",
+                playerPosition(player),
+                "select",
+                {
+                    items: [
+                        {
+                            value: "Вратарь",
+                            label: "Вратарь"
+                        },
+                        {
+                            value: "Защитник",
+                            label: "Защитник"
+                        },
+                        {
+                            value: "Нападающий",
+                            label: "Нападающий"
+                        }
+                    ]
+                }
+            )}
 
-            <form id="birthdayForm">
+            ${field(
+                "Дата рождения",
+                "formPlayerBirth",
+                player.birth_date ||
+                "",
+                "date"
+            )}
 
-                <div class="form-group">
+            ${field(
+                "Фото",
+                "formPlayerImage",
+                getImage(player)
+            )}
 
-                    <label>Игрок</label>
+            ${field(
+                "Описание",
+                "formPlayerDescription",
+                player.description ||
+                "",
+                "textarea"
+            )}
 
-                    <select id="birthdayPlayer" required>
-
-                        <option value="">
-                            Выберите игрока
-                        </option>
-
-                        ${state.players.map(player => `
-                            <option
-                                value="${player.id}"
-                                ${String(birthday?.player_id) === String(player.id)
-                                    ? "selected"
-                                    : ""}
-                            >
-                                #${player.number ?? "—"}
-                                ${escapeHTML(player.full_name)}
-                            </option>
-                        `).join("")}
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Дата рождения</label>
-
-                    <input
-                        id="birthdayDate"
-                        type="date"
-                        value="${birthday?.birthday || ""}"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Комментарий</label>
-
-                    <input
-                        id="birthdayNote"
-                        type="text"
-                        value="${escapeHTML(birthday?.note || "")}"
-                        placeholder="Например: поздравляем!"
-                    >
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    ${isEdit ? "Сохранить" : "Добавить"}
-                </button>
-
-            </form>
-
-            `
-        );
+        </div>
+    `;
+}
 
 
-        $("birthdayForm")?.addEventListener(
-            "submit",
-            async event => {
+function openPlayerModal(player = null) {
 
-                event.preventDefault();
-
-                try {
-
-                    const values = {
-
-                        player_id:
-                            Number(
-                                $("birthdayPlayer").value
-                            ),
-
-                        birthday:
-                            $("birthdayDate").value,
-
-                        note:
-                            $("birthdayNote")
-                                .value.trim() || null
-                    };
+    const editing =
+        !!player;
 
 
-                    if (isEdit) {
+    openModal({
 
-                        await update(
-                            "birthdays",
-                            birthday.id,
-                            values
-                        );
+        title:
+            editing
+                ? "Редактировать игрока"
+                : "Добавить игрока",
 
-                    } else {
+        label:
+            "ИГРОК",
 
-                        await insert(
-                            "birthdays",
-                            values
-                        );
-                    }
+        body:
+            playerForm(player || {}),
+
+        save:
+            async () => {
+
+                const payload = {
+
+                    full_name:
+                        getValue(
+                            "formPlayerName"
+                        ),
+
+                    number:
+                        getValue(
+                            "formPlayerNumber"
+                        ) || null,
+
+                    position:
+                        getValue(
+                            "formPlayerPosition"
+                        ),
+
+                    birth_date:
+                        getValue(
+                            "formPlayerBirth"
+                        ) || null,
+
+                    image_url:
+                        getValue(
+                            "formPlayerImage"
+                        ),
+
+                    description:
+                        getValue(
+                            "formPlayerDescription"
+                        )
+
+                };
 
 
-                    toast(
-                        "День рождения сохранён."
-                    );
+                if (!payload.full_name) {
 
-                    closeModal();
-
-                    await loadBirthdays();
-
-                    renderBirthdays();
-
-                } catch (error) {
-
-                    toast(
-                        error.message,
-                        "error"
+                    throw new Error(
+                        "Укажи ФИО игрока"
                     );
                 }
+
+
+                if (editing) {
+
+                    await updateRow(
+                        TABLES.players,
+                        getId(player),
+                        payload
+                    );
+
+                    toast(
+                        "Игрок обновлён"
+                    );
+
+                } else {
+
+                    await insertRow(
+                        TABLES.players,
+                        payload
+                    );
+
+                    toast(
+                        "Игрок добавлен"
+                    );
+                }
+
+
+                await loadAllData();
             }
-        );
+
+    });
+}
+
+
+/* =========================================================
+   NEWS
+========================================================= */
+
+function newsTitle(news) {
+
+    return (
+        news.title ||
+        news.name ||
+        "Новость"
+    );
+}
+
+
+function newsDate(news) {
+
+    return (
+        news.published_at ||
+        news.date ||
+        news.created_at ||
+        ""
+    );
+}
+
+
+function renderNews() {
+
+    const container =
+        $("#newsList");
+
+    if (!container) {
+        return;
     }
 
 
-    async function deleteBirthday(id) {
+    let news =
+        [...state.data.news];
 
-        if (!confirm(
-            "Удалить запись?"
-        )) return;
 
-        try {
+    const search =
+        (
+            $("#newsSearch")?.value ||
+            ""
+        )
+            .toLowerCase()
+            .trim();
 
-            await remove(
-                "birthdays",
-                id
-            );
 
-            await loadBirthdays();
+    const filter =
+        $("#newsStatusFilter")?.value ||
+        "all";
 
-            renderBirthdays();
 
-            toast(
-                "Запись удалена."
-            );
+    if (search) {
 
-        } catch (error) {
+        news =
+            news.filter(item => {
 
-            toast(
-                error.message,
-                "error"
-            );
-        }
+                const text =
+                    `${newsTitle(item)}
+                    ${item.description || ""}
+                    ${item.content || ""}`
+                        .toLowerCase();
+
+                return text.includes(search);
+            });
     }
 
 
-    /* =====================================================
-       ACHIEVEMENTS
-       ===================================================== */
+    if (filter === "published") {
 
-    function renderAchievements() {
+        news =
+            news.filter(
+                item =>
+                    item.published !== false &&
+                    item.is_published !== false
+            );
+    }
 
-        const container =
-            $("achievementsAdminList");
 
-        if (!container) return;
+    if (filter === "hidden") {
 
+        news =
+            news.filter(
+                item =>
+                    item.published === false ||
+                    item.is_published === false
+            );
+    }
+
+
+    news.sort(
+        (a, b) =>
+            new Date(newsDate(b) || 0) -
+            new Date(newsDate(a) || 0)
+    );
+
+
+    if (!news.length) {
 
         container.innerHTML =
-            state.achievements.length
-            ? state.achievements.map(item => `
+            emptyHTML(
+                "Новостей пока нет"
+            );
 
-                <div class="admin-card">
-
-                    ${
-                        item.image_url
-                            ? `
-                                <img
-                                    src="${escapeHTML(item.image_url)}"
-                                    alt=""
-                                    style="
-                                        width:100%;
-                                        max-height:220px;
-                                        object-fit:cover;
-                                        border-radius:16px;
-                                        margin-bottom:14px;
-                                    "
-                                >
-                              `
-                            : ""
-                    }
-
-
-                    <div class="card-title">
-                        ${escapeHTML(item.title)}
-                    </div>
-
-
-                    <div class="card-description">
-                        ${escapeHTML(item.description || "")}
-                    </div>
-
-
-                    <div class="admin-actions">
-
-                        <button
-                            class="small-button"
-                            type="button"
-                            data-action="edit-achievement"
-                            data-id="${item.id}"
-                        >
-                            Изменить
-                        </button>
-
-                        <button
-                            class="small-button danger"
-                            type="button"
-                            data-action="delete-achievement"
-                            data-id="${item.id}"
-                        >
-                            Удалить
-                        </button>
-
-                    </div>
-
-                </div>
-
-            `).join("")
-            : `
-                <div class="admin-card">
-                    Достижений пока нет.
-                </div>
-            `;
+        return;
     }
 
 
-    function openAchievementForm(item = null) {
+    container.innerHTML =
+        news.map(item => {
 
-        const isEdit =
-            Boolean(item);
+            const id =
+                getId(item);
 
 
-        openModal(
-            isEdit
-                ? "Редактирование достижения"
-                : "Добавить достижение",
+            return `
+                <article class="data-card">
 
-            `
+                    <div class="data-card-main">
 
-            <form id="achievementForm">
+                        <div class="data-card-title">
 
-                <div class="form-group">
+                            ${escapeHTML(
+                                newsTitle(item)
+                            )}
 
-                    <label>Название</label>
+                        </div>
 
-                    <input
-                        id="achievementTitle"
-                        type="text"
-                        value="${escapeHTML(item?.title || "")}"
-                        required
-                    >
+                        <div class="data-card-meta">
 
-                </div>
+                            <span>
+                                ${formatDate(
+                                    newsDate(item)
+                                )}
+                            </span>
 
+                            ${
+                                item.category
+                                    ? `
+                                        <span>·</span>
+                                        <span>
+                                            ${escapeHTML(
+                                                item.category
+                                            )}
+                                        </span>
+                                    `
+                                    : ""
+                            }
 
-                <div class="form-group">
-
-                    <label>Описание</label>
-
-                    <textarea
-                        id="achievementDescription"
-                        rows="6"
-                    >${escapeHTML(item?.description || "")}</textarea>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Порядок</label>
-
-                    <input
-                        id="achievementOrder"
-                        type="number"
-                        value="${item?.sort_order ?? 0}"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Изображение</label>
-
-                    <input
-                        id="achievementImage"
-                        type="file"
-                        accept="image/*"
-                    >
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    ${isEdit ? "Сохранить" : "Добавить"}
-                </button>
-
-            </form>
-
-            `
-        );
-
-
-        $("achievementForm")?.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                try {
-
-                    let imageUrl =
-                        item?.image_url ||
-                        null;
-
-
-                    const file =
-                        $("achievementImage")
-                            ?.files?.[0];
-
-
-                    if (file) {
-
-                        imageUrl =
-                            await uploadFile(
-                                file,
-                                "achievements"
-                            );
-                    }
-
-
-                    const values = {
-
-                        title:
-                            $("achievementTitle")
-                                .value.trim(),
-
-                        description:
-                            $("achievementDescription")
-                                .value.trim() || null,
-
-                        sort_order:
-                            Number(
-                                $("achievementOrder").value || 0
-                            ),
-
-                        image_url:
-                            imageUrl
-                    };
-
-
-                    if (isEdit) {
-
-                        await update(
-                            "achievements",
-                            item.id,
-                            values
-                        );
-
-                    } else {
-
-                        await insert(
-                            "achievements",
-                            values
-                        );
-                    }
-
-
-                    toast(
-                        "Достижение сохранено."
-                    );
-
-                    closeModal();
-
-                    await loadAchievements();
-
-                    renderAchievements();
-
-                } catch (error) {
-
-                    toast(
-                        error.message,
-                        "error"
-                    );
-                }
-            }
-        );
-    }
-
-
-    async function deleteAchievement(id) {
-
-        if (!confirm(
-            "Удалить достижение?"
-        )) return;
-
-        try {
-
-            await remove(
-                "achievements",
-                id
-            );
-
-            await loadAchievements();
-
-            renderAchievements();
-
-            toast(
-                "Достижение удалено."
-            );
-
-        } catch (error) {
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
-    }
-
-
-    /* =====================================================
-       REGISTRY
-       ===================================================== */
-
-    function renderRegistry() {
-
-        const teams =
-            $("registryTeamsList");
-
-        if (teams) {
-
-            teams.innerHTML =
-                state.teams.map(team => `
-
-                    <div class="admin-list-item">
-
-                        <div>
-
-                            <strong>
-                                ${escapeHTML(team.name)}
-                            </strong>
+                            <span>·</span>
 
                             <span>
                                 ${
-                                    team.city
-                                        ? escapeHTML(team.city)
-                                        : ""
+                                    (
+                                        item.published === false ||
+                                        item.is_published === false
+                                    )
+                                        ? "Скрыта"
+                                        : "Опубликована"
                                 }
                             </span>
 
                         </div>
 
+                    </div>
 
-                        <div class="admin-actions">
+
+                    <div class="data-card-actions">
+
+                        <button
+                            class="card-action"
+                            type="button"
+                            data-edit-news="${escapeHTML(id)}"
+                        >
+                            ✎
+                        </button>
+
+                        <button
+                            class="card-action delete"
+                            type="button"
+                            data-delete-news="${escapeHTML(id)}"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                </article>
+            `;
+
+        }).join("");
+}
+
+
+function newsForm(news = {}) {
+
+    return `
+        <div class="form-grid">
+
+            ${field(
+                "Заголовок",
+                "formNewsTitle",
+                newsTitle(news),
+                "text",
+                {
+                    required: true
+                }
+            )}
+
+            ${field(
+                "Категория",
+                "formNewsCategory",
+                news.category ||
+                "Новости"
+            )}
+
+            ${field(
+                "Дата публикации",
+                "formNewsDate",
+                newsDate(news)
+                    ? new Date(
+                        newsDate(news)
+                    )
+                        .toISOString()
+                        .slice(0, 16)
+                    : "",
+                "datetime-local"
+            )}
+
+            ${field(
+                "Изображение",
+                "formNewsImage",
+                getImage(news)
+            )}
+
+            ${field(
+                "Короткое описание",
+                "formNewsDescription",
+                news.description ||
+                news.excerpt ||
+                "",
+                "textarea"
+            )}
+
+            ${field(
+                "Текст",
+                "formNewsContent",
+                news.content ||
+                news.text ||
+                "",
+                "textarea",
+                {
+                    rows: 8
+                }
+            )}
+
+            <label class="toggle-row field-full">
+
+                <div>
+                    <strong>
+                        Опубликовано
+                    </strong>
+
+                    <span>
+                        Новость будет видна на сайте
+                    </span>
+                </div>
+
+                <input
+                    type="checkbox"
+                    id="formNewsPublished"
+                    ${
+                        (
+                            news.published !== false &&
+                            news.is_published !== false
+                        )
+                            ? "checked"
+                            : ""
+                    }
+                >
+
+                <i></i>
+
+            </label>
+
+        </div>
+    `;
+}
+
+
+function openNewsModal(news = null) {
+
+    const editing =
+        !!news;
+
+
+    openModal({
+
+        title:
+            editing
+                ? "Редактировать новость"
+                : "Добавить новость",
+
+        label:
+            "НОВОСТЬ",
+
+        body:
+            newsForm(news || {}),
+
+        save:
+            async () => {
+
+                const published =
+                    getChecked(
+                        "formNewsPublished"
+                    );
+
+
+                const payload = {
+
+                    title:
+                        getValue(
+                            "formNewsTitle"
+                        ),
+
+                    category:
+                        getValue(
+                            "formNewsCategory"
+                        ),
+
+                    published_at:
+                        getValue(
+                            "formNewsDate"
+                        ) ||
+                        new Date().toISOString(),
+
+                    image_url:
+                        getValue(
+                            "formNewsImage"
+                        ),
+
+                    description:
+                        getValue(
+                            "formNewsDescription"
+                        ),
+
+                    content:
+                        getValue(
+                            "formNewsContent"
+                        ),
+
+                    published
+
+                };
+
+
+                if (!payload.title) {
+
+                    throw new Error(
+                        "Укажи заголовок"
+                    );
+                }
+
+
+                if (editing) {
+
+                    await updateRow(
+                        TABLES.news,
+                        getId(news),
+                        payload
+                    );
+
+                    toast(
+                        "Новость обновлена"
+                    );
+
+                } else {
+
+                    await insertRow(
+                        TABLES.news,
+                        payload
+                    );
+
+                    toast(
+                        "Новость создана"
+                    );
+                }
+
+
+                await loadAllData();
+            }
+
+    });
+}
+
+
+/* =========================================================
+   ALBUMS
+========================================================= */
+
+function renderAlbums() {
+
+    const container =
+        $("#albumsList");
+
+    if (!container) {
+        return;
+    }
+
+
+    const albums =
+        [...state.data.albums]
+            .sort(
+                (a, b) =>
+                    new Date(
+                        b.created_at ||
+                        b.date ||
+                        0
+                    ) -
+                    new Date(
+                        a.created_at ||
+                        a.date ||
+                        0
+                    )
+            );
+
+
+    if (!albums.length) {
+
+        container.innerHTML =
+            emptyHTML(
+                "Альбомов пока нет"
+            );
+
+        return;
+    }
+
+
+    container.innerHTML =
+        albums.map(album => {
+
+            const image =
+                safeURL(
+                    getImage(album)
+                );
+
+
+            const id =
+                getId(album);
+
+
+            return `
+                <article class="album-card">
+
+                    <div class="album-image">
+
+                        ${
+                            image
+                                ? `
+                                    <img
+                                        src="${escapeHTML(image)}"
+                                        alt=""
+                                    >
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+
+                    <div class="album-body">
+
+                        <h3>
+                            ${escapeHTML(
+                                album.title ||
+                                album.name ||
+                                "Альбом"
+                            )}
+                        </h3>
+
+                        <p>
+                            ${escapeHTML(
+                                album.description ||
+                                ""
+                            )}
+                        </p>
+
+                        <div class="album-actions">
 
                             <button
-                                class="small-button"
+                                class="secondary-button"
                                 type="button"
-                                data-action="edit-team"
-                                data-id="${team.id}"
+                                data-edit-album="${escapeHTML(id)}"
                             >
                                 Изменить
                             </button>
 
                             <button
-                                class="small-button danger"
+                                class="card-action delete"
                                 type="button"
-                                data-action="delete-team"
-                                data-id="${team.id}"
+                                data-delete-album="${escapeHTML(id)}"
                             >
-                                Удалить
+                                ×
                             </button>
 
                         </div>
 
                     </div>
 
-                `).join("");
-        }
+                </article>
+            `;
 
+        }).join("");
+}
 
-        const venues =
-            $("registryVenuesList");
 
-        if (venues) {
+function albumForm(album = {}) {
 
-            const uniqueVenues =
-                [
-                    ...new Set(
-                        state.matches
-                            .map(match => match.venue)
-                            .filter(Boolean)
-                    )
-                ];
+    return `
+        <div class="form-grid">
 
+            ${field(
+                "Название",
+                "formAlbumTitle",
+                album.title ||
+                album.name ||
+                "",
+                "text",
+                {
+                    required: true
+                }
+            )}
 
-            venues.innerHTML =
-                uniqueVenues.length
-                ? uniqueVenues.map(venue => `
+            ${field(
+                "Дата",
+                "formAlbumDate",
+                album.date ||
+                "",
+                "date"
+            )}
 
-                    <div class="admin-list-item">
+            ${field(
+                "Обложка",
+                "formAlbumCover",
+                getImage(album)
+            )}
 
-                        <strong>
-                            ${escapeHTML(venue)}
-                        </strong>
+            ${field(
+                "Описание",
+                "formAlbumDescription",
+                album.description ||
+                "",
+                "textarea"
+            )}
 
-                    </div>
+        </div>
+    `;
+}
 
-                `).join("")
-                : `
-                    <div class="card-description">
-                        Арены появятся после добавления матчей.
-                    </div>
-                `;
-        }
-    }
 
+function openAlbumModal(album = null) {
 
-    function openTeamForm(team = null) {
+    const editing =
+        !!album;
 
-        const isEdit =
-            Boolean(team);
 
+    openModal({
 
-        openModal(
-            isEdit
-                ? "Редактирование команды"
-                : "Добавить команду",
+        title:
+            editing
+                ? "Редактировать альбом"
+                : "Создать альбом",
 
-            `
+        label:
+            "МЕДИА",
 
-            <form id="teamForm">
+        body:
+            albumForm(album || {}),
 
-                <div class="form-group">
+        save:
+            async () => {
 
-                    <label>Название</label>
+                const payload = {
 
-                    <input
-                        id="teamNameInput"
-                        type="text"
-                        value="${escapeHTML(team?.name || "")}"
-                        required
-                    >
+                    title:
+                        getValue(
+                            "formAlbumTitle"
+                        ),
 
-                </div>
+                    date:
+                        getValue(
+                            "formAlbumDate"
+                        ) || null,
 
+                    cover_url:
+                        getValue(
+                            "formAlbumCover"
+                        ),
 
-                <div class="form-group">
+                    description:
+                        getValue(
+                            "formAlbumDescription"
+                        )
 
-                    <label>Короткое название</label>
+                };
 
-                    <input
-                        id="teamShortName"
-                        type="text"
-                        value="${escapeHTML(team?.short_name || "")}"
-                    >
 
-                </div>
+                if (!payload.title) {
 
-
-                <div class="form-group">
-
-                    <label>Город</label>
-
-                    <input
-                        id="teamCity"
-                        type="text"
-                        value="${escapeHTML(team?.city || "")}"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Логотип</label>
-
-                    <input
-                        id="teamLogo"
-                        type="file"
-                        accept="image/*"
-                    >
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    ${isEdit ? "Сохранить" : "Добавить"}
-                </button>
-
-            </form>
-
-            `
-        );
-
-
-        $("teamForm")?.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                try {
-
-                    let logoUrl =
-                        team?.logo_url ||
-                        null;
-
-
-                    const file =
-                        $("teamLogo")
-                            ?.files?.[0];
-
-
-                    if (file) {
-
-                        logoUrl =
-                            await uploadFile(
-                                file,
-                                "teams"
-                            );
-                    }
-
-
-                    const values = {
-
-                        name:
-                            $("teamNameInput")
-                                .value.trim(),
-
-                        short_name:
-                            $("teamShortName")
-                                .value.trim() || null,
-
-                        city:
-                            $("teamCity")
-                                .value.trim() || null,
-
-                        logo_url:
-                            logoUrl
-                    };
-
-
-                    if (isEdit) {
-
-                        await update(
-                            "teams",
-                            team.id,
-                            values
-                        );
-
-                    } else {
-
-                        await insert(
-                            "teams",
-                            values
-                        );
-                    }
-
-
-                    toast(
-                        "Команда сохранена."
-                    );
-
-                    closeModal();
-
-                    await loadTeams();
-
-                    renderRegistry();
-
-                    renderMatches();
-
-                } catch (error) {
-
-                    toast(
-                        error.message,
-                        "error"
+                    throw new Error(
+                        "Укажи название альбома"
                     );
                 }
-            }
-        );
-    }
 
 
-    async function deleteTeam(id) {
+                if (editing) {
 
-        if (!confirm(
-            "Удалить команду?"
-        )) return;
-
-        try {
-
-            await remove(
-                "teams",
-                id
-            );
-
-            toast(
-                "Команда удалена."
-            );
-
-            await loadTeams();
-
-            await loadStandings();
-
-            renderRegistry();
-
-            renderStandings();
-
-        } catch (error) {
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
-    }
-
-
-    /* =====================================================
-       DESIGN
-       ===================================================== */
-
-    function renderDesign() {
-
-        const settings =
-            state.settings || {};
-
-
-        const colors = {
-
-            primary:
-                settings.primary_color ||
-                DEFAULTS.colors.primary,
-
-            accent:
-                settings.gold_color ||
-                settings.accent_color ||
-                DEFAULTS.colors.accent,
-
-            background:
-                settings.background_color ||
-                DEFAULTS.colors.background,
-
-            surface:
-                DEFAULTS.colors.surface,
-
-            text:
-                settings.text_color ||
-                DEFAULTS.colors.text,
-
-            muted:
-                DEFAULTS.colors.muted,
-
-            border:
-                DEFAULTS.colors.border
-        };
-
-
-        setColor(
-            "colorPrimary",
-            "colorPrimaryHex",
-            colors.primary
-        );
-
-        setColor(
-            "colorAccent",
-            "colorAccentHex",
-            colors.accent
-        );
-
-        setColor(
-            "colorBackground",
-            "colorBackgroundHex",
-            colors.background
-        );
-
-        setColor(
-            "colorSurface",
-            "colorSurfaceHex",
-            colors.surface
-        );
-
-        setColor(
-            "colorText",
-            "colorTextHex",
-            colors.text
-        );
-
-        setColor(
-            "colorMuted",
-            "colorMutedHex",
-            colors.muted
-        );
-
-        setColor(
-            "colorBorder",
-            "colorBorderHex",
-            colors.border
-        );
-
-
-        if ($("designTeamName")) {
-            $("designTeamName").value =
-                settings.team_name ||
-                DEFAULTS.teamName;
-        }
-
-
-        if ($("designSubtitle")) {
-            $("designSubtitle").value =
-                settings.subtitle ||
-                "НАБЕРЕЖНЫЕ ЧЕЛНЫ";
-        }
-
-
-        if ($("designTitleSize")) {
-            $("designTitleSize").value =
-                settings.title_size ||
-                24;
-        }
-
-
-        if ($("logoPreview")) {
-
-            $("logoPreview").innerHTML =
-                settings.logo_url
-                    ? `
-                        <img
-                            src="${escapeHTML(settings.logo_url)}"
-                            alt="Логотип"
-                        >
-                      `
-                    : `
-                        <span>
-                            Логотип не загружен
-                        </span>
-                      `;
-        }
-
-
-        renderIcons();
-    }
-
-
-    function setColor(
-        colorId,
-        hexId,
-        value
-    ) {
-
-        const color =
-            $(colorId);
-
-        const hex =
-            $(hexId);
-
-        if (color) {
-            color.value =
-                normalizeHex(value);
-        }
-
-        if (hex) {
-            hex.value =
-                normalizeHex(value);
-        }
-    }
-
-
-    function normalizeHex(value) {
-
-        const text =
-            String(value || "")
-                .trim();
-
-
-        if (/^#[0-9a-fA-F]{6}$/.test(text)) {
-            return text;
-        }
-
-
-        if (/^[0-9a-fA-F]{6}$/.test(text)) {
-            return `#${text}`;
-        }
-
-
-        return "#000000";
-    }
-
-
-    function bindColorPair(
-        colorId,
-        hexId
-    ) {
-
-        const color =
-            $(colorId);
-
-        const hex =
-            $(hexId);
-
-
-        color?.addEventListener(
-            "input",
-            () => {
-
-                hex.value =
-                    color.value
-                        .toLowerCase();
-
-            }
-        );
-
-
-        hex?.addEventListener(
-            "input",
-            () => {
-
-                const normalized =
-                    normalizeHex(
-                        hex.value
+                    await updateRow(
+                        TABLES.albums,
+                        getId(album),
+                        payload
                     );
 
+                    toast(
+                        "Альбом обновлён"
+                    );
 
-                if (
-                    /^#[0-9a-fA-F]{6}$/.test(
-                        normalized
-                    )
-                ) {
+                } else {
 
-                    color.value =
-                        normalized;
+                    await insertRow(
+                        TABLES.albums,
+                        payload
+                    );
+
+                    toast(
+                        "Альбом создан"
+                    );
                 }
+
+
+                await loadAllData();
             }
-        );
+
+    });
+}
+
+
+/* =========================================================
+   STANDINGS
+========================================================= */
+
+function renderStandings() {
+
+    const container =
+        $("#standingsList");
+
+    if (!container) {
+        return;
     }
 
 
-    async function saveDesign() {
-
-        try {
-
-            let logoUrl =
-                state.settings?.logo_url ||
-                null;
-
-
-            const file =
-                $("logoUpload")
-                    ?.files?.[0];
-
-
-            if (file) {
-
-                logoUrl =
-                    await uploadFile(
-                        file,
-                        "logo"
-                    );
-            }
-
-
-            const values = {
-
-                team_name:
-                    $("designTeamName")
-                        ?.value.trim() ||
-                    DEFAULTS.teamName,
-
-                subtitle:
-                    $("designSubtitle")
-                        ?.value.trim() ||
-                    "НАБЕРЕЖНЫЕ ЧЕЛНЫ",
-
-                title_size:
+    const rows =
+        [...state.data.teams]
+            .sort(
+                (a, b) =>
                     Number(
-                        $("designTitleSize")
-                            ?.value || 24
-                    ),
-
-                logo_url:
-                    logoUrl,
-
-                primary_color:
-                    $("colorPrimaryHex")
-                        ?.value || DEFAULTS.colors.primary,
-
-                gold_color:
-                    $("colorAccentHex")
-                        ?.value || DEFAULTS.colors.accent,
-
-                accent_color:
-                    $("colorAccentHex")
-                        ?.value || DEFAULTS.colors.accent,
-
-                background_color:
-                    $("colorBackgroundHex")
-                        ?.value || DEFAULTS.colors.background,
-
-                text_color:
-                    $("colorTextHex")
-                        ?.value || DEFAULTS.colors.text
-            };
-
-
-            await saveSettingsData(
-                values
+                        b.points ||
+                        b.pts ||
+                        0
+                    ) -
+                    Number(
+                        a.points ||
+                        a.pts ||
+                        0
+                    )
             );
 
 
-            toast(
-                "Дизайн сохранён."
-            );
-
-            renderDesign();
-
-        } catch (error) {
-
-            console.error(error);
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
-    }
-
-
-    /* =====================================================
-       ICONS
-       ===================================================== */
-
-    function renderIcons() {
-
-        const container =
-            $("iconsAdminList");
-
-        if (!container) return;
-
-
-        const icons =
-            state.settings?.icons || {};
-
-
-        const entries =
-            Object.entries(icons);
-
+    if (!rows.length) {
 
         container.innerHTML =
-            entries.length
-            ? entries.map(([name, url]) => `
+            emptyHTML(
+                "Команд в таблице пока нет"
+            );
 
-                <div class="admin-list-item">
+        return;
+    }
+
+
+    container.innerHTML =
+        rows.map((team, index) => {
+
+            const id =
+                getId(team);
+
+
+            return `
+                <div class="standing-row">
+
+                    <div class="standing-place">
+                        ${index + 1}
+                    </div>
+
+                    <div class="standing-team">
+                        ${escapeHTML(
+                            team.name ||
+                            team.team_name ||
+                            "Команда"
+                        )}
+                    </div>
+
+                    <div class="standing-points">
+                        ${escapeHTML(
+                            team.points ||
+                            team.pts ||
+                            0
+                        )}
+                    </div>
+
+                    <div class="standing-actions">
+
+                        <button
+                            class="card-action"
+                            type="button"
+                            data-edit-team="${escapeHTML(id)}"
+                        >
+                            ✎
+                        </button>
+
+                        <button
+                            class="card-action delete"
+                            type="button"
+                            data-delete-team="${escapeHTML(id)}"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
+        }).join("");
+}
+
+
+function teamForm(team = {}) {
+
+    return `
+        <div class="form-grid">
+
+            ${field(
+                "Название команды",
+                "formTeamName",
+                team.name ||
+                team.team_name ||
+                "",
+                "text",
+                {
+                    required: true
+                }
+            )}
+
+            ${field(
+                "Очки",
+                "formTeamPoints",
+                team.points ||
+                team.pts ||
+                0,
+                "number"
+            )}
+
+            ${field(
+                "Победы",
+                "formTeamWins",
+                team.wins ||
+                0,
+                "number"
+            )}
+
+            ${field(
+                "Поражения",
+                "formTeamLosses",
+                team.losses ||
+                0,
+                "number"
+            )}
+
+            ${field(
+                "Логотип",
+                "formTeamLogo",
+                getImage(team)
+            )}
+
+        </div>
+    `;
+}
+
+
+function openTeamModal(team = null) {
+
+    const editing =
+        !!team;
+
+
+    openModal({
+
+        title:
+            editing
+                ? "Редактировать команду"
+                : "Добавить команду",
+
+        label:
+            "ТАБЛИЦА",
+
+        body:
+            teamForm(team || {}),
+
+        save:
+            async () => {
+
+                const payload = {
+
+                    name:
+                        getValue(
+                            "formTeamName"
+                        ),
+
+                    points:
+                        Number(
+                            getValue(
+                                "formTeamPoints"
+                            ) || 0
+                        ),
+
+                    wins:
+                        Number(
+                            getValue(
+                                "formTeamWins"
+                            ) || 0
+                        ),
+
+                    losses:
+                        Number(
+                            getValue(
+                                "formTeamLosses"
+                            ) || 0
+                        ),
+
+                    logo_url:
+                        getValue(
+                            "formTeamLogo"
+                        )
+
+                };
+
+
+                if (!payload.name) {
+
+                    throw new Error(
+                        "Укажи название команды"
+                    );
+                }
+
+
+                if (editing) {
+
+                    await updateRow(
+                        TABLES.teams,
+                        getId(team),
+                        payload
+                    );
+
+                    toast(
+                        "Команда обновлена"
+                    );
+
+                } else {
+
+                    await insertRow(
+                        TABLES.teams,
+                        payload
+                    );
+
+                    toast(
+                        "Команда добавлена"
+                    );
+                }
+
+
+                await loadAllData();
+            }
+
+    });
+}
+
+
+/* =========================================================
+   PRODUCTS
+========================================================= */
+
+function renderProducts() {
+
+    const container =
+        $("#productsList");
+
+    if (!container) {
+        return;
+    }
+
+
+    const products =
+        [...state.data.products];
+
+
+    if (!products.length) {
+
+        container.innerHTML =
+            emptyHTML(
+                "Товаров пока нет"
+            );
+
+        return;
+    }
+
+
+    container.innerHTML =
+        products.map(product => {
+
+            const image =
+                safeURL(
+                    getImage(product)
+                );
+
+
+            const id =
+                getId(product);
+
+
+            return `
+                <article class="product-card">
+
+                    <div class="product-image">
+
+                        ${
+                            image
+                                ? `
+                                    <img
+                                        src="${escapeHTML(image)}"
+                                        alt=""
+                                    >
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+
+                    <div class="product-body">
+
+                        <h3>
+                            ${escapeHTML(
+                                product.name ||
+                                product.title ||
+                                "Товар"
+                            )}
+                        </h3>
+
+                        <p>
+                            ${escapeHTML(
+                                product.description ||
+                                ""
+                            )}
+                        </p>
+
+                        <strong>
+                            ${
+                                product.price !== null &&
+                                product.price !== undefined
+                                    ? `${escapeHTML(product.price)} ₽`
+                                    : "Цена не указана"
+                            }
+                        </strong>
+
+
+                        <div class="product-actions">
+
+                            <button
+                                class="secondary-button"
+                                type="button"
+                                data-edit-product="${escapeHTML(id)}"
+                            >
+                                Изменить
+                            </button>
+
+                            <button
+                                class="card-action delete"
+                                type="button"
+                                data-delete-product="${escapeHTML(id)}"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+            `;
+
+        }).join("");
+}
+
+
+function productForm(product = {}) {
+
+    return `
+        <div class="form-grid">
+
+            ${field(
+                "Название",
+                "formProductName",
+                product.name ||
+                product.title ||
+                "",
+                "text",
+                {
+                    required: true
+                }
+            )}
+
+            ${field(
+                "Цена",
+                "formProductPrice",
+                product.price ||
+                "",
+                "number"
+            )}
+
+            ${field(
+                "Изображение",
+                "formProductImage",
+                getImage(product)
+            )}
+
+            ${field(
+                "Ссылка магазина",
+                "formProductUrl",
+                product.url ||
+                product.link ||
+                ""
+            )}
+
+            ${field(
+                "Описание",
+                "formProductDescription",
+                product.description ||
+                "",
+                "textarea"
+            )}
+
+            <label class="toggle-row field-full">
+
+                <div>
+                    <strong>
+                        Показывать
+                    </strong>
+
+                    <span>
+                        Товар будет отображаться на сайте
+                    </span>
+                </div>
+
+                <input
+                    type="checkbox"
+                    id="formProductVisible"
+                    ${
+                        (
+                            product.visible !== false &&
+                            product.is_visible !== false
+                        )
+                            ? "checked"
+                            : ""
+                    }
+                >
+
+                <i></i>
+
+            </label>
+
+        </div>
+    `;
+}
+
+
+function openProductModal(product = null) {
+
+    const editing =
+        !!product;
+
+
+    openModal({
+
+        title:
+            editing
+                ? "Редактировать товар"
+                : "Добавить товар",
+
+        label:
+            "МАГАЗИН",
+
+        body:
+            productForm(product || {}),
+
+        save:
+            async () => {
+
+                const payload = {
+
+                    name:
+                        getValue(
+                            "formProductName"
+                        ),
+
+                    price:
+                        Number(
+                            getValue(
+                                "formProductPrice"
+                            ) || 0
+                        ),
+
+                    image_url:
+                        getValue(
+                            "formProductImage"
+                        ),
+
+                    url:
+                        getValue(
+                            "formProductUrl"
+                        ),
+
+                    description:
+                        getValue(
+                            "formProductDescription"
+                        ),
+
+                    visible:
+                        getChecked(
+                            "formProductVisible"
+                        )
+
+                };
+
+
+                if (!payload.name) {
+
+                    throw new Error(
+                        "Укажи название товара"
+                    );
+                }
+
+
+                if (editing) {
+
+                    await updateRow(
+                        TABLES.products,
+                        getId(product),
+                        payload
+                    );
+
+                    toast(
+                        "Товар обновлён"
+                    );
+
+                } else {
+
+                    await insertRow(
+                        TABLES.products,
+                        payload
+                    );
+
+                    toast(
+                        "Товар добавлен"
+                    );
+                }
+
+
+                await loadAllData();
+            }
+
+    });
+}
+
+
+/* =========================================================
+   EXTRAS
+========================================================= */
+
+function renderExtras() {
+
+    renderSimpleList(
+        "#achievementsList",
+        state.data.achievements,
+        item =>
+            item.title ||
+            item.name ||
+            "Достижение",
+        item =>
+            item.year ||
+            item.date ||
+            "",
+        "achievement"
+    );
+
+
+    renderSimpleList(
+        "#birthdaysList",
+        state.data.birthdays,
+        item =>
+            item.name ||
+            item.player_name ||
+            "Игрок",
+        item =>
+            item.birth_date ||
+            item.date ||
+            "",
+        "birthday"
+    );
+
+
+    renderSimpleList(
+        "#eventsList",
+        state.data.events,
+        item =>
+            item.description ||
+            item.type ||
+            "Событие",
+        item =>
+            item.period ||
+            item.minute ||
+            "",
+        "event"
+    );
+
+
+    renderSimpleList(
+        "#periodsList",
+        state.data.periods,
+        item =>
+            item.period ||
+            item.name ||
+            "Период",
+        item =>
+            item.score ||
+            "",
+        "period"
+    );
+}
+
+
+function renderSimpleList(
+    selector,
+    items,
+    titleFn,
+    metaFn,
+    type
+) {
+
+    const container =
+        $(selector);
+
+    if (!container) {
+        return;
+    }
+
+
+    if (!items.length) {
+
+        container.innerHTML =
+            emptyHTML(
+                "Пока пусто"
+            );
+
+        return;
+    }
+
+
+    container.innerHTML =
+        items.map(item => {
+
+            const id =
+                getId(item);
+
+
+            return `
+                <div class="mini-item">
 
                     <div>
 
                         <strong>
-                            ${escapeHTML(name)}
+                            ${escapeHTML(
+                                titleFn(item)
+                            )}
                         </strong>
 
                         <span>
-                            ${escapeHTML(url)}
+                            ${escapeHTML(
+                                metaFn(item)
+                            )}
                         </span>
 
                     </div>
 
 
-                    <button
-                        class="small-button danger"
-                        type="button"
-                        data-action="delete-icon"
-                        data-icon="${escapeHTML(name)}"
-                    >
-                        Удалить
-                    </button>
+                    <div class="data-card-actions">
 
-                </div>
+                        <button
+                            class="card-action"
+                            type="button"
+                            data-edit-${type}="${escapeHTML(id)}"
+                        >
+                            ✎
+                        </button>
 
-            `).join("")
-            : `
-                <div class="card-description">
-                    Пользовательских иконок пока нет.
+                        <button
+                            class="card-action delete"
+                            type="button"
+                            data-delete-${type}="${escapeHTML(id)}"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
                 </div>
             `;
+
+        }).join("");
+}
+
+
+function simpleForm(
+    type,
+    item = {}
+) {
+
+    if (type === "achievement") {
+
+        return `
+            <div class="form-grid">
+
+                ${field(
+                    "Название",
+                    "formExtraTitle",
+                    item.title ||
+                    item.name ||
+                    "",
+                    "text",
+                    {
+                        required: true
+                    }
+                )}
+
+                ${field(
+                    "Год",
+                    "formExtraYear",
+                    item.year ||
+                    ""
+                )}
+
+                ${field(
+                    "Описание",
+                    "formExtraDescription",
+                    item.description ||
+                    "",
+                    "textarea"
+                )}
+
+            </div>
+        `;
     }
 
 
-    function openIconForm() {
+    if (type === "birthday") {
 
-        openModal(
-            "Добавить иконку",
+        return `
+            <div class="form-grid">
 
-            `
-
-            <form id="iconForm">
-
-                <div class="form-group">
-
-                    <label>Название</label>
-
-                    <input
-                        id="iconName"
-                        type="text"
-                        placeholder="telegram"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>Файл</label>
-
-                    <input
-                        id="iconFile"
-                        type="file"
-                        accept="image/*,.svg"
-                        required
-                    >
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    Добавить
-                </button>
-
-            </form>
-
-            `
-        );
-
-
-        $("iconForm")?.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                try {
-
-                    const name =
-                        $("iconName")
-                            .value.trim();
-
-
-                    const file =
-                        $("iconFile")
-                            .files?.[0];
-
-
-                    if (!name || !file) {
-                        toast(
-                            "Заполни все поля.",
-                            "warning"
-                        );
-                        return;
+                ${field(
+                    "Имя",
+                    "formExtraTitle",
+                    item.name ||
+                    item.player_name ||
+                    "",
+                    "text",
+                    {
+                        required: true
                     }
+                )}
+
+                ${field(
+                    "Дата рождения",
+                    "formExtraDate",
+                    item.birth_date ||
+                    item.date ||
+                    "",
+                    "date"
+                )}
+
+                ${field(
+                    "Фото",
+                    "formExtraImage",
+                    getImage(item)
+                )}
+
+            </div>
+        `;
+    }
 
 
-                    const url =
-                        await uploadFile(
-                            file,
-                            "icons"
-                        );
+    if (type === "event") {
+
+        return `
+            <div class="form-grid">
+
+                ${field(
+                    "Событие",
+                    "formExtraTitle",
+                    item.description ||
+                    item.type ||
+                    "",
+                    "text",
+                    {
+                        required: true
+                    }
+                )}
+
+                ${field(
+                    "Минута",
+                    "formExtraMinute",
+                    item.minute ||
+                    ""
+                )}
+
+                ${field(
+                    "Период",
+                    "formExtraPeriod",
+                    item.period ||
+                    ""
+                )}
+
+            </div>
+        `;
+    }
 
 
-                    const icons =
-                        {
-                            ...(state.settings?.icons || {}),
-                            [name]: url
-                        };
+    return `
+        <div class="form-grid">
+
+            ${field(
+                "Период",
+                "formExtraTitle",
+                item.period ||
+                item.name ||
+                "",
+                "text",
+                {
+                    required: true
+                }
+            )}
+
+            ${field(
+                "Счёт",
+                "formExtraScore",
+                item.score ||
+                ""
+            )}
+
+        </div>
+    `;
+}
 
 
-                    await saveSettingsData({
-                        icons
-                    });
+function openSimpleModal(
+    type,
+    item = null
+) {
+
+    const table =
+        TABLES[
+            type === "achievement"
+                ? "achievements"
+                : type === "birthday"
+                    ? "birthdays"
+                    : type === "event"
+                        ? "events"
+                        : "periods"
+        ];
 
 
-                    toast(
-                        "Иконка добавлена."
+    const editing =
+        !!item;
+
+
+    openModal({
+
+        title:
+            editing
+                ? "Редактировать"
+                : "Добавить",
+
+        label:
+            "ДОПОЛНИТЕЛЬНО",
+
+        body:
+            simpleForm(
+                type,
+                item || {}
+            ),
+
+        save:
+            async () => {
+
+                let payload;
+
+
+                if (type === "achievement") {
+
+                    payload = {
+
+                        title:
+                            getValue(
+                                "formExtraTitle"
+                            ),
+
+                        year:
+                            getValue(
+                                "formExtraYear"
+                            ),
+
+                        description:
+                            getValue(
+                                "formExtraDescription"
+                            )
+
+                    };
+
+                } else if (type === "birthday") {
+
+                    payload = {
+
+                        name:
+                            getValue(
+                                "formExtraTitle"
+                            ),
+
+                        birth_date:
+                            getValue(
+                                "formExtraDate"
+                            ),
+
+                        image_url:
+                            getValue(
+                                "formExtraImage"
+                            )
+
+                    };
+
+                } else if (type === "event") {
+
+                    payload = {
+
+                        description:
+                            getValue(
+                                "formExtraTitle"
+                            ),
+
+                        minute:
+                            getValue(
+                                "formExtraMinute"
+                            ),
+
+                        period:
+                            getValue(
+                                "formExtraPeriod"
+                            )
+
+                    };
+
+                } else {
+
+                    payload = {
+
+                        period:
+                            getValue(
+                                "formExtraTitle"
+                            ),
+
+                        score:
+                            getValue(
+                                "formExtraScore"
+                            )
+
+                    };
+                }
+
+
+                if (editing) {
+
+                    await updateRow(
+                        table,
+                        getId(item),
+                        payload
                     );
 
-                    closeModal();
+                } else {
 
-                    renderDesign();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        error.message,
-                        "error"
+                    await insertRow(
+                        table,
+                        payload
                     );
                 }
-            }
-        );
-    }
 
 
-    async function deleteIcon(name) {
-
-        const icons =
-            {
-                ...(state.settings?.icons || {})
-            };
-
-
-        delete icons[name];
-
-
-        try {
-
-            await saveSettingsData({
-                icons
-            });
-
-            renderDesign();
-
-            toast(
-                "Иконка удалена."
-            );
-
-        } catch (error) {
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
-    }
-
-
-    /* =====================================================
-       STORAGE
-       ===================================================== */
-
-    async function uploadFile(
-        file,
-        folder = "uploads"
-    ) {
-
-        if (!file) {
-            throw new Error(
-                "Файл не выбран."
-            );
-        }
-
-
-        const safeName =
-            file.name
-                .replace(
-                    /[^a-zA-Z0-9а-яА-Я._-]/g,
-                    "_"
+                toast(
+                    editing
+                        ? "Изменения сохранены"
+                        : "Добавлено"
                 );
 
 
-        const path =
-            `${folder}/${Date.now()}_${safeName}`;
+                await loadAllData();
+            }
+
+    });
+}
 
 
-        const {
-            error
-        } = await db
+/* =========================================================
+   DESIGN / SETTINGS
+========================================================= */
+
+const designSettings = {
+
+    primary:
+        DEFAULT_COLORS.primary,
+
+    accent:
+        DEFAULT_COLORS.accent,
+
+    dark:
+        DEFAULT_COLORS.dark,
+
+    secondary:
+        DEFAULT_COLORS.secondary,
+
+    logo:
+        "",
+
+    favicon:
+        "",
+
+    menuIcon:
+        "",
+
+    siteIcon:
+        "",
+
+    fonts: {}
+
+};
+
+
+function settingValue(key) {
+
+    const item =
+        state.data.settings.find(
+            row =>
+                row.key === key ||
+                row.name === key
+        );
+
+
+    if (!item) {
+        return null;
+    }
+
+
+    return (
+        item.value ??
+        item.setting_value ??
+        item.data ??
+        null
+    );
+}
+
+
+function parseSetting(value) {
+
+    if (typeof value !== "string") {
+        return value;
+    }
+
+
+    try {
+
+        return JSON.parse(value);
+
+    } catch (_) {
+
+        return value;
+    }
+}
+
+
+function loadDesignIntoForm() {
+
+    const values = {
+
+        primary:
+            settingValue("color_primary") ||
+            settingValue("primary_color") ||
+            DEFAULT_COLORS.primary,
+
+        accent:
+            settingValue("color_accent") ||
+            settingValue("accent_color") ||
+            DEFAULT_COLORS.accent,
+
+        dark:
+            settingValue("color_dark") ||
+            settingValue("dark_color") ||
+            DEFAULT_COLORS.dark,
+
+        secondary:
+            settingValue("color_secondary") ||
+            settingValue("secondary_color") ||
+            DEFAULT_COLORS.secondary,
+
+        logo:
+            settingValue("logo_url") || "",
+
+        favicon:
+            settingValue("favicon_url") || "",
+
+        menuIcon:
+            settingValue("menu_icon_url") || "",
+
+        siteIcon:
+            settingValue("site_icon_url") || ""
+
+    };
+
+
+    Object.assign(
+        designSettings,
+        values
+    );
+
+
+    setColorInput(
+        "colorPrimary",
+        "colorPrimaryText",
+        values.primary
+    );
+
+
+    setColorInput(
+        "colorAccent",
+        "colorAccentText",
+        values.accent
+    );
+
+
+    setColorInput(
+        "colorDark",
+        "colorDarkText",
+        values.dark
+    );
+
+
+    setColorInput(
+        "colorSecondary",
+        "colorSecondaryText",
+        values.secondary
+    );
+
+
+    const preview =
+        $("#logoPreview");
+
+
+    if (preview) {
+
+        const url =
+            safeURL(values.logo);
+
+
+        preview.innerHTML =
+            url
+                ? `<img src="${escapeHTML(url)}" alt="">`
+                : "ЛОГО";
+    }
+}
+
+
+function setColorInput(
+    colorId,
+    textId,
+    value
+) {
+
+    const color =
+        $(`#${colorId}`);
+
+    const text =
+        $(`#${textId}`);
+
+
+    if (!color || !text) {
+        return;
+    }
+
+
+    const valid =
+        /^#[0-9a-f]{6}$/i
+            .test(value || "");
+
+
+    if (!valid) {
+        value = "#000000";
+    }
+
+
+    color.value =
+        value;
+
+    text.value =
+        value;
+}
+
+
+async function saveSetting(
+    key,
+    value
+) {
+
+    const existing =
+        state.data.settings.find(
+            item =>
+                item.key === key ||
+                item.name === key
+        );
+
+
+    const payload = {
+
+        key,
+
+        value:
+            typeof value === "string"
+                ? value
+                : JSON.stringify(value)
+
+    };
+
+
+    if (existing && getId(existing)) {
+
+        await updateRow(
+            TABLES.settings,
+            getId(existing),
+            payload
+        );
+
+    } else {
+
+        await insertRow(
+            TABLES.settings,
+            payload
+        );
+    }
+}
+
+
+async function saveDesign() {
+
+    const values = {
+
+        color_primary:
+            getValue(
+                "colorPrimaryText"
+            ),
+
+        color_accent:
+            getValue(
+                "colorAccentText"
+            ),
+
+        color_dark:
+            getValue(
+                "colorDarkText"
+            ),
+
+        color_secondary:
+            getValue(
+                "colorSecondaryText"
+            )
+
+    };
+
+
+    for (
+        const [key, value]
+        of Object.entries(values)
+    ) {
+
+        await saveSetting(
+            key,
+            value
+        );
+    }
+
+
+    toast(
+        "Дизайн сохранён"
+    );
+
+
+    await loadAllData();
+}
+
+
+function loadSettingsIntoForm() {
+
+    const get =
+        (key, fallback = "") =>
+            settingValue(key) ??
+            fallback;
+
+
+    $("#settingTeamName").value =
+        get(
+            "team_name",
+            "ХК Челны 2011"
+        );
+
+
+    $("#settingCity").value =
+        get(
+            "city",
+            "Набережные Челны"
+        );
+
+
+    $("#settingDescription").value =
+        get(
+            "description",
+            ""
+        );
+
+
+    $("#settingTelegram").value =
+        get(
+            "telegram",
+            ""
+        );
+
+
+    $("#settingVk").value =
+        get(
+            "vk",
+            ""
+        );
+
+
+    $("#homeMatch").checked =
+        parseSetting(
+            get(
+                "home_match",
+                true
+            )
+        ) !== false;
+
+
+    $("#homeNews").checked =
+        parseSetting(
+            get(
+                "home_news",
+                true
+            )
+        ) !== false;
+
+
+    $("#homeMedia").checked =
+        parseSetting(
+            get(
+                "home_media",
+                true
+            )
+        ) !== false;
+
+
+    $("#homeStandings").checked =
+        parseSetting(
+            get(
+                "home_standings",
+                true
+            )
+        ) !== false;
+
+
+    $("#homeProducts").checked =
+        parseSetting(
+            get(
+                "home_products",
+                true
+            )
+        ) !== false;
+}
+
+
+async function saveSettings() {
+
+    const values = {
+
+        team_name:
+            getValue(
+                "settingTeamName"
+            ),
+
+        city:
+            getValue(
+                "settingCity"
+            ),
+
+        description:
+            getValue(
+                "settingDescription"
+            ),
+
+        telegram:
+            getValue(
+                "settingTelegram"
+            ),
+
+        vk:
+            getValue(
+                "settingVk"
+            ),
+
+        home_match:
+            getChecked(
+                "homeMatch"
+            ),
+
+        home_news:
+            getChecked(
+                "homeNews"
+            ),
+
+        home_media:
+            getChecked(
+                "homeMedia"
+            ),
+
+        home_standings:
+            getChecked(
+                "homeStandings"
+            ),
+
+        home_products:
+            getChecked(
+                "homeProducts"
+            )
+
+    };
+
+
+    for (
+        const [key, value]
+        of Object.entries(values)
+    ) {
+
+        await saveSetting(
+            key,
+            value
+        );
+    }
+
+
+    toast(
+        "Настройки сохранены"
+    );
+
+
+    await loadAllData();
+}
+
+
+/* =========================================================
+   STORAGE UPLOAD
+========================================================= */
+
+async function uploadFile(
+    file,
+    folder = "uploads"
+) {
+
+    if (!file) {
+        throw new Error(
+            "Файл не выбран"
+        );
+    }
+
+
+    const extension =
+        file.name
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+
+    const safeName =
+        file.name
+            .replace(
+                /[^a-zA-Z0-9а-яА-Я._-]/g,
+                "_"
+            );
+
+
+    const filename =
+        `${Date.now()}_${safeName}`;
+
+
+    const path =
+        `${folder}/${filename}`;
+
+
+    const result =
+        await supabaseClient
             .storage
             .from(STORAGE_BUCKET)
             .upload(
                 path,
                 file,
                 {
-                    upsert: false,
-                    contentType:
-                        file.type || undefined
+                    cacheControl: "3600",
+                    upsert: false
                 }
             );
 
 
-        if (error) throw error;
+    if (result.error) {
+        throw result.error;
+    }
 
 
-        const {
-            data
-        } = db
+    const publicData =
+        supabaseClient
             .storage
             .from(STORAGE_BUCKET)
             .getPublicUrl(path);
 
 
-        return data.publicUrl;
-    }
+    return publicData.data.publicUrl;
+}
 
 
-    /* =====================================================
-       SETTINGS SECTION
-       ===================================================== */
+/* =========================================================
+   LOGO
+========================================================= */
 
-    function loadSettingsForm() {
+async function handleLogoUpload(file) {
 
-        const settings =
-            state.settings || {};
+    try {
 
-
-        if ($("settingsTeamName")) {
-            $("settingsTeamName").value =
-                settings.team_name ||
-                DEFAULTS.teamName;
-        }
-
-
-        if ($("settingsSubtitle")) {
-            $("settingsSubtitle").value =
-                settings.subtitle ||
-                "НАБЕРЕЖНЫЕ ЧЕЛНЫ";
-        }
-
-
-        if ($("settingsTimezone")) {
-            $("settingsTimezone").value =
-                settings.timezone ||
-                "Europe/Moscow";
-        }
-
-
-        if ($("settingsAdminEmail")) {
-            $("settingsAdminEmail").value =
-                currentUser?.email ||
-                "";
-        }
-    }
-
-
-    async function saveGeneralSettings() {
-
-        try {
-
-            await saveSettingsData({
-
-                team_name:
-                    $("settingsTeamName")
-                        ?.value.trim() ||
-                    DEFAULTS.teamName,
-
-                subtitle:
-                    $("settingsSubtitle")
-                        ?.value.trim() ||
-                    "НАБЕРЕЖНЫЕ ЧЕЛНЫ",
-
-                timezone:
-                    $("settingsTimezone")
-                        ?.value.trim() ||
-                    "Europe/Moscow"
-            });
-
-
-            toast(
-                "Настройки сохранены."
-            );
-
-        } catch (error) {
-
-            toast(
-                error.message,
-                "error"
-            );
-        }
-    }
-
-
-    /* =====================================================
-       NAVIGATION
-       ===================================================== */
-
-    const sectionNames = {
-
-        dashboard: [
-            "Главная",
-            "Управление сайтом"
-        ],
-
-        homepage: [
-            "Главная сайта",
-            "Управление содержимым главной"
-        ],
-
-        matches: [
-            "Матчи",
-            "Расписание и матч-центр"
-        ],
-
-        players: [
-            "Состав",
-            "Игроки команды"
-        ],
-
-        stats: [
-            "Статистика",
-            "Статистика игроков"
-        ],
-
-        news: [
-            "Новости",
-            "Публикации команды"
-        ],
-
-        media: [
-            "Медиа",
-            "Фотоальбомы"
-        ],
-
-        products: [
-            "Товары",
-            "Атрибутика команды"
-        ],
-
-        standings: [
-            "Таблица",
-            "Турнирная таблица"
-        ],
-
-        birthdays: [
-            "Дни рождения",
-            "Поздравления игроков"
-        ],
-
-        achievements: [
-            "Достижения",
-            "Кубки и турниры"
-        ],
-
-        registry: [
-            "Реестры",
-            "Команды и арены"
-        ],
-
-        design: [
-            "Дизайн",
-            "Визуальная система"
-        ],
-
-        settings: [
-            "Настройки",
-            "Общие параметры"
-        ]
-    };
-
-
-    function openSection(section) {
-
-        if (!section) return;
-
-
-        $$(".sidebar-item[data-section]").forEach(
-            button => {
-
-                button.classList.toggle(
-                    "active",
-                    button.dataset.section === section
-                );
-            }
+        toast(
+            "Загрузка логотипа..."
         );
 
 
-        $$(".admin-section").forEach(
-            element => {
+        const url =
+            await uploadFile(
+                file,
+                "branding"
+            );
 
-                element.classList.toggle(
-                    "active",
-                    element.id ===
-                    `section-${section}`
-                );
-            }
+
+        await saveSetting(
+            "logo_url",
+            url
         );
 
 
-        const info =
-            sectionNames[section] ||
-            [
-                section,
-                ""
-            ];
+        $("#logoPreview").innerHTML =
+            `<img
+                src="${escapeHTML(url)}"
+                alt=""
+            >`;
 
 
-        if ($("currentSectionTitle")) {
-            $("currentSectionTitle").textContent =
-                info[0];
-        }
-
-
-        if ($("currentSectionSubtitle")) {
-            $("currentSectionSubtitle").textContent =
-                info[1];
-        }
-
-
-        if (section === "settings") {
-            loadSettingsForm();
-        }
-
-
-        closeMobileSidebar();
-    }
-
-
-    /* =====================================================
-       MOBILE SIDEBAR
-       ===================================================== */
-
-    function openMobileSidebar() {
-
-        const sidebar =
-            $("adminSidebar");
-
-        if (!sidebar) return;
-
-
-        sidebar.classList.add(
-            "open"
+        toast(
+            "Логотип загружен"
         );
 
 
-        let overlay =
-            document.querySelector(
-                ".admin-sidebar-overlay"
-            );
+        await loadAllData();
 
+    } catch (error) {
 
-        if (!overlay) {
+        console.error(error);
 
-            overlay =
-                document.createElement(
-                    "div"
-                );
-
-            overlay.className =
-                "admin-sidebar-overlay";
-
-            document.body.appendChild(
-                overlay
-            );
-
-
-            overlay.addEventListener(
-                "click",
-                closeMobileSidebar
-            );
-        }
-
-
-        overlay.classList.add(
-            "show"
+        toast(
+            error.message ||
+            "Не удалось загрузить файл",
+            "error"
         );
     }
+}
 
 
-    function closeMobileSidebar() {
+/* =========================================================
+   FONT UPLOAD
+========================================================= */
 
-        const sidebar =
-            $("adminSidebar");
+async function handleFontUpload(
+    type,
+    file
+) {
 
+    try {
 
-        sidebar?.classList.remove(
-            "open"
+        toast(
+            `Загрузка ${type}...`
         );
 
 
-        document
-            .querySelector(
-                ".admin-sidebar-overlay"
-            )
-            ?.classList.remove(
-                "show"
-            );
-    }
-
-
-    /* =====================================================
-       GLOBAL CLICK HANDLER
-       ===================================================== */
-
-    function handleActionClick(event) {
-
-        const button =
-            event.target.closest(
-                "[data-action]"
+        const url =
+            await uploadFile(
+                file,
+                "fonts"
             );
 
 
-        if (!button) return;
+        await saveSetting(
+            `font_${type}`,
+            url
+        );
 
 
-        const action =
-            button.dataset.action;
-
-        const id =
-            button.dataset.id;
+        toast(
+            "Шрифт загружен"
+        );
 
 
-        switch (action) {
+        await loadAllData();
 
-            case "edit-match":
-                openMatchForm(
-                    getMatch(id)
-                );
-                break;
+    } catch (error) {
 
+        console.error(error);
 
-            case "delete-match":
-                deleteMatch(id);
-                break;
-
-
-            case "match-center":
-                openMatchCenter(id);
-                break;
+        toast(
+            error.message ||
+            "Ошибка загрузки",
+            "error"
+        );
+    }
+}
 
 
-            case "edit-player":
-                openPlayerForm(
-                    getPlayer(id)
-                );
-                break;
+/* =========================================================
+   ICON UPLOAD
+========================================================= */
+
+async function handleIconUpload(
+    type,
+    file
+) {
+
+    try {
+
+        const url =
+            await uploadFile(
+                file,
+                "icons"
+            );
 
 
-            case "delete-player":
-                deletePlayer(id);
-                break;
+        await saveSetting(
+            `${type}_icon_url`,
+            url
+        );
 
 
-            case "edit-news":
-                openNewsForm(
-                    state.news.find(
-                        item =>
-                            String(item.id) ===
-                            String(id)
+        toast(
+            "Иконка загружена"
+        );
+
+
+        await loadAllData();
+
+    } catch (error) {
+
+        console.error(error);
+
+        toast(
+            error.message ||
+            "Ошибка загрузки",
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   GENERIC EMPTY
+========================================================= */
+
+function emptyHTML(text) {
+
+    return `
+        <div class="empty-state">
+            ${escapeHTML(text)}
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function renderDashboard() {
+
+    $("#statMatches").textContent =
+        state.data.matches.length;
+
+
+    $("#statPlayers").textContent =
+        state.data.players.length;
+
+
+    $("#statNews").textContent =
+        state.data.news.length;
+
+
+    $("#statAlbums").textContent =
+        state.data.albums.length;
+
+
+    const played =
+        state.data.matches
+            .filter(isMatchPlayed)
+            .sort(
+                (a, b) =>
+                    new Date(
+                        matchDate(b) || 0
+                    ) -
+                    new Date(
+                        matchDate(a) || 0
                     )
-                );
-                break;
+            );
 
 
-            case "delete-news":
-                deleteNews(id);
-                break;
+    const container =
+        $("#latestMatchDashboard");
 
 
-            case "edit-album":
-                openAlbumForm(
-                    state.albums.find(
-                        item =>
-                            String(item.id) ===
-                            String(id)
-                    )
-                );
-                break;
+    if (!played.length) {
 
+        container.innerHTML =
+            emptyHTML(
+                "Сыгранных матчей пока нет"
+            );
 
-            case "delete-album":
-                deleteAlbum(id);
-                break;
-
-
-            case "edit-product":
-                openProductForm(
-                    state.products.find(
-                        item =>
-                            String(item.id) ===
-                            String(id)
-                    )
-                );
-                break;
-
-
-            case "delete-product":
-                deleteProduct(id);
-                break;
-
-
-            case "edit-standing":
-                openStandingForm(
-                    state.standings.find(
-                        item =>
-                            String(item.id) ===
-                            String(id)
-                    )
-                );
-                break;
-
-
-            case "delete-standing":
-                deleteStanding(id);
-                break;
-
-
-            case "edit-birthday":
-                openBirthdayForm(
-                    state.birthdays.find(
-                        item =>
-                            String(item.id) ===
-                            String(id)
-                    )
-                );
-                break;
-
-
-            case "delete-birthday":
-                deleteBirthday(id);
-                break;
-
-
-            case "edit-achievement":
-                openAchievementForm(
-                    state.achievements.find(
-                        item =>
-                            String(item.id) ===
-                            String(id)
-                    )
-                );
-                break;
-
-
-            case "delete-achievement":
-                deleteAchievement(id);
-                break;
-
-
-            case "edit-team":
-                openTeamForm(
-                    getTeam(id)
-                );
-                break;
-
-
-            case "delete-team":
-                deleteTeam(id);
-                break;
-
-
-            case "delete-icon":
-                deleteIcon(
-                    button.dataset.icon
-                );
-                break;
-        }
+        return;
     }
 
 
-    /* =====================================================
-       EVENT BINDINGS
-       ===================================================== */
+    const match =
+        played[0];
 
-    function bindEvents() {
 
-        /* Navigation */
+    container.innerHTML = `
 
-        document.addEventListener(
+        <div class="data-card">
+
+            <div class="data-card-main">
+
+                <div class="data-card-title">
+
+                    ${escapeHTML(
+                        homeTeam(match)
+                    )}
+
+                    <span style="color:#9aa1b3">
+                        —
+                    </span>
+
+                    ${escapeHTML(
+                        awayTeam(match)
+                    )}
+
+                </div>
+
+                <div class="data-card-meta">
+
+                    <span>
+                        ${formatDateTime(
+                            matchDate(match)
+                        )}
+                    </span>
+
+                    <span>·</span>
+
+                    <strong>
+                        ${escapeHTML(
+                            scoreText(match)
+                        )}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   RENDER EVERYTHING
+========================================================= */
+
+function renderEverything() {
+
+    renderDashboard();
+
+    renderMatches();
+
+    renderPlayers();
+
+    renderNews();
+
+    renderAlbums();
+
+    renderStandings();
+
+    renderProducts();
+
+    renderExtras();
+
+    loadDesignIntoForm();
+
+    loadSettingsIntoForm();
+}
+
+
+/* =========================================================
+   DELETE CONFIRMATION
+========================================================= */
+
+async function confirmDelete(
+    table,
+    id,
+    message
+) {
+
+    if (!id) {
+
+        toast(
+            "Не найден ID записи",
+            "error"
+        );
+
+        return;
+    }
+
+
+    const confirmed =
+        window.confirm(
+            message ||
+            "Удалить эту запись?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        await deleteRow(
+            table,
+            id
+        );
+
+
+        toast(
+            "Удалено"
+        );
+
+
+        await loadAllData();
+
+    } catch (error) {
+
+        toast(
+            error.message ||
+            "Не удалось удалить",
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+function setupEvents() {
+
+
+    /* NAV */
+
+    $$(".nav-item").forEach(button => {
+
+        button.addEventListener(
             "click",
-            event => {
+            () =>
+                openTab(
+                    button.dataset.tab
+                )
+        );
 
-                const button =
-                    event.target.closest(
-                        "[data-section]"
-                    );
+    });
 
+
+    $$(".mobile-nav-item").forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
 
                 if (
-                    button &&
-                    (
-                        button.classList.contains(
-                            "sidebar-item"
-                        ) ||
-                        button.classList.contains(
-                            "quick-action"
-                        )
-                    )
+                    button.id ===
+                    "mobileMore"
                 ) {
 
-                    event.preventDefault();
+                    const sidebar =
+                        $(".sidebar");
 
-                    openSection(
-                        button.dataset.section
+                    sidebar.classList.toggle(
+                        "open"
                     );
 
                     return;
                 }
+
+
+                openTab(
+                    button.dataset.tab
+                );
+
+            }
+        );
+
+    });
+
+
+    $$(".quick-action")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () =>
+                    openTab(
+                        button.dataset.openTab
+                    )
+            );
+
+        });
+
+
+    /* MOBILE SIDEBAR */
+
+    $("#mobileMenu")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                $(".sidebar")
+                    .classList.add(
+                        "open"
+                    );
+
             }
         );
 
 
-        /* CRUD actions */
-
-        document.addEventListener(
+    $("#sidebarClose")
+        ?.addEventListener(
             "click",
-            handleActionClick
+            () => {
+
+                $(".sidebar")
+                    .classList.remove(
+                        "open"
+                    );
+
+            }
         );
 
 
-        /* Login */
+    /* MODAL */
 
-        $("loginForm")?.addEventListener(
-            "submit",
-            login
-        );
-
-
-        /* Logout */
-
-        $("logoutButton")?.addEventListener(
+    $("#modalClose")
+        ?.addEventListener(
             "click",
-            logout
+            closeModal
         );
 
 
-        /* Refresh */
+    $("#modalCancel")
+        ?.addEventListener(
+            "click",
+            closeModal
+        );
 
-        $("refreshButton")?.addEventListener(
+
+    $("#modalSave")
+        ?.addEventListener(
+            "click",
+            saveModal
+        );
+
+
+    $("#modalOverlay")
+        ?.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target ===
+                    $("#modalOverlay")
+                ) {
+                    closeModal();
+                }
+
+            }
+        );
+
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+                closeModal();
+            }
+
+        }
+    );
+
+
+    /* TOP */
+
+    $("#refreshData")
+        ?.addEventListener(
             "click",
             async () => {
 
-                const button =
-                    $("refreshButton");
+                toast(
+                    "Обновление..."
+                );
 
-                if (button) {
-                    button.classList.add(
-                        "rotating"
-                    );
-                }
-
-
-                await loadEverything();
-
-
-                if (button) {
-                    button.classList.remove(
-                        "rotating"
-                    );
-                }
-
+                await loadAllData();
 
                 toast(
-                    "Данные обновлены."
+                    "Данные обновлены"
                 );
             }
         );
 
 
-        /* Mobile menu */
-
-        $("mobileMenuButton")?.addEventListener(
+    $("#openSite")
+        ?.addEventListener(
             "click",
-            openMobileSidebar
+            () => {
+
+                window.open(
+                    "index.html",
+                    "_blank"
+                );
+
+            }
         );
 
 
-        /* Modal */
+    /* MATCH */
 
-        $("adminModalClose")?.addEventListener(
+    $("#addMatchButton")
+        ?.addEventListener(
             "click",
-            closeModal
+            () =>
+                openMatchModal()
         );
 
 
-        $("adminModalBackdrop")?.addEventListener(
-            "click",
-            closeModal
+    $("#matchSearch")
+        ?.addEventListener(
+            "input",
+            renderMatches
         );
 
 
-        /* Add buttons */
-
-        $("addMatchButton")?.addEventListener(
-            "click",
-            () => openMatchForm()
+    $("#matchFilter")
+        ?.addEventListener(
+            "change",
+            renderMatches
         );
 
 
-        $("addPlayerButton")?.addEventListener(
+    /* PLAYER */
+
+    $("#addPlayerButton")
+        ?.addEventListener(
             "click",
-            () => openPlayerForm()
+            () =>
+                openPlayerModal()
         );
 
 
-        $("addNewsButton")?.addEventListener(
-            "click",
-            () => openNewsForm()
+    $("#playerSearch")
+        ?.addEventListener(
+            "input",
+            renderPlayers
         );
 
 
-        $("addAlbumButton")?.addEventListener(
-            "click",
-            () => openAlbumForm()
+    $("#playerPositionFilter")
+        ?.addEventListener(
+            "change",
+            renderPlayers
         );
 
 
-        $("addProductButton")?.addEventListener(
+    /* NEWS */
+
+    $("#addNewsButton")
+        ?.addEventListener(
             "click",
-            () => openProductForm()
+            () =>
+                openNewsModal()
         );
 
 
-        $("addStandingButton")?.addEventListener(
-            "click",
-            () => openStandingForm()
+    $("#newsSearch")
+        ?.addEventListener(
+            "input",
+            renderNews
         );
 
 
-        $("addBirthdayButton")?.addEventListener(
-            "click",
-            () => openBirthdayForm()
+    $("#newsStatusFilter")
+        ?.addEventListener(
+            "change",
+            renderNews
         );
 
 
-        $("addAchievementButton")?.addEventListener(
+    /* MEDIA */
+
+    $("#addAlbumButton")
+        ?.addEventListener(
             "click",
-            () => openAchievementForm()
+            () =>
+                openAlbumModal()
         );
 
 
-        $("addRegistryTeamButton")?.addEventListener(
+    /* STANDINGS */
+
+    $("#addStandingButton")
+        ?.addEventListener(
             "click",
-            () => openTeamForm()
+            () =>
+                openTeamModal()
         );
 
 
-        $("addRegistryVenueButton")?.addEventListener(
+    /* PRODUCTS */
+
+    $("#addProductButton")
+        ?.addEventListener(
             "click",
-            () => openVenueForm()
+            () =>
+                openProductModal()
         );
 
 
-        $("addIconButton")?.addEventListener(
+    /* EXTRAS */
+
+    $("#addAchievementButton")
+        ?.addEventListener(
             "click",
-            openIconForm
+            () =>
+                openSimpleModal(
+                    "achievement"
+                )
         );
 
 
-        /* Stats */
-
-        $("addGoalButton")?.addEventListener(
+    $("#addBirthdayButton")
+        ?.addEventListener(
             "click",
-            () => openQuickStatForm("goal")
+            () =>
+                openSimpleModal(
+                    "birthday"
+                )
         );
 
 
-        $("addAssistButton")?.addEventListener(
+    $("#addEventButton")
+        ?.addEventListener(
             "click",
-            () => openQuickStatForm("assist")
+            () =>
+                openSimpleModal(
+                    "event"
+                )
         );
 
 
-        $("addPenaltyButton")?.addEventListener(
+    $("#addPeriodButton")
+        ?.addEventListener(
             "click",
-            () => openQuickStatForm("penalty")
+            () =>
+                openSimpleModal(
+                    "period"
+                )
         );
 
 
-        /* Homepage */
+    /* DESIGN */
 
-        $("saveHomepageButton")?.addEventListener(
+    $("#saveDesignButton")
+        ?.addEventListener(
             "click",
-            saveHomepage
+            async () => {
+
+                try {
+
+                    await saveDesign();
+
+                } catch (error) {
+
+                    toast(
+                        error.message ||
+                        "Ошибка сохранения",
+                        "error"
+                    );
+
+                }
+
+            }
         );
 
 
-        /* Design */
+    /* SETTINGS */
 
-        $("saveDesignButton")?.addEventListener(
+    $("#saveSettingsButton")
+        ?.addEventListener(
             "click",
-            saveDesign
+            async () => {
+
+                try {
+
+                    await saveSettings();
+
+                } catch (error) {
+
+                    toast(
+                        error.message ||
+                        "Ошибка сохранения",
+                        "error"
+                    );
+
+                }
+
+            }
         );
 
 
-        /* Settings */
+    /* COLORS */
 
-        $("saveSettingsButton")?.addEventListener(
+    [
+        [
+            "colorPrimary",
+            "colorPrimaryText"
+        ],
+        [
+            "colorAccent",
+            "colorAccentText"
+        ],
+        [
+            "colorDark",
+            "colorDarkText"
+        ],
+        [
+            "colorSecondary",
+            "colorSecondaryText"
+        ]
+
+    ].forEach(
+        ([colorId, textId]) => {
+
+            const color =
+                $(`#${colorId}`);
+
+            const text =
+                $(`#${textId}`);
+
+
+            color?.addEventListener(
+                "input",
+                () => {
+
+                    text.value =
+                        color.value;
+
+                }
+            );
+
+
+            text?.addEventListener(
+                "input",
+                () => {
+
+                    if (
+                        /^#[0-9a-f]{6}$/i
+                            .test(
+                                text.value
+                            )
+                    ) {
+
+                        color.value =
+                            text.value;
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    /* LOGO */
+
+    $("#logoUploadButton")
+        ?.addEventListener(
             "click",
-            saveGeneralSettings
+            () =>
+                $("#logoFile").click()
         );
 
 
-        /* Player filters */
+    $("#logoFile")
+        ?.addEventListener(
+            "change",
+            event => {
 
-        $$(".admin-filter[data-player-filter]")
-            .forEach(button => {
+                const file =
+                    event.target.files?.[0];
 
-                button.addEventListener(
-                    "click",
-                    () => {
+                if (file) {
 
-                        $$(".admin-filter[data-player-filter]")
-                            .forEach(
-                                item =>
-                                    item.classList.remove(
-                                        "active"
+                    handleLogoUpload(
+                        file
+                    );
+
+                }
+
+            }
+        );
+
+
+    /* FONTS */
+
+    $$(".font-upload button")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const type =
+                        button.dataset.font;
+
+                    const input =
+                        $(
+                            `[data-font-input="${type}"]`
+                        );
+
+                    input?.click();
+
+                }
+            );
+
+        });
+
+
+    $$(".font-input")
+        .forEach(input => {
+
+            input.addEventListener(
+                "change",
+                event => {
+
+                    const file =
+                        event.target.files?.[0];
+
+                    if (!file) {
+                        return;
+                    }
+
+
+                    handleFontUpload(
+                        input.dataset.fontInput,
+                        file
+                    );
+
+                }
+            );
+
+        });
+
+
+    /* ICONS */
+
+    $$(".icon-upload button")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const type =
+                        button.dataset.icon;
+
+                    const input =
+                        $(
+                            `[data-icon-input="${type}"]`
+                        );
+
+                    input?.click();
+
+                }
+            );
+
+        });
+
+
+    $$(".icon-input")
+        .forEach(input => {
+
+            input.addEventListener(
+                "change",
+                event => {
+
+                    const file =
+                        event.target.files?.[0];
+
+                    if (!file) {
+                        return;
+                    }
+
+
+                    handleIconUpload(
+                        input.dataset.iconInput,
+                        file
+                    );
+
+                }
+            );
+
+        });
+
+
+    /* DELEGATED ACTIONS */
+
+    document.addEventListener(
+        "click",
+        async event => {
+
+            const target =
+                event.target.closest(
+                    "button"
+                );
+
+
+            if (!target) {
+                return;
+            }
+
+
+            /* MATCH EDIT */
+
+            if (
+                target.dataset.editMatch
+            ) {
+
+                const item =
+                    state.data.matches.find(
+                        row =>
+                            String(
+                                getId(row)
+                            ) ===
+                            String(
+                                target.dataset.editMatch
+                            )
+                    );
+
+
+                if (item) {
+                    openMatchModal(item);
+                }
+
+                return;
+            }
+
+
+            /* MATCH DELETE */
+
+            if (
+                target.dataset.deleteMatch
+            ) {
+
+                await confirmDelete(
+                    TABLES.matches,
+                    target.dataset.deleteMatch,
+                    "Удалить матч?"
+                );
+
+                return;
+            }
+
+
+            /* PLAYER EDIT */
+
+            if (
+                target.dataset.editPlayer
+            ) {
+
+                const item =
+                    state.data.players.find(
+                        row =>
+                            String(
+                                getId(row)
+                            ) ===
+                            String(
+                                target.dataset.editPlayer
+                            )
+                    );
+
+
+                if (item) {
+                    openPlayerModal(item);
+                }
+
+                return;
+            }
+
+
+            /* PLAYER DELETE */
+
+            if (
+                target.dataset.deletePlayer
+            ) {
+
+                await confirmDelete(
+                    TABLES.players,
+                    target.dataset.deletePlayer,
+                    "Удалить игрока?"
+                );
+
+                return;
+            }
+
+
+            /* NEWS EDIT */
+
+            if (
+                target.dataset.editNews
+            ) {
+
+                const item =
+                    state.data.news.find(
+                        row =>
+                            String(
+                                getId(row)
+                            ) ===
+                            String(
+                                target.dataset.editNews
+                            )
+                    );
+
+
+                if (item) {
+                    openNewsModal(item);
+                }
+
+                return;
+            }
+
+
+            /* NEWS DELETE */
+
+            if (
+                target.dataset.deleteNews
+            ) {
+
+                await confirmDelete(
+                    TABLES.news,
+                    target.dataset.deleteNews,
+                    "Удалить новость?"
+                );
+
+                return;
+            }
+
+
+            /* ALBUM EDIT */
+
+            if (
+                target.dataset.editAlbum
+            ) {
+
+                const item =
+                    state.data.albums.find(
+                        row =>
+                            String(
+                                getId(row)
+                            ) ===
+                            String(
+                                target.dataset.editAlbum
+                            )
+                    );
+
+
+                if (item) {
+                    openAlbumModal(item);
+                }
+
+                return;
+            }
+
+
+            /* ALBUM DELETE */
+
+            if (
+                target.dataset.deleteAlbum
+            ) {
+
+                await confirmDelete(
+                    TABLES.albums,
+                    target.dataset.deleteAlbum,
+                    "Удалить альбом?"
+                );
+
+                return;
+            }
+
+
+            /* TEAM EDIT */
+
+            if (
+                target.dataset.editTeam
+            ) {
+
+                const item =
+                    state.data.teams.find(
+                        row =>
+                            String(
+                                getId(row)
+                            ) ===
+                            String(
+                                target.dataset.editTeam
+                            )
+                    );
+
+
+                if (item) {
+                    openTeamModal(item);
+                }
+
+                return;
+            }
+
+
+            /* TEAM DELETE */
+
+            if (
+                target.dataset.deleteTeam
+            ) {
+
+                await confirmDelete(
+                    TABLES.teams,
+                    target.dataset.deleteTeam,
+                    "Удалить команду?"
+                );
+
+                return;
+            }
+
+
+            /* PRODUCT EDIT */
+
+            if (
+                target.dataset.editProduct
+            ) {
+
+                const item =
+                    state.data.products.find(
+                        row =>
+                            String(
+                                getId(row)
+                            ) ===
+                            String(
+                                target.dataset.editProduct
+                            )
+                    );
+
+
+                if (item) {
+                    openProductModal(item);
+                }
+
+                return;
+            }
+
+
+            /* PRODUCT DELETE */
+
+            if (
+                target.dataset.deleteProduct
+            ) {
+
+                await confirmDelete(
+                    TABLES.products,
+                    target.dataset.deleteProduct,
+                    "Удалить товар?"
+                );
+
+                return;
+            }
+
+
+            /* SIMPLE */
+
+            const simpleTypes = [
+                "achievement",
+                "birthday",
+                "event",
+                "period"
+            ];
+
+
+            for (
+                const type
+                of simpleTypes
+            ) {
+
+                const editKey =
+                    `edit${capitalize(type)}`;
+
+                const deleteKey =
+                    `delete${capitalize(type)}`;
+
+
+                if (
+                    target.dataset[
+                        editKey
+                    ]
+                ) {
+
+                    const dataKey =
+                        type === "achievement"
+                            ? "achievements"
+                            : type === "birthday"
+                                ? "birthdays"
+                                : type === "event"
+                                    ? "events"
+                                    : "periods";
+
+
+                    const item =
+                        state.data[dataKey]
+                            .find(
+                                row =>
+                                    String(
+                                        getId(row)
+                                    ) ===
+                                    String(
+                                        target.dataset[
+                                            editKey
+                                        ]
                                     )
                             );
 
 
-                        button.classList.add(
-                            "active"
+                    if (item) {
+
+                        openSimpleModal(
+                            type,
+                            item
                         );
 
-
-                        currentPlayerFilter =
-                            button.dataset.playerFilter;
-
-
-                        renderPlayers();
                     }
-                );
-            });
 
 
-        /* Color inputs */
+                    return;
+                }
 
-        bindColorPair(
-            "colorPrimary",
-            "colorPrimaryHex"
-        );
-
-        bindColorPair(
-            "colorAccent",
-            "colorAccentHex"
-        );
-
-        bindColorPair(
-            "colorBackground",
-            "colorBackgroundHex"
-        );
-
-        bindColorPair(
-            "colorSurface",
-            "colorSurfaceHex"
-        );
-
-        bindColorPair(
-            "colorText",
-            "colorTextHex"
-        );
-
-        bindColorPair(
-            "colorMuted",
-            "colorMutedHex"
-        );
-
-        bindColorPair(
-            "colorBorder",
-            "colorBorderHex"
-        );
-
-
-        /* ESC */
-
-        document.addEventListener(
-            "keydown",
-            event => {
 
                 if (
-                    event.key === "Escape"
+                    target.dataset[
+                        deleteKey
+                    ]
                 ) {
 
-                    closeModal();
+                    const table =
+                        type === "achievement"
+                            ? TABLES.achievements
+                            : type === "birthday"
+                                ? TABLES.birthdays
+                                : type === "event"
+                                    ? TABLES.events
+                                    : TABLES.periods;
 
-                    closeMobileSidebar();
+
+                    await confirmDelete(
+                        table,
+                        target.dataset[
+                            deleteKey
+                        ],
+                        "Удалить запись?"
+                    );
+
+
+                    return;
                 }
-            }
-        );
-    }
 
-
-    /* =====================================================
-       VENUES
-       ===================================================== */
-
-    /*
-       Отдельной таблицы venues в текущей schema.sql нет.
-       Поэтому арены хранятся в matches.venue.
-    */
-
-    function openVenueForm() {
-
-        openModal(
-            "Добавить арену",
-
-            `
-
-            <form id="venueForm">
-
-                <div class="form-group">
-
-                    <label>
-                        Название арены
-                    </label>
-
-                    <input
-                        id="venueName"
-                        type="text"
-                        placeholder="ЛД «Челны»"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="card-description">
-
-                    В текущей базе отдельного реестра арен нет.
-                    Арена будет сохранена при создании
-                    или редактировании матча.
-
-                </div>
-
-
-                <button
-                    class="primary-button"
-                    type="submit"
-                >
-                    Создать тестовый матч с ареной
-                </button>
-
-            </form>
-
-            `
-        );
-
-
-        $("venueForm")?.addEventListener(
-            "submit",
-            event => {
-
-                event.preventDefault();
-
-                const venue =
-                    $("venueName")
-                        .value.trim();
-
-
-                if (!venue) return;
-
-
-                closeModal();
-
-
-                openMatchForm({
-                    match_date: "",
-                    match_time: "",
-                    tournament: "",
-                    home_team_id: null,
-                    away_team_id: null,
-                    venue,
-                    status: "scheduled"
-                });
-            }
-        );
-    }
-
-
-    /* =====================================================
-       INIT
-       ===================================================== */
-
-    async function init() {
-
-        try {
-
-            initSupabase();
-
-            bindEvents();
-
-            setLoaderText(
-                "Подключение к Supabase..."
-            );
-
-            await checkAuth();
-
-        } catch (error) {
-
-            console.error(
-                "ADMIN INIT ERROR:",
-                error
-            );
-
-
-            $("adminLoader")?.classList.add(
-                "hidden"
-            );
-
-
-            if ($("loginError")) {
-
-                $("loginError").textContent =
-                    error.message ||
-                    "Ошибка запуска админ-панели.";
             }
 
-
-            $("loginScreen")?.classList.remove(
-                "hidden"
-            );
         }
-    }
+    );
+
+}
 
 
-    /* =====================================================
-       START
-       ===================================================== */
+/* =========================================================
+   CAPITALIZE
+========================================================= */
 
-    if (
-        document.readyState ===
-        "loading"
-    ) {
+function capitalize(value) {
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            init
+    return value.charAt(0)
+        .toUpperCase() +
+        value.slice(1);
+}
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+async function init() {
+
+    setupEvents();
+
+
+    openTab(
+        "dashboard"
+    );
+
+
+    try {
+
+        await loadAllData();
+
+    } catch (error) {
+
+        console.error(
+            "INIT ERROR",
+            error
         );
 
-    } else {
 
-        init();
+        setConnection(
+            "offline",
+            "Ошибка"
+        );
+
+
+        toast(
+            "Не удалось загрузить данные",
+            "error"
+        );
     }
 
-})();
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    init
+);
