@@ -1,2384 +1,4679 @@
 /* =========================================================
    ХК ЧЕЛНЫ 2011 — ADMIN.JS
+   Supabase Admin Panel
    ========================================================= */
 
-const db = window.supabaseClient;
+(() => {
+    "use strict";
 
-let currentUser = null;
-let currentSection = "dashboard";
-let currentModalAction = null;
-let currentStatType = "scorers";
+    /* =========================================================
+       CONFIG
+       ========================================================= */
 
-const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => [...document.querySelectorAll(selector)];
+    const db = window.supabaseClient;
 
-/* =========================================================
-   INIT
-   ========================================================= */
-
-document.addEventListener("DOMContentLoaded", async () => {
     if (!db) {
         console.error("Supabase client не найден.");
-        showLoginError("Ошибка подключения к Supabase.");
         return;
     }
 
-    initUI();
-    initAuth();
-});
+    const STORAGE_BUCKET =
+        window.STORAGE_BUCKET ||
+        window.SUPABASE_CONFIG?.storageBucket ||
+        "site-media";
 
-/* =========================================================
-   AUTH
-   ========================================================= */
+    /* =========================================================
+       STATE
+       ========================================================= */
 
-function initAuth() {
-    db.auth.getSession().then(({ data }) => {
-        if (data.session?.user) {
-            currentUser = data.session.user;
-            showAdmin();
-        } else {
-            showLogin();
-        }
-    });
+    let currentUser = null;
+    let currentSection = "dashboard";
+    let currentStatsFilter = "scorers";
 
-    db.auth.onAuthStateChange((_event, session) => {
-        if (session?.user) {
-            currentUser = session.user;
-            showAdmin();
-        } else {
-            currentUser = null;
-            showLogin();
-        }
-    });
+    let clubsCache = [];
+    let settingsCache = null;
 
-    const form = $("#loginForm");
+    /* =========================================================
+       DOM
+       ========================================================= */
 
-    if (form) {
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
+    const $ = (selector, parent = document) =>
+        parent.querySelector(selector);
 
-            const email = $("#loginEmail")?.value.trim();
-            const password = $("#loginPassword")?.value;
+    const $$ = (selector, parent = document) =>
+        [...parent.querySelectorAll(selector)];
 
-            if (!email || !password) {
-                showLoginError("Введите email и пароль.");
-                return;
-            }
+    /* =========================================================
+       ELEMENTS
+       ========================================================= */
 
-            const button = $("#loginButton");
+    const authScreen = $("#authScreen");
+    const adminApp = $("#adminApp");
 
-            if (button) {
-                button.disabled = true;
-                button.textContent = "Вход...";
-            }
+    const loginForm = $("#loginForm");
+    const loginEmail = $("#loginEmail");
+    const loginPassword = $("#loginPassword");
+    const loginError = $("#loginError");
 
-            const { data, error } = await db.auth.signInWithPassword({
-                email,
-                password
-            });
+    const adminSidebar = $("#adminSidebar");
+    const sidebarClose = $("#sidebarClose");
+    const sidebarOpen = $("#sidebarOpen");
 
-            if (error) {
-                showLoginError(error.message);
-            } else {
-                currentUser = data.user;
-                showAdmin();
-            }
+    const logoutButton = $("#logoutButton");
+    const currentSectionLabel = $("#currentSectionLabel");
 
-            if (button) {
-                button.disabled = false;
-                button.textContent = "Войти";
-            }
-        });
+    const adminModal = $("#adminModal");
+    const modalKicker = $("#modalKicker");
+    const modalTitle = $("#modalTitle");
+    const modalBody = $("#modalBody");
+    const modalFooter = $("#modalFooter");
+    const modalClose = $("#modalClose");
+
+    const adminToast = $("#adminToast");
+    const toastMessage = $("#toastMessage");
+
+    /* =========================================================
+       HELPERS
+       ========================================================= */
+
+    function escapeHTML(value = "") {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
 
-    $("#logoutButton")?.addEventListener("click", async () => {
-        await db.auth.signOut();
-    });
-}
+    function showToast(message, type = "success") {
+        if (!adminToast || !toastMessage) return;
 
-function showLogin() {
-    $("#authScreen")?.classList.remove("hidden");
-    $("#adminApp")?.classList.add("hidden");
-}
+        toastMessage.textContent = message;
 
-async function showAdmin() {
-    $("#authScreen")?.classList.add("hidden");
-    $("#adminApp")?.classList.remove("hidden");
-
-    if ($("#adminUserEmail")) {
-        $("#adminUserEmail").textContent =
-            currentUser?.email || "";
-    }
-
-    await loadAllDashboard();
-    await loadSettings();
-    await loadNews();
-    await loadStories();
-    await loadClubs();
-    await loadMatches();
-    await loadCompetition();
-    await loadStats(currentStatType);
-    await loadLeaders();
-    await loadAlbums();
-}
-
-/* =========================================================
-   UI
-   ========================================================= */
-
-function initUI() {
-    /* Навигация */
-
-    $$("[data-section]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const section = button.dataset.section;
-            switchSection(section);
-        });
-    });
-
-    $$("[data-go-section]").forEach((button) => {
-        button.addEventListener("click", () => {
-            switchSection(button.dataset.goSection);
-        });
-    });
-
-    /* Добавление */
-
-    $$("[data-action='add-news']").forEach((button) => {
-        button.addEventListener("click", () => openNewsModal());
-    });
-
-    $$("[data-action='add-story']").forEach((button) => {
-        button.addEventListener("click", () => openStoryModal());
-    });
-
-    $$("[data-action='add-club']").forEach((button) => {
-        button.addEventListener("click", () => openClubModal());
-    });
-
-    $$("[data-action='add-match']").forEach((button) => {
-        button.addEventListener("click", () => openMatchModal());
-    });
-
-    $$("[data-action='add-stat']").forEach((button) => {
-        button.addEventListener("click", () => openStatModal());
-    });
-
-    $$("[data-action='add-album']").forEach((button) => {
-        button.addEventListener("click", () => openAlbumModal());
-    });
-
-    /* Фильтры матчей */
-
-    $$("[data-match-filter]").forEach((button) => {
-        button.addEventListener("click", async () => {
-            $$("[data-match-filter]").forEach((b) =>
-                b.classList.remove("active")
-            );
-
-            button.classList.add("active");
-
-            await loadMatches(button.dataset.matchFilter);
-        });
-    });
-
-    /* Статистика */
-
-    $$("[data-stat-type]").forEach((button) => {
-        button.addEventListener("click", async () => {
-            $$("[data-stat-type]").forEach((b) =>
-                b.classList.remove("active")
-            );
-
-            button.classList.add("active");
-
-            currentStatType = button.dataset.statType;
-
-            await loadStats(currentStatType);
-        });
-    });
-
-    /* Таблица */
-
-    $("#addStandingsRow")?.addEventListener("click", () => {
-        addStandingsRow();
-    });
-
-    $("#saveCompetition")?.addEventListener("click", saveCompetition);
-
-    /* Настройки */
-
-    $("#settingsForm")?.addEventListener("submit", saveSettings);
-
-    ["settingsPrimary", "settingsAccent", "settingsGold", "settingsWhite"]
-        .forEach((id) => {
-            const input = $("#" + id);
-            const value = $("#" + id + "Value");
-
-            if (!input) return;
-
-            input.addEventListener("input", () => {
-                if (value) value.textContent = input.value;
-            });
-        });
-
-    /* Модальное окно */
-
-    $("#modalClose")?.addEventListener("click", closeModal);
-
-    $("#modalOverlay")?.addEventListener("click", (e) => {
-        if (e.target === $("#modalOverlay")) {
-            closeModal();
-        }
-    });
-
-    /* Мобильное меню */
-
-    $("#openSidebar")?.addEventListener("click", () => {
-        document.body.classList.add("sidebar-open");
-    });
-
-    $("#closeSidebar")?.addEventListener("click", () => {
-        document.body.classList.remove("sidebar-open");
-    });
-
-    $("#sidebarOverlay")?.addEventListener("click", () => {
-        document.body.classList.remove("sidebar-open");
-    });
-}
-
-function switchSection(section) {
-    currentSection = section;
-
-    $$(".admin-section").forEach((el) => {
-        el.classList.remove("active");
-    });
-
-    const target = $("#section-" + section);
-
-    if (target) {
-        target.classList.add("active");
-    }
-
-    $$("[data-section]").forEach((button) => {
-        button.classList.toggle(
-            "active",
-            button.dataset.section === section
+        adminToast.classList.remove(
+            "show",
+            "success",
+            "error"
         );
-    });
 
-    const titles = {
-        dashboard: ["Главная", "Обзор сайта"],
-        settings: ["Настройки", "Основные параметры"],
-        news: ["Новости", "Управление новостями"],
-        stories: ["Истории", "Временные публикации"],
-        clubs: ["Клубы", "Реестр команд"],
-        matches: ["Матчи", "Календарь и результаты"],
-        competition: ["Первенство", "Таблица и последние матчи"],
-        stats: ["Статистика", "Игроки и показатели"],
-        leaders: ["Лидеры", "Карточки лучших игроков"],
-        albums: ["Фотоальбомы", "Медиа команды"]
-    };
+        adminToast.classList.add(type);
 
-    const title = titles[section];
-
-    if (title) {
-        if ($("#pageTitle")) $("#pageTitle").textContent = title[0];
-        if ($("#pageSubtitle")) $("#pageSubtitle").textContent = title[1];
-    }
-
-    document.body.classList.remove("sidebar-open");
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-}
-
-/* =========================================================
-   DASHBOARD
-   ========================================================= */
-
-async function loadAllDashboard() {
-    const tables = [
-        ["news", "dashboardNewsCount"],
-        ["stories", "dashboardStoriesCount"],
-        ["matches", "dashboardMatchesCount"],
-        ["albums", "dashboardAlbumsCount"]
-    ];
-
-    for (const [table, elementId] of tables) {
-        const { count } = await db
-            .from(table)
-            .select("*", { count: "exact", head: true });
-
-        const el = $("#" + elementId);
-
-        if (el) {
-            el.textContent = count ?? 0;
-        }
-    }
-
-    const { data: nextMatch } = await db
-        .from("matches")
-        .select(`
-            *,
-            home:clubs!matches_home_club_id_fkey(*),
-            away:clubs!matches_away_club_id_fkey(*)
-        `)
-        .eq("status", "planned")
-        .gte("match_date", new Date().toISOString())
-        .order("match_date", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-
-    if ($("#dashboardNextMatch")) {
-        if (nextMatch) {
-            $("#dashboardNextMatch").textContent =
-                `${nextMatch.home?.name || "—"} — ${nextMatch.away?.name || "—"} · ${formatDate(nextMatch.match_date)}`;
-        } else {
-            $("#dashboardNextMatch").textContent =
-                "Ближайших матчей нет";
-        }
-    }
-}
-
-/* =========================================================
-   SETTINGS
-   ========================================================= */
-
-async function loadSettings() {
-    const settings = await getSettings();
-
-    if (!settings) return;
-
-    setValue("settingsTeamName", settings.team_name);
-    setValue("settingsSubtitle", settings.subtitle);
-    setValue("settingsCity", settings.city);
-
-    setValue("settingsPrimary", settings.primary_color || "#000056");
-    setValue("settingsAccent", settings.accent_color || "#0875dc");
-    setValue("settingsGold", settings.gold_color || "#ffcd00");
-    setValue("settingsWhite", settings.white_color || "#ffffff");
-
-    setText("settingsPrimaryValue", settings.primary_color || "#000056");
-    setText("settingsAccentValue", settings.accent_color || "#0875dc");
-    setText("settingsGoldValue", settings.gold_color || "#ffcd00");
-    setText("settingsWhiteValue", settings.white_color || "#ffffff");
-
-    const preview = $("#settingsLogoPreview");
-
-    if (preview && settings.logo_path) {
-        preview.src = publicFile(settings.logo_path);
-        preview.classList.add("visible");
-    }
-}
-
-async function saveSettings(e) {
-    e.preventDefault();
-
-    try {
-        const current = await getSettings();
-
-        let logoPath = current?.logo_path || null;
-
-        const logoInput = $("#settingsLogo");
-
-        if (logoInput?.files?.length) {
-            logoPath = await uploadFile(
-                logoInput.files[0],
-                "settings"
-            );
-        }
-
-        const payload = {
-            team_name: $("#settingsTeamName")?.value.trim() || "Челны 2011",
-            subtitle: $("#settingsSubtitle")?.value.trim() || "хоккейный клуб",
-            city: $("#settingsCity")?.value.trim() || "Набережные Челны",
-            logo_path: logoPath,
-            primary_color: $("#settingsPrimary")?.value || "#000056",
-            accent_color: $("#settingsAccent")?.value || "#0875dc",
-            gold_color: $("#settingsGold")?.value || "#ffcd00",
-            white_color: $("#settingsWhite")?.value || "#ffffff",
-            updated_at: new Date().toISOString()
-        };
-
-        if (current?.id) {
-            const { error } = await db
-                .from("site_settings")
-                .update(payload)
-                .eq("id", current.id);
-
-            if (error) throw error;
-        } else {
-            const { error } = await db
-                .from("site_settings")
-                .insert(payload);
-
-            if (error) throw error;
-        }
-
-        toast("Настройки сохранены");
-
-        await loadSettings();
-    } catch (error) {
-        console.error(error);
-        toast(error.message || "Не удалось сохранить настройки", true);
-    }
-}
-
-/* =========================================================
-   NEWS
-   ========================================================= */
-
-async function loadNews() {
-    const container = $("#newsList");
-
-    if (!container) return;
-
-    const { data, error } = await db
-        .from("news")
-        .select("*")
-        .order("published_at", { ascending: false });
-
-    if (error) {
-        console.error(error);
-        container.innerHTML = emptyState("Ошибка загрузки новостей");
-        return;
-    }
-
-    if (!data?.length) {
-        container.innerHTML = emptyState("Новостей пока нет");
-        return;
-    }
-
-    container.innerHTML = data.map((item) => `
-        <article class="content-item">
-            ${item.image_path
-                ? `<img class="content-item-image" src="${publicFile(item.image_path)}">`
-                : `<div class="content-item-image placeholder"></div>`
-            }
-
-            <div class="content-item-main">
-                <div class="item-meta">
-                    ${escapeHtml(item.tag || "новость")}
-                    · ${formatDate(item.published_at)}
-                </div>
-
-                <h3>${escapeHtml(item.title)}</h3>
-
-                <p>${escapeHtml(shortText(item.text, 130))}</p>
-            </div>
-
-            <div class="content-item-actions">
-                <button class="button secondary"
-                    data-edit-news="${item.id}">
-                    Изменить
-                </button>
-
-                <button class="button danger"
-                    data-delete-news="${item.id}">
-                    Удалить
-                </button>
-            </div>
-        </article>
-    `).join("");
-
-    $$("[data-edit-news]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const item = data.find(
-                (x) => x.id === button.dataset.editNews
-            );
-
-            if (item) openNewsModal(item);
-        });
-    });
-
-    $$("[data-delete-news]").forEach((button) => {
-        button.addEventListener("click", async () => {
-            if (!confirm("Удалить эту новость?")) return;
-
-            await deleteRow("news", button.dataset.deleteNews);
-            await loadNews();
-            await loadAllDashboard();
-        });
-    });
-}
-
-function openNewsModal(item = null) {
-    currentModalAction = async () => {
-        const title = $("#modalNewsTitle")?.value.trim();
-        const tag = $("#modalNewsTag")?.value.trim();
-        const text = $("#modalNewsText")?.value.trim();
-        const date = $("#modalNewsDate")?.value;
-        const image = $("#modalNewsImage")?.files?.[0];
-
-        if (!title || !text) {
-            throw new Error("Заполните заголовок и текст.");
-        }
-
-        let imagePath = item?.image_path || null;
-
-        if (image) {
-            imagePath = await uploadFile(image, "news");
-        }
-
-        const payload = {
-            title,
-            tag,
-            text,
-            image_path: imagePath,
-            published_at: date
-                ? new Date(date).toISOString()
-                : item?.published_at || new Date().toISOString(),
-            updated_at: new Date().toISOString()
-        };
-
-        let error;
-
-        if (item) {
-            ({ error } = await db
-                .from("news")
-                .update(payload)
-                .eq("id", item.id));
-        } else {
-            ({ error } = await db
-                .from("news")
-                .insert(payload));
-        }
-
-        if (error) throw error;
-
-        closeModal();
-        toast(item ? "Новость изменена" : "Новость опубликована");
-
-        await loadNews();
-        await loadAllDashboard();
-    };
-
-    openModal(
-        item ? "Изменить новость" : "Новая новость",
-        `
-        <div class="form-grid">
-            <label class="field">
-                <span>Заголовок</span>
-                <input id="modalNewsTitle"
-                    value="${escapeAttr(item?.title || "")}"
-                    placeholder="Например: Челны начинают сезон">
-            </label>
-
-            <label class="field">
-                <span>Тег</span>
-                <input id="modalNewsTag"
-                    value="${escapeAttr(item?.tag || "новость")}"
-                    placeholder="новость">
-            </label>
-
-            <label class="field full">
-                <span>Текст</span>
-                <textarea id="modalNewsText"
-                    rows="8"
-                    placeholder="Текст новости">${escapeHtml(item?.text || "")}</textarea>
-            </label>
-
-            <label class="field">
-                <span>Дата и время</span>
-                <input id="modalNewsDate"
-                    type="datetime-local"
-                    value="${toDateTimeLocal(item?.published_at)}">
-            </label>
-
-            <label class="field">
-                <span>Изображение</span>
-                <input id="modalNewsImage" type="file" accept="image/*">
-            </label>
-        </div>
-        `
-    );
-}
-
-/* =========================================================
-   STORIES
-   ========================================================= */
-
-async function loadStories() {
-    const container = $("#storiesList");
-
-    if (!container) return;
-
-    const { data, error } = await db
-        .from("stories")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-    if (error) {
-        container.innerHTML = emptyState("Ошибка загрузки историй");
-        return;
-    }
-
-    if (!data?.length) {
-        container.innerHTML = emptyState("Историй пока нет");
-        return;
-    }
-
-    container.innerHTML = data.map((item) => `
-        <article class="content-item">
-            <img class="content-item-image story-admin-image"
-                 src="${publicFile(item.image_path)}">
-
-            <div class="content-item-main">
-                <div class="item-meta">История</div>
-                <h3>${formatDate(item.created_at)}</h3>
-                <p>
-                    ${item.expires_at
-                        ? `Удаление: ${formatDate(item.expires_at)}`
-                        : "Без даты удаления"
-                    }
-                </p>
-            </div>
-
-            <div class="content-item-actions">
-                <button class="button secondary"
-                    data-edit-story="${item.id}">
-                    Изменить
-                </button>
-
-                <button class="button danger"
-                    data-delete-story="${item.id}">
-                    Удалить
-                </button>
-            </div>
-        </article>
-    `).join("");
-
-    $$("[data-edit-story]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const item = data.find(
-                (x) => x.id === button.dataset.editStory
-            );
-
-            if (item) openStoryModal(item);
-        });
-    });
-
-    $$("[data-delete-story]").forEach((button) => {
-        button.addEventListener("click", async () => {
-            if (!confirm("Удалить историю?")) return;
-
-            await deleteRow("stories", button.dataset.deleteStory);
-
-            await loadStories();
-            await loadAllDashboard();
-        });
-    });
-}
-
-function openStoryModal(item = null) {
-    currentModalAction = async () => {
-        const image = $("#modalStoryImage")?.files?.[0];
-        const expires = $("#modalStoryExpires")?.value;
-
-        let imagePath = item?.image_path;
-
-        if (image) {
-            imagePath = await uploadFile(image, "stories");
-        }
-
-        if (!imagePath) {
-            throw new Error("Выберите изображение.");
-        }
-
-        const payload = {
-            image_path: imagePath,
-            expires_at: expires
-                ? new Date(expires).toISOString()
-                : null
-        };
-
-        let error;
-
-        if (item) {
-            ({ error } = await db
-                .from("stories")
-                .update(payload)
-                .eq("id", item.id));
-        } else {
-            ({ error } = await db
-                .from("stories")
-                .insert(payload));
-        }
-
-        if (error) throw error;
-
-        closeModal();
-        toast(item ? "История изменена" : "История добавлена");
-
-        await loadStories();
-        await loadAllDashboard();
-    };
-
-    openModal(
-        item ? "Изменить историю" : "Новая история",
-        `
-        <div class="form-grid">
-
-            <label class="field">
-                <span>Изображение</span>
-                <input id="modalStoryImage"
-                       type="file"
-                       accept="image/*">
-            </label>
-
-            <label class="field">
-                <span>Удалить автоматически</span>
-                <input id="modalStoryExpires"
-                       type="datetime-local"
-                       value="${toDateTimeLocal(item?.expires_at)}">
-            </label>
-
-        </div>
-        `
-    );
-}
-
-/* =========================================================
-   CLUBS
-   ========================================================= */
-
-async function loadClubs() {
-    const container = $("#clubsList");
-
-    if (!container) return;
-
-    const { data, error } = await db
-        .from("clubs")
-        .select("*")
-        .order("name");
-
-    if (error) {
-        container.innerHTML = emptyState("Ошибка загрузки клубов");
-        return;
-    }
-
-    if (!data?.length) {
-        container.innerHTML = emptyState("Клубов пока нет");
-        return;
-    }
-
-    container.innerHTML = data.map((club) => `
-        <article class="content-item">
-
-            ${club.logo_path
-                ? `<img class="content-item-image club-admin-logo"
-                         src="${publicFile(club.logo_path)}">`
-                : `<div class="content-item-image placeholder"></div>`
-            }
-
-            <div class="content-item-main">
-                <div class="item-meta">Клуб</div>
-                <h3>${escapeHtml(club.name)}</h3>
-                <p>${escapeHtml(club.city || "")}</p>
-            </div>
-
-            <div class="content-item-actions">
-                <button class="button secondary"
-                    data-edit-club="${club.id}">
-                    Изменить
-                </button>
-
-                <button class="button danger"
-                    data-delete-club="${club.id}">
-                    Удалить
-                </button>
-            </div>
-
-        </article>
-    `).join("");
-
-    $$("[data-edit-club]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const item = data.find(
-                (x) => x.id === button.dataset.editClub
-            );
-
-            if (item) openClubModal(item);
-        });
-    });
-
-    $$("[data-delete-club]").forEach((button) => {
-        button.addEventListener("click", async () => {
-            if (!confirm("Удалить клуб?")) return;
-
-            await deleteRow("clubs", button.dataset.deleteClub);
-
-            await loadClubs();
-            await loadMatches();
-        });
-    });
-}
-
-function openClubModal(item = null) {
-    currentModalAction = async () => {
-        const name = $("#modalClubName")?.value.trim();
-        const city = $("#modalClubCity")?.value.trim();
-        const logo = $("#modalClubLogo")?.files?.[0];
-
-        if (!name) {
-            throw new Error("Введите название клуба.");
-        }
-
-        let logoPath = item?.logo_path || null;
-
-        if (logo) {
-            logoPath = await uploadFile(logo, "clubs");
-        }
-
-        const payload = {
-            name,
-            city,
-            logo_path: logoPath,
-            updated_at: new Date().toISOString()
-        };
-
-        let error;
-
-        if (item) {
-            ({ error } = await db
-                .from("clubs")
-                .update(payload)
-                .eq("id", item.id));
-        } else {
-            ({ error } = await db
-                .from("clubs")
-                .insert(payload));
-        }
-
-        if (error) throw error;
-
-        closeModal();
-        toast(item ? "Клуб изменён" : "Клуб добавлен");
-
-        await loadClubs();
-    };
-
-    openModal(
-        item ? "Изменить клуб" : "Новый клуб",
-        `
-        <div class="form-grid">
-
-            <label class="field">
-                <span>Название клуба</span>
-                <input id="modalClubName"
-                    value="${escapeAttr(item?.name || "")}"
-                    placeholder="ХК Челны 2011">
-            </label>
-
-            <label class="field">
-                <span>Город</span>
-                <input id="modalClubCity"
-                    value="${escapeAttr(item?.city || "")}"
-                    placeholder="Набережные Челны">
-            </label>
-
-            <label class="field full">
-                <span>Логотип</span>
-                <input id="modalClubLogo"
-                    type="file"
-                    accept="image/*">
-            </label>
-
-        </div>
-        `
-    );
-}
-
-/* =========================================================
-   MATCHES
-   ========================================================= */
-
-async function loadMatches(filter = "all") {
-    const container = $("#matchesList");
-
-    if (!container) return;
-
-    let query = db
-        .from("matches")
-        .select(`
-            *,
-            home:clubs!matches_home_club_id_fkey(*),
-            away:clubs!matches_away_club_id_fkey(*)
-        `)
-        .order("match_date", { ascending: false });
-
-    if (filter !== "all") {
-        query = query.eq("status", filter);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-        console.error(error);
-        container.innerHTML = emptyState("Ошибка загрузки матчей");
-        return;
-    }
-
-    if (!data?.length) {
-        container.innerHTML = emptyState("Матчей пока нет");
-        return;
-    }
-
-    container.innerHTML = data.map((match) => `
-        <article class="content-item">
-
-            <div class="content-item-main">
-                <div class="item-meta">
-                    ${statusLabel(match.status)}
-                    · ${formatDate(match.match_date)}
-                </div>
-
-                <h3>
-                    ${escapeHtml(match.home?.name || "—")}
-                    —
-                    ${escapeHtml(match.away?.name || "—")}
-                </h3>
-
-                <p>
-                    ${escapeHtml(match.venue || "")}
-                    ${match.competition
-                        ? ` · ${escapeHtml(match.competition)}`
-                        : ""
-                    }
-                </p>
-
-                <div class="match-admin-score">
-                    ${match.home_score ?? 0}
-                    :
-                    ${match.away_score ?? 0}
-                </div>
-            </div>
-
-            <div class="content-item-actions">
-                <button class="button secondary"
-                    data-edit-match="${match.id}">
-                    Изменить
-                </button>
-
-                <button class="button secondary"
-                    data-live-match="${match.id}">
-                    События
-                </button>
-
-                <button class="button danger"
-                    data-delete-match="${match.id}">
-                    Удалить
-                </button>
-            </div>
-
-        </article>
-    `).join("");
-
-    $$("[data-edit-match]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const item = data.find(
-                (x) => x.id === button.dataset.editMatch
-            );
-
-            if (item) openMatchModal(item);
-        });
-    });
-
-    $$("[data-live-match]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const item = data.find(
-                (x) => x.id === button.dataset.liveMatch
-            );
-
-            if (item) openMatchEventsModal(item);
-        });
-    });
-
-    $$("[data-delete-match]").forEach((button) => {
-        button.addEventListener("click", async () => {
-            if (!confirm("Удалить матч?")) return;
-
-            const id = button.dataset.deleteMatch;
-
-            await db.from("match_goals")
-                .delete()
-                .eq("match_id", id);
-
-            await db.from("match_penalties")
-                .delete()
-                .eq("match_id", id);
-
-            await db.from("match_roster")
-                .delete()
-                .eq("match_id", id);
-
-            await deleteRow("matches", id);
-
-            await loadMatches(filter);
-            await loadAllDashboard();
-        });
-    });
-}
-
-async function openMatchModal(item = null) {
-    const { data: clubs, error } = await db
-        .from("clubs")
-        .select("*")
-        .order("name");
-
-    if (error) {
-        toast(error.message, true);
-        return;
-    }
-
-    if (!clubs?.length) {
-        toast("Сначала добавьте хотя бы два клуба.", true);
-        switchSection("clubs");
-        return;
-    }
-
-    currentModalAction = async () => {
-        const home = $("#modalMatchHome")?.value;
-        const away = $("#modalMatchAway")?.value;
-        const date = $("#modalMatchDate")?.value;
-        const venue = $("#modalMatchVenue")?.value.trim();
-        const competition = $("#modalMatchCompetition")?.value.trim();
-        const status = $("#modalMatchStatus")?.value;
-        const homeScore = Number($("#modalMatchHomeScore")?.value || 0);
-        const awayScore = Number($("#modalMatchAwayScore")?.value || 0);
-
-        if (!home || !away) {
-            throw new Error("Выберите обе команды.");
-        }
-
-        if (home === away) {
-            throw new Error("Хозяева и гости должны отличаться.");
-        }
-
-        if (!date) {
-            throw new Error("Укажите дату и время.");
-        }
-
-        const payload = {
-            home_club_id: home,
-            away_club_id: away,
-            match_date: new Date(date).toISOString(),
-            venue,
-            competition,
-            status,
-            home_score: homeScore,
-            away_score: awayScore,
-            updated_at: new Date().toISOString()
-        };
-
-        let error;
-
-        if (item) {
-            ({ error } = await db
-                .from("matches")
-                .update(payload)
-                .eq("id", item.id));
-        } else {
-            ({ error } = await db
-                .from("matches")
-                .insert(payload));
-        }
-
-        if (error) throw error;
-
-        closeModal();
-
-        toast(item ? "Матч изменён" : "Матч создан");
-
-        await loadMatches();
-        await loadAllDashboard();
-    };
-
-    openModal(
-        item ? "Изменить матч" : "Новый матч",
-        `
-        <div class="form-grid">
-
-            <label class="field">
-                <span>Хозяева</span>
-                <select id="modalMatchHome">
-                    ${clubs.map((club) => `
-                        <option value="${club.id}"
-                            ${club.id === item?.home_club_id ? "selected" : ""}>
-                            ${escapeHtml(club.name)}
-                        </option>
-                    `).join("")}
-                </select>
-            </label>
-
-            <label class="field">
-                <span>Гости</span>
-                <select id="modalMatchAway">
-                    ${clubs.map((club) => `
-                        <option value="${club.id}"
-                            ${club.id === item?.away_club_id ? "selected" : ""}>
-                            ${escapeHtml(club.name)}
-                        </option>
-                    `).join("")}
-                </select>
-            </label>
-
-            <label class="field">
-                <span>Дата и время</span>
-                <input id="modalMatchDate"
-                    type="datetime-local"
-                    value="${toDateTimeLocal(item?.match_date)}">
-            </label>
-
-            <label class="field">
-                <span>Место</span>
-                <input id="modalMatchVenue"
-                    value="${escapeAttr(item?.venue || "")}"
-                    placeholder="ЛД «Челны»">
-            </label>
-
-            <label class="field">
-                <span>Соревнование</span>
-                <input id="modalMatchCompetition"
-                    value="${escapeAttr(item?.competition || "Первенство ПФО. Группа Б2")}">
-            </label>
-
-            <label class="field">
-                <span>Статус</span>
-                <select id="modalMatchStatus">
-                    <option value="planned"
-                        ${item?.status === "planned" ? "selected" : ""}>
-                        Запланирован
-                    </option>
-
-                    <option value="live"
-                        ${item?.status === "live" ? "selected" : ""}>
-                        Идёт
-                    </option>
-
-                    <option value="finished"
-                        ${item?.status === "finished" ? "selected" : ""}>
-                        Завершён
-                    </option>
-                </select>
-            </label>
-
-            <label class="field">
-                <span>Голы хозяев</span>
-                <input id="modalMatchHomeScore"
-                    type="number"
-                    min="0"
-                    value="${item?.home_score ?? 0}">
-            </label>
-
-            <label class="field">
-                <span>Голы гостей</span>
-                <input id="modalMatchAwayScore"
-                    type="number"
-                    min="0"
-                    value="${item?.away_score ?? 0}">
-            </label>
-
-        </div>
-        `
-    );
-}
-
-/* =========================================================
-   MATCH EVENTS
-   ========================================================= */
-
-async function openMatchEventsModal(match) {
-    const [goalsResult, penaltiesResult] = await Promise.all([
-        db.from("match_goals")
-            .select("*")
-            .eq("match_id", match.id)
-            .order("created_at"),
-
-        db.from("match_penalties")
-            .select("*")
-            .eq("match_id", match.id)
-            .order("created_at")
-    ]);
-
-    const goals = goalsResult.data || [];
-    const penalties = penaltiesResult.data || [];
-
-    currentModalAction = async () => {
-        const type = $("#eventType")?.value;
-
-        if (type === "goal") {
-            await addMatchGoal(match.id);
-        } else {
-            await addMatchPenalty(match.id);
-        }
-
-        closeModal();
-        await loadMatches();
-    };
-
-    openModal(
-        `События · ${match.home?.name || ""} — ${match.away?.name || ""}`,
-        `
-        <div class="event-manager">
-
-            <div class="event-section">
-                <div class="event-section-head">
-                    <strong>Голы</strong>
-                </div>
-
-                ${
-                    goals.length
-                        ? goals.map((goal) => `
-                            <div class="event-row">
-                                <b>${escapeHtml(goal.minute || "")}'</b>
-                                <span>
-                                    ${escapeHtml(goal.player_name || "")}
-                                    #${escapeHtml(String(goal.player_number || ""))}
-                                </span>
-                                <small>${escapeHtml(goal.strength || "")}</small>
-                            </div>
-                        `).join("")
-                        : `<div class="muted">Голов пока нет</div>`
-                }
-            </div>
-
-            <div class="event-section">
-                <div class="event-section-head">
-                    <strong>Удаления</strong>
-                </div>
-
-                ${
-                    penalties.length
-                        ? penalties.map((penalty) => `
-                            <div class="event-row">
-                                <b>${escapeHtml(penalty.penalty_time || "")}</b>
-                                <span>
-                                    ${escapeHtml(penalty.player_name || "")}
-                                    #${escapeHtml(String(penalty.player_number || ""))}
-                                </span>
-                                <small>
-                                    ${escapeHtml(penalty.reason || "")}
-                                    · ${penalty.minutes} мин.
-                                </small>
-                            </div>
-                        `).join("")
-                        : `<div class="muted">Удалений пока нет</div>`
-                }
-            </div>
-
-            <hr>
-
-            <label class="field">
-                <span>Добавить событие</span>
-                <select id="eventType">
-                    <option value="goal">Гол</option>
-                    <option value="penalty">Удаление</option>
-                </select>
-            </label>
-
-            <div class="hint">
-                После выбора типа нажмите «Добавить событие».
-            </div>
-
-        </div>
-        `,
-        "Добавить событие"
-    );
-}
-
-async function addMatchGoal(matchId) {
-    const minute = prompt("Время гола, например 12:34:");
-    if (minute === null) return;
-
-    const team = prompt("Команда: home или away", "home");
-    if (!team) return;
-
-    const number = prompt("Номер игрока:");
-    if (number === null) return;
-
-    const name = prompt("ФИО игрока:");
-    if (name === null) return;
-
-    const strength = prompt(
-        "Ситуация: равные / большинство / меньшинство",
-        "равные"
-    );
-
-    const { error } = await db
-        .from("match_goals")
-        .insert({
-            match_id: matchId,
-            team,
-            minute,
-            player_number: Number(number),
-            player_name: name,
-            strength
+        requestAnimationFrame(() => {
+            adminToast.classList.add("show");
         });
 
-    if (error) throw error;
+        clearTimeout(showToast.timer);
 
-    toast("Гол добавлен");
-}
+        showToast.timer = setTimeout(() => {
+            adminToast.classList.remove("show");
+        }, 3000);
+    }
 
-async function addMatchPenalty(matchId) {
-    const penaltyTime = prompt("Время удаления:");
-    if (penaltyTime === null) return;
+    function showError(message) {
+        showToast(message, "error");
+        console.error(message);
+    }
 
-    const team = prompt("Команда: home или away", "home");
-    if (!team) return;
+    function setLoginError(message = "") {
+        if (!loginError) return;
 
-    const number = prompt("Номер игрока:");
-    if (number === null) return;
+        loginError.textContent = message;
+        loginError.classList.toggle("show", Boolean(message));
+    }
 
-    const name = prompt("ФИО игрока:");
-    if (name === null) return;
+    function formatDate(value) {
+        if (!value) return "—";
 
-    const reason = prompt("Причина удаления:");
-    if (reason === null) return;
+        const date = new Date(value);
 
-    const minutes = prompt("Количество минут:", "2");
-    if (minutes === null) return;
+        if (Number.isNaN(date.getTime())) return "—";
 
-    const { error } = await db
-        .from("match_penalties")
-        .insert({
-            match_id: matchId,
-            team,
-            penalty_time: penaltyTime,
-            player_number: Number(number),
-            player_name: name,
-            reason,
-            minutes: Number(minutes)
+        return date.toLocaleDateString("ru-RU", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
         });
-
-    if (error) throw error;
-
-    toast("Удаление добавлено");
-}
-
-/* =========================================================
-   COMPETITION / STANDINGS
-   ========================================================= */
-
-async function loadCompetition() {
-    const container = $("#standingsEditorBody");
-
-    if (!container) return;
-
-    const { data, error } = await db
-        .from("standings")
-        .select("*")
-        .order("place");
-
-    if (error) {
-        console.error(error);
-        return;
     }
 
-    container.innerHTML = "";
+    function formatDateTime(value) {
+        if (!value) return "—";
 
-    if (!data?.length) {
-        addStandingsRow();
-        return;
-    }
+        const date = new Date(value);
 
-    data.forEach((row) => addStandingsRow(row));
+        if (Number.isNaN(date.getTime())) return "—";
 
-    const lastMatches = $("#competitionLastMatches");
-
-    if (lastMatches) {
-        const { data: matches } = await db
-            .from("matches")
-            .select(`
-                *,
-                home:clubs!matches_home_club_id_fkey(*),
-                away:clubs!matches_away_club_id_fkey(*)
-            `)
-            .eq("status", "finished")
-            .order("match_date", { ascending: false })
-            .limit(3);
-
-        lastMatches.innerHTML = matches?.length
-            ? matches.map((match) => `
-                <div class="mini-match">
-                    <span>
-                        ${escapeHtml(match.home?.name || "")}
-                        —
-                        ${escapeHtml(match.away?.name || "")}
-                    </span>
-
-                    <b>
-                        ${match.home_score ?? 0}:
-                        ${match.away_score ?? 0}
-                    </b>
-                </div>
-            `).join("")
-            : `<div class="muted">Завершённых матчей пока нет</div>`;
-    }
-}
-
-function addStandingsRow(row = null) {
-    const body = $("#standingsEditorBody");
-
-    if (!body) return;
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-        <td>
-            <input class="standing-place"
-                type="number"
-                value="${row?.place ?? body.children.length + 1}">
-        </td>
-
-        <td>
-            <input class="standing-team"
-                value="${escapeAttr(row?.team_name || "")}">
-        </td>
-
-        <td><input class="standing-games" type="number" value="${row?.games ?? 0}"></td>
-        <td><input class="standing-wins" type="number" value="${row?.wins ?? 0}"></td>
-        <td><input class="standing-owins" type="number" value="${row?.overtime_wins ?? 0}"></td>
-        <td><input class="standing-swins" type="number" value="${row?.shootout_wins ?? 0}"></td>
-        <td><input class="standing-losses" type="number" value="${row?.losses ?? 0}"></td>
-        <td><input class="standing-olosses" type="number" value="${row?.overtime_losses ?? 0}"></td>
-        <td><input class="standing-slosses" type="number" value="${row?.shootout_losses ?? 0}"></td>
-        <td><input class="standing-points" type="number" value="${row?.points ?? 0}"></td>
-
-        <td>
-            <button class="icon-button danger"
-                type="button">
-                ×
-            </button>
-        </td>
-    `;
-
-    tr.querySelector("button")?.addEventListener("click", () => {
-        tr.remove();
-    });
-
-    body.appendChild(tr);
-}
-
-async function saveCompetition() {
-    const rows = $$("#standingsEditorBody tr");
-
-    try {
-        await db
-            .from("standings")
-            .delete()
-            .neq("id", "00000000-0000-0000-0000-000000000000");
-
-        const payload = rows.map((row) => ({
-            place: Number(row.querySelector(".standing-place")?.value || 0),
-            team_name: row.querySelector(".standing-team")?.value.trim() || "",
-            games: Number(row.querySelector(".standing-games")?.value || 0),
-            wins: Number(row.querySelector(".standing-wins")?.value || 0),
-            overtime_wins: Number(row.querySelector(".standing-owins")?.value || 0),
-            shootout_wins: Number(row.querySelector(".standing-swins")?.value || 0),
-            losses: Number(row.querySelector(".standing-losses")?.value || 0),
-            overtime_losses: Number(row.querySelector(".standing-olosses")?.value || 0),
-            shootout_losses: Number(row.querySelector(".standing-slosses")?.value || 0),
-            points: Number(row.querySelector(".standing-points")?.value || 0)
-        }));
-
-        const clean = payload.filter((row) => row.team_name);
-
-        if (clean.length) {
-            const { error } = await db
-                .from("standings")
-                .insert(clean);
-
-            if (error) throw error;
-        }
-
-        toast("Таблица сохранена");
-
-        await loadCompetition();
-    } catch (error) {
-        console.error(error);
-        toast(error.message || "Ошибка сохранения таблицы", true);
-    }
-}
-
-/* =========================================================
-   PLAYER STATS
-   ========================================================= */
-
-async function loadStats(type) {
-    const container = $("#statsList");
-
-    if (!container) return;
-
-    const { data, error } = await db
-        .from("player_stats")
-        .select("*")
-        .eq("stat_type", type)
-        .order("value", { ascending: false });
-
-    if (error) {
-        console.error(error);
-        container.innerHTML = emptyState("Ошибка загрузки статистики");
-        return;
-    }
-
-    if (!data?.length) {
-        container.innerHTML = emptyState("Игроков пока нет");
-        return;
-    }
-
-    container.innerHTML = data.map((item) => `
-        <article class="content-item">
-
-            <div class="player-number-small">
-                ${escapeHtml(String(item.player_number || ""))}
-            </div>
-
-            <div class="content-item-main">
-                <div class="item-meta">
-                    ${statLabel(type)}
-                </div>
-
-                <h3>${escapeHtml(item.player_name)}</h3>
-
-                <p>
-                    ${escapeHtml(item.position || "")}
-                </p>
-            </div>
-
-            <div class="stat-value">
-                ${item.value ?? 0}
-            </div>
-
-            <div class="content-item-actions">
-                <button class="button secondary"
-                    data-edit-stat="${item.id}">
-                    Изменить
-                </button>
-
-                <button class="button danger"
-                    data-delete-stat="${item.id}">
-                    Удалить
-                </button>
-            </div>
-
-        </article>
-    `).join("");
-
-    $$("[data-edit-stat]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const item = data.find(
-                (x) => x.id === button.dataset.editStat
-            );
-
-            if (item) openStatModal(item);
+        return date.toLocaleString("ru-RU", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
         });
-    });
+    }
 
-    $$("[data-delete-stat]").forEach((button) => {
-        button.addEventListener("click", async () => {
-            if (!confirm("Удалить статистику игрока?")) return;
+    function toDateTimeLocal(value) {
+        if (!value) return "";
 
-            await deleteRow(
-                "player_stats",
-                button.dataset.deleteStat
-            );
+        const date = new Date(value);
 
-            await loadStats(type);
-        });
-    });
-}
+        if (Number.isNaN(date.getTime())) return "";
 
-function openStatModal(item = null) {
-    currentModalAction = async () => {
-        const playerName = $("#modalStatName")?.value.trim();
-        const number = $("#modalStatNumber")?.value;
-        const position = $("#modalStatPosition")?.value.trim();
-        const value = Number($("#modalStatValue")?.value || 0);
+        const offset = date.getTimezoneOffset();
 
-        if (!playerName) {
-            throw new Error("Введите фамилию и имя игрока.");
+        const local = new Date(
+            date.getTime() - offset * 60000
+        );
+
+        return local.toISOString().slice(0, 16);
+    }
+
+    function localDateTimeToISO(value) {
+        if (!value) return null;
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) return null;
+
+        return date.toISOString();
+    }
+
+    function safeFileName(name) {
+        return name
+            .toLowerCase()
+            .replace(/[^a-zа-яё0-9._-]/gi, "-")
+            .replace(/-+/g, "-");
+    }
+
+    function uniqueId() {
+        if (crypto?.randomUUID) {
+            return crypto.randomUUID();
         }
 
-        const payload = {
-            stat_type: currentStatType,
-            player_name: playerName,
-            player_number: Number(number || 0),
-            position,
-            value,
-            updated_at: new Date().toISOString()
-        };
-
-        let error;
-
-        if (item) {
-            ({ error } = await db
-                .from("player_stats")
-                .update(payload)
-                .eq("id", item.id));
-        } else {
-            ({ error } = await db
-                .from("player_stats")
-                .insert(payload));
-        }
-
-        if (error) throw error;
-
-        closeModal();
-
-        toast(item ? "Статистика изменена" : "Статистика добавлена");
-
-        await loadStats(currentStatType);
-    };
-
-    openModal(
-        item ? "Изменить статистику" : "Добавить игрока",
-        `
-        <div class="form-grid">
-
-            <label class="field">
-                <span>Игрок</span>
-                <input id="modalStatName"
-                    value="${escapeAttr(item?.player_name || "")}">
-            </label>
-
-            <label class="field">
-                <span>Номер</span>
-                <input id="modalStatNumber"
-                    type="number"
-                    value="${item?.player_number ?? ""}">
-            </label>
-
-            <label class="field">
-                <span>Амплуа</span>
-                <input id="modalStatPosition"
-                    value="${escapeAttr(item?.position || "")}"
-                    placeholder="Нападающий">
-            </label>
-
-            <label class="field">
-                <span>${statLabel(currentStatType)}</span>
-                <input id="modalStatValue"
-                    type="number"
-                    step="0.1"
-                    value="${item?.value ?? 0}">
-            </label>
-
-        </div>
-        `
-    );
-}
-
-/* =========================================================
-   LEADERS
-   ========================================================= */
-
-async function loadLeaders() {
-    const container = $("#leadersList");
-
-    if (!container) return;
-
-    const { data, error } = await db
-        .from("team_leaders")
-        .select("*")
-        .order("leader_type");
-
-    if (error) {
-        container.innerHTML = emptyState("Ошибка загрузки лидеров");
-        return;
+        return `${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2)}`;
     }
 
-    if (!data?.length) {
-        container.innerHTML = emptyState("Лидеры пока не настроены");
-        return;
-    }
-
-    container.innerHTML = data.map((item) => `
-        <article class="content-item">
-
-            ${
-                item.image_path
-                    ? `<img class="content-item-image player-cutout-preview"
-                           src="${publicFile(item.image_path)}">`
-                    : `<div class="content-item-image placeholder"></div>`
-            }
-
-            <div class="content-item-main">
-                <div class="item-meta">
-                    ${leaderLabel(item.leader_type)}
-                </div>
-
-                <h3>
-                    #${escapeHtml(String(item.player_number || ""))}
-                    ${escapeHtml(item.player_name)}
-                </h3>
-
-                <p>
-                    ${escapeHtml(item.position || "")}
-                    · ${escapeHtml(item.statistic || "")}
-                </p>
-            </div>
-
-            <div class="content-item-actions">
-                <button class="button secondary"
-                    data-edit-leader="${item.id}">
-                    Изменить
-                </button>
-
-                <button class="button danger"
-                    data-delete-leader="${item.id}">
-                    Удалить
-                </button>
-            </div>
-
-        </article>
-    `).join("");
-
-    $$("[data-edit-leader]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const item = data.find(
-                (x) => x.id === button.dataset.editLeader
-            );
-
-            if (item) openLeaderModal(item);
-        });
-    });
-
-    $$("[data-delete-leader]").forEach((button) => {
-        button.addEventListener("click", async () => {
-            if (!confirm("Удалить карточку лидера?")) return;
-
-            await deleteRow(
-                "team_leaders",
-                button.dataset.deleteLeader
-            );
-
-            await loadLeaders();
-        });
-    });
-}
-
-function openLeaderModal(item = null) {
-    currentModalAction = async () => {
-        const type = $("#modalLeaderType")?.value;
-        const name = $("#modalLeaderName")?.value.trim();
-        const number = Number($("#modalLeaderNumber")?.value || 0);
-        const position = $("#modalLeaderPosition")?.value.trim();
-        const statistic = $("#modalLeaderStatistic")?.value.trim();
-        const image = $("#modalLeaderImage")?.files?.[0];
-
-        if (!name) {
-            throw new Error("Введите имя игрока.");
-        }
-
-        let imagePath = item?.image_path || null;
-
-        if (image) {
-            imagePath = await uploadFile(image, "leaders");
-        }
-
-        const payload = {
-            leader_type: type,
-            player_name: name,
-            player_number: number,
-            position,
-            statistic,
-            image_path: imagePath
-        };
-
-        let error;
-
-        if (item) {
-            ({ error } = await db
-                .from("team_leaders")
-                .update(payload)
-                .eq("id", item.id));
-        } else {
-            ({ error } = await db
-                .from("team_leaders")
-                .insert(payload));
-        }
-
-        if (error) throw error;
-
-        closeModal();
-        toast(item ? "Лидер изменён" : "Лидер добавлен");
-
-        await loadLeaders();
-    };
-
-    openModal(
-        item ? "Изменить лидера" : "Новый лидер",
-        `
-        <div class="form-grid">
-
-            <label class="field">
-                <span>Категория</span>
-                <select id="modalLeaderType">
-
-                    <option value="scorer"
-                        ${item?.leader_type === "scorer" ? "selected" : ""}>
-                        Бомбардир
-                    </option>
-
-                    <option value="sniper"
-                        ${item?.leader_type === "sniper" ? "selected" : ""}>
-                        Снайпер
-                    </option>
-
-                    <option value="defender"
-                        ${item?.leader_type === "defender" ? "selected" : ""}>
-                        Бомбардир-защитник
-                    </option>
-
-                    <option value="plus_minus"
-                        ${item?.leader_type === "plus_minus" ? "selected" : ""}>
-                        Плюс/минус
-                    </option>
-
-                </select>
-            </label>
-
-            <label class="field">
-                <span>Игрок</span>
-                <input id="modalLeaderName"
-                    value="${escapeAttr(item?.player_name || "")}">
-            </label>
-
-            <label class="field">
-                <span>Номер</span>
-                <input id="modalLeaderNumber"
-                    type="number"
-                    value="${item?.player_number ?? ""}">
-            </label>
-
-            <label class="field">
-                <span>Позиция</span>
-                <input id="modalLeaderPosition"
-                    value="${escapeAttr(item?.position || "")}">
-            </label>
-
-            <label class="field">
-                <span>Статистика</span>
-                <input id="modalLeaderStatistic"
-                    value="${escapeAttr(item?.statistic || "")}"
-                    placeholder="35 очков">
-            </label>
-
-            <label class="field full">
-                <span>PNG игрока без фона</span>
-                <input id="modalLeaderImage"
-                    type="file"
-                    accept="image/png,image/webp,image/jpeg">
-            </label>
-
-        </div>
-        `
-    );
-}
-
-/* =========================================================
-   ALBUMS
-   ========================================================= */
-
-async function loadAlbums() {
-    const container = $("#albumsList");
-
-    if (!container) return;
-
-    const { data, error } = await db
-        .from("albums")
-        .select("*")
-        .order("album_date", { ascending: false });
-
-    if (error) {
-        container.innerHTML = emptyState("Ошибка загрузки альбомов");
-        return;
-    }
-
-    if (!data?.length) {
-        container.innerHTML = emptyState("Альбомов пока нет");
-        return;
-    }
-
-    container.innerHTML = data.map((album) => `
-        <article class="content-item">
-
-            ${
-                album.cover_path
-                    ? `<img class="content-item-image"
-                           src="${publicFile(album.cover_path)}">`
-                    : `<div class="content-item-image placeholder"></div>`
-            }
-
-            <div class="content-item-main">
-                <div class="item-meta">
-                    ${formatDate(album.album_date)}
-                </div>
-
-                <h3>${escapeHtml(album.title)}</h3>
-            </div>
-
-            <div class="content-item-actions">
-                <button class="button secondary"
-                    data-edit-album="${album.id}">
-                    Изменить
-                </button>
-
-                <button class="button danger"
-                    data-delete-album="${album.id}">
-                    Удалить
-                </button>
-            </div>
-
-        </article>
-    `).join("");
-
-    $$("[data-edit-album]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const item = data.find(
-                (x) => x.id === button.dataset.editAlbum
-            );
-
-            if (item) openAlbumModal(item);
-        });
-    });
-
-    $$("[data-delete-album]").forEach((button) => {
-        button.addEventListener("click", async () => {
-            if (!confirm("Удалить альбом и его фотографии?")) return;
-
-            const id = button.dataset.deleteAlbum;
-
-            await db
-                .from("album_photos")
-                .delete()
-                .eq("album_id", id);
-
-            await deleteRow("albums", id);
-
-            await loadAlbums();
-            await loadAllDashboard();
-        });
-    });
-}
-
-function openAlbumModal(item = null) {
-    currentModalAction = async () => {
-        const title = $("#modalAlbumTitle")?.value.trim();
-        const date = $("#modalAlbumDate")?.value;
-        const cover = $("#modalAlbumCover")?.files?.[0];
-        const photos = $("#modalAlbumPhotos")?.files || [];
-
-        if (!title) {
-            throw new Error("Введите название альбома.");
-        }
-
-        let coverPath = item?.cover_path || null;
-
-        if (cover) {
-            coverPath = await uploadFile(cover, "albums");
-        }
-
-        const payload = {
-            title,
-            album_date: date
-                ? new Date(date).toISOString()
-                : item?.album_date || new Date().toISOString(),
-            cover_path: coverPath,
-            updated_at: new Date().toISOString()
-        };
-
-        let albumId = item?.id;
-        let error;
-
-        if (item) {
-            ({ error } = await db
-                .from("albums")
-                .update(payload)
-                .eq("id", item.id));
-        } else {
-            const result = await db
-                .from("albums")
-                .insert(payload)
-                .select()
-                .single();
-
-            error = result.error;
-            albumId = result.data?.id;
-        }
-
-        if (error) throw error;
-
-        if (albumId && photos.length) {
-            const photoRows = [];
-
-            for (let i = 0; i < photos.length; i++) {
-                const path = await uploadFile(
-                    photos[i],
-                    "albums/photos"
-                );
-
-                photoRows.push({
-                    album_id: albumId,
-                    image_path: path,
-                    sort_order: i
-                });
-            }
-
-            if (photoRows.length) {
-                const { error: photoError } = await db
-                    .from("album_photos")
-                    .insert(photoRows);
-
-                if (photoError) throw photoError;
-            }
-        }
-
-        closeModal();
-
-        toast(item ? "Альбом изменён" : "Альбом создан");
-
-        await loadAlbums();
-        await loadAllDashboard();
-    };
-
-    openModal(
-        item ? "Изменить альбом" : "Новый альбом",
-        `
-        <div class="form-grid">
-
-            <label class="field">
-                <span>Название</span>
-                <input id="modalAlbumTitle"
-                    value="${escapeAttr(item?.title || "")}"
-                    placeholder="Матч с ...">
-            </label>
-
-            <label class="field">
-                <span>Дата</span>
-                <input id="modalAlbumDate"
-                    type="date"
-                    value="${toDateLocal(item?.album_date)}">
-            </label>
-
-            <label class="field">
-                <span>Обложка</span>
-                <input id="modalAlbumCover"
-                    type="file"
-                    accept="image/*">
-            </label>
-
-            <label class="field full">
-                <span>Фотографии</span>
-                <input id="modalAlbumPhotos"
-                    type="file"
-                    accept="image/*"
-                    multiple>
-            </label>
-
-        </div>
-        `
-    );
-}
-
-/* =========================================================
-   MODAL
-   ========================================================= */
-
-function openModal(title, body, confirmText = "Сохранить") {
-    const modal = $("#modal");
-
-    if (!modal) return;
-
-    $("#modalTitle").textContent = title;
-    $("#modalEyebrow").textContent = "Управление";
-
-    $("#modalBody").innerHTML = body;
-
-    $("#modalFooter").innerHTML = `
-        <button class="button secondary"
-            id="modalCancel">
-            Отмена
-        </button>
-
-        <button class="button primary"
-            id="modalConfirm">
-            ${confirmText}
-        </button>
-    `;
-
-    $("#modalCancel").addEventListener("click", closeModal);
-
-    $("#modalConfirm").addEventListener("click", async () => {
-        const button = $("#modalConfirm");
-
-        if (!currentModalAction) return;
-
-        button.disabled = true;
-        button.textContent = "Сохранение...";
-
-        try {
-            await currentModalAction();
-        } catch (error) {
-            console.error(error);
-            toast(error.message || "Произошла ошибка", true);
-        } finally {
-            button.disabled = false;
-            button.textContent = confirmText;
-        }
-    });
-
-    modal.classList.add("open");
-    document.body.classList.add("modal-open");
-}
-
-function closeModal() {
-    const modal = $("#modal");
-
-    if (modal) {
-        modal.classList.remove("open");
-    }
-
-    document.body.classList.remove("modal-open");
-
-    currentModalAction = null;
-}
-
-/* =========================================================
-   HELPERS
-   ========================================================= */
-
-async function deleteRow(table, id) {
-    const { error } = await db
-        .from(table)
-        .delete()
-        .eq("id", id);
-
-    if (error) {
-        console.error(error);
-        toast(error.message || "Ошибка удаления", true);
-        throw error;
-    }
-
-    toast("Удалено");
-}
-
-function setValue(id, value) {
-    const element = $("#" + id);
-
-    if (element && value !== undefined && value !== null) {
-        element.value = value;
-    }
-}
-
-function setText(id, value) {
-    const element = $("#" + id);
-
-    if (element) {
-        element.textContent = value ?? "";
-    }
-}
-
-function formatDate(value) {
-    if (!value) return "—";
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-        return "—";
-    }
-
-    return new Intl.DateTimeFormat("ru-RU", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-    }).format(date);
-}
-
-function toDateTimeLocal(value) {
-    if (!value) return "";
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-        return "";
-    }
-
-    const offset = date.getTimezoneOffset();
-    const local = new Date(date.getTime() - offset * 60000);
-
-    return local.toISOString().slice(0, 16);
-}
-
-function toDateLocal(value) {
-    if (!value) return "";
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-        return "";
-    }
-
-    return date.toISOString().slice(0, 10);
-}
-
-function shortText(text, length) {
-    if (!text) return "";
-
-    return text.length > length
-        ? text.slice(0, length).trim() + "…"
-        : text;
-}
-
-function escapeHtml(value) {
-    return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-function escapeAttr(value) {
-    return escapeHtml(value);
-}
-
-function emptyState(text) {
-    return `
-        <div class="empty-state">
-            <div class="empty-state-title">
-                ${escapeHtml(text)}
-            </div>
-        </div>
-    `;
-}
-
-function statusLabel(status) {
-    const labels = {
-        planned: "Запланирован",
-        live: "LIVE",
-        finished: "Завершён"
-    };
-
-    return labels[status] || status || "—";
-}
-
-function statLabel(type) {
-    const labels = {
-        scorers: "Бомбардиры",
-        snipers: "Снайперы",
-        defenders: "Бомбардиры-защитники",
-        plus_minus: "Плюс/минус"
-    };
-
-    return labels[type] || type;
-}
-
-function leaderLabel(type) {
-    const labels = {
-        scorer: "Бомбардир",
-        sniper: "Снайпер",
-        defender: "Бомбардир-защитник",
-        plus_minus: "Плюс/минус"
-    };
-
-    return labels[type] || type;
-}
-
-function toast(message, isError = false) {
-    const element = $("#toast");
-    const messageElement = $("#toastMessage");
-
-    if (!element || !messageElement) return;
-
-    messageElement.textContent = message;
-
-    element.classList.toggle("error", isError);
-    element.classList.add("show");
-
-    clearTimeout(window.__toastTimer);
-
-    window.__toastTimer = setTimeout(() => {
-        element.classList.remove("show");
-    }, 3000);
-}
-
-function showLoginError(message) {
-    const element = $("#loginError");
-
-    if (!element) return;
-
-    element.textContent = message;
-    element.classList.add("show");
-}
-
-/* =========================================================
-   SETTINGS FALLBACK
-   ========================================================= */
-
-async function getSettings() {
-    const { data, error } = await db
-        .from("site_settings")
-        .select("*")
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-
-    if (error) {
-        console.error(error);
-        return null;
-    }
-
-    return data;
-}
-
-/* =========================================================
-   GLOBAL FALLBACKS
-   ========================================================= */
-
-if (typeof window.getSettings !== "function") {
-    window.getSettings = getSettings;
-}
-
-if (typeof window.publicFile !== "function") {
-    window.publicFile = (path) => {
-        if (!path) return "";
-
-        return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
-    };
-}
-
-if (typeof window.uploadFile !== "function") {
-    window.uploadFile = async (file, folder = "uploads") => {
-        if (!file) {
-            throw new Error("Файл не выбран.");
-        }
+    /* =========================================================
+       STORAGE
+       ========================================================= */
+
+    async function uploadFile(file, folder = "uploads") {
+        if (!file) return null;
 
         const extension =
-            file.name.split(".").pop()?.toLowerCase() || "bin";
+            file.name.includes(".")
+                ? "." + file.name.split(".").pop()
+                : "";
 
-        const filename =
-            `${crypto.randomUUID()}.${extension}`;
+        const fileName =
+            `${uniqueId()}-${safeFileName(
+                file.name.replace(/\.[^/.]+$/, "")
+            )}${extension}`;
 
-        const path = `${folder}/${filename}`;
+        const path = `${folder}/${fileName}`;
 
-        const { error } = await db
-            .storage
+        const { error } = await db.storage
             .from(STORAGE_BUCKET)
             .upload(path, file, {
                 cacheControl: "3600",
                 upsert: false
             });
 
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
 
         return path;
+    }
+
+    function publicFile(path) {
+        if (!path) return "";
+
+        if (
+            path.startsWith("http://") ||
+            path.startsWith("https://") ||
+            path.startsWith("data:")
+        ) {
+            return path;
+        }
+
+        const { data } = db.storage
+            .from(STORAGE_BUCKET)
+            .getPublicUrl(path);
+
+        return data?.publicUrl || "";
+    }
+
+    async function deleteStorageFile(path) {
+        if (!path) return;
+
+        try {
+            await db.storage
+                .from(STORAGE_BUCKET)
+                .remove([path]);
+        } catch (error) {
+            console.warn(
+                "Не удалось удалить файл:",
+                error
+            );
+        }
+    }
+
+    /* =========================================================
+       MODAL
+       ========================================================= */
+
+    function openModal({
+        kicker = "Управление",
+        title = "",
+        body = "",
+        footer = ""
+    }) {
+        if (!adminModal) return;
+
+        if (modalKicker) {
+            modalKicker.textContent = kicker;
+        }
+
+        if (modalTitle) {
+            modalTitle.textContent = title;
+        }
+
+        if (modalBody) {
+            modalBody.innerHTML = body;
+        }
+
+        if (modalFooter) {
+            modalFooter.innerHTML = footer;
+        }
+
+        adminModal.classList.add("show");
+        document.body.classList.add("modal-open");
+    }
+
+    function closeModal() {
+        if (!adminModal) return;
+
+        adminModal.classList.remove("show");
+        document.body.classList.remove("modal-open");
+
+        if (modalBody) modalBody.innerHTML = "";
+        if (modalFooter) modalFooter.innerHTML = "";
+    }
+
+    modalClose?.addEventListener("click", closeModal);
+
+    $$("[data-modal-close]").forEach(button => {
+        button.addEventListener("click", closeModal);
+    });
+
+    adminModal?.addEventListener("click", event => {
+        if (event.target === adminModal) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener("keydown", event => {
+        if (
+            event.key === "Escape" &&
+            adminModal?.classList.contains("show")
+        ) {
+            closeModal();
+        }
+    });
+
+    /* =========================================================
+       AUTH
+       ========================================================= */
+
+    async function checkAuth() {
+        const {
+            data,
+            error
+        } = await db.auth.getSession();
+
+        if (error) {
+            console.error(error);
+            showAuth();
+            return;
+        }
+
+        if (data?.session?.user) {
+            currentUser = data.session.user;
+            showAdmin();
+        } else {
+            showAuth();
+        }
+    }
+
+    function showAuth() {
+        if (authScreen) {
+            authScreen.classList.remove("hidden");
+        }
+
+        if (adminApp) {
+            adminApp.classList.add("hidden");
+        }
+    }
+
+    async function showAdmin() {
+        if (authScreen) {
+            authScreen.classList.add("hidden");
+        }
+
+        if (adminApp) {
+            adminApp.classList.remove("hidden");
+        }
+
+        await initializeAdmin();
+    }
+
+    loginForm?.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        setLoginError("");
+
+        const email = loginEmail?.value.trim();
+        const password = loginPassword?.value;
+
+        if (!email || !password) {
+            setLoginError(
+                "Введите email и пароль."
+            );
+            return;
+        }
+
+        const submitButton =
+            loginForm.querySelector(
+                'button[type="submit"]'
+            );
+
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = "Вход...";
+        }
+
+        try {
+            const {
+                data,
+                error
+            } = await db.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            currentUser = data.user;
+
+            showToast("Вход выполнен.");
+
+            await showAdmin();
+
+        } catch (error) {
+            console.error(error);
+
+            setLoginError(
+                error?.message ||
+                "Не удалось выполнить вход."
+            );
+
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = "Войти";
+            }
+        }
+    });
+
+    logoutButton?.addEventListener("click", async () => {
+        await db.auth.signOut();
+    });
+
+    db.auth.onAuthStateChange(
+        async (_event, session) => {
+            currentUser =
+                session?.user || null;
+
+            if (currentUser) {
+                await showAdmin();
+            } else {
+                showAuth();
+            }
+        }
+    );
+
+    /* =========================================================
+       NAVIGATION
+       ========================================================= */
+
+    function openSidebar() {
+        adminSidebar?.classList.add("open");
+    }
+
+    function closeSidebar() {
+        adminSidebar?.classList.remove("open");
+    }
+
+    sidebarOpen?.addEventListener(
+        "click",
+        openSidebar
+    );
+
+    sidebarClose?.addEventListener(
+        "click",
+        closeSidebar
+    );
+
+    $$(".admin-nav button").forEach(button => {
+        button.addEventListener("click", () => {
+            const section =
+                button.dataset.section;
+
+            if (!section) return;
+
+            switchSection(section);
+            closeSidebar();
+        });
+    });
+
+    $$("[data-go-section]").forEach(button => {
+        button.addEventListener("click", () => {
+            switchSection(
+                button.dataset.goSection
+            );
+        });
+    });
+
+    function switchSection(section) {
+        currentSection = section;
+
+        $$(".admin-section").forEach(
+            element => {
+                element.classList.toggle(
+                    "active",
+                    element.id ===
+                    `section-${section}`
+                );
+            }
+        );
+
+        $$(".admin-nav button").forEach(
+            button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.section ===
+                    section
+                );
+            }
+        );
+
+        const activeButton =
+            $(`.admin-nav button[data-section="${section}"]`);
+
+        if (currentSectionLabel) {
+            currentSectionLabel.textContent =
+                activeButton?.textContent.trim() ||
+                "Панель управления";
+        }
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+        if (section === "dashboard") {
+            loadDashboard();
+        }
+
+        if (section === "settings") {
+            loadSettings();
+        }
+
+        if (section === "news") {
+            loadNewsAdmin();
+        }
+
+        if (section === "stories") {
+            loadStoriesAdmin();
+        }
+
+        if (section === "matches") {
+            loadMatchesAdmin();
+        }
+
+        if (section === "clubs") {
+            loadClubsAdmin();
+        }
+
+        if (section === "competition") {
+            loadCompetition();
+        }
+
+        if (section === "stats") {
+            loadStatsAdmin();
+        }
+
+        if (section === "leaders") {
+            loadLeaders();
+        }
+
+        if (section === "albums") {
+            loadAlbumsAdmin();
+        }
+    }
+
+    /* =========================================================
+       INITIALIZATION
+       ========================================================= */
+
+    async function initializeAdmin() {
+        try {
+            await loadSettings();
+            await loadClubsCache();
+            await loadDashboard();
+
+            switchSection("dashboard");
+
+        } catch (error) {
+            console.error(error);
+            showError(
+                "Не удалось загрузить панель управления."
+            );
+        }
+    }
+
+    /* =========================================================
+       SETTINGS
+       ========================================================= */
+
+    async function getSettings() {
+        const {
+            data,
+            error
+        } = await db
+            .from("site_settings")
+            .select("*")
+            .order("created_at", {
+                ascending: true
+            })
+            .limit(1)
+            .maybeSingle();
+
+        if (error) throw error;
+
+        return data;
+    }
+
+    async function loadSettings() {
+        try {
+            const settings =
+                await getSettings();
+
+            settingsCache = settings;
+
+            if (!settings) return;
+
+            const map = {
+                settingsTeamName:
+                    settings.team_name || "",
+                settingsSubtitle:
+                    settings.subtitle || "",
+                settingsCity:
+                    settings.city || ""
+            };
+
+            Object.entries(map).forEach(
+                ([id, value]) => {
+                    const input = document.getElementById(id);
+
+                    if (input) {
+                        input.value = value;
+                    }
+                }
+            );
+
+            setColorInput(
+                "settingsPrimaryColor",
+                "settingsPrimaryColorText",
+                settings.primary_color
+            );
+
+            setColorInput(
+                "settingsAccentColor",
+                "settingsAccentColorText",
+                settings.accent_color
+            );
+
+            setColorInput(
+                "settingsGoldColor",
+                "settingsGoldColorText",
+                settings.gold_color
+            );
+
+            setColorInput(
+                "settingsWhiteColor",
+                "settingsWhiteColorText",
+                settings.white_color
+            );
+
+            const preview =
+                $("#settingsLogoPreview");
+
+            if (preview) {
+                preview.src =
+                    publicFile(settings.logo_path) ||
+                    "";
+            }
+
+        } catch (error) {
+            console.error(error);
+            showError(
+                "Ошибка загрузки настроек."
+            );
+        }
+    }
+
+    function setColorInput(
+        colorId,
+        textId,
+        value
+    ) {
+        if (!value) return;
+
+        const color =
+            document.getElementById(colorId);
+
+        const text =
+            document.getElementById(textId);
+
+        if (color) color.value = value;
+        if (text) text.value = value;
+    }
+
+    function bindColorInputs() {
+        const pairs = [
+            [
+                "settingsPrimaryColor",
+                "settingsPrimaryColorText"
+            ],
+            [
+                "settingsAccentColor",
+                "settingsAccentColorText"
+            ],
+            [
+                "settingsGoldColor",
+                "settingsGoldColorText"
+            ],
+            [
+                "settingsWhiteColor",
+                "settingsWhiteColorText"
+            ]
+        ];
+
+        pairs.forEach(([colorId, textId]) => {
+            const color =
+                document.getElementById(colorId);
+
+            const text =
+                document.getElementById(textId);
+
+            color?.addEventListener(
+                "input",
+                () => {
+                    if (text) {
+                        text.value = color.value;
+                    }
+                }
+            );
+
+            text?.addEventListener(
+                "input",
+                () => {
+                    const value =
+                        text.value.trim();
+
+                    if (
+                        /^#[0-9a-f]{6}$/i.test(value) &&
+                        color
+                    ) {
+                        color.value = value;
+                    }
+                }
+            );
+        });
+    }
+
+    bindColorInputs();
+
+    const settingsForm =
+        $("#settingsForm");
+
+    settingsForm?.addEventListener(
+        "submit",
+        async event => {
+            event.preventDefault();
+
+            try {
+                const file =
+                    $("#settingsLogo")?.files?.[0];
+
+                let logoPath =
+                    settingsCache?.logo_path ||
+                    null;
+
+                if (file) {
+                    logoPath =
+                        await uploadFile(
+                            file,
+                            "logo"
+                        );
+                }
+
+                const payload = {
+                    team_name:
+                        $("#settingsTeamName")
+                            ?.value.trim() ||
+                        "ХК Челны 2011",
+
+                    subtitle:
+                        $("#settingsSubtitle")
+                            ?.value.trim() ||
+                        "хоккейный клуб",
+
+                    city:
+                        $("#settingsCity")
+                            ?.value.trim() ||
+                        "Набережные Челны",
+
+                    logo_path:
+                        logoPath,
+
+                    primary_color:
+                        $("#settingsPrimaryColorText")
+                            ?.value.trim() ||
+                        "#000056",
+
+                    accent_color:
+                        $("#settingsAccentColorText")
+                            ?.value.trim() ||
+                        "#0875dc",
+
+                    gold_color:
+                        $("#settingsGoldColorText")
+                            ?.value.trim() ||
+                        "#ffcd00",
+
+                    white_color:
+                        $("#settingsWhiteColorText")
+                            ?.value.trim() ||
+                        "#ffffff",
+
+                    updated_at:
+                        new Date().toISOString()
+                };
+
+                if (settingsCache?.id) {
+                    const {
+                        error
+                    } = await db
+                        .from("site_settings")
+                        .update(payload)
+                        .eq(
+                            "id",
+                            settingsCache.id
+                        );
+
+                    if (error) throw error;
+
+                } else {
+                    const {
+                        data,
+                        error
+                    } = await db
+                        .from("site_settings")
+                        .insert(payload)
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+
+                    settingsCache = data;
+                }
+
+                settingsCache = {
+                    ...settingsCache,
+                    ...payload
+                };
+
+                showToast(
+                    "Настройки сохранены."
+                );
+
+            } catch (error) {
+                console.error(error);
+                showError(
+                    error.message ||
+                    "Не удалось сохранить настройки."
+                );
+            }
+        }
+    );
+
+    /* =========================================================
+       DASHBOARD
+       ========================================================= */
+
+    async function countTable(table) {
+        const {
+            count,
+            error
+        } = await db
+            .from(table)
+            .select("*", {
+                count: "exact",
+                head: true
+            });
+
+        if (error) throw error;
+
+        return count || 0;
+    }
+
+    async function loadDashboard() {
+        try {
+            const [
+                news,
+                matches,
+                albums,
+                clubs
+            ] = await Promise.all([
+                countTable("news"),
+                countTable("matches"),
+                countTable("albums"),
+                countTable("clubs")
+            ]);
+
+            const values = {
+                dashboardNewsCount: news,
+                dashboardMatchesCount: matches,
+                dashboardAlbumsCount: albums,
+                dashboardClubsCount: clubs
+            };
+
+            Object.entries(values).forEach(
+                ([id, value]) => {
+                    const element =
+                        document.getElementById(id);
+
+                    if (element) {
+                        element.textContent =
+                            value;
+                    }
+                }
+            );
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    /* =========================================================
+       NEWS
+       ========================================================= */
+
+    $("#addNewsButton")?.addEventListener(
+        "click",
+        () => openNewsModal()
+    );
+
+    async function loadNewsAdmin() {
+        const container =
+            $("#newsListAdmin");
+
+        if (!container) return;
+
+        container.innerHTML =
+            `<div class="admin-loading">Загрузка...</div>`;
+
+        const {
+            data,
+            error
+        } = await db
+            .from("news")
+            .select("*")
+            .order("published_at", {
+                ascending: false
+            });
+
+        if (error) {
+            console.error(error);
+            container.innerHTML =
+                `<div class="admin-empty">
+                    Не удалось загрузить новости.
+                </div>`;
+            return;
+        }
+
+        if (!data?.length) {
+            container.innerHTML =
+                `<div class="admin-empty">
+                    Новостей пока нет.
+                </div>`;
+            return;
+        }
+
+        container.innerHTML =
+            data.map(news => `
+                <article class="admin-content-card">
+                    <div class="admin-content-card-media">
+                        ${
+                            news.image_path
+                                ? `<img src="${escapeHTML(
+                                      publicFile(news.image_path)
+                                  )}" alt="">`
+                                : ""
+                        }
+                    </div>
+
+                    <div class="admin-content-card-body">
+                        <span class="admin-badge">
+                            ${escapeHTML(
+                                news.tag || "Новость"
+                            )}
+                        </span>
+
+                        <h3>
+                            ${escapeHTML(
+                                news.title
+                            )}
+                        </h3>
+
+                        <p>
+                            ${formatDateTime(
+                                news.published_at
+                            )}
+                        </p>
+                    </div>
+
+                    <div class="admin-content-card-actions">
+                        <button
+                            class="button secondary"
+                            data-edit-news="${news.id}"
+                        >
+                            Изменить
+                        </button>
+
+                        <button
+                            class="button danger"
+                            data-delete-news="${news.id}"
+                        >
+                            Удалить
+                        </button>
+                    </div>
+                </article>
+            `).join("");
+
+        $$("[data-edit-news]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () => {
+                        const item =
+                            data.find(
+                                n =>
+                                    n.id ===
+                                    button.dataset.editNews
+                            );
+
+                        if (item) {
+                            openNewsModal(item);
+                        }
+                    }
+                );
+            });
+
+        $$("[data-delete-news]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () =>
+                        deleteNews(
+                            button.dataset.deleteNews
+                        )
+                );
+            });
+    }
+
+    function openNewsModal(item = null) {
+        const isEdit = Boolean(item);
+
+        openModal({
+            kicker: "Новости",
+            title: isEdit
+                ? "Изменить новость"
+                : "Новая новость",
+
+            body: `
+                <div class="form-grid">
+
+                    <label class="form-field">
+                        <span>Заголовок</span>
+                        <input
+                            id="modalNewsTitle"
+                            type="text"
+                            value="${escapeHTML(
+                                item?.title || ""
+                            )}"
+                            placeholder="Заголовок новости"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Тег</span>
+                        <input
+                            id="modalNewsTag"
+                            type="text"
+                            value="${escapeHTML(
+                                item?.tag || "новость"
+                            )}"
+                            placeholder="новость"
+                        >
+                    </label>
+
+                    <label class="form-field full">
+                        <span>Текст</span>
+                        <textarea
+                            id="modalNewsText"
+                            rows="7"
+                            placeholder="Текст новости"
+                        >${escapeHTML(
+                            item?.text || ""
+                        )}</textarea>
+                    </label>
+
+                    <label class="form-field">
+                        <span>Дата и время публикации</span>
+                        <input
+                            id="modalNewsDate"
+                            type="datetime-local"
+                            value="${toDateTimeLocal(
+                                item?.published_at ||
+                                new Date().toISOString()
+                            )}"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Изображение</span>
+                        <input
+                            id="modalNewsImage"
+                            type="file"
+                            accept="image/*"
+                        >
+                    </label>
+
+                </div>
+            `,
+
+            footer: `
+                <button
+                    class="button secondary"
+                    data-modal-close
+                >
+                    Отмена
+                </button>
+
+                <button
+                    class="button primary"
+                    id="saveNewsButton"
+                >
+                    Сохранить
+                </button>
+            `
+        });
+
+        $("#saveNewsButton")
+            ?.addEventListener(
+                "click",
+                async () => {
+                    try {
+                        const title =
+                            $("#modalNewsTitle")
+                                ?.value.trim();
+
+                        if (!title) {
+                            showError(
+                                "Введите заголовок."
+                            );
+                            return;
+                        }
+
+                        let imagePath =
+                            item?.image_path ||
+                            null;
+
+                        const file =
+                            $("#modalNewsImage")
+                                ?.files?.[0];
+
+                        if (file) {
+                            imagePath =
+                                await uploadFile(
+                                    file,
+                                    "news"
+                                );
+                        }
+
+                        const payload = {
+                            title,
+                            tag:
+                                $("#modalNewsTag")
+                                    ?.value.trim() ||
+                                "новость",
+
+                            text:
+                                $("#modalNewsText")
+                                    ?.value.trim() ||
+                                "",
+
+                            image_path:
+                                imagePath,
+
+                            published_at:
+                                localDateTimeToISO(
+                                    $("#modalNewsDate")
+                                        ?.value
+                                ),
+
+                            updated_at:
+                                new Date().toISOString()
+                        };
+
+                        if (item) {
+                            const {
+                                error
+                            } = await db
+                                .from("news")
+                                .update(payload)
+                                .eq(
+                                    "id",
+                                    item.id
+                                );
+
+                            if (error) throw error;
+
+                        } else {
+                            const {
+                                error
+                            } = await db
+                                .from("news")
+                                .insert(payload);
+
+                            if (error) throw error;
+                        }
+
+                        closeModal();
+                        showToast(
+                            isEdit
+                                ? "Новость обновлена."
+                                : "Новость опубликована."
+                        );
+
+                        await loadNewsAdmin();
+                        await loadDashboard();
+
+                    } catch (error) {
+                        console.error(error);
+                        showError(
+                            error.message ||
+                            "Ошибка сохранения новости."
+                        );
+                    }
+                }
+            );
+    }
+
+    async function deleteNews(id) {
+        if (
+            !confirm(
+                "Удалить эту новость?"
+            )
+        ) return;
+
+        try {
+            const {
+                data,
+                error: readError
+            } = await db
+                .from("news")
+                .select("image_path")
+                .eq("id", id)
+                .maybeSingle();
+
+            if (readError) throw readError;
+
+            const {
+                error
+            } = await db
+                .from("news")
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+
+            if (data?.image_path) {
+                await deleteStorageFile(
+                    data.image_path
+                );
+            }
+
+            showToast(
+                "Новость удалена."
+            );
+
+            await loadNewsAdmin();
+            await loadDashboard();
+
+        } catch (error) {
+            console.error(error);
+            showError(
+                "Не удалось удалить новость."
+            );
+        }
+    }
+
+    /* =========================================================
+       STORIES
+       ========================================================= */
+
+    $("#addStoryButton")?.addEventListener(
+        "click",
+        () => openStoryModal()
+    );
+
+    async function loadStoriesAdmin() {
+        const container =
+            $("#storiesListAdmin");
+
+        if (!container) return;
+
+        const {
+            data,
+            error
+        } = await db
+            .from("stories")
+            .select("*")
+            .order("created_at", {
+                ascending: false
+            });
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        if (!data?.length) {
+            container.innerHTML =
+                `<div class="admin-empty">
+                    Сторис пока нет.
+                </div>`;
+            return;
+        }
+
+        container.innerHTML =
+            data.map(story => `
+                <article class="admin-content-card">
+
+                    <div class="admin-content-card-media portrait">
+                        <img
+                            src="${escapeHTML(
+                                publicFile(
+                                    story.image_path
+                                )
+                            )}"
+                            alt=""
+                        >
+                    </div>
+
+                    <div class="admin-content-card-body">
+                        <span class="admin-badge">
+                            Сторис
+                        </span>
+
+                        <h3>
+                            ${
+                                story.expires_at
+                                    ? `До ${formatDateTime(
+                                          story.expires_at
+                                      )}`
+                                    : "Без срока"
+                            }
+                        </h3>
+                    </div>
+
+                    <div class="admin-content-card-actions">
+                        <button
+                            class="button secondary"
+                            data-edit-story="${story.id}"
+                        >
+                            Изменить
+                        </button>
+
+                        <button
+                            class="button danger"
+                            data-delete-story="${story.id}"
+                        >
+                            Удалить
+                        </button>
+                    </div>
+
+                </article>
+            `).join("");
+
+        $$("[data-edit-story]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () => {
+                        const story =
+                            data.find(
+                                x =>
+                                    x.id ===
+                                    button.dataset.editStory
+                            );
+
+                        if (story) {
+                            openStoryModal(story);
+                        }
+                    }
+                );
+            });
+
+        $$("[data-delete-story]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () =>
+                        deleteStory(
+                            button.dataset.deleteStory
+                        )
+                );
+            });
+    }
+
+    function openStoryModal(item = null) {
+        const isEdit = Boolean(item);
+
+        openModal({
+            kicker: "Stories",
+            title: isEdit
+                ? "Изменить сторис"
+                : "Новая сторис",
+
+            body: `
+                <div class="form-grid">
+
+                    <label class="form-field">
+                        <span>Изображение</span>
+                        <input
+                            id="modalStoryImage"
+                            type="file"
+                            accept="image/*"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Удалить после</span>
+                        <input
+                            id="modalStoryExpires"
+                            type="datetime-local"
+                            value="${toDateTimeLocal(
+                                item?.expires_at ||
+                                new Date(
+                                    Date.now() +
+                                    24 * 60 * 60 * 1000
+                                ).toISOString()
+                            )}"
+                        >
+                    </label>
+
+                </div>
+            `,
+
+            footer: `
+                <button
+                    class="button secondary"
+                    data-modal-close
+                >
+                    Отмена
+                </button>
+
+                <button
+                    class="button primary"
+                    id="saveStoryButton"
+                >
+                    Сохранить
+                </button>
+            `
+        });
+
+        $("#saveStoryButton")
+            ?.addEventListener(
+                "click",
+                async () => {
+                    try {
+                        let imagePath =
+                            item?.image_path ||
+                            null;
+
+                        const file =
+                            $("#modalStoryImage")
+                                ?.files?.[0];
+
+                        if (file) {
+                            imagePath =
+                                await uploadFile(
+                                    file,
+                                    "stories"
+                                );
+                        }
+
+                        if (!imagePath) {
+                            showError(
+                                "Загрузите изображение."
+                            );
+                            return;
+                        }
+
+                        const payload = {
+                            image_path:
+                                imagePath,
+
+                            expires_at:
+                                localDateTimeToISO(
+                                    $("#modalStoryExpires")
+                                        ?.value
+                                )
+                        };
+
+                        if (item) {
+                            const {
+                                error
+                            } = await db
+                                .from("stories")
+                                .update(payload)
+                                .eq(
+                                    "id",
+                                    item.id
+                                );
+
+                            if (error) throw error;
+
+                        } else {
+                            const {
+                                error
+                            } = await db
+                                .from("stories")
+                                .insert(payload);
+
+                            if (error) throw error;
+                        }
+
+                        closeModal();
+                        showToast(
+                            isEdit
+                                ? "Сторис обновлена."
+                                : "Сторис добавлена."
+                        );
+
+                        await loadStoriesAdmin();
+
+                    } catch (error) {
+                        console.error(error);
+                        showError(
+                            error.message ||
+                            "Ошибка сохранения сторис."
+                        );
+                    }
+                }
+            );
+    }
+
+    async function deleteStory(id) {
+        if (
+            !confirm(
+                "Удалить эту сторис?"
+            )
+        ) return;
+
+        try {
+            const {
+                data,
+                error: readError
+            } = await db
+                .from("stories")
+                .select("image_path")
+                .eq("id", id)
+                .maybeSingle();
+
+            if (readError) throw readError;
+
+            const {
+                error
+            } = await db
+                .from("stories")
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+
+            if (data?.image_path) {
+                await deleteStorageFile(
+                    data.image_path
+                );
+            }
+
+            showToast(
+                "Сторис удалена."
+            );
+
+            await loadStoriesAdmin();
+
+        } catch (error) {
+            console.error(error);
+            showError(
+                "Не удалось удалить сторис."
+            );
+        }
+    }
+
+    /* =========================================================
+       CLUBS
+       ========================================================= */
+
+    $("#addClubButton")?.addEventListener(
+        "click",
+        () => openClubModal()
+    );
+
+    async function loadClubsCache() {
+        const {
+            data,
+            error
+        } = await db
+            .from("clubs")
+            .select("*")
+            .order("name");
+
+        if (error) throw error;
+
+        clubsCache = data || [];
+
+        return clubsCache;
+    }
+
+    async function loadClubsAdmin() {
+        const container =
+            $("#clubsListAdmin");
+
+        if (!container) return;
+
+        try {
+            await loadClubsCache();
+
+            if (!clubsCache.length) {
+                container.innerHTML =
+                    `<div class="admin-empty">
+                        Клубов пока нет.
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML =
+                clubsCache.map(club => `
+                    <article class="admin-content-card">
+
+                        <div class="admin-content-card-media logo">
+                            ${
+                                club.logo_path
+                                    ? `<img
+                                        src="${escapeHTML(
+                                            publicFile(
+                                                club.logo_path
+                                            )
+                                        )}"
+                                        alt=""
+                                    >`
+                                    : ""
+                            }
+                        </div>
+
+                        <div class="admin-content-card-body">
+                            <span class="admin-badge">
+                                Клуб
+                            </span>
+
+                            <h3>
+                                ${escapeHTML(
+                                    club.name
+                                )}
+                            </h3>
+
+                            <p>
+                                ${escapeHTML(
+                                    club.city || ""
+                                )}
+                            </p>
+                        </div>
+
+                        <div class="admin-content-card-actions">
+                            <button
+                                class="button secondary"
+                                data-edit-club="${club.id}"
+                            >
+                                Изменить
+                            </button>
+
+                            <button
+                                class="button danger"
+                                data-delete-club="${club.id}"
+                            >
+                                Удалить
+                            </button>
+                        </div>
+
+                    </article>
+                `).join("");
+
+            $$("[data-edit-club]", container)
+                .forEach(button => {
+                    button.addEventListener(
+                        "click",
+                        () => {
+                            const club =
+                                clubsCache.find(
+                                    x =>
+                                        x.id ===
+                                        button.dataset.editClub
+                                );
+
+                            if (club) {
+                                openClubModal(club);
+                            }
+                        }
+                    );
+                });
+
+            $$("[data-delete-club]", container)
+                .forEach(button => {
+                    button.addEventListener(
+                        "click",
+                        () =>
+                            deleteClub(
+                                button.dataset.deleteClub
+                            )
+                    );
+                });
+
+        } catch (error) {
+            console.error(error);
+            showError(
+                "Ошибка загрузки клубов."
+            );
+        }
+    }
+
+    function openClubModal(item = null) {
+        const isEdit = Boolean(item);
+
+        openModal({
+            kicker: "Клубы",
+            title: isEdit
+                ? "Изменить клуб"
+                : "Новый клуб",
+
+            body: `
+                <div class="form-grid">
+
+                    <label class="form-field">
+                        <span>Название клуба</span>
+                        <input
+                            id="modalClubName"
+                            type="text"
+                            value="${escapeHTML(
+                                item?.name || ""
+                            )}"
+                            placeholder="ХК Челны 2011"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Город</span>
+                        <input
+                            id="modalClubCity"
+                            type="text"
+                            value="${escapeHTML(
+                                item?.city || ""
+                            )}"
+                            placeholder="Набережные Челны"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Логотип</span>
+                        <input
+                            id="modalClubLogo"
+                            type="file"
+                            accept="image/*"
+                        >
+                    </label>
+
+                </div>
+            `,
+
+            footer: `
+                <button
+                    class="button secondary"
+                    data-modal-close
+                >
+                    Отмена
+                </button>
+
+                <button
+                    class="button primary"
+                    id="saveClubButton"
+                >
+                    Сохранить
+                </button>
+            `
+        });
+
+        $("#saveClubButton")
+            ?.addEventListener(
+                "click",
+                async () => {
+                    try {
+                        const name =
+                            $("#modalClubName")
+                                ?.value.trim();
+
+                        if (!name) {
+                            showError(
+                                "Введите название клуба."
+                            );
+                            return;
+                        }
+
+                        let logoPath =
+                            item?.logo_path ||
+                            null;
+
+                        const file =
+                            $("#modalClubLogo")
+                                ?.files?.[0];
+
+                        if (file) {
+                            logoPath =
+                                await uploadFile(
+                                    file,
+                                    "clubs"
+                                );
+                        }
+
+                        const payload = {
+                            name,
+                            city:
+                                $("#modalClubCity")
+                                    ?.value.trim() ||
+                                "",
+
+                            logo_path:
+                                logoPath,
+
+                            updated_at:
+                                new Date().toISOString()
+                        };
+
+                        if (item) {
+                            const {
+                                error
+                            } = await db
+                                .from("clubs")
+                                .update(payload)
+                                .eq(
+                                    "id",
+                                    item.id
+                                );
+
+                            if (error) throw error;
+
+                        } else {
+                            const {
+                                error
+                            } = await db
+                                .from("clubs")
+                                .insert(payload);
+
+                            if (error) throw error;
+                        }
+
+                        closeModal();
+
+                        showToast(
+                            isEdit
+                                ? "Клуб обновлён."
+                                : "Клуб добавлен."
+                        );
+
+                        await loadClubsAdmin();
+                        await loadClubsCache();
+                        await loadDashboard();
+
+                    } catch (error) {
+                        console.error(error);
+                        showError(
+                            error.message ||
+                            "Ошибка сохранения клуба."
+                        );
+                    }
+                }
+            );
+    }
+
+    async function deleteClub(id) {
+        if (
+            !confirm(
+                "Удалить этот клуб?"
+            )
+        ) return;
+
+        try {
+            const {
+                data,
+                error: readError
+            } = await db
+                .from("clubs")
+                .select("logo_path")
+                .eq("id", id)
+                .maybeSingle();
+
+            if (readError) throw readError;
+
+            const {
+                error
+            } = await db
+                .from("clubs")
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+
+            if (data?.logo_path) {
+                await deleteStorageFile(
+                    data.logo_path
+                );
+            }
+
+            showToast(
+                "Клуб удалён."
+            );
+
+            await loadClubsAdmin();
+            await loadClubsCache();
+            await loadDashboard();
+
+        } catch (error) {
+            console.error(error);
+
+            showError(
+                error.message ||
+                "Не удалось удалить клуб."
+            );
+        }
+    }
+
+    /* =========================================================
+       MATCHES
+       ========================================================= */
+
+    $("#addMatchButton")?.addEventListener(
+        "click",
+        () => openMatchModal()
+    );
+
+    const statusLabels = {
+        scheduled: "Запланирован",
+        live: "Идёт",
+        finished: "Завершён",
+        cancelled: "Отменён"
     };
-}
+
+    async function loadMatchesAdmin() {
+        const container =
+            $("#matchesListAdmin");
+
+        if (!container) return;
+
+        container.innerHTML =
+            `<div class="admin-loading">Загрузка...</div>`;
+
+        const {
+            data,
+            error
+        } = await db
+            .from("matches")
+            .select(`
+                *,
+                home:clubs!matches_home_club_id_fkey(*),
+                away:clubs!matches_away_club_id_fkey(*)
+            `)
+            .order("match_date", {
+                ascending: false
+            });
+
+        if (error) {
+            console.error(error);
+            container.innerHTML =
+                `<div class="admin-empty">
+                    Ошибка загрузки матчей.
+                </div>`;
+            return;
+        }
+
+        if (!data?.length) {
+            container.innerHTML =
+                `<div class="admin-empty">
+                    Матчей пока нет.
+                </div>`;
+            return;
+        }
+
+        container.innerHTML =
+            data.map(match => `
+                <article class="admin-content-card">
+
+                    <div class="admin-content-card-body wide">
+
+                        <span class="admin-badge">
+                            ${escapeHTML(
+                                statusLabels[
+                                    match.status
+                                ] ||
+                                match.status ||
+                                "Матч"
+                            )}
+                        </span>
+
+                        <h3>
+                            ${escapeHTML(
+                                match.home?.name ||
+                                "—"
+                            )}
+                            —
+                            ${escapeHTML(
+                                match.away?.name ||
+                                "—"
+                            )}
+                        </h3>
+
+                        <p>
+                            ${formatDateTime(
+                                match.match_date
+                            )}
+                            ·
+                            ${escapeHTML(
+                                match.venue || ""
+                            )}
+                        </p>
+
+                        <strong>
+                            ${match.home_score ?? 0}
+                            :
+                            ${match.away_score ?? 0}
+                        </strong>
+
+                    </div>
+
+                    <div class="admin-content-card-actions">
+
+                        <button
+                            class="button secondary"
+                            data-edit-match="${match.id}"
+                        >
+                            Изменить
+                        </button>
+
+                        <button
+                            class="button secondary"
+                            data-live-match="${match.id}"
+                        >
+                            События
+                        </button>
+
+                        <button
+                            class="button danger"
+                            data-delete-match="${match.id}"
+                        >
+                            Удалить
+                        </button>
+
+                    </div>
+
+                </article>
+            `).join("");
+
+        $$("[data-edit-match]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () => {
+                        const match =
+                            data.find(
+                                x =>
+                                    x.id ===
+                                    button.dataset.editMatch
+                            );
+
+                        if (match) {
+                            openMatchModal(match);
+                        }
+                    }
+                );
+            });
+
+        $$("[data-live-match]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () => {
+                        const match =
+                            data.find(
+                                x =>
+                                    x.id ===
+                                    button.dataset.liveMatch
+                            );
+
+                        if (match) {
+                            openMatchEventsModal(
+                                match
+                            );
+                        }
+                    }
+                );
+            });
+
+        $$("[data-delete-match]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () =>
+                        deleteMatch(
+                            button.dataset.deleteMatch
+                        )
+                );
+            });
+    }
+
+    function clubOptions(selected) {
+        return clubsCache
+            .map(club => `
+                <option
+                    value="${club.id}"
+                    ${
+                        selected === club.id
+                            ? "selected"
+                            : ""
+                    }
+                >
+                    ${escapeHTML(
+                        club.name
+                    )}
+                </option>
+            `)
+            .join("");
+    }
+
+    function openMatchModal(item = null) {
+        const isEdit = Boolean(item);
+
+        openModal({
+            kicker: "Матчи",
+            title: isEdit
+                ? "Изменить матч"
+                : "Новый матч",
+
+            body: `
+                <div class="form-grid">
+
+                    <label class="form-field">
+                        <span>Хозяева</span>
+                        <select id="modalMatchHome">
+                            <option value="">
+                                Выберите клуб
+                            </option>
+                            ${clubOptions(
+                                item?.home_club_id
+                            )}
+                        </select>
+                    </label>
+
+                    <label class="form-field">
+                        <span>Гости</span>
+                        <select id="modalMatchAway">
+                            <option value="">
+                                Выберите клуб
+                            </option>
+                            ${clubOptions(
+                                item?.away_club_id
+                            )}
+                        </select>
+                    </label>
+
+                    <label class="form-field">
+                        <span>Дата и время</span>
+                        <input
+                            id="modalMatchDate"
+                            type="datetime-local"
+                            value="${toDateTimeLocal(
+                                item?.match_date
+                            )}"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Арена</span>
+                        <input
+                            id="modalMatchVenue"
+                            type="text"
+                            value="${escapeHTML(
+                                item?.venue || ""
+                            )}"
+                            placeholder="ЛД «Челны»"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Соревнование</span>
+                        <input
+                            id="modalMatchCompetition"
+                            type="text"
+                            value="${escapeHTML(
+                                item?.competition ||
+                                "Первенство ПФО. Группа Б2"
+                            )}"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Статус</span>
+                        <select id="modalMatchStatus">
+                            ${Object.entries(
+                                statusLabels
+                            )
+                            .map(
+                                ([value, label]) => `
+                                    <option
+                                        value="${value}"
+                                        ${
+                                            (
+                                                item?.status ||
+                                                "scheduled"
+                                            ) === value
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        ${label}
+                                    </option>
+                                `
+                            )
+                            .join("")}
+                        </select>
+                    </label>
+
+                    <label class="form-field">
+                        <span>Счёт хозяев</span>
+                        <input
+                            id="modalMatchHomeScore"
+                            type="number"
+                            min="0"
+                            value="${
+                                item?.home_score ??
+                                0
+                            }"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Счёт гостей</span>
+                        <input
+                            id="modalMatchAwayScore"
+                            type="number"
+                            min="0"
+                            value="${
+                                item?.away_score ??
+                                0
+                            }"
+                        >
+                    </label>
+
+                </div>
+
+                ${
+                    isEdit
+                        ? `
+                            <div class="modal-section">
+                                <h3>Состав на матч</h3>
+
+                                <div id="matchRosterEditor">
+                                    Загрузка...
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="button secondary"
+                                    id="addRosterPlayer"
+                                >
+                                    + Добавить игрока
+                                </button>
+                            </div>
+                        `
+                        : ""
+                }
+            `,
+
+            footer: `
+                <button
+                    class="button secondary"
+                    data-modal-close
+                >
+                    Отмена
+                </button>
+
+                <button
+                    class="button primary"
+                    id="saveMatchButton"
+                >
+                    Сохранить
+                </button>
+            `
+        });
+
+        if (isEdit) {
+            loadRosterEditor(item.id);
+
+            $("#addRosterPlayer")
+                ?.addEventListener(
+                    "click",
+                    () => {
+                        addRosterRow();
+                    }
+                );
+        }
+
+        $("#saveMatchButton")
+            ?.addEventListener(
+                "click",
+                async () => {
+                    try {
+                        const home =
+                            $("#modalMatchHome")
+                                ?.value;
+
+                        const away =
+                            $("#modalMatchAway")
+                                ?.value;
+
+                        if (!home || !away) {
+                            showError(
+                                "Выберите оба клуба."
+                            );
+                            return;
+                        }
+
+                        if (home === away) {
+                            showError(
+                                "Хозяева и гости должны быть разными клубами."
+                            );
+                            return;
+                        }
+
+                        const payload = {
+                            home_club_id:
+                                home,
+
+                            away_club_id:
+                                away,
+
+                            match_date:
+                                localDateTimeToISO(
+                                    $("#modalMatchDate")
+                                        ?.value
+                                ),
+
+                            venue:
+                                $("#modalMatchVenue")
+                                    ?.value.trim() ||
+                                "",
+
+                            competition:
+                                $("#modalMatchCompetition")
+                                    ?.value.trim() ||
+                                "",
+
+                            status:
+                                $("#modalMatchStatus")
+                                    ?.value ||
+                                "scheduled",
+
+                            home_score:
+                                Number(
+                                    $("#modalMatchHomeScore")
+                                        ?.value || 0
+                                ),
+
+                            away_score:
+                                Number(
+                                    $("#modalMatchAwayScore")
+                                        ?.value || 0
+                                ),
+
+                            updated_at:
+                                new Date().toISOString()
+                        };
+
+                        let matchId =
+                            item?.id;
+
+                        if (item) {
+                            const {
+                                error
+                            } = await db
+                                .from("matches")
+                                .update(payload)
+                                .eq(
+                                    "id",
+                                    item.id
+                                );
+
+                            if (error) throw error;
+
+                        } else {
+                            const {
+                                data,
+                                error
+                            } = await db
+                                .from("matches")
+                                .insert(payload)
+                                .select()
+                                .single();
+
+                            if (error) throw error;
+
+                            matchId = data.id;
+                        }
+
+                        if (isEdit) {
+                            await saveRoster(
+                                matchId
+                            );
+                        }
+
+                        closeModal();
+
+                        showToast(
+                            isEdit
+                                ? "Матч обновлён."
+                                : "Матч создан."
+                        );
+
+                        await loadMatchesAdmin();
+                        await loadDashboard();
+
+                    } catch (error) {
+                        console.error(error);
+
+                        showError(
+                            error.message ||
+                            "Ошибка сохранения матча."
+                        );
+                    }
+                }
+            );
+    }
+
+    /* =========================================================
+       ROSTER
+       ========================================================= */
+
+    async function loadRosterEditor(matchId) {
+        const container =
+            $("#matchRosterEditor");
+
+        if (!container) return;
+
+        const {
+            data,
+            error
+        } = await db
+            .from("match_roster")
+            .select("*")
+            .eq("match_id", matchId)
+            .order("player_number");
+
+        if (error) {
+            console.error(error);
+
+            container.innerHTML =
+                `<div class="admin-empty">
+                    Не удалось загрузить состав.
+                </div>`;
+
+            return;
+        }
+
+        container.innerHTML = "";
+
+        (data || []).forEach(player => {
+            addRosterRow(player);
+        });
+
+        if (!data?.length) {
+            addRosterRow();
+        }
+    }
+
+    function addRosterRow(player = {}) {
+        const container =
+            $("#matchRosterEditor");
+
+        if (!container) return;
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "form-grid roster-row";
+
+        row.innerHTML = `
+            <label class="form-field">
+                <span>№</span>
+                <input
+                    data-roster-number
+                    type="number"
+                    min="0"
+                    value="${
+                        player.player_number ??
+                        ""
+                    }"
+                >
+            </label>
+
+            <label class="form-field">
+                <span>Игрок</span>
+                <input
+                    data-roster-name
+                    type="text"
+                    value="${escapeHTML(
+                        player.player_name ||
+                        ""
+                    )}"
+                >
+            </label>
+
+            <label class="form-field">
+                <span>Позиция</span>
+                <input
+                    data-roster-position
+                    type="text"
+                    value="${escapeHTML(
+                        player.position ||
+                        ""
+                    )}"
+                    placeholder="нападающий"
+                >
+            </label>
+
+            <button
+                type="button"
+                class="button danger"
+                data-remove-roster
+            >
+                Удалить
+            </button>
+        `;
+
+        row.querySelector(
+            "[data-remove-roster]"
+        )?.addEventListener(
+            "click",
+            () => row.remove()
+        );
+
+        container.appendChild(row);
+    }
+
+    async function saveRoster(matchId) {
+        const {
+            error: deleteError
+        } = await db
+            .from("match_roster")
+            .delete()
+            .eq("match_id", matchId);
+
+        if (deleteError) {
+            throw deleteError;
+        }
+
+        const rows =
+            $$(".roster-row");
+
+        const players = rows
+            .map(row => ({
+                match_id: matchId,
+
+                player_number:
+                    Number(
+                        row.querySelector(
+                            "[data-roster-number]"
+                        )?.value || 0
+                    ),
+
+                player_name:
+                    row.querySelector(
+                        "[data-roster-name]"
+                    )?.value.trim() || "",
+
+                position:
+                    row.querySelector(
+                        "[data-roster-position]"
+                    )?.value.trim() || ""
+            }))
+            .filter(
+                player =>
+                    player.player_name
+            );
+
+        if (!players.length) return;
+
+        const {
+            error
+        } = await db
+            .from("match_roster")
+            .insert(players);
+
+        if (error) throw error;
+    }
+
+    /* =========================================================
+       MATCH EVENTS
+       ========================================================= */
+
+    async function openMatchEventsModal(match) {
+        openModal({
+            kicker: "Матч",
+            title:
+                `${match.home?.name || "Хозяева"} — ${
+                    match.away?.name || "Гости"
+                }`,
+
+            body: `
+                <div id="matchEventsContainer">
+                    Загрузка...
+                </div>
+            `,
+
+            footer: `
+                <button
+                    class="button secondary"
+                    data-modal-close
+                >
+                    Закрыть
+                </button>
+
+                <button
+                    class="button primary"
+                    id="saveMatchEvents"
+                >
+                    Сохранить события
+                </button>
+            `
+        });
+
+        await loadMatchEvents(
+            match
+        );
+
+        $("#saveMatchEvents")
+            ?.addEventListener(
+                "click",
+                () =>
+                    saveMatchEvents(
+                        match.id
+                    )
+            );
+    }
+
+    async function loadMatchEvents(match) {
+        const container =
+            $("#matchEventsContainer");
+
+        if (!container) return;
+
+        const [
+            goalsResult,
+            penaltiesResult
+        ] = await Promise.all([
+            db
+                .from("match_goals")
+                .select("*")
+                .eq("match_id", match.id)
+                .order("minute"),
+
+            db
+                .from("match_penalties")
+                .select("*")
+                .eq("match_id", match.id)
+                .order("penalty_time")
+        ]);
+
+        if (goalsResult.error) {
+            console.error(
+                goalsResult.error
+            );
+        }
+
+        if (penaltiesResult.error) {
+            console.error(
+                penaltiesResult.error
+            );
+        }
+
+        container.innerHTML = `
+            <div class="modal-section">
+
+                <h3>Голы</h3>
+
+                <div
+                    id="goalsEditor"
+                    class="modal-list"
+                ></div>
+
+                <button
+                    type="button"
+                    class="button secondary"
+                    id="addGoalButton"
+                >
+                    + Добавить гол
+                </button>
+
+            </div>
+
+            <div class="modal-section">
+
+                <h3>Удаления</h3>
+
+                <div
+                    id="penaltiesEditor"
+                    class="modal-list"
+                ></div>
+
+                <button
+                    type="button"
+                    class="button secondary"
+                    id="addPenaltyButton"
+                >
+                    + Добавить удаление
+                </button>
+
+            </div>
+        `;
+
+        (goalsResult.data || [])
+            .forEach(goal =>
+                addGoalRow(goal)
+            );
+
+        (penaltiesResult.data || [])
+            .forEach(penalty =>
+                addPenaltyRow(penalty)
+            );
+
+        $("#addGoalButton")
+            ?.addEventListener(
+                "click",
+                () => addGoalRow()
+            );
+
+        $("#addPenaltyButton")
+            ?.addEventListener(
+                "click",
+                () => addPenaltyRow()
+            );
+    }
+
+    function teamSelect(selected) {
+        return `
+            <select data-event-team>
+                <option
+                    value="home"
+                    ${
+                        selected === "home"
+                            ? "selected"
+                            : ""
+                    }
+                >
+                    Хозяева
+                </option>
+
+                <option
+                    value="away"
+                    ${
+                        selected === "away"
+                            ? "selected"
+                            : ""
+                    }
+                >
+                    Гости
+                </option>
+            </select>
+        `;
+    }
+
+    function addGoalRow(goal = {}) {
+        const container =
+            $("#goalsEditor");
+
+        if (!container) return;
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "event-row";
+
+        row.innerHTML = `
+            ${teamSelect(
+                goal.team || "home"
+            )}
+
+            <input
+                data-goal-minute
+                type="text"
+                placeholder="Минута"
+                value="${escapeHTML(
+                    goal.minute || ""
+                )}"
+            >
+
+            <input
+                data-goal-number
+                type="number"
+                placeholder="№"
+                value="${
+                    goal.player_number ??
+                    ""
+                }"
+            >
+
+            <input
+                data-goal-player
+                type="text"
+                placeholder="Игрок"
+                value="${escapeHTML(
+                    goal.player_name ||
+                    ""
+                )}"
+            >
+
+            <input
+                data-goal-strength
+                type="text"
+                placeholder="5x4"
+                value="${escapeHTML(
+                    goal.strength ||
+                    ""
+                )}"
+            >
+
+            <button
+                type="button"
+                class="button danger"
+                data-remove-event
+            >
+                ×
+            </button>
+        `;
+
+        row.querySelector(
+            "[data-remove-event]"
+        )?.addEventListener(
+            "click",
+            () => row.remove()
+        );
+
+        container.appendChild(row);
+    }
+
+    function addPenaltyRow(penalty = {}) {
+        const container =
+            $("#penaltiesEditor");
+
+        if (!container) return;
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "event-row";
+
+        row.innerHTML = `
+            ${teamSelect(
+                penalty.team || "home"
+            )}
+
+            <input
+                data-penalty-time
+                type="text"
+                placeholder="Минута"
+                value="${escapeHTML(
+                    penalty.penalty_time ||
+                    ""
+                )}"
+            >
+
+            <input
+                data-penalty-number
+                type="number"
+                placeholder="№"
+                value="${
+                    penalty.player_number ??
+                    ""
+                }"
+            >
+
+            <input
+                data-penalty-player
+                type="text"
+                placeholder="Игрок"
+                value="${escapeHTML(
+                    penalty.player_name ||
+                    ""
+                )}"
+            >
+
+            <input
+                data-penalty-reason
+                type="text"
+                placeholder="Причина"
+                value="${escapeHTML(
+                    penalty.reason ||
+                    ""
+                )}"
+            >
+
+            <input
+                data-penalty-minutes
+                type="number"
+                min="0"
+                placeholder="Мин"
+                value="${
+                    penalty.minutes ??
+                    2
+                }"
+            >
+
+            <button
+                type="button"
+                class="button danger"
+                data-remove-event
+            >
+                ×
+            </button>
+        `;
+
+        row.querySelector(
+            "[data-remove-event]"
+        )?.addEventListener(
+            "click",
+            () => row.remove()
+        );
+
+        container.appendChild(row);
+    }
+
+    async function saveMatchEvents(matchId) {
+        try {
+            const {
+                error: goalDeleteError
+            } = await db
+                .from("match_goals")
+                .delete()
+                .eq("match_id", matchId);
+
+            if (goalDeleteError) {
+                throw goalDeleteError;
+            }
+
+            const {
+                error: penaltyDeleteError
+            } = await db
+                .from("match_penalties")
+                .delete()
+                .eq("match_id", matchId);
+
+            if (penaltyDeleteError) {
+                throw penaltyDeleteError;
+            }
+
+            const goals =
+                $$("#goalsEditor .event-row")
+                    .map(row => ({
+                        match_id: matchId,
+
+                        team:
+                            row.querySelector(
+                                "[data-event-team]"
+                            )?.value,
+
+                        minute:
+                            row.querySelector(
+                                "[data-goal-minute]"
+                            )?.value.trim(),
+
+                        player_number:
+                            Number(
+                                row.querySelector(
+                                    "[data-goal-number]"
+                                )?.value || 0
+                            ),
+
+                        player_name:
+                            row.querySelector(
+                                "[data-goal-player]"
+                            )?.value.trim(),
+
+                        strength:
+                            row.querySelector(
+                                "[data-goal-strength]"
+                            )?.value.trim()
+                    }))
+                    .filter(
+                        goal =>
+                            goal.player_name ||
+                            goal.minute
+                    );
+
+            if (goals.length) {
+                const {
+                    error
+                } = await db
+                    .from("match_goals")
+                    .insert(goals);
+
+                if (error) throw error;
+            }
+
+            const penalties =
+                $$("#penaltiesEditor .event-row")
+                    .map(row => ({
+                        match_id: matchId,
+
+                        team:
+                            row.querySelector(
+                                "[data-event-team]"
+                            )?.value,
+
+                        penalty_time:
+                            row.querySelector(
+                                "[data-penalty-time]"
+                            )?.value.trim(),
+
+                        player_number:
+                            Number(
+                                row.querySelector(
+                                    "[data-penalty-number]"
+                                )?.value || 0
+                            ),
+
+                        player_name:
+                            row.querySelector(
+                                "[data-penalty-player]"
+                            )?.value.trim(),
+
+                        reason:
+                            row.querySelector(
+                                "[data-penalty-reason]"
+                            )?.value.trim(),
+
+                        minutes:
+                            Number(
+                                row.querySelector(
+                                    "[data-penalty-minutes]"
+                                )?.value || 0
+                            )
+                    }))
+                    .filter(
+                        penalty =>
+                            penalty.player_name ||
+                            penalty.penalty_time
+                    );
+
+            if (penalties.length) {
+                const {
+                    error
+                } = await db
+                    .from("match_penalties")
+                    .insert(penalties);
+
+                if (error) throw error;
+            }
+
+            closeModal();
+
+            showToast(
+                "События матча сохранены."
+            );
+
+        } catch (error) {
+            console.error(error);
+            showError(
+                error.message ||
+                "Не удалось сохранить события."
+            );
+        }
+    }
+
+    async function deleteMatch(id) {
+        if (
+            !confirm(
+                "Удалить матч и все его события?"
+            )
+        ) return;
+
+        try {
+            const {
+                error
+            } = await db
+                .from("matches")
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+
+            showToast(
+                "Матч удалён."
+            );
+
+            await loadMatchesAdmin();
+            await loadDashboard();
+
+        } catch (error) {
+            console.error(error);
+
+            showError(
+                error.message ||
+                "Не удалось удалить матч."
+            );
+        }
+    }
+
+    /* =========================================================
+       COMPETITION
+       ========================================================= */
+
+    $("#addStandingRow")?.addEventListener(
+        "click",
+        () => addStandingRow()
+    );
+
+    $("#saveCompetitionButton")
+        ?.addEventListener(
+            "click",
+            saveCompetition
+        );
+
+    async function loadCompetition() {
+        const tbody =
+            $("#standingsEditorBody");
+
+        if (!tbody) return;
+
+        const {
+            data,
+            error
+        } = await db
+            .from("standings")
+            .select("*")
+            .order("place", {
+                ascending: true
+            });
+
+        if (error) {
+            console.error(error);
+            showError(
+                "Ошибка загрузки таблицы."
+            );
+            return;
+        }
+
+        tbody.innerHTML = "";
+
+        if (!data?.length) {
+            addStandingRow();
+            return;
+        }
+
+        data.forEach(row =>
+            addStandingRow(row)
+        );
+    }
+
+    function addStandingRow(row = {}) {
+        const tbody =
+            $("#standingsEditorBody");
+
+        if (!tbody) return;
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>
+                <input
+                    data-standing-place
+                    type="number"
+                    min="1"
+                    value="${
+                        row.place ??
+                        tbody.children.length + 1
+                    }"
+                >
+            </td>
+
+            <td>
+                <input
+                    data-standing-team
+                    type="text"
+                    value="${escapeHTML(
+                        row.team_name ||
+                        ""
+                    )}"
+                    placeholder="Команда"
+                >
+            </td>
+
+            <td>
+                <input
+                    data-standing-games
+                    type="number"
+                    min="0"
+                    value="${
+                        row.games ??
+                        0
+                    }"
+                >
+            </td>
+
+            <td>
+                <input
+                    data-standing-wins
+                    type="number"
+                    min="0"
+                    value="${
+                        row.wins ??
+                        0
+                    }"
+                >
+            </td>
+
+            <td>
+                <input
+                    data-standing-ow
+                    type="number"
+                    min="0"
+                    value="${
+                        row.overtime_wins ??
+                        0
+                    }"
+                >
+            </td>
+
+            <td>
+                <input
+                    data-standing-sw
+                    type="number"
+                    min="0"
+                    value="${
+                        row.shootout_wins ??
+                        0
+                    }"
+                >
+            </td>
+
+            <td>
+                <input
+                    data-standing-losses
+                    type="number"
+                    min="0"
+                    value="${
+                        row.losses ??
+                        0
+                    }"
+                >
+            </td>
+
+            <td>
+                <input
+                    data-standing-ol
+                    type="number"
+                    min="0"
+                    value="${
+                        row.overtime_losses ??
+                        0
+                    }"
+                >
+            </td>
+
+            <td>
+                <input
+                    data-standing-sl
+                    type="number"
+                    min="0"
+                    value="${
+                        row.shootout_losses ??
+                        0
+                    }"
+                >
+            </td>
+
+            <td>
+                <input
+                    data-standing-points
+                    type="number"
+                    min="0"
+                    value="${
+                        row.points ??
+                        0
+                    }"
+                >
+            </td>
+
+            <td>
+                <button
+                    type="button"
+                    class="button danger small"
+                    data-remove-standing
+                >
+                    ×
+                </button>
+            </td>
+        `;
+
+        tr.querySelector(
+            "[data-remove-standing]"
+        )?.addEventListener(
+            "click",
+            () => tr.remove()
+        );
+
+        tbody.appendChild(tr);
+    }
+
+    async function saveCompetition() {
+        try {
+            const rows =
+                $$("#standingsEditorBody tr");
+
+            const standings =
+                rows
+                    .map(row => ({
+                        place:
+                            Number(
+                                row.querySelector(
+                                    "[data-standing-place]"
+                                )?.value || 0
+                            ),
+
+                        team_name:
+                            row.querySelector(
+                                "[data-standing-team]"
+                            )?.value.trim(),
+
+                        games:
+                            Number(
+                                row.querySelector(
+                                    "[data-standing-games]"
+                                )?.value || 0
+                            ),
+
+                        wins:
+                            Number(
+                                row.querySelector(
+                                    "[data-standing-wins]"
+                                )?.value || 0
+                            ),
+
+                        overtime_wins:
+                            Number(
+                                row.querySelector(
+                                    "[data-standing-ow]"
+                                )?.value || 0
+                            ),
+
+                        shootout_wins:
+                            Number(
+                                row.querySelector(
+                                    "[data-standing-sw]"
+                                )?.value || 0
+                            ),
+
+                        losses:
+                            Number(
+                                row.querySelector(
+                                    "[data-standing-losses]"
+                                )?.value || 0
+                            ),
+
+                        overtime_losses:
+                            Number(
+                                row.querySelector(
+                                    "[data-standing-ol]"
+                                )?.value || 0
+                            ),
+
+                        shootout_losses:
+                            Number(
+                                row.querySelector(
+                                    "[data-standing-sl]"
+                                )?.value || 0
+                            ),
+
+                        points:
+                            Number(
+                                row.querySelector(
+                                    "[data-standing-points]"
+                                )?.value || 0
+                            ),
+
+                        updated_at:
+                            new Date().toISOString()
+                    }))
+                    .filter(
+                        row =>
+                            row.team_name
+                    );
+
+            const {
+                error: deleteError
+            } = await db
+                .from("standings")
+                .delete()
+                .not("id", "is", null);
+
+            if (deleteError) {
+                throw deleteError;
+            }
+
+            if (standings.length) {
+                const {
+                    error
+                } = await db
+                    .from("standings")
+                    .insert(standings);
+
+                if (error) throw error;
+            }
+
+            showToast(
+                "Таблица сохранена."
+            );
+
+        } catch (error) {
+            console.error(error);
+            showError(
+                error.message ||
+                "Не удалось сохранить таблицу."
+            );
+        }
+    }
+
+    /* =========================================================
+       PLAYER STATS
+       ========================================================= */
+
+    $$(".stats-filter button").forEach(button => {
+        button.addEventListener(
+            "click",
+            () => {
+                currentStatsFilter =
+                    button.dataset.statFilter ||
+                    "scorers";
+
+                $$(".stats-filter button")
+                    .forEach(
+                        b =>
+                            b.classList.toggle(
+                                "active",
+                                b === button
+                            )
+                    );
+
+                loadStatsAdmin();
+            }
+        );
+    });
+
+    $("#addStatButton")?.addEventListener(
+        "click",
+        () => openStatModal()
+    );
+
+    async function loadStatsAdmin() {
+        const container =
+            $("#statsListAdmin");
+
+        if (!container) return;
+
+        const {
+            data,
+            error
+        } = await db
+            .from("player_stats")
+            .select("*")
+            .eq(
+                "stat_type",
+                currentStatsFilter
+            )
+            .order("value", {
+                ascending: false
+            });
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        if (!data?.length) {
+            container.innerHTML =
+                `<div class="admin-empty">
+                    Игроков пока нет.
+                </div>`;
+            return;
+        }
+
+        container.innerHTML =
+            data.map(player => `
+                <article class="admin-content-card">
+
+                    <div class="admin-content-card-body">
+
+                        <span class="admin-badge">
+                            №${escapeHTML(
+                                player.player_number ??
+                                ""
+                            )}
+                        </span>
+
+                        <h3>
+                            ${escapeHTML(
+                                player.player_name
+                            )}
+                        </h3>
+
+                        <p>
+                            ${escapeHTML(
+                                player.position ||
+                                ""
+                            )}
+                        </p>
+
+                        <strong>
+                            ${player.value ?? 0}
+                        </strong>
+
+                    </div>
+
+                    <div class="admin-content-card-actions">
+
+                        <button
+                            class="button secondary"
+                            data-edit-stat="${player.id}"
+                        >
+                            Изменить
+                        </button>
+
+                        <button
+                            class="button danger"
+                            data-delete-stat="${player.id}"
+                        >
+                            Удалить
+                        </button>
+
+                    </div>
+
+                </article>
+            `).join("");
+
+        $$("[data-edit-stat]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () => {
+                        const player =
+                            data.find(
+                                x =>
+                                    x.id ===
+                                    button.dataset.editStat
+                            );
+
+                        if (player) {
+                            openStatModal(player);
+                        }
+                    }
+                );
+            });
+
+        $$("[data-delete-stat]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () =>
+                        deleteStat(
+                            button.dataset.deleteStat
+                        )
+                );
+            });
+    }
+
+    function openStatModal(item = null) {
+        const isEdit = Boolean(item);
+
+        openModal({
+            kicker: "Статистика",
+            title: isEdit
+                ? "Изменить статистику"
+                : "Добавить игрока",
+
+            body: `
+                <div class="form-grid">
+
+                    <label class="form-field">
+                        <span>Категория</span>
+                        <select id="modalStatType">
+                            <option
+                                value="scorers"
+                                ${
+                                    (
+                                        item?.stat_type ||
+                                        currentStatsFilter
+                                    ) === "scorers"
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
+                                Бомбардиры
+                            </option>
+
+                            <option
+                                value="snipers"
+                                ${
+                                    (
+                                        item?.stat_type ||
+                                        currentStatsFilter
+                                    ) === "snipers"
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
+                                Снайперы
+                            </option>
+
+                            <option
+                                value="defenders"
+                                ${
+                                    (
+                                        item?.stat_type ||
+                                        currentStatsFilter
+                                    ) === "defenders"
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
+                                Бомбардиры-защитники
+                            </option>
+
+                            <option
+                                value="plus_minus"
+                                ${
+                                    (
+                                        item?.stat_type ||
+                                        currentStatsFilter
+                                    ) === "plus_minus"
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
+                                Плюс/минус
+                            </option>
+                        </select>
+                    </label>
+
+                    <label class="form-field">
+                        <span>Игрок</span>
+                        <input
+                            id="modalStatName"
+                            type="text"
+                            value="${escapeHTML(
+                                item?.player_name ||
+                                ""
+                            )}"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Номер</span>
+                        <input
+                            id="modalStatNumber"
+                            type="number"
+                            min="0"
+                            value="${
+                                item?.player_number ??
+                                ""
+                            }"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Позиция</span>
+                        <input
+                            id="modalStatPosition"
+                            type="text"
+                            value="${escapeHTML(
+                                item?.position ||
+                                ""
+                            )}"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Значение</span>
+                        <input
+                            id="modalStatValue"
+                            type="number"
+                            value="${
+                                item?.value ??
+                                0
+                            }"
+                        >
+                    </label>
+
+                </div>
+            `,
+
+            footer: `
+                <button
+                    class="button secondary"
+                    data-modal-close
+                >
+                    Отмена
+                </button>
+
+                <button
+                    class="button primary"
+                    id="saveStatButton"
+                >
+                    Сохранить
+                </button>
+            `
+        });
+
+        $("#saveStatButton")
+            ?.addEventListener(
+                "click",
+                async () => {
+                    try {
+                        const payload = {
+                            stat_type:
+                                $("#modalStatType")
+                                    ?.value,
+
+                            player_name:
+                                $("#modalStatName")
+                                    ?.value.trim(),
+
+                            player_number:
+                                Number(
+                                    $("#modalStatNumber")
+                                        ?.value || 0
+                                ),
+
+                            position:
+                                $("#modalStatPosition")
+                                    ?.value.trim() ||
+                                "",
+
+                            value:
+                                Number(
+                                    $("#modalStatValue")
+                                        ?.value || 0
+                                ),
+
+                            updated_at:
+                                new Date().toISOString()
+                        };
+
+                        if (!payload.player_name) {
+                            showError(
+                                "Введите имя игрока."
+                            );
+                            return;
+                        }
+
+                        if (item) {
+                            const {
+                                error
+                            } = await db
+                                .from("player_stats")
+                                .update(payload)
+                                .eq(
+                                    "id",
+                                    item.id
+                                );
+
+                            if (error) throw error;
+
+                        } else {
+                            const {
+                                error
+                            } = await db
+                                .from("player_stats")
+                                .insert(payload);
+
+                            if (error) throw error;
+                        }
+
+                        closeModal();
+
+                        showToast(
+                            isEdit
+                                ? "Статистика обновлена."
+                                : "Игрок добавлен."
+                        );
+
+                        await loadStatsAdmin();
+
+                    } catch (error) {
+                        console.error(error);
+                        showError(
+                            error.message ||
+                            "Ошибка сохранения статистики."
+                        );
+                    }
+                }
+            );
+    }
+
+    async function deleteStat(id) {
+        if (
+            !confirm(
+                "Удалить эту запись?"
+            )
+        ) return;
+
+        const {
+            error
+        } = await db
+            .from("player_stats")
+            .delete()
+            .eq("id", id);
+
+        if (error) {
+            showError(
+                "Не удалось удалить запись."
+            );
+            return;
+        }
+
+        showToast(
+            "Запись удалена."
+        );
+
+        await loadStatsAdmin();
+    }
+
+    /* =========================================================
+       LEADERS
+       ========================================================= */
+
+    $("#saveLeadersButton")
+        ?.addEventListener(
+            "click",
+            saveLeaders
+        );
+
+    async function loadLeaders() {
+        const {
+            data,
+            error
+        } = await db
+            .from("team_leaders")
+            .select("*");
+
+        if (error) {
+            console.error(error);
+            showError(
+                "Не удалось загрузить лидеров."
+            );
+            return;
+        }
+
+        const leaders =
+            data || [];
+
+        $$(".leader-editor-card")
+            .forEach(card => {
+                const type =
+                    card.dataset.leaderType;
+
+                const item =
+                    leaders.find(
+                        x =>
+                            x.leader_type ===
+                            type
+                    );
+
+                const fields =
+                    $$("[data-field]", card);
+
+                fields.forEach(input => {
+                    const field =
+                        input.dataset.field;
+
+                    if (item) {
+                        input.value =
+                            item[field] ??
+                            "";
+                    } else {
+                        input.value = "";
+                    }
+                });
+
+                const preview =
+                    $("[data-preview]", card);
+
+                if (preview) {
+                    preview.src =
+                        publicFile(
+                            item?.image_path
+                        ) || "";
+                }
+
+                card.dataset.id =
+                    item?.id || "";
+            });
+    }
+
+    $$(".leader-editor-card")
+        .forEach(card => {
+            const input =
+                $("[data-image]", card);
+
+            input?.addEventListener(
+                "change",
+                async () => {
+                    const file =
+                        input.files?.[0];
+
+                    if (!file) return;
+
+                    const preview =
+                        $("[data-preview]", card);
+
+                    if (preview) {
+                        preview.src =
+                            URL.createObjectURL(
+                                file
+                            );
+                    }
+                }
+            );
+        });
+
+    async function saveLeaders() {
+        try {
+            const cards =
+                $$(".leader-editor-card");
+
+            for (const card of cards) {
+                const type =
+                    card.dataset.leaderType;
+
+                const existingId =
+                    card.dataset.id ||
+                    null;
+
+                const name =
+                    $(
+                        '[data-field="player_name"]',
+                        card
+                    )?.value.trim();
+
+                if (!name) {
+                    continue;
+                }
+
+                let imagePath =
+                    null;
+
+                const oldImage =
+                    card.dataset.oldImage ||
+                    null;
+
+                const {
+                    data: existing
+                } = await db
+                    .from("team_leaders")
+                    .select("*")
+                    .eq(
+                        "leader_type",
+                        type
+                    )
+                    .maybeSingle();
+
+                imagePath =
+                    existing?.image_path ||
+                    oldImage ||
+                    null;
+
+                const file =
+                    $("[data-image]", card)
+                        ?.files?.[0];
+
+                if (file) {
+                    imagePath =
+                        await uploadFile(
+                            file,
+                            "leaders"
+                        );
+                }
+
+                const payload = {
+                    leader_type:
+                        type,
+
+                    player_name:
+                        name,
+
+                    player_number:
+                        Number(
+                            $(
+                                '[data-field="player_number"]',
+                                card
+                            )?.value || 0
+                        ),
+
+                    position:
+                        $(
+                            '[data-field="position"]',
+                            card
+                        )?.value.trim() ||
+                        "",
+
+                    statistic:
+                        $(
+                            '[data-field="statistic"]',
+                            card
+                        )?.value.trim() ||
+                        "",
+
+                    image_path:
+                        imagePath,
+
+                    updated_at:
+                        new Date().toISOString()
+                };
+
+                if (existing?.id || existingId) {
+                    const id =
+                        existing?.id ||
+                        existingId;
+
+                    const {
+                        error
+                    } = await db
+                        .from("team_leaders")
+                        .update(payload)
+                        .eq(
+                            "id",
+                            id
+                        );
+
+                    if (error) throw error;
+
+                } else {
+                    const {
+                        error
+                    } = await db
+                        .from("team_leaders")
+                        .insert(payload);
+
+                    if (error) throw error;
+                }
+            }
+
+            showToast(
+                "Лидеры сохранены."
+            );
+
+            await loadLeaders();
+
+        } catch (error) {
+            console.error(error);
+            showError(
+                error.message ||
+                "Не удалось сохранить лидеров."
+            );
+        }
+    }
+
+    /* =========================================================
+       ALBUMS
+       ========================================================= */
+
+    $("#addAlbumButton")?.addEventListener(
+        "click",
+        () => openAlbumModal()
+    );
+
+    async function loadAlbumsAdmin() {
+        const container =
+            $("#albumsListAdmin");
+
+        if (!container) return;
+
+        const {
+            data,
+            error
+        } = await db
+            .from("albums")
+            .select("*")
+            .order("album_date", {
+                ascending: false
+            });
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        if (!data?.length) {
+            container.innerHTML =
+                `<div class="admin-empty">
+                    Альбомов пока нет.
+                </div>`;
+            return;
+        }
+
+        container.innerHTML =
+            data.map(album => `
+                <article class="admin-content-card">
+
+                    <div class="admin-content-card-media">
+                        ${
+                            album.cover_path
+                                ? `<img
+                                    src="${escapeHTML(
+                                        publicFile(
+                                            album.cover_path
+                                        )
+                                    )}"
+                                    alt=""
+                                >`
+                                : ""
+                        }
+                    </div>
+
+                    <div class="admin-content-card-body">
+                        <span class="admin-badge">
+                            ${formatDate(
+                                album.album_date
+                            )}
+                        </span>
+
+                        <h3>
+                            ${escapeHTML(
+                                album.title
+                            )}
+                        </h3>
+                    </div>
+
+                    <div class="admin-content-card-actions">
+
+                        <button
+                            class="button secondary"
+                            data-edit-album="${album.id}"
+                        >
+                            Изменить
+                        </button>
+
+                        <button
+                            class="button danger"
+                            data-delete-album="${album.id}"
+                        >
+                            Удалить
+                        </button>
+
+                    </div>
+
+                </article>
+            `).join("");
+
+        $$("[data-edit-album]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    async () => {
+                        const album =
+                            data.find(
+                                x =>
+                                    x.id ===
+                                    button.dataset.editAlbum
+                            );
+
+                        if (album) {
+                            await openAlbumModal(
+                                album
+                            );
+                        }
+                    }
+                );
+            });
+
+        $$("[data-delete-album]", container)
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () =>
+                        deleteAlbum(
+                            button.dataset.deleteAlbum
+                        )
+                );
+            });
+    }
+
+    async function openAlbumModal(item = null) {
+        const isEdit =
+            Boolean(item);
+
+        let photos = [];
+
+        if (item) {
+            const {
+                data
+            } = await db
+                .from("album_photos")
+                .select("*")
+                .eq(
+                    "album_id",
+                    item.id
+                )
+                .order("sort_order");
+
+            photos = data || [];
+        }
+
+        openModal({
+            kicker: "Медиа",
+            title: isEdit
+                ? "Изменить альбом"
+                : "Новый альбом",
+
+            body: `
+                <div class="form-grid">
+
+                    <label class="form-field">
+                        <span>Название</span>
+                        <input
+                            id="modalAlbumTitle"
+                            type="text"
+                            value="${escapeHTML(
+                                item?.title || ""
+                            )}"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Дата</span>
+                        <input
+                            id="modalAlbumDate"
+                            type="date"
+                            value="${
+                                item?.album_date
+                                    ? String(
+                                          item.album_date
+                                      ).slice(0, 10)
+                                    : new Date()
+                                          .toISOString()
+                                          .slice(0, 10)
+                            }"
+                        >
+                    </label>
+
+                    <label class="form-field">
+                        <span>Обложка</span>
+                        <input
+                            id="modalAlbumCover"
+                            type="file"
+                            accept="image/*"
+                        >
+                    </label>
+
+                    <label class="form-field full">
+                        <span>Фотографии</span>
+                        <input
+                            id="modalAlbumPhotos"
+                            type="file"
+                            accept="image/*"
+                            multiple
+                        >
+                    </label>
+
+                </div>
+
+                ${
+                    photos.length
+                        ? `
+                            <div class="modal-section">
+
+                                <h3>
+                                    Фотографии альбома
+                                </h3>
+
+                                <div
+                                    class="album-photo-admin-grid"
+                                >
+                                    ${photos
+                                        .map(
+                                            photo => `
+                                                <div
+                                                    class="album-photo-admin"
+                                                    data-photo-id="${photo.id}"
+                                                >
+                                                    <img
+                                                        src="${escapeHTML(
+                                                            publicFile(
+                                                                photo.image_path
+                                                            )
+                                                        )}"
+                                                        alt=""
+                                                    >
+
+                                                    <button
+                                                        type="button"
+                                                        class="button danger small"
+                                                        data-delete-album-photo="${photo.id}"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            `
+                                        )
+                                        .join("")}
+                                </div>
+
+                            </div>
+                        `
+                        : ""
+                }
+            `,
+
+            footer: `
+                <button
+                    class="button secondary"
+                    data-modal-close
+                >
+                    Отмена
+                </button>
+
+                <button
+                    class="button primary"
+                    id="saveAlbumButton"
+                >
+                    Сохранить
+                </button>
+            `
+        });
+
+        $$("[data-delete-album-photo]")
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    async () => {
+                        await deleteAlbumPhoto(
+                            button.dataset
+                                .deleteAlbumPhoto
+                        );
+
+                        button
+                            .closest(
+                                "[data-photo-id]"
+                            )
+                            ?.remove();
+                    }
+                );
+            });
+
+        $("#saveAlbumButton")
+            ?.addEventListener(
+                "click",
+                async () => {
+                    try {
+                        const title =
+                            $("#modalAlbumTitle")
+                                ?.value.trim();
+
+                        if (!title) {
+                            showError(
+                                "Введите название альбома."
+                            );
+                            return;
+                        }
+
+                        let coverPath =
+                            item?.cover_path ||
+                            null;
+
+                        const cover =
+                            $("#modalAlbumCover")
+                                ?.files?.[0];
+
+                        if (cover) {
+                            coverPath =
+                                await uploadFile(
+                                    cover,
+                                    "albums/covers"
+                                );
+                        }
+
+                        const payload = {
+                            title,
+
+                            album_date:
+                                $("#modalAlbumDate")
+                                    ?.value ||
+                                new Date()
+                                    .toISOString()
+                                    .slice(
+                                        0,
+                                        10
+                                    ),
+
+                            cover_path:
+                                coverPath,
+
+                            updated_at:
+                                new Date().toISOString()
+                        };
+
+                        let albumId =
+                            item?.id;
+
+                        if (item) {
+                            const {
+                                error
+                            } = await db
+                                .from("albums")
+                                .update(payload)
+                                .eq(
+                                    "id",
+                                    item.id
+                                );
+
+                            if (error) throw error;
+
+                        } else {
+                            const {
+                                data,
+                                error
+                            } = await db
+                                .from("albums")
+                                .insert(payload)
+                                .select()
+                                .single();
+
+                            if (error) throw error;
+
+                            albumId =
+                                data.id;
+                        }
+
+                        const files =
+                            [
+                                ...(
+                                    $("#modalAlbumPhotos")
+                                        ?.files ||
+                                    []
+                                )
+                            ];
+
+                        if (files.length) {
+                            const currentCount =
+                                await getAlbumPhotoCount(
+                                    albumId
+                                );
+
+                            const photoRows = [];
+
+                            for (
+                                let i = 0;
+                                i < files.length;
+                                i++
+                            ) {
+                                const path =
+                                    await uploadFile(
+                                        files[i],
+                                        `albums/${albumId}`
+                                    );
+
+                                photoRows.push({
+                                    album_id:
+                                        albumId,
+
+                                    image_path:
+                                        path,
+
+                                    sort_order:
+                                        currentCount +
+                                        i
+                                });
+                            }
+
+                            if (
+                                photoRows.length
+                            ) {
+                                const {
+                                    error
+                                } = await db
+                                    .from("album_photos")
+                                    .insert(
+                                        photoRows
+                                    );
+
+                                if (error) {
+                                    throw error;
+                                }
+                            }
+                        }
+
+                        closeModal();
+
+                        showToast(
+                            isEdit
+                                ? "Альбом обновлён."
+                                : "Альбом создан."
+                        );
+
+                        await loadAlbumsAdmin();
+                        await loadDashboard();
+
+                    } catch (error) {
+                        console.error(error);
+                        showError(
+                            error.message ||
+                            "Ошибка сохранения альбома."
+                        );
+                    }
+                }
+            );
+    }
+
+    async function getAlbumPhotoCount(
+        albumId
+    ) {
+        const {
+            count,
+            error
+        } = await db
+            .from("album_photos")
+            .select("*", {
+                count: "exact",
+                head: true
+            })
+            .eq(
+                "album_id",
+                albumId
+            );
+
+        if (error) throw error;
+
+        return count || 0;
+    }
+
+    async function deleteAlbumPhoto(id) {
+        try {
+            const {
+                data,
+                error: readError
+            } = await db
+                .from("album_photos")
+                .select("image_path")
+                .eq("id", id)
+                .maybeSingle();
+
+            if (readError) throw readError;
+
+            const {
+                error
+            } = await db
+                .from("album_photos")
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+
+            if (data?.image_path) {
+                await deleteStorageFile(
+                    data.image_path
+                );
+            }
+
+            showToast(
+                "Фотография удалена."
+            );
+
+        } catch (error) {
+            console.error(error);
+            showError(
+                "Не удалось удалить фотографию."
+            );
+        }
+    }
+
+    async function deleteAlbum(id) {
+        if (
+            !confirm(
+                "Удалить альбом и все его фотографии?"
+            )
+        ) return;
+
+        try {
+            const {
+                data: photos,
+                error: photoError
+            } = await db
+                .from("album_photos")
+                .select("image_path")
+                .eq("album_id", id);
+
+            if (photoError) {
+                throw photoError;
+            }
+
+            const {
+                data: album,
+                error: albumReadError
+            } = await db
+                .from("albums")
+                .select("cover_path")
+                .eq("id", id)
+                .maybeSingle();
+
+            if (albumReadError) {
+                throw albumReadError;
+            }
+
+            const {
+                error
+            } = await db
+                .from("albums")
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+
+            const files = [
+                ...(photos || [])
+                    .map(
+                        photo =>
+                            photo.image_path
+                    )
+                    .filter(Boolean),
+
+                album?.cover_path
+            ].filter(Boolean);
+
+            if (files.length) {
+                await db.storage
+                    .from(STORAGE_BUCKET)
+                    .remove(files);
+            }
+
+            showToast(
+                "Альбом удалён."
+            );
+
+            await loadAlbumsAdmin();
+            await loadDashboard();
+
+        } catch (error) {
+            console.error(error);
+
+            showError(
+                error.message ||
+                "Не удалось удалить альбом."
+            );
+        }
+    }
+
+    /* =========================================================
+       INIT
+       ========================================================= */
+
+    checkAuth();
+
+})();
