@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Состав — ХК Челны 2011</title>
+
+<link id="favicon"
+rel="icon"
+href="logo.svg">
+
+<style>
+
+:root{
+--primary:#000056;
+--secondary:#0875dc;
+--bg:#050b22;
+--card:#0d1738;
+--text:#fff;
+--muted:#aab5d5;
+--button:#ffcd00;
+--border:#26345f;
+--radius:16px;
+}
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:var(--bg);
+color:var(--text);
+}
+
+header{
+padding:18px;
+background:linear-gradient(
+135deg,
+var(--primary),
+var(--secondary)
+);
+border-radius:0 0 25px 25px;
+}
+
+.header{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.logo{
+width:55px;
+height:55px;
+background:white;
+border-radius:50%;
+object-fit:contain;
+}
+
+.club{
+font-size:20px;
+font-weight:900;
+}
+
+.season{
+font-size:12px;
+opacity:.7;
+}
+
+main{
+max-width:700px;
+margin:auto;
+padding:18px 14px 100px;
+}
+
+.label{
+font-size:11px;
+color:var(--muted);
+letter-spacing:1.5px;
+}
+
+h1{
+font-size:30px;
+margin:8px 0 18px;
+}
+
+.group{
+font-size:15px;
+font-weight:900;
+margin:22px 0 10px;
+}
+
+.player{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:var(--radius);
+padding:14px;
+margin-bottom:10px;
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.number{
+font-size:26px;
+font-weight:900;
+width:55px;
+text-align:center;
+}
+
+.name{
+font-size:17px;
+font-weight:800;
+}
+
+.position{
+font-size:12px;
+color:var(--muted);
+margin-top:4px;
+}
+
+.bottom{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:72px;
+background:var(--card);
+border-top:1px solid var(--border);
+display:flex;
+justify-content:space-around;
+align-items:center;
+}
+
+.bottom a{
+color:var(--muted);
+text-decoration:none;
+font-size:10px;
+text-align:center;
+}
+
+.bottom a.active{
+color:var(--button);
+font-weight:800;
+}
+
+.icon{
+display:block;
+font-size:21px;
+margin-bottom:4px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="header">
+
+<img id="logo"
+class="logo"
+src="logo.svg">
+
+<div>
+
+<div id="siteName"
+class="club">
+ХК ЧЕЛНЫ 2011
+</div>
+
+<div class="season">
+СЕЗОН 2026/27
+</div>
+
+</div>
+
+</div>
+
+</header>
+
+<main>
+
+<div class="label">
+ХК ЧЕЛНЫ 2011
+</div>
+
+<h1>Состав</h1>
+
+<div id="roster">
+Загрузка...
+</div>
+
+</main>
+
+<nav class="bottom">
+
+<a href="index.html">
+<span class="icon">⌂</span>
+Главная
+</a>
+
+<a href="matches.html">
+<span class="icon">🏒</span>
+Матчи
+</a>
+
+<a class="active" href="roster.html">
+<span class="icon">👥</span>
+Состав
+</a>
+
+<a href="standings.html">
+<span class="icon">📊</span>
+Таблица
+</a>
+
+<a href="news.html">
+<span class="icon">📰</span>
+Новости
+</a>
+
+</nav>
+
+<script>
+
+const SUPABASE_URL=
+"https://jxlbojosxaaqnyuzohnw.supabase.co";
+
+const SUPABASE_KEY=
+"sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
+
+const headers={
+apikey:SUPABASE_KEY,
+Authorization:"Bearer "+SUPABASE_KEY
+};
+
+async function getData(table,query=""){
+
+const r=await fetch(
+SUPABASE_URL+
+"/rest/v1/"+
+table+
+"?select=*"+
+query,
+{headers}
+);
+
+return await r.json();
+
+}
+
+function esc(v){
+
+return String(v??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;");
+
+}
+
+async function settings(){
+
+const a=
+await getData("settings","&limit=1");
+
+if(!a.length)return;
+
+const s=a[0];
+
+const r=
+document.documentElement.style;
+
+if(s.primary_color)
+r.setProperty("--primary",s.primary_color);
+
+if(s.secondary_color)
+r.setProperty("--secondary",s.secondary_color);
+
+if(s.background_color)
+r.setProperty("--bg",s.background_color);
+
+if(s.card_color)
+r.setProperty("--card",s.card_color);
+
+if(s.text_color)
+r.setProperty("--text",s.text_color);
+
+if(s.muted_text_color)
+r.setProperty("--muted",s.muted_text_color);
+
+if(s.button_color)
+r.setProperty("--button",s.button_color);
+
+if(s.border_color)
+r.setProperty("--border",s.border_color);
+
+if(s.border_radius)
+r.setProperty("--radius",s.border_radius+"px");
+
+if(s.site_name){
+
+document.title=
+s.site_name+" — Состав";
+
+document.getElementById(
+"siteName"
+).textContent=s.site_name;
+
+}
+
+if(s.logo_url)
+document.getElementById("logo").src=
+s.logo_url;
+
+if(s.favicon_url)
+document.getElementById("favicon").href=
+s.favicon_url;
+
+}
+
+async function loadRoster(){
+
+const players=
+await getData(
+"players",
+"&order=number.asc"
+);
+
+const box=
+document.getElementById("roster");
+
+if(!players.length){
+
+box.innerHTML=
+"Состав пока не добавлен";
+
+return;
+
+}
+
+const groups={
+"Вратари":[],
+"Защитники":[],
+"Нападающие":[]
+};
+
+players.forEach(p=>{
+
+const position=
+String(p.position||"");
+
+if(
+position.toLowerCase().includes("врат")
+){
+groups["Вратари"].push(p);
+}
+
+else if(
+position.toLowerCase().includes("защит")
+){
+groups["Защитники"].push(p);
+}
+
+else{
+groups["Нападающие"].push(p);
+}
+
+});
+
+let html="";
+
+for(const group in groups){
+
+if(!groups[group].length)continue;
+
+html+=`
+<div class="group">
+${group}
+</div>
+`;
+
+groups[group].forEach(p=>{
+
+const number=
+p.number ??
+p.jersey_number ??
+p.no ??
+"";
+
+const name=
+p.name ??
+p.full_name ??
+"Игрок";
+
+html+=`
+
+<div class="player">
+
+<div class="number">
+#${esc(number)}
+</div>
+
+<div>
+
+<div class="name">
+${esc(name)}
+</div>
+
+<div class="position">
+${esc(p.position||"")}
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+box.innerHTML=html;
+
+}
+
+settings();
+loadRoster();
+
+</script>
+
+</body>
+</html>
