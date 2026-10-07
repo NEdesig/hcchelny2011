@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -15,223 +13,185 @@
         content="#000056"
     >
 
-    <title>Челны 2011</title>
-
     <meta
         name="description"
-        content="Челны 2011 — хоккейный клуб"
+        content="ХК Челны 2011 — хоккейный клуб из Набережных Челнов"
     >
 
-    <link
-        rel="stylesheet"
-        href="css/style.css"
-    >
+    <title>Челны 2011</title>
 
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-    <!-- ======================================================
-         HEADER
-    ======================================================= -->
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
-    <header class="site-header">
+<header class="site-header">
 
-        <div class="header-inner">
+    <div class="header-inner">
 
-            <a
-                href="/hcchelny2011/"
-                class="team-brand"
-            >
+        <a href="./" class="header-logo" aria-label="Челны 2011">
 
-                <div class="team-logo">
-                    <img
-                        id="siteLogo"
-                        src=""
-                        alt="Челны 2011"
-                    >
-                </div>
+            <div class="header-logo-image">
+                <img
+                    id="teamLogo"
+                    src=""
+                    alt="Логотип ХК Челны 2011"
+                >
+            </div>
 
-                <div class="team-title">
+            <div class="header-title">
 
-                    <strong id="teamName">
-                        Челны 2011
-                    </strong>
+                <strong id="teamName">
+                    Челны 2011
+                </strong>
 
-                    <span id="teamSubtitle">
-                        хоккейный клуб
-                    </span>
-
-                </div>
-
-            </a>
-
-
-            <button
-                class="menu-button"
-                id="menuButton"
-                type="button"
-                aria-label="Открыть меню"
-            >
-
-                <span></span>
-                <span></span>
-                <span></span>
-
-            </button>
-
-        </div>
-
-    </header>
-
-
-    <!-- ======================================================
-         MENU
-    ======================================================= -->
-
-    <aside
-        class="mobile-menu"
-        id="mobileMenu"
-    >
-
-        <div class="mobile-menu-inner">
-
-            <button
-                class="menu-close"
-                id="menuClose"
-                type="button"
-            >
-                ×
-            </button>
-
-            <nav>
-
-                <a href="#news">
-                    Новости
-                </a>
-
-                <a href="#matchday">
-                    День матча
-                </a>
-
-                <a href="#matches">
-                    Матчи
-                </a>
-
-                <a href="#competition">
-                    Турнир
-                </a>
-
-                <a href="#stats">
-                    Статистика
-                </a>
-
-                <a href="#leaders">
-                    Лидеры
-                </a>
-
-                <a href="#albums">
-                    Фото
-                </a>
-
-            </nav>
-
-        </div>
-
-    </aside>
-
-
-    <main>
-
-
-        <!-- ==================================================
-             НОВОСТИ
-        =================================================== -->
-
-        <section
-            class="section news-section"
-            id="news"
-        >
-
-            <div class="section-heading">
-
-                <div>
-                    <span class="section-eyebrow">
-                        Клуб
-                    </span>
-
-                    <h2>
-                        Новости
-                    </h2>
-                </div>
+                <span id="teamSubtitle">
+                    хоккейный клуб
+                </span>
 
             </div>
 
+        </a>
 
-            <div
-                class="horizontal-scroll news-list"
-                id="newsList"
-            ></div>
+        <button
+            class="menu-button"
+            id="menuButton"
+            type="button"
+            aria-label="Открыть меню"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
 
-        </section>
+    </div>
 
-
-        <!-- ==================================================
-             STORIES
-        =================================================== -->
-
-        <section class="stories-section">
-
-            <div
-                class="horizontal-scroll stories-list"
-                id="storiesList"
-            ></div>
-
-        </section>
+</header>
 
 
-        <!-- ==================================================
-             STORY VIEWER
-        =================================================== -->
+<!-- =====================================================
+     MOBILE MENU
+===================================================== -->
+
+<div class="mobile-menu" id="mobileMenu">
+
+    <div class="mobile-menu-head">
+
+        <span>Меню</span>
+
+        <button
+            id="menuClose"
+            type="button"
+            aria-label="Закрыть меню"
+        >
+            ×
+        </button>
+
+    </div>
+
+    <nav class="mobile-menu-links">
+
+        <a href="#news">
+            Новости
+        </a>
+
+        <a href="#matchday">
+            День матча
+        </a>
+
+        <a href="#competition">
+            Первенство
+        </a>
+
+        <a href="#stats">
+            Статистика
+        </a>
+
+        <a href="#leaders">
+            Лидеры
+        </a>
+
+        <a href="#albums">
+            Фото
+        </a>
+
+    </nav>
+
+</div>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="page">
+
+    <!-- =================================================
+         STORIES
+    ================================================== -->
+
+    <section
+        class="stories-section"
+        id="storiesSection"
+    >
 
         <div
-            class="story-viewer"
-            id="storyViewer"
-        >
+            class="stories-list"
+            id="storiesList"
+        ></div>
 
-            <div
-                class="story-progress"
-                id="storyProgress"
-            ></div>
+    </section>
 
-            <img
-                id="storyViewerImage"
-                src=""
-                alt=""
-            >
 
-            <button
-                id="storyViewerClose"
-                type="button"
-            >
-                ×
-            </button>
+    <!-- =================================================
+         NEWS
+    ================================================== -->
+
+    <section
+        class="section news-section"
+        id="news"
+    >
+
+        <div class="section-head">
+
+            <div>
+                <span class="section-kicker">
+                    Последнее
+                </span>
+
+                <h2>
+                    Новости
+                </h2>
+            </div>
 
         </div>
 
+        <div
+            class="news-list"
+            id="newsList"
+        ></div>
 
-        <!-- ==================================================
-             ДЕНЬ МАТЧА
-        =================================================== -->
+    </section>
 
-        <section
-            class="section matchday-section"
-            id="matchday"
-        >
 
-            <div class="matchday-heading">
+    <!-- =================================================
+         MATCH DAY
+    ================================================== -->
 
-                <span class="section-eyebrow">
+    <section
+        class="section matchday-section"
+        id="matchday"
+    >
+
+        <div class="section-head">
+
+            <div>
+
+                <span class="section-kicker">
                     Ближайшая игра
                 </span>
 
@@ -239,113 +199,139 @@
                     День матча
                 </h2>
 
-                <div
-                    class="matchday-date"
-                    id="matchdayDate"
-                >
-                    —
-                </div>
-
             </div>
 
-
             <div
-                class="match-card"
-                id="nextMatch"
-            ></div>
-
-
-            <a
-                href="#matches"
-                class="section-button"
+                class="matchday-date"
+                id="matchdayDate"
             >
-                Ко всем матчам
-            </a>
-
-        </section>
-
-
-        <!-- ==================================================
-             МАТЧИ
-        =================================================== -->
-
-        <section
-            class="section matches-section"
-            id="matches"
-        >
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-eyebrow">
-                        Результаты
-                    </span>
-
-                    <h2>
-                        Матчи
-                    </h2>
-
-                </div>
-
+                —
             </div>
 
-
-            <div
-                class="matches-list"
-                id="matchesList"
-            ></div>
-
-        </section>
+        </div>
 
 
-        <!-- ==================================================
-             ТУРНИР
-        =================================================== -->
+        <div
+            class="next-match"
+            id="nextMatch"
+        ></div>
 
-        <section
-            class="section competition-section"
-            id="competition"
+
+        <a
+            href="#matches"
+            class="section-button"
         >
+            Ко всем матчам
+        </a>
 
-            <div class="competition-title">
+    </section>
 
-                <span class="section-eyebrow">
-                    Турнир
+
+    <!-- =================================================
+         ALL MATCHES
+    ================================================== -->
+
+    <section
+        class="section matches-section"
+        id="matches"
+    >
+
+        <div class="section-head">
+
+            <div>
+
+                <span class="section-kicker">
+                    Календарь
                 </span>
 
-                <h2 id="competitionName">
-                    Первенство ПФО. Группа Б2
+                <h2>
+                    Матчи
                 </h2>
 
             </div>
 
+        </div>
+
+        <div
+            class="matches-list"
+            id="matchesList"
+        ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         COMPETITION
+    ================================================== -->
+
+    <section
+        class="section competition-section"
+        id="competition"
+    >
+
+        <div class="section-head">
+
+            <div>
+
+                <span class="section-kicker">
+                    Турнир
+                </span>
+
+                <h2>
+                    Первенство ПФО.
+                    Группа Б2
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <!-- Последние три матча -->
+
+        <div class="subsection">
+
+            <div class="subsection-head">
+                <h3>
+                    Последние матчи
+                </h3>
+            </div>
 
             <div
                 class="last-matches"
                 id="lastMatches"
             ></div>
 
+        </div>
 
-            <div class="table-wrapper">
 
-                <table class="standings-table">
+        <!-- Таблица -->
+
+        <div class="subsection">
+
+            <div class="subsection-head">
+                <h3>
+                    Турнирная таблица
+                </h3>
+            </div>
+
+            <div class="standings-wrap">
+
+                <table class="standings">
 
                     <thead>
 
                         <tr>
-
-                            <th>М</th>
+                            <th>#</th>
                             <th>Команда</th>
                             <th>И</th>
                             <th>В</th>
                             <th>ВО</th>
                             <th>ВБ</th>
-                            <th>ПО</th>
-                            <th>ПБ</th>
                             <th>П</th>
+                            <th>ПБ</th>
+                            <th>ПО</th>
                             <th>О</th>
-
                         </tr>
 
                     </thead>
@@ -358,168 +344,283 @@
 
             </div>
 
-        </section>
-
-
-        <!-- ==================================================
-             СТАТИСТИКА
-        =================================================== -->
-
-        <section
-            class="section stats-section"
-            id="stats"
-        >
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-eyebrow">
-                        Игроки
-                    </span>
-
-                    <h2>
-                        Статистика
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-            <div
-                class="stats-tabs"
-                id="statsTabs"
-            >
-
-                <button
-                    class="active"
-                    data-stat-type="scorers"
-                >
-                    Бомбардиры
-                </button>
-
-                <button data-stat-type="snipers">
-                    Снайперы
-                </button>
-
-                <button data-stat-type="defenders">
-                    Бомбардиры-защитники
-                </button>
-
-                <button data-stat-type="plus_minus">
-                    Плюс/минус
-                </button>
-
-            </div>
-
-
-            <div
-                class="stats-list"
-                id="statsList"
-            ></div>
-
-        </section>
-
-
-        <!-- ==================================================
-             ЛИДЕРЫ
-        =================================================== -->
-
-        <section
-            class="section leaders-section"
-            id="leaders"
-        >
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-eyebrow">
-                        Команда
-                    </span>
-
-                    <h2>
-                        Лидеры команды
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-            <div
-                class="horizontal-scroll leaders-list"
-                id="leadersList"
-            ></div>
-
-        </section>
-
-
-        <!-- ==================================================
-             АЛЬБОМЫ
-        =================================================== -->
-
-        <section
-            class="section albums-section"
-            id="albums"
-        >
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-eyebrow">
-                        Медиа
-                    </span>
-
-                    <h2>
-                        Последние фото
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-            <div
-                class="horizontal-scroll albums-list"
-                id="albumsList"
-            ></div>
-
-        </section>
-
-
-    </main>
-
-
-    <!-- ======================================================
-         FOOTER
-    ======================================================= -->
-
-    <footer class="site-footer">
-
-        <div id="footerTeamName">
-            Челны 2011
         </div>
 
-        <span id="footerCity">
-            Набережные Челны
-        </span>
-
-    </footer>
+    </section>
 
 
-    <!-- ======================================================
-         SCRIPTS
-    ======================================================= -->
+    <!-- =================================================
+         STATS
+    ================================================== -->
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <section
+        class="section stats-section"
+        id="stats"
+    >
 
-    <script src="js/config.js"></script>
+        <div class="section-head">
 
-    <script src="js/app.js"></script>
+            <div>
+
+                <span class="section-kicker">
+                    Игроки
+                </span>
+
+                <h2>
+                    Статистика
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="stats-tabs"
+            id="statsTabs"
+        >
+
+            <button
+                type="button"
+                class="active"
+                data-stat-type="scorers"
+            >
+                Бомбардиры
+            </button>
+
+            <button
+                type="button"
+                data-stat-type="snipers"
+            >
+                Снайперы
+            </button>
+
+            <button
+                type="button"
+                data-stat-type="defenders"
+            >
+                Защитники
+            </button>
+
+            <button
+                type="button"
+                data-stat-type="plus_minus"
+            >
+                +/−
+            </button>
+
+        </div>
+
+
+        <div
+            class="stats-list"
+            id="statsList"
+        ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         LEADERS
+    ================================================== -->
+
+    <section
+        class="section leaders-section"
+        id="leaders"
+    >
+
+        <div class="section-head">
+
+            <div>
+
+                <span class="section-kicker">
+                    Команда
+                </span>
+
+                <h2>
+                    Лидеры
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="leaders-list"
+            id="leadersList"
+        ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         ALBUMS
+    ================================================== -->
+
+    <section
+        class="section albums-section"
+        id="albums"
+    >
+
+        <div class="section-head">
+
+            <div>
+
+                <span class="section-kicker">
+                    Медиа
+                </span>
+
+                <h2>
+                    Последние фото
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="albums-list"
+            id="albumsList"
+        ></div>
+
+    </section>
+
+</main>
+
+
+<!-- =====================================================
+     STORY VIEWER
+===================================================== -->
+
+<div
+    class="story-viewer"
+    id="storyViewer"
+    aria-hidden="true"
+>
+
+    <button
+        class="story-viewer-close"
+        id="storyViewerClose"
+        type="button"
+        aria-label="Закрыть"
+    >
+        ×
+    </button>
+
+    <div class="story-progress">
+        <span></span>
+    </div>
+
+    <img
+        id="storyViewerImage"
+        src=""
+        alt=""
+    >
+
+</div>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="site-footer">
+
+    <div class="footer-inner">
+
+        <div class="footer-brand">
+
+            <img
+                id="footerLogo"
+                src=""
+                alt=""
+            >
+
+            <div>
+
+                <strong id="footerTeamName">
+                    Челны 2011
+                </strong>
+
+                <span id="footerCity">
+                    Набережные Челны
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+
+            <span>
+                © <span id="footerYear"></span>
+                Челны 2011
+            </span>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/config.js"></script>
+
+<script src="js/app.js"></script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const year = document.getElementById("footerYear");
+
+    if (year) {
+        year.textContent = new Date().getFullYear();
+    }
+
+    const menuButton =
+        document.getElementById("menuButton");
+
+    const menu =
+        document.getElementById("mobileMenu");
+
+    const menuClose =
+        document.getElementById("menuClose");
+
+    if (menuButton && menu) {
+        menuButton.addEventListener("click", () => {
+            menu.classList.add("open");
+            document.body.classList.add("menu-open");
+        });
+    }
+
+    if (menuClose && menu) {
+        menuClose.addEventListener("click", () => {
+            menu.classList.remove("open");
+            document.body.classList.remove("menu-open");
+        });
+    }
+
+    document.querySelectorAll(".mobile-menu-links a")
+        .forEach((link) => {
+
+            link.addEventListener("click", () => {
+                menu?.classList.remove("open");
+                document.body.classList.remove("menu-open");
+            });
+
+        });
+
+});
+</script>
 
 </body>
-
 </html>
