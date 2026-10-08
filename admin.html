@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
 <title>Админ-панель — ХК Челны 2011</title>
 
 <style>
+
 * {
     box-sizing: border-box;
 }
@@ -18,7 +23,7 @@ body {
 }
 
 .container {
-    max-width: 900px;
+    max-width: 950px;
     margin: auto;
     padding: 20px;
 }
@@ -29,7 +34,7 @@ h1 {
 }
 
 h2 {
-    margin-top: 30px;
+    margin-top: 5px;
 }
 
 .card {
@@ -58,6 +63,11 @@ textarea {
     resize: vertical;
 }
 
+input[type="color"] {
+    height: 50px;
+    padding: 4px;
+}
+
 button {
     border: 0;
     border-radius: 8px;
@@ -84,7 +94,7 @@ button {
 
 .tabs {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 6px;
     margin-bottom: 20px;
 }
@@ -128,7 +138,8 @@ button {
     display: none;
 }
 
-#message {
+#message,
+#loginMessage {
     text-align: center;
     margin: 10px 0;
     font-weight: bold;
@@ -160,7 +171,38 @@ th {
     background: #16234c;
 }
 
-@media(max-width:600px) {
+.color-row {
+    display: grid;
+    grid-template-columns: 1fr 110px;
+    gap: 10px;
+    align-items: center;
+}
+
+.setting-title {
+    font-weight: bold;
+    margin-top: 16px;
+    margin-bottom: 4px;
+}
+
+.preview {
+    padding: 20px;
+    border-radius: 14px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.preview-logo {
+    max-width: 130px;
+    max-height: 130px;
+    object-fit: contain;
+}
+
+.range-value {
+    color: #aab5d5;
+}
+
+@media(max-width:700px) {
+
     .tabs {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -168,11 +210,19 @@ th {
     .container {
         padding: 12px;
     }
+
+    .color-row {
+        grid-template-columns: 1fr;
+    }
+
 }
+
 </style>
+
 </head>
 
 <body>
+
 
 <!-- LOGIN -->
 
@@ -184,12 +234,22 @@ th {
 
         <h2>Вход в админ-панель</h2>
 
-        <input id="email" type="email" placeholder="Email">
+        <input
+            id="email"
+            type="email"
+            placeholder="Email">
 
-        <input id="password" type="password" placeholder="Пароль">
+        <input
+            id="password"
+            type="password"
+            placeholder="Пароль">
 
-        <button class="primary" onclick="login()">
+        <button
+            class="primary"
+            onclick="login()">
+
             Войти
+
         </button>
 
         <div id="loginMessage"></div>
@@ -201,12 +261,17 @@ th {
 
 <!-- ADMIN -->
 
-<div id="adminScreen" class="container hidden">
+<div id="adminScreen"
+     class="container hidden">
 
     <h1>⚙️ Админ-панель</h1>
 
-    <button class="danger" onclick="logout()">
+    <button
+        class="danger"
+        onclick="logout()">
+
         Выйти
+
     </button>
 
     <div id="message"></div>
@@ -216,20 +281,44 @@ th {
 
     <div class="tabs">
 
-        <button class="tab active" onclick="openTab('players', this)">
+        <button
+            class="tab active"
+            onclick="openTab('players', this)">
+
             👥 Состав
+
         </button>
 
-        <button class="tab" onclick="openTab('news', this)">
+        <button
+            class="tab"
+            onclick="openTab('news', this)">
+
             📰 Новости
+
         </button>
 
-        <button class="tab" onclick="openTab('matches', this)">
+        <button
+            class="tab"
+            onclick="openTab('matches', this)">
+
             🏒 Матчи
+
         </button>
 
-        <button class="tab" onclick="openTab('standings', this)">
+        <button
+            class="tab"
+            onclick="openTab('standings', this)">
+
             📊 Таблица
+
+        </button>
+
+        <button
+            class="tab"
+            onclick="openTab('design', this)">
+
+            🎨 Оформление
+
         </button>
 
     </div>
@@ -237,24 +326,44 @@ th {
 
     <!-- PLAYERS -->
 
-    <div id="players" class="section active">
+    <div id="players"
+         class="section active">
 
         <div class="card">
 
             <h2>👥 Добавить игрока</h2>
 
-            <input id="playerNumber" type="number" placeholder="Номер">
+            <input
+                id="playerNumber"
+                type="number"
+                placeholder="Номер">
 
-            <input id="playerName" placeholder="ФИО">
+            <input
+                id="playerName"
+                placeholder="ФИО">
 
             <select id="playerPosition">
-                <option value="Вратарь">Вратарь</option>
-                <option value="Защитник">Защитник</option>
-                <option value="Нападающий">Нападающий</option>
+
+                <option value="Вратарь">
+                    Вратарь
+                </option>
+
+                <option value="Защитник">
+                    Защитник
+                </option>
+
+                <option value="Нападающий">
+                    Нападающий
+                </option>
+
             </select>
 
-            <button class="primary" onclick="addPlayer()">
+            <button
+                class="primary"
+                onclick="addPlayer()">
+
                 Добавить игрока
+
             </button>
 
         </div>
@@ -272,28 +381,42 @@ th {
 
     <!-- NEWS -->
 
-    <div id="news" class="section">
+    <div id="news"
+         class="section">
 
         <div class="card">
 
-            <h2 id="newsFormTitle">📰 Добавить новость</h2>
+            <h2 id="newsFormTitle">
+                📰 Добавить новость
+            </h2>
 
-            <input id="newsTitle" placeholder="Заголовок">
+            <input
+                id="newsTitle"
+                placeholder="Заголовок">
 
-            <textarea id="newsText"
+            <textarea
+                id="newsText"
                 placeholder="Текст новости"></textarea>
 
-            <input id="newsImage"
+            <input
+                id="newsImage"
                 placeholder="Ссылка на изображение">
 
-            <button class="primary" onclick="saveNews()">
-                Сохранить новость
+            <button
+                class="primary"
+                onclick="saveNews()">
+
+                Сохранить
+
             </button>
 
-            <button class="secondary hidden"
-                    id="cancelNews"
-                    onclick="cancelNewsEdit()">
+            <button
+                class="secondary hidden"
+                id="cancelNews"
+                onclick="cancelNewsEdit()">
+
                 Отмена
+
             </button>
 
         </div>
@@ -311,35 +434,42 @@ th {
 
     <!-- MATCHES -->
 
-    <div id="matches" class="section">
+    <div id="matches"
+         class="section">
 
         <div class="card">
 
-            <h2 id="matchFormTitle">🏒 Добавить матч</h2>
+            <h2 id="matchFormTitle">
+                🏒 Добавить матч
+            </h2>
 
-            <input id="matchDate" type="date">
+            <input
+                id="matchDate"
+                type="date">
 
-            <input id="matchTime"
-                   type="text"
-                   placeholder="Время, например 18:00">
+            <input
+                id="matchTime"
+                placeholder="Время, например 18:00">
 
-            <input id="matchOpponent"
-                   placeholder="Соперник">
+            <input
+                id="matchOpponent"
+                placeholder="Соперник">
 
             <select id="matchHome">
 
                 <option value="true">
-                    🏠 Домашний матч
+                    🏠 Домашний
                 </option>
 
                 <option value="false">
-                    ✈️ Выездной матч
+                    ✈️ Выездной
                 </option>
 
             </select>
 
-            <input id="matchScore"
-                   placeholder="Счёт, например 5:2">
+            <input
+                id="matchScore"
+                placeholder="Счёт, например 5:2">
 
             <select id="matchStatus">
 
@@ -357,18 +487,24 @@ th {
 
             </select>
 
-            <button class="primary" onclick="saveMatch()">
-                Сохранить матч
+            <button
+                class="primary"
+                onclick="saveMatch()">
+
+                Сохранить
+
             </button>
 
-            <button class="secondary hidden"
-                    id="cancelMatch"
-                    onclick="cancelMatchEdit()">
+            <button
+                class="secondary hidden"
+                id="cancelMatch"
+                onclick="cancelMatchEdit()">
+
                 Отмена
+
             </button>
 
         </div>
-
 
         <div class="card">
 
@@ -383,7 +519,8 @@ th {
 
     <!-- STANDINGS -->
 
-    <div id="standings" class="section">
+    <div id="standings"
+         class="section">
 
         <div class="card">
 
@@ -391,58 +528,73 @@ th {
                 📊 Добавить команду
             </h2>
 
-            <input id="standingPosition"
-                   type="number"
-                   placeholder="Место">
+            <input
+                id="standingPosition"
+                type="number"
+                placeholder="Место">
 
-            <input id="standingTeam"
-                   placeholder="Команда">
+            <input
+                id="standingTeam"
+                placeholder="Команда">
 
-            <input id="standingGames"
-                   type="number"
-                   placeholder="Игр">
+            <input
+                id="standingGames"
+                type="number"
+                placeholder="Игр">
 
-            <input id="standingWins"
-                   type="number"
-                   placeholder="Побед">
+            <input
+                id="standingWins"
+                type="number"
+                placeholder="Побед">
 
-            <input id="standingOvertimeWins"
-                   type="number"
-                   placeholder="Побед в ОТ">
+            <input
+                id="standingOvertimeWins"
+                type="number"
+                placeholder="Побед в ОТ">
 
-            <input id="standingLosses"
-                   type="number"
-                   placeholder="Поражений">
+            <input
+                id="standingLosses"
+                type="number"
+                placeholder="Поражений">
 
-            <input id="standingOvertimeLosses"
-                   type="number"
-                   placeholder="Поражений в ОТ">
+            <input
+                id="standingOvertimeLosses"
+                type="number"
+                placeholder="Поражений в ОТ">
 
-            <input id="standingGF"
-                   type="number"
-                   placeholder="Забито">
+            <input
+                id="standingGF"
+                type="number"
+                placeholder="Забито">
 
-            <input id="standingGA"
-                   type="number"
-                   placeholder="Пропущено">
+            <input
+                id="standingGA"
+                type="number"
+                placeholder="Пропущено">
 
-            <input id="standingPoints"
-                   type="number"
-                   placeholder="Очки">
+            <input
+                id="standingPoints"
+                type="number"
+                placeholder="Очки">
 
-            <button class="primary"
-                    onclick="saveStanding()">
+            <button
+                class="primary"
+                onclick="saveStanding()">
+
                 Сохранить
+
             </button>
 
-            <button class="secondary hidden"
-                    id="cancelStanding"
-                    onclick="cancelStandingEdit()">
+            <button
+                class="secondary hidden"
+                id="cancelStanding"
+                onclick="cancelStandingEdit()">
+
                 Отмена
+
             </button>
 
         </div>
-
 
         <div class="card">
 
@@ -454,13 +606,346 @@ th {
 
     </div>
 
+
+    <!-- DESIGN -->
+
+    <div id="design"
+         class="section">
+
+        <div class="card">
+
+            <h2>🎨 Оформление сайта</h2>
+
+            <p class="small">
+                Здесь можно менять дизайн сайта
+                без изменения кода.
+            </p>
+
+            <div class="setting-title">
+                Название сайта
+            </div>
+
+            <input
+                id="siteName"
+                placeholder="ХК Челны 2011">
+
+
+            <div class="setting-title">
+                🖼️ Логотип
+            </div>
+
+            <input
+                id="logoUrl"
+                placeholder="Ссылка на логотип">
+
+
+            <div class="setting-title">
+                📱 Иконка сайта
+            </div>
+
+            <input
+                id="faviconUrl"
+                placeholder="Ссылка на favicon">
+
+
+            <div class="setting-title">
+                🖼️ Фоновая картинка
+            </div>
+
+            <input
+                id="backgroundImage"
+                placeholder="Ссылка на фон">
+
+
+            <hr>
+
+
+            <h3>🎨 Цвета</h3>
+
+
+            <div class="setting-title">
+                Основной цвет
+            </div>
+
+            <div class="color-row">
+
+                <input
+                    id="primaryColorText"
+                    placeholder="#000056">
+
+                <input
+                    id="primaryColor"
+                    type="color"
+                    value="#000056">
+
+            </div>
+
+
+            <div class="setting-title">
+                Дополнительный цвет
+            </div>
+
+            <div class="color-row">
+
+                <input
+                    id="secondaryColorText"
+                    placeholder="#ffcd00">
+
+                <input
+                    id="secondaryColor"
+                    type="color"
+                    value="#ffcd00">
+
+            </div>
+
+
+            <div class="setting-title">
+                Цвет фона
+            </div>
+
+            <div class="color-row">
+
+                <input
+                    id="backgroundColorText"
+                    placeholder="#050b22">
+
+                <input
+                    id="backgroundColor"
+                    type="color"
+                    value="#050b22">
+
+            </div>
+
+
+            <div class="setting-title">
+                Цвет карточек
+            </div>
+
+            <div class="color-row">
+
+                <input
+                    id="cardColorText"
+                    placeholder="#0d1738">
+
+                <input
+                    id="cardColor"
+                    type="color"
+                    value="#0d1738">
+
+            </div>
+
+
+            <div class="setting-title">
+                Цвет текста
+            </div>
+
+            <div class="color-row">
+
+                <input
+                    id="textColorText"
+                    placeholder="#ffffff">
+
+                <input
+                    id="textColor"
+                    type="color"
+                    value="#ffffff">
+
+            </div>
+
+
+            <div class="setting-title">
+                Второстепенный текст
+            </div>
+
+            <div class="color-row">
+
+                <input
+                    id="mutedTextColorText"
+                    placeholder="#aab5d5">
+
+                <input
+                    id="mutedTextColor"
+                    type="color"
+                    value="#aab5d5">
+
+            </div>
+
+
+            <div class="setting-title">
+                Цвет кнопок
+            </div>
+
+            <div class="color-row">
+
+                <input
+                    id="buttonColorText"
+                    placeholder="#ffcd00">
+
+                <input
+                    id="buttonColor"
+                    type="color"
+                    value="#ffcd00">
+
+            </div>
+
+
+            <div class="setting-title">
+                Цвет границ
+            </div>
+
+            <div class="color-row">
+
+                <input
+                    id="borderColorText"
+                    placeholder="#26345f">
+
+                <input
+                    id="borderColor"
+                    type="color"
+                    value="#26345f">
+
+            </div>
+
+
+            <hr>
+
+
+            <h3>🔲 Форма элементов</h3>
+
+            <div class="setting-title">
+                Скругление карточек
+            </div>
+
+            <input
+                id="borderRadius"
+                type="range"
+                min="0"
+                max="40"
+                value="14"
+                oninput="updateRange('borderRadius')">
+
+            <div
+                id="borderRadiusValue"
+                class="range-value">
+
+                14 px
+
+            </div>
+
+
+            <div class="setting-title">
+                Тени
+            </div>
+
+            <input
+                id="shadowStrength"
+                type="range"
+                min="0"
+                max="50"
+                value="20"
+                oninput="updateRange('shadowStrength')">
+
+            <div
+                id="shadowStrengthValue"
+                class="range-value">
+
+                20%
+
+            </div>
+
+
+            <hr>
+
+
+            <h3>⚡ Иконки меню</h3>
+
+            <input
+                id="homeIcon"
+                placeholder="Главная">
+
+            <input
+                id="matchesIcon"
+                placeholder="Матчи">
+
+            <input
+                id="rosterIcon"
+                placeholder="Состав">
+
+            <input
+                id="tableIcon"
+                placeholder="Таблица">
+
+            <input
+                id="newsIcon"
+                placeholder="Новости">
+
+
+            <div class="preview"
+                 id="designPreview">
+
+                <img
+                    id="previewLogo"
+                    class="preview-logo"
+                    style="display:none">
+
+                <h2 id="previewTitle">
+                    ХК Челны 2011
+                </h2>
+
+                <p>
+                    Предпросмотр оформления
+                </p>
+
+                <button
+                    class="primary">
+
+                    Пример кнопки
+
+                </button>
+
+            </div>
+
+
+            <br>
+
+
+            <button
+                class="primary"
+                onclick="saveDesign()">
+
+                💾 Сохранить оформление
+
+            </button>
+
+
+            <button
+                class="secondary"
+                onclick="loadDesign()">
+
+                ↻ Загрузить настройки
+
+            </button>
+
+
+            <button
+                class="danger"
+                onclick="resetDesign()">
+
+                Сбросить оформление
+
+            </button>
+
+        </div>
+
+    </div>
+
 </div>
 
 
 <script>
 
 /* =========================
-   SUPABASE
+SUPABASE
 ========================= */
 
 const SUPABASE_URL =
@@ -475,17 +960,21 @@ let editingNewsId = null;
 let editingMatchId = null;
 let editingStandingId = null;
 
+let settingsId = null;
+
 
 /* =========================
-   HELPERS
+HEADERS
 ========================= */
 
-function headers() {
+function authHeaders() {
 
     return {
         "apikey": SUPABASE_KEY,
-        "Authorization": "Bearer " + accessToken,
-        "Content-Type": "application/json"
+        "Authorization":
+            "Bearer " + accessToken,
+        "Content-Type":
+            "application/json"
     };
 
 }
@@ -495,19 +984,28 @@ function publicHeaders() {
 
     return {
         "apikey": SUPABASE_KEY,
-        "Content-Type": "application/json"
+        "Content-Type":
+            "application/json"
     };
 
 }
 
 
+/* =========================
+MESSAGE
+========================= */
+
 function showMessage(text) {
 
-    document.getElementById("message").textContent = text;
+    document.getElementById(
+        "message"
+    ).textContent = text;
 
     setTimeout(() => {
 
-        document.getElementById("message").textContent = "";
+        document.getElementById(
+            "message"
+        ).textContent = "";
 
     }, 3000);
 
@@ -515,16 +1013,20 @@ function showMessage(text) {
 
 
 /* =========================
-   LOGIN
+LOGIN
 ========================= */
 
 async function login() {
 
     const email =
-        document.getElementById("email").value;
+        document.getElementById(
+            "email"
+        ).value;
 
     const password =
-        document.getElementById("password").value;
+        document.getElementById(
+            "password"
+        ).value;
 
 
     const response = await fetch(
@@ -535,23 +1037,27 @@ async function login() {
 
             headers: {
                 "apikey": SUPABASE_KEY,
-                "Content-Type": "application/json"
+                "Content-Type":
+                    "application/json"
             },
 
             body: JSON.stringify({
-                email: email,
-                password: password
+                email,
+                password
             })
         }
     );
 
 
-    const data = await response.json();
+    const data =
+        await response.json();
 
 
     if (!response.ok) {
 
-        document.getElementById("loginMessage").textContent =
+        document.getElementById(
+            "loginMessage"
+        ).textContent =
             data.msg ||
             data.error_description ||
             "Ошибка входа";
@@ -560,16 +1066,18 @@ async function login() {
     }
 
 
-    accessToken = data.access_token;
+    accessToken =
+        data.access_token;
 
 
-    document
-        .getElementById("loginScreen")
-        .classList.add("hidden");
+    document.getElementById(
+        "loginScreen"
+    ).classList.add("hidden");
 
-    document
-        .getElementById("adminScreen")
-        .classList.remove("hidden");
+
+    document.getElementById(
+        "adminScreen"
+    ).classList.remove("hidden");
 
 
     loadAll();
@@ -578,7 +1086,7 @@ async function login() {
 
 
 /* =========================
-   LOGOUT
+LOGOUT
 ========================= */
 
 function logout() {
@@ -591,22 +1099,29 @@ function logout() {
 
 
 /* =========================
-   TABS
+TABS
 ========================= */
 
-function openTab(tab, button) {
+function openTab(
+    tab,
+    button
+) {
 
     document
         .querySelectorAll(".section")
         .forEach(el =>
-            el.classList.remove("active")
+            el.classList.remove(
+                "active"
+            )
         );
 
 
     document
         .querySelectorAll(".tab")
         .forEach(el =>
-            el.classList.remove("active")
+            el.classList.remove(
+                "active"
+            )
         );
 
 
@@ -621,7 +1136,7 @@ function openTab(tab, button) {
 
 
 /* =========================
-   LOAD ALL
+LOAD ALL
 ========================= */
 
 function loadAll() {
@@ -630,51 +1145,66 @@ function loadAll() {
     loadNews();
     loadMatches();
     loadStandings();
+    loadDesign();
 
 }
 
 
 /* =========================
-   PLAYERS
+PLAYERS
 ========================= */
 
 async function loadPlayers() {
 
-    const response = await fetch(
-        SUPABASE_URL +
-        "/rest/v1/players?select=*&order=number.asc",
-        {
-            headers: publicHeaders()
-        }
-    );
+    const response =
+        await fetch(
+            SUPABASE_URL +
+            "/rest/v1/players?select=*&order=number.asc",
+            {
+                headers:
+                    publicHeaders()
+            }
+        );
 
 
-    const players = await response.json();
+    const players =
+        await response.json();
+
 
     const list =
-        document.getElementById("playersList");
+        document.getElementById(
+            "playersList"
+        );
 
     list.innerHTML = "";
 
 
     players.forEach(player => {
 
-        const div = document.createElement("div");
+        const div =
+            document.createElement(
+                "div"
+            );
 
         div.className = "item";
 
         div.innerHTML = `
+
             <strong>
-                #${player.number} ${player.name}
+                #${player.number}
+                ${escapeHtml(player.name)}
             </strong>
 
             <div class="small">
-                ${player.position}
+                ${escapeHtml(player.position)}
             </div>
 
-            <button class="danger"
-                    onclick="deletePlayer(${player.id})">
+            <button
+                class="danger"
+                onclick="deletePlayer(${player.id})">
+
                 Удалить
+
             </button>
         `;
 
@@ -688,54 +1218,77 @@ async function loadPlayers() {
 async function addPlayer() {
 
     const number =
-        document.getElementById("playerNumber").value;
+        document.getElementById(
+            "playerNumber"
+        ).value;
 
     const name =
-        document.getElementById("playerName").value;
+        document.getElementById(
+            "playerName"
+        ).value;
 
     const position =
-        document.getElementById("playerPosition").value;
+        document.getElementById(
+            "playerPosition"
+        ).value;
 
 
     if (!number || !name) {
 
-        alert("Заполни номер и имя");
+        alert(
+            "Заполни номер и имя"
+        );
 
         return;
     }
 
 
-    const response = await fetch(
-        SUPABASE_URL + "/rest/v1/players",
-        {
-            method: "POST",
+    const response =
+        await fetch(
+            SUPABASE_URL +
+            "/rest/v1/players",
+            {
+                method: "POST",
 
-            headers: {
-                ...headers(),
-                "Prefer": "return=minimal"
-            },
+                headers: {
+                    ...authHeaders(),
+                    "Prefer":
+                        "return=minimal"
+                },
 
-            body: JSON.stringify({
-                number: Number(number),
-                name: name,
-                position: position
-            })
-        }
-    );
+                body:
+                    JSON.stringify({
+                        number:
+                            Number(number),
+                        name,
+                        position
+                    })
+            }
+        );
 
 
     if (!response.ok) {
 
-        alert(await response.text());
+        alert(
+            await response.text()
+        );
 
         return;
     }
 
 
-    document.getElementById("playerNumber").value = "";
-    document.getElementById("playerName").value = "";
+    document.getElementById(
+        "playerNumber"
+    ).value = "";
 
-    showMessage("Игрок добавлен");
+    document.getElementById(
+        "playerName"
+    ).value = "";
+
+
+    showMessage(
+        "Игрок добавлен"
+    );
 
     loadPlayers();
 
@@ -744,15 +1297,19 @@ async function addPlayer() {
 
 async function deletePlayer(id) {
 
-    if (!confirm("Удалить игрока?")) return;
+    if (!confirm(
+        "Удалить игрока?"
+    )) return;
 
 
     await fetch(
         SUPABASE_URL +
-        "/rest/v1/players?id=eq." + id,
+        "/rest/v1/players?id=eq." +
+        id,
         {
             method: "DELETE",
-            headers: headers()
+            headers:
+                authHeaders()
         }
     );
 
@@ -763,62 +1320,68 @@ async function deletePlayer(id) {
 
 
 /* =========================
-   NEWS
+NEWS
 ========================= */
 
 async function loadNews() {
 
-    const response = await fetch(
-        SUPABASE_URL +
-        "/rest/v1/news?select=*&order=created_at.desc",
-        {
-            headers: publicHeaders()
-        }
-    );
+    const response =
+        await fetch(
+            SUPABASE_URL +
+            "/rest/v1/news?select=*&order=created_at.desc",
+            {
+                headers:
+                    publicHeaders()
+            }
+        );
 
 
-    const news = await response.json();
+    const news =
+        await response.json();
+
 
     const list =
-        document.getElementById("newsList");
+        document.getElementById(
+            "newsList"
+        );
 
     list.innerHTML = "";
 
 
     news.forEach(item => {
 
-        const div = document.createElement("div");
+        const div =
+            document.createElement(
+                "div"
+            );
 
         div.className = "item";
 
         div.innerHTML = `
 
-            <strong>${escapeHtml(item.title)}</strong>
+            <strong>
+                ${escapeHtml(item.title)}
+            </strong>
 
             <div class="small">
                 ${escapeHtml(item.text)}
             </div>
 
-            ${
-                item.image
-                ?
-                `<div class="small">
-                    🖼 ${escapeHtml(item.image)}
-                </div>`
-                :
-                ""
-            }
+            <button
+                class="primary"
+                onclick="editNews(${item.id})">
 
-            <button class="primary"
-                    onclick="editNews(${item.id})">
                 Изменить
+
             </button>
 
-            <button class="danger"
-                    onclick="deleteNews(${item.id})">
+            <button
+                class="danger"
+                onclick="deleteNews(${item.id})">
+
                 Удалить
-            </button>
 
+            </button>
         `;
 
         list.appendChild(div);
@@ -831,27 +1394,36 @@ async function loadNews() {
 async function saveNews() {
 
     const title =
-        document.getElementById("newsTitle").value;
+        document.getElementById(
+            "newsTitle"
+        ).value;
 
     const text =
-        document.getElementById("newsText").value;
+        document.getElementById(
+            "newsText"
+        ).value;
 
     const image =
-        document.getElementById("newsImage").value;
+        document.getElementById(
+            "newsImage"
+        ).value;
 
 
     if (!title || !text) {
 
-        alert("Заполни заголовок и текст");
+        alert(
+            "Заполни заголовок и текст"
+        );
 
         return;
     }
 
 
     const body = {
-        title: title,
-        text: text,
-        image: image || null
+        title,
+        text,
+        image:
+            image || null
     };
 
 
@@ -860,34 +1432,43 @@ async function saveNews() {
 
     if (editingNewsId) {
 
-        response = await fetch(
-            SUPABASE_URL +
-            "/rest/v1/news?id=eq." +
-            editingNewsId,
-            {
-                method: "PATCH",
-                headers: headers(),
-                body: JSON.stringify(body)
-            }
-        );
+        response =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/news?id=eq." +
+                editingNewsId,
+                {
+                    method: "PATCH",
+                    headers:
+                        authHeaders(),
+                    body:
+                        JSON.stringify(body)
+                }
+            );
 
     } else {
 
-        response = await fetch(
-            SUPABASE_URL + "/rest/v1/news",
-            {
-                method: "POST",
-                headers: headers(),
-                body: JSON.stringify(body)
-            }
-        );
+        response =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/news",
+                {
+                    method: "POST",
+                    headers:
+                        authHeaders(),
+                    body:
+                        JSON.stringify(body)
+                }
+            );
 
     }
 
 
     if (!response.ok) {
 
-        alert(await response.text());
+        alert(
+            await response.text()
+        );
 
         return;
     }
@@ -895,7 +1476,9 @@ async function saveNews() {
 
     cancelNewsEdit();
 
-    showMessage("Новость сохранена");
+    showMessage(
+        "Новость сохранена"
+    );
 
     loadNews();
 
@@ -904,67 +1487,82 @@ async function saveNews() {
 
 async function editNews(id) {
 
-    const response = await fetch(
-        SUPABASE_URL +
-        "/rest/v1/news?id=eq." +
-        id +
-        "&select=*",
-        {
-            headers: publicHeaders()
-        }
-    );
+    const response =
+        await fetch(
+            SUPABASE_URL +
+            "/rest/v1/news?id=eq." +
+            id +
+            "&select=*",
+            {
+                headers:
+                    publicHeaders()
+            }
+        );
 
 
-    const data = await response.json();
+    const data =
+        await response.json();
+
 
     if (!data.length) return;
 
 
-    const item = data[0];
+    const item =
+        data[0];
 
-    editingNewsId = id;
+    editingNewsId =
+        id;
 
 
-    document.getElementById("newsTitle").value =
+    document.getElementById(
+        "newsTitle"
+    ).value =
         item.title;
 
-    document.getElementById("newsText").value =
+    document.getElementById(
+        "newsText"
+    ).value =
         item.text;
 
-    document.getElementById("newsImage").value =
+    document.getElementById(
+        "newsImage"
+    ).value =
         item.image || "";
 
 
-    document.getElementById("newsFormTitle")
-        .textContent =
+    document.getElementById(
+        "newsFormTitle"
+    ).textContent =
         "📰 Редактирование новости";
 
 
-    document.getElementById("cancelNews")
-        .classList.remove("hidden");
-
-
-    openSectionDirect("news");
+    document.getElementById(
+        "cancelNews"
+    ).classList.remove(
+        "hidden"
+    );
 
 }
 
 
 async function deleteNews(id) {
 
-    if (!confirm("Удалить новость?")) return;
+    if (!confirm(
+        "Удалить новость?"
+    )) return;
 
 
     await fetch(
         SUPABASE_URL +
-        "/rest/v1/news?id=eq." + id,
+        "/rest/v1/news?id=eq." +
+        id,
         {
             method: "DELETE",
-            headers: headers()
+            headers:
+                authHeaders()
         }
     );
 
-
-    showMessage("Новость удалена");
 
     loadNews();
 
@@ -975,46 +1573,67 @@ function cancelNewsEdit() {
 
     editingNewsId = null;
 
-    document.getElementById("newsTitle").value = "";
-    document.getElementById("newsText").value = "";
-    document.getElementById("newsImage").value = "";
+    document.getElementById(
+        "newsTitle"
+    ).value = "";
 
-    document.getElementById("newsFormTitle")
-        .textContent =
+    document.getElementById(
+        "newsText"
+    ).value = "";
+
+    document.getElementById(
+        "newsImage"
+    ).value = "";
+
+    document.getElementById(
+        "newsFormTitle"
+    ).textContent =
         "📰 Добавить новость";
 
-    document.getElementById("cancelNews")
-        .classList.add("hidden");
+    document.getElementById(
+        "cancelNews"
+    ).classList.add(
+        "hidden"
+    );
 
 }
 
 
 /* =========================
-   MATCHES
+MATCHES
 ========================= */
 
 async function loadMatches() {
 
-    const response = await fetch(
-        SUPABASE_URL +
-        "/rest/v1/matches?select=*&order=date.asc",
-        {
-            headers: publicHeaders()
-        }
-    );
+    const response =
+        await fetch(
+            SUPABASE_URL +
+            "/rest/v1/matches?select=*&order=date.asc",
+            {
+                headers:
+                    publicHeaders()
+            }
+        );
 
 
-    const matches = await response.json();
+    const matches =
+        await response.json();
+
 
     const list =
-        document.getElementById("matchesList");
+        document.getElementById(
+            "matchesList"
+        );
 
     list.innerHTML = "";
 
 
     matches.forEach(match => {
 
-        const div = document.createElement("div");
+        const div =
+            document.createElement(
+                "div"
+            );
 
         div.className = "item";
 
@@ -1032,23 +1651,29 @@ async function loadMatches() {
             </div>
 
             <div class="small">
-                Счёт: ${match.score || "—"}
+                Счёт:
+                ${escapeHtml(match.score || "—")}
             </div>
 
             <div class="small">
-                Статус: ${match.status || "—"}
+                ${escapeHtml(match.status || "")}
             </div>
 
-            <button class="primary"
-                    onclick="editMatch(${match.id})">
+            <button
+                class="primary"
+                onclick="editMatch(${match.id})">
+
                 Изменить
+
             </button>
 
-            <button class="danger"
-                    onclick="deleteMatch(${match.id})">
+            <button
+                class="danger"
+                onclick="deleteMatch(${match.id})">
+
                 Удалить
-            </button>
 
+            </button>
         `;
 
         list.appendChild(div);
@@ -1061,27 +1686,41 @@ async function loadMatches() {
 async function saveMatch() {
 
     const date =
-        document.getElementById("matchDate").value;
+        document.getElementById(
+            "matchDate"
+        ).value;
 
     const time =
-        document.getElementById("matchTime").value;
+        document.getElementById(
+            "matchTime"
+        ).value;
 
     const opponent =
-        document.getElementById("matchOpponent").value;
+        document.getElementById(
+            "matchOpponent"
+        ).value;
 
     const home =
-        document.getElementById("matchHome").value === "true";
+        document.getElementById(
+            "matchHome"
+        ).value === "true";
 
     const score =
-        document.getElementById("matchScore").value;
+        document.getElementById(
+            "matchScore"
+        ).value;
 
     const status =
-        document.getElementById("matchStatus").value;
+        document.getElementById(
+            "matchStatus"
+        ).value;
 
 
     if (!date || !opponent) {
 
-        alert("Укажи дату и соперника");
+        alert(
+            "Укажи дату и соперника"
+        );
 
         return;
     }
@@ -1102,34 +1741,43 @@ async function saveMatch() {
 
     if (editingMatchId) {
 
-        response = await fetch(
-            SUPABASE_URL +
-            "/rest/v1/matches?id=eq." +
-            editingMatchId,
-            {
-                method: "PATCH",
-                headers: headers(),
-                body: JSON.stringify(body)
-            }
-        );
+        response =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/matches?id=eq." +
+                editingMatchId,
+                {
+                    method: "PATCH",
+                    headers:
+                        authHeaders(),
+                    body:
+                        JSON.stringify(body)
+                }
+            );
 
     } else {
 
-        response = await fetch(
-            SUPABASE_URL + "/rest/v1/matches",
-            {
-                method: "POST",
-                headers: headers(),
-                body: JSON.stringify(body)
-            }
-        );
+        response =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/matches",
+                {
+                    method: "POST",
+                    headers:
+                        authHeaders(),
+                    body:
+                        JSON.stringify(body)
+                }
+            );
 
     }
 
 
     if (!response.ok) {
 
-        alert(await response.text());
+        alert(
+            await response.text()
+        );
 
         return;
     }
@@ -1137,7 +1785,9 @@ async function saveMatch() {
 
     cancelMatchEdit();
 
-    showMessage("Матч сохранён");
+    showMessage(
+        "Матч сохранён"
+    );
 
     loadMatches();
 
@@ -1146,76 +1796,98 @@ async function saveMatch() {
 
 async function editMatch(id) {
 
-    const response = await fetch(
-        SUPABASE_URL +
-        "/rest/v1/matches?id=eq." +
-        id +
-        "&select=*",
-        {
-            headers: publicHeaders()
-        }
-    );
+    const response =
+        await fetch(
+            SUPABASE_URL +
+            "/rest/v1/matches?id=eq." +
+            id +
+            "&select=*",
+            {
+                headers:
+                    publicHeaders()
+            }
+        );
 
 
-    const data = await response.json();
+    const data =
+        await response.json();
+
 
     if (!data.length) return;
 
 
-    const match = data[0];
+    const match =
+        data[0];
 
-    editingMatchId = id;
+    editingMatchId =
+        id;
 
 
-    document.getElementById("matchDate").value =
+    document.getElementById(
+        "matchDate"
+    ).value =
         match.date;
 
-    document.getElementById("matchTime").value =
+    document.getElementById(
+        "matchTime"
+    ).value =
         match.time || "";
 
-    document.getElementById("matchOpponent").value =
+    document.getElementById(
+        "matchOpponent"
+    ).value =
         match.opponent;
 
-    document.getElementById("matchHome").value =
+    document.getElementById(
+        "matchHome"
+    ).value =
         String(match.home);
 
-    document.getElementById("matchScore").value =
+    document.getElementById(
+        "matchScore"
+    ).value =
         match.score || "";
 
-    document.getElementById("matchStatus").value =
-        match.status || "Запланирован";
+    document.getElementById(
+        "matchStatus"
+    ).value =
+        match.status ||
+        "Запланирован";
 
 
-    document.getElementById("matchFormTitle")
-        .textContent =
+    document.getElementById(
+        "matchFormTitle"
+    ).textContent =
         "🏒 Редактирование матча";
 
 
-    document.getElementById("cancelMatch")
-        .classList.remove("hidden");
-
-
-    openSectionDirect("matches");
+    document.getElementById(
+        "cancelMatch"
+    ).classList.remove(
+        "hidden"
+    );
 
 }
 
 
 async function deleteMatch(id) {
 
-    if (!confirm("Удалить матч?")) return;
+    if (!confirm(
+        "Удалить матч?"
+    )) return;
 
 
     await fetch(
         SUPABASE_URL +
-        "/rest/v1/matches?id=eq." + id,
+        "/rest/v1/matches?id=eq." +
+        id,
         {
             method: "DELETE",
-            headers: headers()
+            headers:
+                authHeaders()
         }
     );
 
-
-    showMessage("Матч удалён");
 
     loadMatches();
 
@@ -1226,65 +1898,96 @@ function cancelMatchEdit() {
 
     editingMatchId = null;
 
-    document.getElementById("matchDate").value = "";
-    document.getElementById("matchTime").value = "";
-    document.getElementById("matchOpponent").value = "";
-    document.getElementById("matchScore").value = "";
+    document.getElementById(
+        "matchDate"
+    ).value = "";
 
-    document.getElementById("matchStatus").value =
+    document.getElementById(
+        "matchTime"
+    ).value = "";
+
+    document.getElementById(
+        "matchOpponent"
+    ).value = "";
+
+    document.getElementById(
+        "matchScore"
+    ).value = "";
+
+    document.getElementById(
+        "matchStatus"
+    ).value =
         "Запланирован";
 
-    document.getElementById("matchHome").value =
+    document.getElementById(
+        "matchHome"
+    ).value =
         "true";
 
-
-    document.getElementById("matchFormTitle")
-        .textContent =
+    document.getElementById(
+        "matchFormTitle"
+    ).textContent =
         "🏒 Добавить матч";
 
-
-    document.getElementById("cancelMatch")
-        .classList.add("hidden");
+    document.getElementById(
+        "cancelMatch"
+    ).classList.add(
+        "hidden"
+    );
 
 }
 
 
 /* =========================
-   STANDINGS
+STANDINGS
 ========================= */
 
 async function loadStandings() {
 
-    const response = await fetch(
-        SUPABASE_URL +
-        "/rest/v1/standings?select=*&order=position.asc",
-        {
-            headers: publicHeaders()
-        }
-    );
+    const response =
+        await fetch(
+            SUPABASE_URL +
+            "/rest/v1/standings?select=*&order=position.asc",
+            {
+                headers:
+                    publicHeaders()
+            }
+        );
 
 
-    const standings = await response.json();
+    const standings =
+        await response.json();
+
 
     const list =
-        document.getElementById("standingsList");
+        document.getElementById(
+            "standingsList"
+        );
 
     list.innerHTML = "";
 
 
     const wrapper =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
-    wrapper.className = "table-wrapper";
+    wrapper.className =
+        "table-wrapper";
 
 
     const table =
-        document.createElement("table");
+        document.createElement(
+            "table"
+        );
 
 
     table.innerHTML = `
+
         <thead>
+
             <tr>
+
                 <th>№</th>
                 <th>Команда</th>
                 <th>И</th>
@@ -1296,25 +1999,35 @@ async function loadStandings() {
                 <th>ПШ</th>
                 <th>О</th>
                 <th></th>
+
             </tr>
+
         </thead>
+
         <tbody></tbody>
+
     `;
 
 
     const tbody =
-        table.querySelector("tbody");
+        table.querySelector(
+            "tbody"
+        );
 
 
     standings.forEach(team => {
 
         const tr =
-            document.createElement("tr");
+            document.createElement(
+                "tr"
+            );
 
 
         tr.innerHTML = `
 
-            <td>${team.position ?? ""}</td>
+            <td>
+                ${team.position ?? ""}
+            </td>
 
             <td>
                 ${escapeHtml(team.team)}
@@ -1334,21 +2047,32 @@ async function loadStandings() {
 
             <td>${team.goals_against ?? 0}</td>
 
-            <td><strong>${team.points ?? 0}</strong></td>
+            <td>
+                <strong>
+                    ${team.points ?? 0}
+                </strong>
+            </td>
 
             <td>
 
-                <button class="primary"
-                        onclick="editStanding(${team.id})">
+                <button
+                    class="primary"
+                    onclick="editStanding(${team.id})">
+
                     ✏️
+
                 </button>
 
-                <button class="danger"
-                        onclick="deleteStanding(${team.id})">
+                <button
+                    class="danger"
+                    onclick="deleteStanding(${team.id})">
+
                     🗑
+
                 </button>
 
             </td>
+
         `;
 
 
@@ -1369,51 +2093,81 @@ async function saveStanding() {
     const body = {
 
         position:
-            Number(document.getElementById(
-                "standingPosition").value),
+            Number(
+                document.getElementById(
+                    "standingPosition"
+                ).value
+            ),
 
         team:
             document.getElementById(
-                "standingTeam").value,
+                "standingTeam"
+            ).value,
 
         games:
-            Number(document.getElementById(
-                "standingGames").value || 0),
+            Number(
+                document.getElementById(
+                    "standingGames"
+                ).value || 0
+            ),
 
         wins:
-            Number(document.getElementById(
-                "standingWins").value || 0),
+            Number(
+                document.getElementById(
+                    "standingWins"
+                ).value || 0
+            ),
 
         overtime_wins:
-            Number(document.getElementById(
-                "standingOvertimeWins").value || 0),
+            Number(
+                document.getElementById(
+                    "standingOvertimeWins"
+                ).value || 0
+            ),
 
         losses:
-            Number(document.getElementById(
-                "standingLosses").value || 0),
+            Number(
+                document.getElementById(
+                    "standingLosses"
+                ).value || 0
+            ),
 
         overtime_losses:
-            Number(document.getElementById(
-                "standingOvertimeLosses").value || 0),
+            Number(
+                document.getElementById(
+                    "standingOvertimeLosses"
+                ).value || 0
+            ),
 
         goals_for:
-            Number(document.getElementById(
-                "standingGF").value || 0),
+            Number(
+                document.getElementById(
+                    "standingGF"
+                ).value || 0
+            ),
 
         goals_against:
-            Number(document.getElementById(
-                "standingGA").value || 0),
+            Number(
+                document.getElementById(
+                    "standingGA"
+                ).value || 0
+            ),
 
         points:
-            Number(document.getElementById(
-                "standingPoints").value || 0)
+            Number(
+                document.getElementById(
+                    "standingPoints"
+                ).value || 0
+            )
 
     };
 
 
     if (!body.team) {
 
-        alert("Укажи название команды");
+        alert(
+            "Укажи команду"
+        );
 
         return;
     }
@@ -1424,34 +2178,43 @@ async function saveStanding() {
 
     if (editingStandingId) {
 
-        response = await fetch(
-            SUPABASE_URL +
-            "/rest/v1/standings?id=eq." +
-            editingStandingId,
-            {
-                method: "PATCH",
-                headers: headers(),
-                body: JSON.stringify(body)
-            }
-        );
+        response =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/standings?id=eq." +
+                editingStandingId,
+                {
+                    method: "PATCH",
+                    headers:
+                        authHeaders(),
+                    body:
+                        JSON.stringify(body)
+                }
+            );
 
     } else {
 
-        response = await fetch(
-            SUPABASE_URL + "/rest/v1/standings",
-            {
-                method: "POST",
-                headers: headers(),
-                body: JSON.stringify(body)
-            }
-        );
+        response =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/standings",
+                {
+                    method: "POST",
+                    headers:
+                        authHeaders(),
+                    body:
+                        JSON.stringify(body)
+                }
+            );
 
     }
 
 
     if (!response.ok) {
 
-        alert(await response.text());
+        alert(
+            await response.text()
+        );
 
         return;
     }
@@ -1459,7 +2222,9 @@ async function saveStanding() {
 
     cancelStandingEdit();
 
-    showMessage("Таблица сохранена");
+    showMessage(
+        "Таблица сохранена"
+    );
 
     loadStandings();
 
@@ -1468,89 +2233,117 @@ async function saveStanding() {
 
 async function editStanding(id) {
 
-    const response = await fetch(
-        SUPABASE_URL +
-        "/rest/v1/standings?id=eq." +
-        id +
-        "&select=*",
-        {
-            headers: publicHeaders()
-        }
-    );
+    const response =
+        await fetch(
+            SUPABASE_URL +
+            "/rest/v1/standings?id=eq." +
+            id +
+            "&select=*",
+            {
+                headers:
+                    publicHeaders()
+            }
+        );
 
 
-    const data = await response.json();
+    const data =
+        await response.json();
+
 
     if (!data.length) return;
 
 
-    const team = data[0];
+    const team =
+        data[0];
 
-    editingStandingId = id;
+    editingStandingId =
+        id;
 
 
-    document.getElementById("standingPosition").value =
+    document.getElementById(
+        "standingPosition"
+    ).value =
         team.position ?? "";
 
-    document.getElementById("standingTeam").value =
+    document.getElementById(
+        "standingTeam"
+    ).value =
         team.team ?? "";
 
-    document.getElementById("standingGames").value =
+    document.getElementById(
+        "standingGames"
+    ).value =
         team.games ?? 0;
 
-    document.getElementById("standingWins").value =
+    document.getElementById(
+        "standingWins"
+    ).value =
         team.wins ?? 0;
 
-    document.getElementById("standingOvertimeWins").value =
+    document.getElementById(
+        "standingOvertimeWins"
+    ).value =
         team.overtime_wins ?? 0;
 
-    document.getElementById("standingLosses").value =
+    document.getElementById(
+        "standingLosses"
+    ).value =
         team.losses ?? 0;
 
-    document.getElementById("standingOvertimeLosses").value =
+    document.getElementById(
+        "standingOvertimeLosses"
+    ).value =
         team.overtime_losses ?? 0;
 
-    document.getElementById("standingGF").value =
+    document.getElementById(
+        "standingGF"
+    ).value =
         team.goals_for ?? 0;
 
-    document.getElementById("standingGA").value =
+    document.getElementById(
+        "standingGA"
+    ).value =
         team.goals_against ?? 0;
 
-    document.getElementById("standingPoints").value =
+    document.getElementById(
+        "standingPoints"
+    ).value =
         team.points ?? 0;
 
 
-    document.getElementById("standingFormTitle")
-        .textContent =
+    document.getElementById(
+        "standingFormTitle"
+    ).textContent =
         "📊 Редактирование команды";
 
 
-    document.getElementById("cancelStanding")
-        .classList.remove("hidden");
-
-
-    openSectionDirect("standings");
+    document.getElementById(
+        "cancelStanding"
+    ).classList.remove(
+        "hidden"
+    );
 
 }
 
 
 async function deleteStanding(id) {
 
-    if (!confirm("Удалить команду из таблицы?"))
-        return;
+    if (!confirm(
+        "Удалить команду?"
+    )) return;
 
 
     await fetch(
         SUPABASE_URL +
-        "/rest/v1/standings?id=eq." + id,
+        "/rest/v1/standings?id=eq." +
+        id,
         {
             method: "DELETE",
-            headers: headers()
+            headers:
+                authHeaders()
         }
     );
 
-
-    showMessage("Команда удалена");
 
     loadStandings();
 
@@ -1562,50 +2355,756 @@ function cancelStandingEdit() {
     editingStandingId = null;
 
 
-    document.getElementById("standingPosition").value = "";
-    document.getElementById("standingTeam").value = "";
-    document.getElementById("standingGames").value = "";
-    document.getElementById("standingWins").value = "";
-    document.getElementById("standingOvertimeWins").value = "";
-    document.getElementById("standingLosses").value = "";
-    document.getElementById("standingOvertimeLosses").value = "";
-    document.getElementById("standingGF").value = "";
-    document.getElementById("standingGA").value = "";
-    document.getElementById("standingPoints").value = "";
+    [
+        "standingPosition",
+        "standingTeam",
+        "standingGames",
+        "standingWins",
+        "standingOvertimeWins",
+        "standingLosses",
+        "standingOvertimeLosses",
+        "standingGF",
+        "standingGA",
+        "standingPoints"
+    ].forEach(id => {
+
+        document.getElementById(
+            id
+        ).value = "";
+
+    });
 
 
-    document.getElementById("standingFormTitle")
-        .textContent =
+    document.getElementById(
+        "standingFormTitle"
+    ).textContent =
         "📊 Добавить команду";
 
 
-    document.getElementById("cancelStanding")
-        .classList.add("hidden");
+    document.getElementById(
+        "cancelStanding"
+    ).classList.add(
+        "hidden"
+    );
 
 }
 
 
 /* =========================
-   UTILITIES
+DESIGN
 ========================= */
+
+async function loadDesign() {
+
+    const response =
+        await fetch(
+            SUPABASE_URL +
+            "/rest/v1/settings?select=*&limit=1",
+            {
+                headers:
+                    publicHeaders()
+            }
+        );
+
+
+    const data =
+        await response.json();
+
+
+    if (!data.length) return;
+
+
+    const s =
+        data[0];
+
+    settingsId =
+        s.id;
+
+
+    setValue(
+        "siteName",
+        s.site_name
+    );
+
+    setValue(
+        "logoUrl",
+        s.logo_url
+    );
+
+    setValue(
+        "faviconUrl",
+        s.favicon_url
+    );
+
+    setValue(
+        "backgroundImage",
+        s.background_image
+    );
+
+
+    setColor(
+        "primaryColor",
+        "primaryColorText",
+        s.primary_color
+    );
+
+    setColor(
+        "secondaryColor",
+        "secondaryColorText",
+        s.secondary_color
+    );
+
+    setColor(
+        "backgroundColor",
+        "backgroundColorText",
+        s.background_color
+    );
+
+    setColor(
+        "cardColor",
+        "cardColorText",
+        s.card_color
+    );
+
+    setColor(
+        "textColor",
+        "textColorText",
+        s.text_color
+    );
+
+    setColor(
+        "mutedTextColor",
+        "mutedTextColorText",
+        s.muted_text_color
+    );
+
+    setColor(
+        "buttonColor",
+        "buttonColorText",
+        s.button_color
+    );
+
+    setColor(
+        "borderColor",
+        "borderColorText",
+        s.border_color
+    );
+
+
+    setValue(
+        "borderRadius",
+        s.border_radius
+    );
+
+    setValue(
+        "shadowStrength",
+        s.shadow_strength
+    );
+
+
+    setValue(
+        "homeIcon",
+        s.home_icon
+    );
+
+    setValue(
+        "matchesIcon",
+        s.matches_icon
+    );
+
+    setValue(
+        "rosterIcon",
+        s.roster_icon
+    );
+
+    setValue(
+        "tableIcon",
+        s.table_icon
+    );
+
+    setValue(
+        "newsIcon",
+        s.news_icon
+    );
+
+
+    updateRange(
+        "borderRadius"
+    );
+
+    updateRange(
+        "shadowStrength"
+    );
+
+
+    updatePreview();
+
+}
+
+
+async function saveDesign() {
+
+    const body = {
+
+        site_name:
+            value("siteName"),
+
+        logo_url:
+            value("logoUrl") || null,
+
+        favicon_url:
+            value("faviconUrl") || null,
+
+        background_image:
+            value("backgroundImage") || null,
+
+
+        primary_color:
+            colorValue(
+                "primaryColor",
+                "primaryColorText"
+            ),
+
+        secondary_color:
+            colorValue(
+                "secondaryColor",
+                "secondaryColorText"
+            ),
+
+        background_color:
+            colorValue(
+                "backgroundColor",
+                "backgroundColorText"
+            ),
+
+        card_color:
+            colorValue(
+                "cardColor",
+                "cardColorText"
+            ),
+
+        text_color:
+            colorValue(
+                "textColor",
+                "textColorText"
+            ),
+
+        muted_text_color:
+            colorValue(
+                "mutedTextColor",
+                "mutedTextColorText"
+            ),
+
+        button_color:
+            colorValue(
+                "buttonColor",
+                "buttonColorText"
+            ),
+
+        border_color:
+            colorValue(
+                "borderColor",
+                "borderColorText"
+            ),
+
+
+        border_radius:
+            Number(
+                value("borderRadius")
+            ),
+
+        shadow_strength:
+            Number(
+                value("shadowStrength")
+            ),
+
+
+        home_icon:
+            value("homeIcon"),
+
+        matches_icon:
+            value("matchesIcon"),
+
+        roster_icon:
+            value("rosterIcon"),
+
+        table_icon:
+            value("tableIcon"),
+
+        news_icon:
+            value("newsIcon"),
+
+        updated_at:
+            new Date().toISOString()
+
+    };
+
+
+    let response;
+
+
+    if (settingsId) {
+
+        response =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/settings?id=eq." +
+                settingsId,
+                {
+                    method: "PATCH",
+                    headers:
+                        authHeaders(),
+                    body:
+                        JSON.stringify(body)
+                }
+            );
+
+    } else {
+
+        response =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/settings",
+                {
+                    method: "POST",
+                    headers:
+                        authHeaders(),
+                    body:
+                        JSON.stringify(body)
+                }
+            );
+
+    }
+
+
+    if (!response.ok) {
+
+        alert(
+            await response.text()
+        );
+
+        return;
+    }
+
+
+    showMessage(
+        "🎨 Оформление сохранено"
+    );
+
+    loadDesign();
+
+}
+
+
+async function resetDesign() {
+
+    if (!confirm(
+        "Сбросить оформление к стандартному?"
+    )) return;
+
+
+    const body = {
+
+        site_name:
+            "ХК Челны 2011",
+
+        logo_url: null,
+
+        favicon_url: null,
+
+        background_image: null,
+
+        primary_color:
+            "#000056",
+
+        secondary_color:
+            "#ffcd00",
+
+        background_color:
+            "#050b22",
+
+        card_color:
+            "#0d1738",
+
+        text_color:
+            "#ffffff",
+
+        muted_text_color:
+            "#aab5d5",
+
+        button_color:
+            "#ffcd00",
+
+        border_color:
+            "#26345f",
+
+        border_radius:
+            14,
+
+        shadow_strength:
+            20,
+
+        home_icon:
+            "⌂",
+
+        matches_icon:
+            "🏒",
+
+        roster_icon:
+            "👥",
+
+        table_icon:
+            "📊",
+
+        news_icon:
+            "📰",
+
+        updated_at:
+            new Date().toISOString()
+
+    };
+
+
+    await fetch(
+        SUPABASE_URL +
+        "/rest/v1/settings?id=eq." +
+        settingsId,
+        {
+            method: "PATCH",
+            headers:
+                authHeaders(),
+            body:
+                JSON.stringify(body)
+        }
+    );
+
+
+    showMessage(
+        "Оформление сброшено"
+    );
+
+    loadDesign();
+
+}
+
+
+/* =========================
+COLOR HELPERS
+========================= */
+
+function setColor(
+    colorId,
+    textId,
+    color
+) {
+
+    if (!color) return;
+
+
+    document.getElementById(
+        colorId
+    ).value =
+        color;
+
+
+    document.getElementById(
+        textId
+    ).value =
+        color;
+
+}
+
+
+function colorValue(
+    colorId,
+    textId
+) {
+
+    const text =
+        document.getElementById(
+            textId
+        ).value.trim();
+
+
+    if (
+        /^#[0-9A-Fa-f]{6}$/.test(text)
+    ) {
+
+        return text;
+
+    }
+
+
+    return document.getElementById(
+        colorId
+    ).value;
+
+}
+
+
+document.addEventListener(
+    "input",
+    function(e) {
+
+        const pairs = {
+
+            primaryColor:
+                "primaryColorText",
+
+            secondaryColor:
+                "secondaryColorText",
+
+            backgroundColor:
+                "backgroundColorText",
+
+            cardColor:
+                "cardColorText",
+
+            textColor:
+                "textColorText",
+
+            mutedTextColor:
+                "mutedTextColorText",
+
+            buttonColor:
+                "buttonColorText",
+
+            borderColor:
+                "borderColorText"
+
+        };
+
+
+        if (
+            pairs[e.target.id]
+        ) {
+
+            const textId =
+                pairs[e.target.id];
+
+
+            if (
+                /^#[0-9A-Fa-f]{6}$/
+                .test(e.target.value)
+            ) {
+
+                document.getElementById(
+                    textId
+                ).value =
+                    e.target.value;
+
+                updatePreview();
+
+            }
+
+        }
+
+
+        if (
+            Object.values(pairs)
+                .includes(e.target.id)
+        ) {
+
+            const colorId =
+                Object.keys(pairs)
+                    .find(
+                        key =>
+                            pairs[key] ===
+                            e.target.id
+                    );
+
+
+            if (
+                /^#[0-9A-Fa-f]{6}$/
+                .test(e.target.value)
+            ) {
+
+                document.getElementById(
+                    colorId
+                ).value =
+                    e.target.value;
+
+                updatePreview();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =========================
+PREVIEW
+========================= */
+
+function updatePreview() {
+
+    const bg =
+        colorValue(
+            "backgroundColor",
+            "backgroundColorText"
+        );
+
+    const card =
+        colorValue(
+            "cardColor",
+            "cardColorText"
+        );
+
+    const text =
+        colorValue(
+            "textColor",
+            "textColorText"
+        );
+
+    const button =
+        colorValue(
+            "buttonColor",
+            "buttonColorText"
+        );
+
+    const radius =
+        value("borderRadius");
+
+
+    const preview =
+        document.getElementById(
+            "designPreview"
+        );
+
+
+    preview.style.background =
+        card;
+
+    preview.style.color =
+        text;
+
+    preview.style.borderRadius =
+        radius + "px";
+
+
+    const previewButton =
+        preview.querySelector(
+            "button"
+        );
+
+    previewButton.style.background =
+        button;
+
+
+    document.getElementById(
+        "previewTitle"
+    ).textContent =
+        value("siteName") ||
+        "ХК Челны 2011";
+
+
+    const logo =
+        value("logoUrl");
+
+    const img =
+        document.getElementById(
+            "previewLogo"
+        );
+
+
+    if (logo) {
+
+        img.src = logo;
+        img.style.display =
+            "block";
+
+    } else {
+
+        img.style.display =
+            "none";
+
+    }
+
+}
+
+
+function updateRange(id) {
+
+    const value =
+        document.getElementById(
+            id
+        ).value;
+
+
+    if (id === "borderRadius") {
+
+        document.getElementById(
+            "borderRadiusValue"
+        ).textContent =
+            value + " px";
+
+    }
+
+
+    if (id === "shadowStrength") {
+
+        document.getElementById(
+            "shadowStrengthValue"
+        ).textContent =
+            value + "%";
+
+    }
+
+
+    updatePreview();
+
+}
+
+
+/* =========================
+UTILITY
+========================= */
+
+function value(id) {
+
+    return document.getElementById(
+        id
+    ).value;
+
+}
+
+
+function setValue(id, value) {
+
+    document.getElementById(
+        id
+    ).value =
+        value ?? "";
+
+}
+
 
 function formatDate(date) {
 
     if (!date) return "";
 
-    const parts = date.split("-");
+    const parts =
+        date.split("-");
 
-    return parts[2] + "." +
-           parts[1] + "." +
-           parts[0];
+    return (
+        parts[2] +
+        "." +
+        parts[1] +
+        "." +
+        parts[0]
+    );
 
 }
 
 
 function escapeHtml(text) {
 
-    if (text === null ||
-        text === undefined) return "";
+    if (
+        text === null ||
+        text === undefined
+    ) return "";
 
     return String(text)
         .replaceAll("&", "&amp;")
@@ -1613,39 +3112,6 @@ function escapeHtml(text) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
-
-}
-
-
-function openSectionDirect(name) {
-
-    document
-        .querySelectorAll(".section")
-        .forEach(el =>
-            el.classList.remove("active")
-        );
-
-    document
-        .getElementById(name)
-        .classList.add("active");
-
-
-    document
-        .querySelectorAll(".tab")
-        .forEach(el =>
-            el.classList.remove("active")
-        );
-
-    const tabs = {
-        players: 0,
-        news: 1,
-        matches: 2,
-        standings: 3
-    };
-
-    document
-        .querySelectorAll(".tab")[tabs[name]]
-        .classList.add("active");
 
 }
 
