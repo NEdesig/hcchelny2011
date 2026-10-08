@@ -3,508 +3,2425 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ХК Челны 2011</title>
-<link rel="icon" id="favicon" href="logo.svg">
 
 <style>
-:root{
---primary:#000056;
---secondary:#0875dc;
---bg:#050b22;
---card:#0d1738;
---text:#fff;
---muted:#aab5d5;
---button:#ffcd00;
---border:#26345f;
---radius:16px;
+/* =========================================================
+   ШРИФТЫ
+   Положи файлы в папку fonts:
+   Stapel-Regular.woff2
+   Stapel-Medium.woff2
+   Stapel-Bold.woff2
+   Stapel-Black.woff2
+   Stengazeta.woff2
+   Christopher.woff2
+========================================================= */
+
+@font-face {
+    font-family: "Stapel";
+    src: url("fonts/Stapel-Regular.woff2") format("woff2");
+    font-weight: 400;
 }
 
-*{box-sizing:border-box}
-
-body{
-margin:0;
-font-family:Arial,sans-serif;
-background:var(--bg);
-color:var(--text);
-background-size:cover;
-background-attachment:fixed;
+@font-face {
+    font-family: "Stapel";
+    src: url("fonts/Stapel-Medium.woff2") format("woff2");
+    font-weight: 500;
 }
 
-header{
-padding:18px;
-background:linear-gradient(135deg,var(--primary),var(--secondary));
-border-radius:0 0 25px 25px;
+@font-face {
+    font-family: "Stapel";
+    src: url("fonts/Stapel-Bold.woff2") format("woff2");
+    font-weight: 700;
 }
 
-.header{
-display:flex;
-align-items:center;
-gap:12px;
+@font-face {
+    font-family: "Stapel";
+    src: url("fonts/Stapel-Black.woff2") format("woff2");
+    font-weight: 900;
 }
 
-.logo{
-width:55px;
-height:55px;
-background:white;
-border-radius:50%;
-object-fit:contain;
+@font-face {
+    font-family: "Stengazeta";
+    src: url("fonts/Stengazeta.woff2") format("woff2");
 }
 
-.club{
-font-size:20px;
-font-weight:900;
+@font-face {
+    font-family: "Christopher";
+    src: url("fonts/Christopher.woff2") format("woff2");
 }
 
-.season{
-font-size:12px;
-opacity:.7;
-margin-top:4px;
+
+/* =========================================================
+   ОСНОВНЫЕ ЦВЕТА
+========================================================= */
+
+:root {
+    --blue: #000056;
+    --yellow: #ffcd00;
+
+    --background: #050b22;
+    --card: #0d1738;
+
+    --white: #ffffff;
+    --muted: #aab5d5;
+
+    --border: #26345f;
+
+    --radius: 18px;
 }
 
-main{
-max-width:700px;
-margin:auto;
-padding:18px 14px 100px;
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-.label{
-font-size:11px;
-letter-spacing:1.5px;
-color:var(--muted);
-text-transform:uppercase;
+html {
+    scroll-behavior: smooth;
 }
 
-h1{
-font-size:30px;
-margin:7px 0 15px;
+body {
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(0, 0, 86, 0.95),
+            transparent 38%
+        ),
+        linear-gradient(
+            180deg,
+            #050b22 0%,
+            #07102d 100%
+        );
+
+    color: var(--white);
+
+    font-family: "Stapel", Arial, sans-serif;
+
+    min-height: 100vh;
+
+    padding-bottom: 90px;
 }
 
-.card{
-background:var(--card);
-border:1px solid var(--border);
-border-radius:var(--radius);
-padding:17px;
-margin-bottom:14px;
-box-shadow:0 7px 25px rgba(0,0,0,.15);
+button,
+input,
+textarea,
+select {
+    font-family: inherit;
 }
 
-.date{
-font-size:11px;
-color:var(--muted);
-text-transform:uppercase;
+button {
+    cursor: pointer;
 }
 
-.teams{
-font-size:18px;
-font-weight:800;
-margin-top:7px;
+img {
+    max-width: 100%;
 }
 
-.score{
-font-size:30px;
-font-weight:900;
-margin:8px 0;
+a {
+    text-decoration: none;
+    color: inherit;
 }
 
-.title{
-font-size:18px;
-font-weight:900;
-margin-bottom:6px;
+
+/* =========================================================
+   ОБЩИЙ КОНТЕЙНЕР
+========================================================= */
+
+.container {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
 }
 
-.muted{
-color:var(--muted);
-font-size:13px;
-line-height:1.5;
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+    position: sticky;
+    top: 0;
+
+    z-index: 50;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px 16px 10px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(5, 11, 34, 0.98),
+            rgba(5, 11, 34, 0.86),
+            transparent
+        );
+
+    backdrop-filter: blur(12px);
 }
 
-.more{
-display:block;
-text-align:center;
-padding:12px;
-background:var(--button);
-color:#111;
-border-radius:12px;
-text-decoration:none;
-font-weight:800;
-margin-top:10px;
+.header-logo {
+    width: 50px;
+    height: 50px;
+
+    object-fit: contain;
+
+    border-radius: 15px;
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+
+    padding: 5px;
 }
 
-.bottom{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-height:72px;
-background:var(--card);
-border-top:1px solid var(--border);
-display:flex;
-justify-content:space-around;
-align-items:center;
-z-index:20;
+.header-title {
+    font-weight: 900;
+
+    font-size: 17px;
+
+    line-height: 1;
 }
 
-.bottom a{
-color:var(--muted);
-text-decoration:none;
-font-size:10px;
-text-align:center;
+.header-subtitle {
+    margin-top: 5px;
+
+    font-size: 9px;
+
+    letter-spacing: 0.14em;
+
+    color: var(--muted);
+
+    text-transform: uppercase;
 }
 
-.bottom a.active{
-color:var(--button);
-font-weight:800;
+.header-button {
+    margin-left: auto;
+
+    width: 44px;
+    height: 44px;
+
+    border-radius: 14px;
+
+    border: 1px solid var(--border);
+
+    background: var(--card);
+
+    color: white;
+
+    font-size: 20px;
 }
 
-.icon{
-font-size:21px;
-display:block;
-margin-bottom:4px;
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero {
+    position: relative;
+
+    margin: 5px 14px 18px;
+
+    padding: 25px 18px 18px;
+
+    overflow: hidden;
+
+    border-radius: 25px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #000056 0%,
+            #0d1738 100%
+        );
+
+    border: 1px solid var(--border);
+
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.3);
+}
+
+.hero::before {
+    content: "";
+
+    position: absolute;
+
+    width: 230px;
+    height: 230px;
+
+    right: -120px;
+    top: -100px;
+
+    border-radius: 50%;
+
+    background: rgba(255,205,0,.07);
+}
+
+.hero-label {
+    position: relative;
+
+    font-family: "Stengazeta", "Stapel", sans-serif;
+
+    color: var(--yellow);
+
+    font-size: 12px;
+
+    letter-spacing: .15em;
+
+    text-transform: uppercase;
+}
+
+.hero-title {
+    position: relative;
+
+    margin-top: 8px;
+
+    font-size: 40px;
+
+    line-height: .95;
+
+    font-weight: 900;
+}
+
+.hero-description {
+    position: relative;
+
+    margin-top: 12px;
+
+    max-width: 85%;
+
+    color: var(--muted);
+
+    font-size: 12px;
+
+    line-height: 1.45;
+}
+
+
+/* =========================================================
+   MATCH
+========================================================= */
+
+.match-card {
+    position: relative;
+
+    margin-top: 22px;
+
+    padding: 16px;
+
+    background: white;
+
+    color: #07102d;
+
+    border-radius: 21px;
+
+    z-index: 2;
+}
+
+.match-top {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+.match-type {
+    color: #70798f;
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    letter-spacing: .12em;
+
+    text-transform: uppercase;
+}
+
+.match-date {
+    margin-top: 5px;
+
+    color: #70798f;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   МАТЧ ДЭЙ
+========================================================= */
+
+.match-day {
+    display: none;
+
+    padding: 7px 10px;
+
+    border-radius: 9px;
+
+    background: var(--yellow);
+
+    color: var(--blue);
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    letter-spacing: .08em;
+}
+
+.match-day.visible {
+    display: block;
+}
+
+
+.match-teams {
+    display: grid;
+
+    grid-template-columns: 1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 18px;
+}
+
+.team {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.team:last-child {
+    align-items: flex-end;
+
+    text-align: right;
+}
+
+.team-logo {
+    width: 48px;
+    height: 48px;
+
+    object-fit: contain;
+}
+
+.team-name {
+    font-weight: 900;
+
+    font-size: 15px;
+
+    line-height: 1.05;
+}
+
+.vs {
+    font-family: "Stengazeta", sans-serif;
+
+    color: var(--blue);
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+.score {
+    font-size: 25px;
+
+    font-weight: 900;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SECTIONS
+========================================================= */
+
+.section-header {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin: 25px 14px 11px;
+}
+
+.section-title {
+    font-size: 20px;
+
+    font-weight: 900;
+}
+
+.section-link {
+    color: var(--yellow);
+
+    font-size: 10px;
+
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.card {
+    margin: 0 14px 12px;
+
+    background: rgba(13,23,56,.96);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    overflow: hidden;
+}
+
+.card-content {
+    padding: 15px;
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin: 0 14px;
+}
+
+.stat-card {
+    padding: 17px;
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+}
+
+.stat-number {
+    font-size: 27px;
+
+    font-weight: 900;
+
+    color: var(--yellow);
+}
+
+.stat-title {
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   NEWS
+========================================================= */
+
+.news-card {
+    cursor: pointer;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease;
+}
+
+.news-card:active {
+    transform: scale(.985);
+}
+
+.news-image {
+    display: block;
+
+    width: 100%;
+
+    aspect-ratio: 16 / 9;
+
+    object-fit: cover;
+
+    background: var(--blue);
+}
+
+.news-content {
+    padding: 15px;
+}
+
+.news-date {
+    color: var(--muted);
+
+    font-size: 9px;
+
+    letter-spacing: .08em;
+
+    text-transform: uppercase;
+}
+
+.news-title {
+    margin-top: 6px;
+
+    font-size: 17px;
+
+    line-height: 1.1;
+
+    font-weight: 900;
+}
+
+.news-text {
+    margin-top: 7px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table-wrapper {
+    margin: 0 14px;
+
+    overflow-x: auto;
+
+    border-radius: 16px;
+
+    border: 1px solid var(--border);
+
+    background: var(--card);
+}
+
+table {
+    width: 100%;
+
+    min-width: 600px;
+
+    border-collapse: collapse;
+
+    font-size: 10px;
+}
+
+th {
+    padding: 11px;
+
+    text-align: left;
+
+    background: var(--blue);
+
+    color: white;
+}
+
+td {
+    padding: 10px;
+
+    border-top: 1px solid var(--border);
+}
+
+.club-row {
+    background: rgba(255,205,0,.08);
+}
+
+.club-row td {
+    color: var(--yellow);
+
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   BOTTOM NAVIGATION
+========================================================= */
+
+.bottom-nav {
+    position: fixed;
+
+    z-index: 100;
+
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+
+    max-width: 760px;
+
+    margin: auto;
+
+    padding:
+        8px
+        7px
+        calc(8px + env(safe-area-inset-bottom));
+
+    background: rgba(5,11,34,.97);
+
+    border-top: 1px solid var(--border);
+
+    backdrop-filter: blur(20px);
+}
+
+.nav-item {
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 4px;
+
+    color: var(--muted);
+
+    font-size: 8px;
+
+    font-weight: 700;
+}
+
+.nav-item.active {
+    color: var(--yellow);
+}
+
+.nav-icon {
+    width: 22px;
+    height: 22px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-icon img {
+    width: 21px;
+    height: 21px;
+
+    object-fit: contain;
+}
+
+.nav-emoji {
+    font-size: 19px;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 200;
+
+    display: none;
+
+    align-items: flex-end;
+
+    background: rgba(0,0,0,.72);
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modal-window {
+    width: 100%;
+
+    max-width: 760px;
+
+    max-height: 88vh;
+
+    margin: auto;
+
+    overflow-y: auto;
+
+    padding: 18px;
+
+    background: #0b1433;
+
+    border: 1px solid var(--border);
+
+    border-bottom: none;
+
+    border-radius: 25px 25px 0 0;
+}
+
+.modal-close {
+    float: right;
+
+    width: 38px;
+    height: 38px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    background: var(--card);
+
+    color: white;
+
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty {
+    margin: 0 14px;
+
+    padding: 24px;
+
+    text-align: center;
+
+    color: var(--muted);
+
+    border: 1px dashed var(--border);
+
+    border-radius: 16px;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media (min-width: 700px) {
+
+    .hero {
+        margin-top: 10px;
+    }
+
+    .hero-title {
+        font-size: 48px;
+    }
+
 }
 </style>
 </head>
 
+
 <body>
 
-<header>
-<div class="header">
-<img id="logo" class="logo" src="logo.svg">
-<div>
-<div class="club" id="siteName">ХК ЧЕЛНЫ 2011</div>
-<div class="season">СЕЗОН 2026/27</div>
+<div class="container">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="header">
+
+        <img
+            id="clubLogo"
+            class="header-logo"
+            src=""
+            alt="ХК Челны 2011"
+        >
+
+        <div>
+
+            <div
+                id="clubName"
+                class="header-title"
+            >
+                ХК ЧЕЛНЫ 2011
+            </div>
+
+            <div class="header-subtitle">
+                СЕЗОН 2026/27
+            </div>
+
+        </div>
+
+        <button
+            class="header-button"
+            onclick="location.href='news.html'"
+        >
+            ☰
+        </button>
+
+    </header>
+
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="hero">
+
+        <div class="hero-label">
+            ХОККЕЙНЫЙ КЛУБ
+        </div>
+
+        <h1
+            id="heroTitle"
+            class="hero-title"
+        >
+            ХК ЧЕЛНЫ<br>
+            2011
+        </h1>
+
+        <div
+            id="heroDescription"
+            class="hero-description"
+        >
+            Официальный сайт команды
+        </div>
+
+
+        <!-- =================================================
+             БЛИЖАЙШИЙ МАТЧ
+        ================================================== -->
+
+        <div
+            id="upcomingMatch"
+            class="match-card"
+        >
+
+            <div class="match-top">
+
+                <div>
+
+                    <div class="match-type">
+                        Ближайший матч
+                    </div>
+
+                    <div
+                        id="upcomingDate"
+                        class="match-date"
+                    >
+                    </div>
+
+                </div>
+
+
+                <!-- ПОЯВЛЯЕТСЯ ТОЛЬКО В ДЕНЬ МАТЧА -->
+
+                <div
+                    id="matchDay"
+                    class="match-day"
+                >
+                    МАТЧ ДЭЙ
+                </div>
+
+            </div>
+
+
+            <div class="match-teams">
+
+                <div class="team">
+
+                    <div class="team-name">
+                        ХК Челны 2011
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="upcomingVs"
+                    class="vs"
+                >
+                    VS
+                </div>
+
+
+                <div class="team">
+
+                    <div
+                        id="upcomingOpponent"
+                        class="team-name"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ПОСЛЕДНИЙ МАТЧ
+    ====================================================== -->
+
+    <div class="section-header">
+
+        <div class="section-title">
+            Последний матч
+        </div>
+
+        <a
+            class="section-link"
+            href="matches.html"
+        >
+            ВСЕ МАТЧИ →
+        </a>
+
+    </div>
+
+
+    <div
+        id="lastMatch"
+        class="card"
+    >
+        <div class="card-content">
+            Загрузка...
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         СТАТИСТИКА
+    ====================================================== -->
+
+    <div class="section-header">
+
+        <div class="section-title">
+            Команда
+        </div>
+
+        <a
+            class="section-link"
+            href="roster.html"
+        >
+            СОСТАВ →
+        </a>
+
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <div class="stat-number">
+                2011
+            </div>
+
+            <div class="stat-title">
+                ГОД РОЖДЕНИЯ
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div
+                id="playersCount"
+                class="stat-number"
+            >
+                —
+            </div>
+
+            <div class="stat-title">
+                ИГРОКОВ
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         НОВОСТИ
+    ====================================================== -->
+
+    <div class="section-header">
+
+        <div class="section-title">
+            Новости
+        </div>
+
+        <a
+            class="section-link"
+            href="news.html"
+        >
+            ВСЕ НОВОСТИ →
+        </a>
+
+    </div>
+
+
+    <div id="newsContainer">
+    </div>
+
+
+    <!-- =====================================================
+         ТАБЛИЦА
+    ====================================================== -->
+
+    <div class="section-header">
+
+        <div class="section-title">
+            Турнирная таблица
+        </div>
+
+        <a
+            class="section-link"
+            href="standings.html"
+        >
+            ВСЯ ТАБЛИЦА →
+        </a>
+
+    </div>
+
+
+    <div
+        id="standingsContainer"
+        class="table-wrapper"
+    >
+        Загрузка...
+    </div>
+
+
+    <!-- =====================================================
+         НИЖНЕЕ МЕНЮ
+    ====================================================== -->
+
+    <nav
+        id="bottomNavigation"
+        class="bottom-nav"
+    >
+    </nav>
+
 </div>
+
+
+<!-- =========================================================
+     MODAL НОВОСТИ
+========================================================= -->
+
+<div
+    id="newsModal"
+    class="modal"
+    onclick="closeNewsModal(event)"
+>
+
+    <div class="modal-window">
+
+        <button
+            class="modal-close"
+            onclick="closeNewsModal(event)"
+        >
+            ×
+        </button>
+
+        <div id="modalContent">
+        </div>
+
+    </div>
+
 </div>
-</header>
 
-<main>
-
-<div class="label">Ближайший матч</div>
-<h1>МАТЧ ДЭЙ</h1>
-
-<div id="nextMatch" class="card">
-Загрузка...
-</div>
-
-<div class="title">Последний матч</div>
-
-<div id="lastMatch" class="card">
-Загрузка...
-</div>
-
-<div class="title">Последние новости</div>
-
-<div id="news">
-Загрузка...
-</div>
-
-<a class="more" href="news.html">Все новости →</a>
-
-</main>
-
-<nav class="bottom">
-
-<a class="active" href="index.html">
-<span class="icon">⌂</span>
-Главная
-</a>
-
-<a href="matches.html">
-<span class="icon">🏒</span>
-Матчи
-</a>
-
-<a href="roster.html">
-<span class="icon">👥</span>
-Состав
-</a>
-
-<a href="standings.html">
-<span class="icon">📊</span>
-Таблица
-</a>
-
-<a href="news.html">
-<span class="icon">📰</span>
-Новости
-</a>
-
-</nav>
 
 <script>
 
-const SUPABASE_URL="https://jxlbojosxaaqnyuzohnw.supabase.co";
+/* =========================================================
+   SUPABASE
+========================================================= */
 
-const SUPABASE_KEY="sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
+const SUPABASE_URL =
+    "https://jxlbojosxaaqnyuzohnw.supabase.co";
 
-const headers={
-apikey:SUPABASE_KEY,
-Authorization:"Bearer "+SUPABASE_KEY
-};
+const SUPABASE_KEY =
+    "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
 
-async function getData(table,query=""){
-const response=await fetch(
-SUPABASE_URL+"/rest/v1/"+table+"?select=*"+query,
-{headers}
-);
 
-if(!response.ok) throw new Error(response.status);
+/* =========================================================
+   SUPABASE FETCH
+========================================================= */
 
-return await response.json();
-}
+async function supabaseFetch(
+    table,
+    query = ""
+) {
 
-function escapeHTML(text){
-return String(text ?? "")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;");
-}
+    const response = await fetch(
+        SUPABASE_URL +
+        "/rest/v1/" +
+        table +
+        "?" +
+        query,
+        {
+            method: "GET",
 
-function formatDate(date){
-if(!date)return "";
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization":
+                    "Bearer " + SUPABASE_KEY
+            }
+        }
+    );
 
-const d=new Date(date);
+    if (!response.ok) {
 
-return d.toLocaleDateString("ru-RU",{
-day:"numeric",
-month:"long",
-year:"numeric"
-});
-}
+        throw new Error(
+            await response.text()
+        );
 
-async function loadSettings(){
+    }
 
-try{
-
-const data=await getData("settings","&limit=1");
-
-if(!data.length)return;
-
-const s=data[0];
-
-const root=document.documentElement;
-
-if(s.primary_color)
-root.style.setProperty("--primary",s.primary_color);
-
-if(s.secondary_color)
-root.style.setProperty("--secondary",s.secondary_color);
-
-if(s.background_color)
-root.style.setProperty("--bg",s.background_color);
-
-if(s.card_color)
-root.style.setProperty("--card",s.card_color);
-
-if(s.text_color)
-root.style.setProperty("--text",s.text_color);
-
-if(s.muted_text_color)
-root.style.setProperty("--muted",s.muted_text_color);
-
-if(s.button_color)
-root.style.setProperty("--button",s.button_color);
-
-if(s.border_color)
-root.style.setProperty("--border",s.border_color);
-
-if(s.border_radius)
-root.style.setProperty("--radius",s.border_radius+"px");
-
-if(s.site_name){
-
-document.title=s.site_name;
-
-document.getElementById("siteName").textContent=s.site_name;
+    return await response.json();
 
 }
 
-if(s.logo_url)
-document.getElementById("logo").src=s.logo_url;
 
-if(s.favicon_url)
-document.getElementById("favicon").href=s.favicon_url;
+/* =========================================================
+   ЭКРАНИРОВАНИЕ HTML
+========================================================= */
 
-if(s.background_image)
-document.body.style.backgroundImage=
-`url("${s.background_image}")`;
+function escapeHTML(value) {
 
-}
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
+    }
 
-catch(error){
-
-console.log(error);
-
-}
-
-}
-
-async function loadMatches(){
-
-try{
-
-const matches=await getData(
-"matches",
-"&order=date.asc,time.asc"
-);
-
-const next=document.getElementById("nextMatch");
-
-const last=document.getElementById("lastMatch");
-
-if(!matches.length){
-
-next.innerHTML="Матчей пока нет";
-
-last.innerHTML="Матчей пока нет";
-
-return;
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 
 }
 
-const now=new Date();
 
-let upcoming=matches.find(m=>{
+/* =========================================================
+   ДАТА МОСКОВСКОЕ ВРЕМЯ
+========================================================= */
 
-if(!m.date)return false;
+function todayMoscow() {
 
-return new Date(
-m.date+"T"+(m.time||"00:00")
-)>=now;
+    const formatter =
+        new Intl.DateTimeFormat(
+            "en-CA",
+            {
+                timeZone: "Europe/Moscow",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            }
+        );
 
-});
-
-if(!upcoming)
-upcoming=matches[matches.length-1];
-
-const home=
-upcoming.home===true ||
-String(upcoming.home).toLowerCase()==="true";
-
-next.innerHTML=`
-
-<div class="date">
-${escapeHTML(formatDate(upcoming.date))}
-${upcoming.time?" · "+escapeHTML(upcoming.time):""}
-</div>
-
-<div class="teams">
-${escapeHTML(home?"ХК Челны":upcoming.opponent||"Соперник")}
-</div>
-
-<div class="teams">
-${escapeHTML(home?
-upcoming.opponent||"Соперник":
-"ХК Челны")}
-</div>
-
-<div class="score">VS</div>
-
-`;
-
-const played=[...matches].reverse()
-.find(m=>m.score || m.status);
-
-if(played){
-
-const h=
-played.home===true ||
-String(played.home).toLowerCase()==="true";
-
-last.innerHTML=`
-
-<div class="date">
-${escapeHTML(formatDate(played.date))}
-</div>
-
-<div class="teams">
-${escapeHTML(h?"ХК Челны":played.opponent||"Соперник")}
-</div>
-
-<div class="teams">
-${escapeHTML(h?
-played.opponent||"Соперник":
-"ХК Челны")}
-</div>
-
-<div class="score">
-${escapeHTML(played.score||"— : —")}
-</div>
-
-<div class="muted">
-${escapeHTML(played.status||"")}
-</div>
-
-`;
+    return formatter.format(
+        new Date()
+    );
 
 }
 
-}
 
-catch(error){
+/* =========================================================
+   ВРЕМЯ МАТЧА
+========================================================= */
 
-console.log(error);
+function getMatchDate(match) {
 
-document.getElementById("nextMatch").textContent=
-"Ошибка загрузки";
+    if (!match || !match.date) {
 
-}
+        return null;
 
-}
+    }
 
-async function loadNews(){
+    const time =
+        match.time || "00:00";
 
-try{
+    /*
+       Матчи считаем по московскому времени.
+    */
 
-const news=await getData(
-"news",
-"&order=id.desc&limit=2"
-);
-
-const box=document.getElementById("news");
-
-if(!news.length){
-
-box.innerHTML=
-'<div class="card">Новостей пока нет</div>';
-
-return;
+    return new Date(
+        match.date +
+        "T" +
+        time +
+        ":00+03:00"
+    );
 
 }
 
-box.innerHTML=news.map(n=>`
 
-<div class="card">
+/* =========================================================
+   ПРОВЕРКА «МАТЧ ДЭЙ»
+=========================================================
 
-<div class="date">
-${escapeHTML(formatDate(n.created_at||n.date))}
-</div>
+   ВАЖНО:
 
-<div class="title">
-${escapeHTML(n.title||"Новость")}
-</div>
+   Надпись появляется НЕ тогда,
+   когда матч ближайший.
 
-<div class="muted">
-${escapeHTML(n.text||"")}
-</div>
+   Она появляется только если:
 
-</div>
+   дата матча === сегодняшняя дата.
 
-`).join("");
+========================================================= */
+
+function isMatchDay(match) {
+
+    if (!match || !match.date) {
+
+        return false;
+
+    }
+
+    return (
+        match.date ===
+        todayMoscow()
+    );
 
 }
 
-catch(error){
 
-console.log(error);
+/* =========================================================
+   НАСТРОЙКИ
+========================================================= */
+
+let settings = {};
+
+
+/* =========================================================
+   ДАННЫЕ
+========================================================= */
+
+let matches = [];
+
+let news = [];
+
+let players = [];
+
+let standings = [];
+
+
+/* =========================================================
+   ЗАГРУЗКА НАСТРОЕК
+========================================================= */
+
+async function loadSettings() {
+
+    const data =
+        await supabaseFetch(
+            "settings",
+            "select=*&limit=1"
+        );
+
+    settings =
+        data.length
+            ? data[0]
+            : {};
 
 }
 
+
+/* =========================================================
+   ЗАГРУЗКА МАТЧЕЙ
+========================================================= */
+
+async function loadMatches() {
+
+    matches =
+        await supabaseFetch(
+            "matches",
+            "select=*&order=date.asc,time.asc"
+        );
+
 }
 
-loadSettings();
-loadMatches();
-loadNews();
+
+/* =========================================================
+   ЗАГРУЗКА НОВОСТЕЙ
+========================================================= */
+
+async function loadNews() {
+
+    news =
+        await supabaseFetch(
+            "news",
+            "select=*&order=created_at.desc"
+        );
+
+}
+
+
+/* =========================================================
+   ЗАГРУЗКА СОСТАВА
+========================================================= */
+
+async function loadPlayers() {
+
+    players =
+        await supabaseFetch(
+            "players",
+            "select=*"
+        );
+
+}
+
+
+/* =========================================================
+   ЗАГРУЗКА ТАБЛИЦЫ
+========================================================= */
+
+async function loadStandings() {
+
+    standings =
+        await supabaseFetch(
+            "standings",
+            "select=*&order=position.asc"
+        );
+
+}
+
+
+/* =========================================================
+   НАЙТИ МАТЧ ПО ID
+========================================================= */
+
+function findMatch(id) {
+
+    if (!id) {
+
+        return null;
+
+    }
+
+    return matches.find(
+        match =>
+            String(match.id) ===
+            String(id)
+    );
+
+}
+
+
+/* =========================================================
+   АВТОМАТИЧЕСКИЙ БЛИЖАЙШИЙ
+========================================================= */
+
+function getAutomaticUpcoming() {
+
+    const now =
+        new Date();
+
+    return matches.find(
+        match =>
+            getMatchDate(match) >= now
+    );
+
+}
+
+
+/* =========================================================
+   АВТОМАТИЧЕСКИЙ ПОСЛЕДНИЙ
+========================================================= */
+
+function getAutomaticLast() {
+
+    const now =
+        new Date();
+
+    const played =
+        matches
+            .filter(
+                match =>
+                    getMatchDate(match) < now
+            )
+            .sort(
+                (a,b) =>
+                    getMatchDate(b) -
+                    getMatchDate(a)
+            );
+
+    return played[0] || null;
+
+}
+
+
+/* =========================================================
+   ОТОБРАЖЕНИЕ БЛИЖАЙШЕГО МАТЧА
+========================================================= */
+
+function renderUpcoming() {
+
+    /*
+       СНАЧАЛА используем выбор администратора.
+
+       Если он ничего не выбрал —
+       используем автоматический поиск.
+    */
+
+    let match =
+        findMatch(
+            settings.home_upcoming_match_id
+        );
+
+    if (!match) {
+
+        match =
+            getAutomaticUpcoming();
+
+    }
+
+
+    if (!match) {
+
+        document.getElementById(
+            "upcomingMatch"
+        ).style.display = "none";
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "upcomingMatch"
+    ).style.display = "block";
+
+
+    document.getElementById(
+        "upcomingDate"
+    ).textContent =
+        formatMatchDate(match);
+
+
+    document.getElementById(
+        "upcomingOpponent"
+    ).textContent =
+        match.opponent ||
+        "Соперник";
+
+
+    /*
+       =====================================================
+       ГЛАВНАЯ ЛОГИКА «МАТЧ ДЭЙ»
+       =====================================================
+
+       Она НЕ зависит от того,
+       ближайший матч это или нет.
+
+       Проверяем именно дату.
+    */
+
+    const matchDay =
+        document.getElementById(
+            "matchDay"
+        );
+
+
+    if (
+        isMatchDay(match)
+    ) {
+
+        matchDay.classList.add(
+            "visible"
+        );
+
+    } else {
+
+        matchDay.classList.remove(
+            "visible"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ФОРМАТ ДАТЫ
+========================================================= */
+
+function formatMatchDate(match) {
+
+    if (!match.date) {
+
+        return "";
+
+    }
+
+    const parts =
+        match.date.split("-");
+
+    if (parts.length !== 3) {
+
+        return match.date;
+
+    }
+
+    const year =
+        parts[0];
+
+    const month =
+        Number(parts[1]);
+
+    const day =
+        Number(parts[2]);
+
+
+    const months = [
+        "",
+        "января",
+        "февраля",
+        "марта",
+        "апреля",
+        "мая",
+        "июня",
+        "июля",
+        "августа",
+        "сентября",
+        "октября",
+        "ноября",
+        "декабря"
+    ];
+
+
+    return (
+        day +
+        " " +
+        months[month] +
+        " " +
+        year +
+        (
+            match.time
+                ? " · " + match.time
+                : ""
+        )
+    );
+
+}
+
+
+/* =========================================================
+   ПОСЛЕДНИЙ МАТЧ
+========================================================= */
+
+function renderLastMatch() {
+
+    let match =
+        findMatch(
+            settings.home_last_match_id
+        );
+
+
+    if (!match) {
+
+        match =
+            getAutomaticLast();
+
+    }
+
+
+    const container =
+        document.getElementById(
+            "lastMatch"
+        );
+
+
+    if (!match) {
+
+        container.innerHTML = `
+            <div class="card-content">
+                <div style="color:var(--muted)">
+                    Последний матч пока не выбран
+                </div>
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML = `
+
+        <div class="card-content">
+
+            <div
+                style="
+                    color:var(--muted);
+                    font-size:9px;
+                    text-transform:uppercase;
+                    letter-spacing:.12em;
+                "
+            >
+                ${escapeHTML(
+                    formatMatchDate(match)
+                )}
+            </div>
+
+
+            <div
+                style="
+                    display:grid;
+                    grid-template-columns:1fr auto 1fr;
+                    align-items:center;
+                    gap:10px;
+                    margin-top:15px;
+                "
+            >
+
+                <strong>
+                    ХК Челны 2011
+                </strong>
+
+
+                <strong
+                    style="
+                        color:var(--yellow);
+                        font-size:25px;
+                    "
+                >
+                    ${escapeHTML(
+                        match.score ||
+                        "— : —"
+                    )}
+                </strong>
+
+
+                <strong
+                    style="
+                        text-align:right;
+                    "
+                >
+                    ${escapeHTML(
+                        match.opponent ||
+                        "Соперник"
+                    )}
+                </strong>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   НОВОСТИ
+========================================================= */
+
+function renderNews() {
+
+    const container =
+        document.getElementById(
+            "newsContainer"
+        );
+
+
+    if (!news.length) {
+
+        container.innerHTML = `
+            <div class="empty">
+                Новостей пока нет
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        news
+            .slice(0,3)
+            .map(
+                item => `
+
+                    <article
+                        class="card news-card"
+                        onclick="openNews(${item.id})"
+                    >
+
+                        ${
+                            item.image_url
+                            ?
+                            `
+                            <img
+                                class="news-image"
+                                src="${escapeHTML(
+                                    item.image_url
+                                )}"
+                                alt=""
+                            >
+                            `
+                            :
+                            ""
+                        }
+
+
+                        <div
+                            class="news-content"
+                        >
+
+                            <div
+                                class="news-date"
+                            >
+                                ${escapeHTML(
+                                    item.date || ""
+                                )}
+                            </div>
+
+
+                            <div
+                                class="news-title"
+                            >
+                                ${escapeHTML(
+                                    item.title || ""
+                                )}
+                            </div>
+
+
+                            <div
+                                class="news-text"
+                            >
+                                ${escapeHTML(
+                                    item.text ||
+                                    item.content ||
+                                    ""
+                                )}
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                `
+            )
+            .join("");
+
+}
+
+
+/* =========================================================
+   СОСТАВ
+========================================================= */
+
+function renderPlayers() {
+
+    document.getElementById(
+        "playersCount"
+    ).textContent =
+        players.length;
+
+}
+
+
+/* =========================================================
+   ТУРНИРНАЯ ТАБЛИЦА
+========================================================= */
+
+function renderStandings() {
+
+    const container =
+        document.getElementById(
+            "standingsContainer"
+        );
+
+
+    if (!standings.length) {
+
+        container.innerHTML = `
+            <div class="empty">
+                Таблица пока пуста
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    const top =
+        standings.slice(0,5);
+
+
+    container.innerHTML = `
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        #
+                    </th>
+
+                    <th>
+                        КОМАНДА
+                    </th>
+
+                    <th>
+                        И
+                    </th>
+
+                    <th>
+                        О
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                ${
+                    top
+                    .map(
+                        team => `
+
+                            <tr
+                                class="${
+                                    String(
+                                        team.team ||
+                                        ""
+                                    )
+                                    .toLowerCase()
+                                    .includes(
+                                        "челны"
+                                    )
+                                    ?
+                                    "club-row"
+                                    :
+                                    ""
+                                }"
+                            >
+
+                                <td>
+                                    ${team.position}
+                                </td>
+
+                                <td>
+                                    ${escapeHTML(
+                                        team.team
+                                    )}
+                                </td>
+
+                                <td>
+                                    ${team.games || 0}
+                                </td>
+
+                                <td>
+                                    ${team.points || 0}
+                                </td>
+
+                            </tr>
+
+                        `
+                    )
+                    .join("")
+                }
+
+            </tbody>
+
+        </table>
+
+    `;
+
+}
+
+
+/* =========================================================
+   НИЖНЕЕ МЕНЮ
+========================================================= */
+
+function createIcon(
+    value,
+    fallback
+) {
+
+    if (!value) {
+
+        return `
+            <span class="nav-emoji">
+                ${fallback}
+            </span>
+        `;
+
+    }
+
+
+    if (
+        value.startsWith("http://") ||
+        value.startsWith("https://")
+    ) {
+
+        return `
+            <img
+                src="${escapeHTML(value)}"
+                alt=""
+            >
+        `;
+
+    }
+
+
+    return `
+        <span class="nav-emoji">
+            ${escapeHTML(value)}
+        </span>
+    `;
+
+}
+
+
+function renderNavigation() {
+
+    const nav =
+        document.getElementById(
+            "bottomNavigation"
+        );
+
+
+    nav.innerHTML = `
+
+        <a
+            href="index.html"
+            class="nav-item active"
+        >
+
+            <span class="nav-icon">
+                ${createIcon(
+                    settings.home_icon,
+                    "⌂"
+                )}
+            </span>
+
+            Главная
+
+        </a>
+
+
+        <a
+            href="matches.html"
+            class="nav-item"
+        >
+
+            <span class="nav-icon">
+                ${createIcon(
+                    settings.matches_icon,
+                    "🏒"
+                )}
+            </span>
+
+            Матчи
+
+        </a>
+
+
+        <a
+            href="roster.html"
+            class="nav-item"
+        >
+
+            <span class="nav-icon">
+                ${createIcon(
+                    settings.roster_icon,
+                    "👥"
+                )}
+            </span>
+
+            Состав
+
+        </a>
+
+
+        <a
+            href="standings.html"
+            class="nav-item"
+        >
+
+            <span class="nav-icon">
+                ${createIcon(
+                    settings.table_icon,
+                    "▥"
+                )}
+            </span>
+
+            Таблица
+
+        </a>
+
+
+        <a
+            href="news.html"
+            class="nav-item"
+        >
+
+            <span class="nav-icon">
+                ${createIcon(
+                    settings.news_icon,
+                    "📰"
+                )}
+            </span>
+
+            Новости
+
+        </a>
+
+    `;
+
+}
+
+
+/* =========================================================
+   ЛОГОТИП И ТЕКСТ
+========================================================= */
+
+function renderSettings() {
+
+    if (settings.site_name) {
+
+        document.getElementById(
+            "clubName"
+        ).textContent =
+            settings.site_name;
+
+    }
+
+
+    if (settings.logo_url) {
+
+        document.getElementById(
+            "clubLogo"
+        ).src =
+            settings.logo_url;
+
+    }
+
+
+    if (settings.home_title) {
+
+        document.getElementById(
+            "heroTitle"
+        ).innerHTML =
+            escapeHTML(
+                settings.home_title
+            ).replace(
+                /\n/g,
+                "<br>"
+            );
+
+    }
+
+
+    if (settings.home_subtitle) {
+
+        document.getElementById(
+            "heroDescription"
+        ).textContent =
+            settings.home_subtitle;
+
+    }
+
+}
+
+
+/* =========================================================
+   NEWS MODAL
+========================================================= */
+
+function openNews(id) {
+
+    const item =
+        news.find(
+            x =>
+                String(x.id) ===
+                String(id)
+        );
+
+
+    if (!item) {
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "modalContent"
+    ).innerHTML = `
+
+        ${
+            item.image_url
+            ?
+            `
+            <img
+                src="${escapeHTML(
+                    item.image_url
+                )}"
+                style="
+                    width:100%;
+                    border-radius:16px;
+                    margin-bottom:15px;
+                "
+            >
+            `
+            :
+            ""
+        }
+
+
+        <div
+            style="
+                color:var(--muted);
+                font-size:9px;
+                text-transform:uppercase;
+            "
+        >
+            ${escapeHTML(
+                item.date || ""
+            )}
+        </div>
+
+
+        <h2
+            style="
+                margin-top:7px;
+                font-size:25px;
+            "
+        >
+            ${escapeHTML(
+                item.title || ""
+            )}
+        </h2>
+
+
+        <p
+            style="
+                margin-top:12px;
+                color:var(--muted);
+                line-height:1.6;
+                font-size:13px;
+            "
+        >
+            ${escapeHTML(
+                item.text ||
+                item.content ||
+                ""
+            ).replace(
+                /\n/g,
+                "<br>"
+            )}
+        </p>
+
+    `;
+
+
+    document.getElementById(
+        "newsModal"
+    ).classList.add("open");
+
+}
+
+
+function closeNewsModal(event) {
+
+    if (
+        event &&
+        event.target &&
+        event.target.closest &&
+        event.target.closest(
+            ".modal-window"
+        ) &&
+        !event.target.classList.contains(
+            "modal-close"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "newsModal"
+    ).classList.remove("open");
+
+}
+
+
+/* =========================================================
+   ПРИМЕНЕНИЕ ЦВЕТОВ ИЗ SUPABASE
+========================================================= */
+
+function applyColors() {
+
+    const root =
+        document.documentElement;
+
+
+    const colors = {
+
+        "--blue":
+            settings.primary_color,
+
+        "--yellow":
+            settings.secondary_color,
+
+        "--background":
+            settings.background_color,
+
+        "--card":
+            settings.card_color,
+
+        "--white":
+            settings.text_color,
+
+        "--muted":
+            settings.muted_text_color,
+
+        "--border":
+            settings.border_color
+
+    };
+
+
+    Object.entries(colors)
+        .forEach(
+            ([name,value]) => {
+
+                if (value) {
+
+                    root.style.setProperty(
+                        name,
+                        value
+                    );
+
+                }
+
+            }
+        );
+
+
+    if (
+        settings.border_radius
+    ) {
+
+        root.style.setProperty(
+            "--radius",
+            settings.border_radius +
+            "px"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ЗАПУСК
+========================================================= */
+
+async function start() {
+
+    try {
+
+        /*
+           Загружаем всё параллельно.
+        */
+
+        await Promise.all([
+
+            loadSettings(),
+
+            loadMatches(),
+
+            loadNews(),
+
+            loadPlayers(),
+
+            loadStandings()
+
+        ]);
+
+
+        applyColors();
+
+        renderSettings();
+
+        renderUpcoming();
+
+        renderLastMatch();
+
+        renderNews();
+
+        renderPlayers();
+
+        renderStandings();
+
+        renderNavigation();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        document.getElementById(
+            "upcomingMatch"
+        ).innerHTML = `
+
+            <div
+                style="
+                    color:#000056;
+                    padding:10px;
+                "
+            >
+                Не удалось загрузить данные
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+start();
 
 </script>
 
