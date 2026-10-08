@@ -120,6 +120,36 @@ text-align:left;
 font-weight:800;
 }
 
+.team-cell{
+display:flex;
+align-items:center;
+gap:9px;
+}
+
+.team-logo{
+width:32px;
+height:32px;
+object-fit:contain;
+flex-shrink:0;
+}
+
+.team-info{
+display:flex;
+flex-direction:column;
+gap:2px;
+}
+
+.team-name{
+font-weight:800;
+line-height:1.1;
+}
+
+.team-city{
+font-size:10px;
+font-weight:400;
+color:var(--muted);
+}
+
 .points{
 font-weight:900;
 font-size:15px;
@@ -360,6 +390,146 @@ if(s.favicon_url)
 document.getElementById("favicon").href=
 s.favicon_url;
 
+if(s.background_image)
+document.body.style.backgroundImage=
+`url("${s.background_image}")`;
+
+}
+
+
+/* =========================
+   РЕЕСТР КОМАНД
+========================= */
+
+let teams=[];
+
+let teamsMap=new Map();
+
+async function loadTeams(){
+
+try{
+
+const data=await getData(
+"teams",
+"&order=name.asc"
+);
+
+if(!Array.isArray(data)){
+
+teams=[];
+teamsMap=new Map();
+
+return;
+
+}
+
+teams=data;
+
+teamsMap=new Map(
+teams.map(team=>[
+String(team.id),
+team
+])
+);
+
+}catch(error){
+
+console.log("Реестр команд пока недоступен");
+
+teams=[];
+teamsMap=new Map();
+
+}
+
+}
+
+function getTeam(id){
+
+if(
+id===null ||
+id===undefined ||
+id===""
+){
+
+return null;
+
+}
+
+return teamsMap.get(String(id))||null;
+
+}
+
+function findTeamByName(name){
+
+if(!name)return null;
+
+const search=String(name)
+.trim()
+.toLowerCase();
+
+return teams.find(team=>
+String(team.name||"")
+.trim()
+.toLowerCase()===search
+)||null;
+
+}
+
+
+/* =========================
+   ТАБЛИЦА
+========================= */
+
+function teamHTML(t){
+
+const team=getTeam(t.team_id);
+
+const name=
+team?.name ||
+t.team ||
+"Команда";
+
+const city=
+team?.city ||
+"";
+
+const logo=
+team?.logo_url ||
+"";
+
+return `
+
+<div class="team-cell">
+
+${
+logo
+? `<img
+class="team-logo"
+src="${esc(logo)}"
+alt="">`
+: ""
+}
+
+<div class="team-info">
+
+<div class="team-name">
+${esc(name)}
+</div>
+
+${
+city
+? `<div class="team-city">
+${esc(city)}
+</div>`
+: ""
+}
+
+</div>
+
+</div>
+
+`;
+
 }
 
 async function load(){
@@ -386,25 +556,45 @@ box.innerHTML=data.map(t=>`
 
 <tr>
 
-<td>${esc(t.position)}</td>
+<td>
+${esc(t.position)}
+</td>
 
-<td>${esc(t.team)}</td>
+<td>
+${teamHTML(t)}
+</td>
 
-<td>${esc(t.games||0)}</td>
+<td>
+${esc(t.games||0)}
+</td>
 
-<td>${esc(t.wins||0)}</td>
+<td>
+${esc(t.wins||0)}
+</td>
 
-<td>${esc(t.overtime_wins||0)}</td>
+<td>
+${esc(t.overtime_wins||0)}
+</td>
 
-<td>${esc(t.losses||0)}</td>
+<td>
+${esc(t.losses||0)}
+</td>
 
-<td>${esc(t.overtime_losses||0)}</td>
+<td>
+${esc(t.overtime_losses||0)}
+</td>
 
-<td>${esc(t.goals_for||0)}</td>
+<td>
+${esc(t.goals_for||0)}
+</td>
 
-<td>${esc(t.goals_against||0)}</td>
+<td>
+${esc(t.goals_against||0)}
+</td>
 
-<td class="points">${esc(t.points||0)}</td>
+<td class="points">
+${esc(t.points||0)}
+</td>
 
 </tr>
 
@@ -412,8 +602,18 @@ box.innerHTML=data.map(t=>`
 
 }
 
-settings();
-load();
+
+async function init(){
+
+await settings();
+
+await loadTeams();
+
+await load();
+
+}
+
+init();
 
 </script>
 
