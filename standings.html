@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
 
+<head>
     <meta charset="UTF-8">
 
     <meta
@@ -16,938 +16,105 @@
 
     <title>Таблица — ХК Челны 2011</title>
 
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-
-        body {
-            margin: 0;
-
-            background: #f5f7fb;
-            color: #111827;
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-        }
-
-
-        button {
-            font: inherit;
-            border: 0;
-            cursor: pointer;
-        }
-
-
-        /* =========================
-           HEADER
-        ========================= */
-
-        .header {
-            position: sticky;
-            top: 0;
-
-            z-index: 100;
-
-            height: 72px;
-
-            display: flex;
-            align-items: center;
-
-            padding: 0 18px;
-
-            background: #000056;
-            color: white;
-
-            box-shadow:
-                0 4px 20px rgba(0,0,86,.16);
-        }
-
-
-        .header-left {
-            display: flex;
-            align-items: center;
-
-            gap: 12px;
-
-            min-width: 0;
-        }
-
-
-        .back-button {
-            width: 40px;
-            height: 40px;
-
-            border-radius: 12px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background:
-                rgba(255,255,255,.12);
-
-            color: white;
-
-            font-size: 23px;
-        }
-
-
-        .header-logo {
-            width: 42px;
-            height: 42px;
-
-            object-fit: contain;
-
-            border-radius: 10px;
-        }
-
-
-        .header-title {
-            min-width: 0;
-        }
-
-
-        .header-title h1 {
-            margin: 0;
-
-            font-size: 18px;
-            font-weight: 900;
-
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-
-        .header-title span {
-            display: block;
-
-            margin-top: 3px;
-
-            color:
-                rgba(255,255,255,.65);
-
-            font-size: 10px;
-            font-weight: 700;
-
-            letter-spacing: .08em;
-            text-transform: uppercase;
-        }
-
-
-        /* =========================
-           MAIN
-        ========================= */
-
-        main {
-            width: 100%;
-            max-width: 1000px;
-
-            margin: auto;
-
-            padding: 20px 14px 50px;
-        }
-
-
-        .page-heading h2 {
-            margin: 0;
-
-            font-size: 30px;
-            line-height: 1;
-
-            font-weight: 950;
-
-            letter-spacing: -.04em;
-        }
-
-
-        .page-heading p {
-            margin: 8px 0 20px;
-
-            color: #70798a;
-
-            font-size: 13px;
-        }
-
-
-        /* =========================
-           TABLE CARD
-        ========================= */
-
-        .table-card {
-            overflow: hidden;
-
-            background: white;
-
-            border-radius: 20px;
-
-            box-shadow:
-                0 5px 20px rgba(15,23,42,.06);
-
-            border:
-                1px solid rgba(0,0,86,.05);
-        }
-
-
-        .table-header {
-            padding: 15px 15px 12px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #000056,
-                    #0875dc
-                );
-
-            color: white;
-        }
-
-
-        .table-header-title {
-            font-size: 16px;
-            font-weight: 950;
-        }
-
-
-        .table-header-subtitle {
-            margin-top: 4px;
-
-            color:
-                rgba(255,255,255,.65);
-
-            font-size: 9px;
-            font-weight: 700;
-        }
-
-
-        /* =========================
-           SCROLL
-        ========================= */
-
-        .table-scroll {
-            width: 100%;
-
-            overflow-x: auto;
-
-            scrollbar-width: thin;
-        }
-
-
-        table {
-            width: 100%;
-
-            min-width: 650px;
-
-            border-collapse: collapse;
-        }
-
-
-        thead th {
-            padding: 11px 7px;
-
-            background: #f4f6f9;
-
-            color: #7c8492;
-
-            font-size: 9px;
-            font-weight: 900;
-
-            text-align: center;
-
-            white-space: nowrap;
-        }
-
-
-        thead th:first-child {
-            text-align: center;
-        }
-
-
-        tbody tr {
-            border-top:
-                1px solid #edf0f4;
-
-            transition: .15s ease;
-        }
-
-
-        tbody tr.my-team {
-            background:
-                rgba(255,205,0,.12);
-        }
-
-
-        tbody td {
-            padding: 12px 7px;
-
-            color: #343c4b;
-
-            font-size: 11px;
-            font-weight: 800;
-
-            text-align: center;
-
-            white-space: nowrap;
-        }
-
-
-        /* PLACE */
-
-        .place {
-            width: 40px;
-
-            color: #7f8795;
-
-            font-size: 11px;
-            font-weight: 950;
-        }
-
-
-        .place.top {
-            color: #000056;
-        }
-
-
-        /* TEAM */
-
-        .team-cell {
-            min-width: 160px;
-
-            display: flex;
-            align-items: center;
-
-            gap: 9px;
-
-            text-align: left;
-        }
-
-
-        .team-logo {
-            width: 34px;
-            height: 34px;
-
-            flex: 0 0 34px;
-
-            object-fit: contain;
-        }
-
-
-        .team-logo-placeholder {
-            width: 34px;
-            height: 34px;
-
-            flex: 0 0 34px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 9px;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    #e8ebf1,
-                    #d7dce5
-                );
-
-            color: #7e8795;
-
-            font-size: 12px;
-            font-weight: 900;
-        }
-
-
-        .team-name {
-            overflow: hidden;
-
-            color: #202735;
-
-            font-size: 11px;
-            font-weight: 950;
-
-            text-overflow: ellipsis;
-        }
-
-
-        .team-mark {
-            margin-top: 2px;
-
-            color: #0875dc;
-
-            font-size: 8px;
-            font-weight: 900;
-        }
-
-
-        /* POINTS */
-
-        .points {
-            color: #000056;
-
-            font-size: 13px;
-            font-weight: 950;
-        }
-
-
-        /* =========================
-           LEGEND
-        ========================= */
-
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-
-            gap: 7px;
-
-            margin-top: 12px;
-
-            padding: 0 3px;
-        }
-
-
-        .legend-item {
-            padding: 7px 9px;
-
-            border-radius: 9px;
-
-            background: white;
-
-            color: #8a92a0;
-
-            font-size: 8px;
-            font-weight: 800;
-        }
-
-
-        /* =========================
-           EMPTY
-        ========================= */
-
-        .empty {
-            padding: 45px 20px;
-
-            text-align: center;
-
-            background: white;
-
-            border-radius: 20px;
-
-            color: #858d9c;
-        }
-
-
-        .empty-icon {
-            font-size: 38px;
-
-            margin-bottom: 8px;
-        }
-
-
-        .empty-title {
-            color: #303847;
-
-            font-size: 15px;
-            font-weight: 900;
-        }
-
-
-        .empty-text {
-            margin-top: 5px;
-
-            font-size: 11px;
-            line-height: 1.4;
-        }
-
-
-        /* =========================
-           LOADER
-        ========================= */
-
-        .loader-wrap {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            padding: 70px 0;
-        }
-
-
-        .loader {
-            width: 32px;
-            height: 32px;
-
-            border:
-                3px solid #dfe4ed;
-
-            border-top-color:
-                #000056;
-
-            border-radius: 50%;
-
-            animation:
-                spin .7s linear infinite;
-        }
-
-
-        @keyframes spin {
-
-            to {
-                transform: rotate(360deg);
-            }
-
-        }
-
-
-        /* =========================
-           DESKTOP
-        ========================= */
-
-        @media (min-width: 700px) {
-
-            .header {
-                padding: 0 28px;
-            }
-
-
-            main {
-                padding:
-                    32px 20px 60px;
-            }
-
-
-            .table-card {
-                border-radius: 22px;
-            }
-
-        }
-
-    </style>
-
+    <link rel="stylesheet" href="style.css">
 </head>
-
 
 <body>
 
-
-<header class="header">
-
-    <div class="header-left">
-
-
-        <button
-            class="back-button"
-            onclick="goBack()"
-        >
-            ‹
-        </button>
-
-
-        <img
-            id="headerLogo"
-            class="header-logo"
-            src=""
-            alt=""
-        >
-
-
-        <div class="header-title">
-
-            <h1 id="headerTeamName">
-                ХК Челны 2011
-            </h1>
-
-
-            <span id="headerSeason">
-                Сезон 2026/27
-            </span>
-
-        </div>
-
-    </div>
-
-</header>
-
-
-
-<main>
-
-
-    <div class="page-heading">
-
-        <h2>
-            Таблица
-        </h2>
-
-
-        <p>
-            Турнирная таблица текущего чемпионата.
-        </p>
-
-    </div>
-
-
-
-    <div id="content">
-
-        <div class="loader-wrap">
-
-            <div class="loader"></div>
-
-        </div>
-
-    </div>
-
-
-</main>
-
-
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-
-<script>
-
-/* =========================================================
-   CONFIG
-========================================================= */
-
-const SUPABASE_URL =
-    "https://jxlbojosxaaqnyuzohnw.supabase.co";
-
-
-const SUPABASE_KEY =
-    "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
-
-
-const STORAGE_BUCKET =
-    "site-media";
-
-
-const db =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-
-/* =========================================================
-   STATE
-========================================================= */
-
-let standings = [];
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function escapeHtml(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "";
-    }
-
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-
-function publicImage(url) {
-
-    if (!url) {
-        return "";
-    }
-
-
-    if (
-        url.startsWith("http://") ||
-        url.startsWith("https://")
-    ) {
-        return url;
-    }
-
-
-    const path =
-        url
-            .replace(/^\/+/, "")
-            .replace(/^site-media\//, "");
-
-
-    return (
-        SUPABASE_URL +
-        "/storage/v1/object/public/" +
-        STORAGE_BUCKET +
-        "/" +
-        path
-    );
-}
-
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-async function loadSettings() {
-
-    const { data, error } =
-        await db
-            .from("settings")
-            .select("*")
-            .limit(1)
-            .maybeSingle();
-
-
-    if (error || !data) {
-        return;
-    }
-
-
-    document
-        .getElementById("headerTeamName")
-        .textContent =
-            data.team_name ||
-            data.name ||
-            "ХК Челны 2011";
-
-
-    document
-        .getElementById("headerSeason")
-        .textContent =
-            `Сезон ${data.season || "2026/27"}`;
-
-
-    const logo =
-        data.logo_url ||
-        data.logo ||
-        data.team_logo;
-
-
-    if (logo) {
-
-        document
-            .getElementById("headerLogo")
-            .src =
-            publicImage(logo);
-
-    }
-
-}
-
-
-/* =========================================================
-   LOAD STANDINGS
-========================================================= */
-
-async function loadStandings() {
-
-    const response =
-        await db
-            .from("standings")
-            .select("*");
-
-
-    if (response.error) {
-
-        console.error(
-            response.error
-        );
-
-
-        document
-            .getElementById("content")
-            .innerHTML = `
-
-                <div class="empty">
-
-                    <div class="empty-icon">
-                        ⚠️
-                    </div>
-
-                    <div class="empty-title">
-                        Не удалось загрузить таблицу
-                    </div>
-
-                    <div class="empty-text">
-                        Проверьте подключение
-                        к Supabase.
-                    </div>
-
+<div class="page">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="site-header">
+
+        <div class="header-inner">
+
+            <a
+                href="index.html"
+                class="header-back"
+                aria-label="На главную"
+            >
+                ‹
+            </a>
+
+            <img
+                id="siteLogo"
+                class="header-logo"
+                src=""
+                alt="ХК Челны 2011"
+            >
+
+            <div class="header-brand">
+
+                <div
+                    id="siteTitle"
+                    class="header-brand-title"
+                >
+                    ХК Челны 2011
                 </div>
 
-            `;
-
-        return;
-    }
-
-
-    standings =
-        response.data || [];
-
-
-    sortStandings();
-
-    renderStandings();
-}
-
-
-/* =========================================================
-   SORT
-========================================================= */
-
-function sortStandings() {
-
-    standings.sort(
-        (a, b) => {
-
-            const placeA =
-                Number(
-                    a.place ??
-                    a.position ??
-                    999
-                );
-
-
-            const placeB =
-                Number(
-                    b.place ??
-                    b.position ??
-                    999
-                );
-
-
-            return placeA - placeB;
-        }
-    );
-
-}
-
-
-/* =========================================================
-   TEAM NAME
-========================================================= */
-
-function getTeamName(row) {
-
-    return (
-        row.team ||
-        row.team_name ||
-        row.name ||
-        row.title ||
-        "Команда"
-    );
-}
-
-
-function getTeamLogo(row) {
-
-    return (
-        row.logo_url ||
-        row.image_url ||
-        row.logo ||
-        ""
-    );
-}
-
-
-/* =========================================================
-   IS OUR TEAM
-========================================================= */
-
-function isOurTeam(row) {
-
-    const name =
-        getTeamName(row)
-            .toLowerCase();
-
-
-    return (
-        name.includes("челны") ||
-        name.includes("cheln")
-    );
-}
-
-
-/* =========================================================
-   RENDER
-========================================================= */
-
-function renderStandings() {
-
-    const container =
-        document.getElementById(
-            "content"
-        );
-
-
-    if (!standings.length) {
-
-        container.innerHTML = `
-
-            <div class="empty">
-
-                <div class="empty-icon">
-                    🏆
-                </div>
-
-                <div class="empty-title">
-                    Таблица пока пуста
-                </div>
-
-                <div class="empty-text">
-                    Заполните турнирную таблицу
-                    через админ-панель.
+                <div
+                    id="siteSubtitle"
+                    class="header-brand-subtitle"
+                >
+                    Набережные Челны
                 </div>
 
             </div>
 
-        `;
+            <div class="header-spacer"></div>
 
-        return;
-    }
+        </div>
 
-
-    const rows =
-        standings
-            .map(renderRow)
-            .join("");
+    </header>
 
 
-    container.innerHTML = `
+    <!-- =====================================================
+         CONTENT
+    ====================================================== -->
 
-        <div class="table-card">
+    <main class="container">
 
+        <section class="section">
 
-            <div class="table-header">
+            <div class="section-header">
 
-                <div class="table-header-title">
-                    Турнирная таблица
-                </div>
+                <div>
 
-                <div class="table-header-subtitle">
-                    Сезон 2026/27
+                    <h1 class="section-title">
+                        Турнирная таблица
+                    </h1>
+
+                    <div class="section-subtitle">
+                        Текущее положение команд
+                    </div>
+
                 </div>
 
             </div>
 
 
-            <div class="table-scroll">
+            <!-- =================================================
+                 TOURNAMENT
+            ================================================== -->
 
-                <table>
+            <div
+                id="standingsTournament"
+                class="standings-tournament"
+            >
+                Хоккейный турнир
+            </div>
+
+
+            <!-- =================================================
+                 TABLE
+            ================================================== -->
+
+            <div class="standings-wrapper">
+
+                <table class="standings-table">
 
                     <thead>
 
@@ -957,7 +124,7 @@ function renderStandings() {
                                 #
                             </th>
 
-                            <th>
+                            <th class="team-column">
                                 Команда
                             </th>
 
@@ -998,9 +165,18 @@ function renderStandings() {
                     </thead>
 
 
-                    <tbody>
+                    <tbody id="standingsBody">
 
-                        ${rows}
+                        <tr>
+
+                            <td
+                                colspan="10"
+                                class="table-loading"
+                            >
+                                Загрузка таблицы…
+                            </td>
+
+                        </tr>
 
                     </tbody>
 
@@ -1008,292 +184,209 @@ function renderStandings() {
 
             </div>
 
-        </div>
 
+            <!-- =================================================
+                 LEGEND
+            ================================================== -->
 
-        <div class="legend">
+            <div class="standings-legend">
 
-            <div class="legend-item">
-                И — игры
-            </div>
-
-            <div class="legend-item">
-                В — победы
-            </div>
-
-            <div class="legend-item">
-                ВО — победы в ОТ
-            </div>
-
-            <div class="legend-item">
-                ВБ — победы по буллитам
-            </div>
-
-            <div class="legend-item">
-                ПО — поражения в ОТ
-            </div>
-
-            <div class="legend-item">
-                ПБ — поражения по буллитам
-            </div>
-
-            <div class="legend-item">
-                П — поражения
-            </div>
-
-            <div class="legend-item">
-                О — очки
-            </div>
-
-        </div>
-
-    `;
-}
-
-
-/* =========================================================
-   ROW
-========================================================= */
-
-function renderRow(row) {
-
-    const place =
-        row.place ??
-        row.position ??
-        "";
-
-
-    const teamName =
-        getTeamName(row);
-
-
-    const logo =
-        getTeamLogo(row);
-
-
-    const games =
-        row.games ??
-        row.played ??
-        row.gp ??
-        0;
-
-
-    const wins =
-        row.wins ??
-        row.v ??
-        0;
-
-
-    const overtimeWins =
-        row.overtime_wins ??
-        row.vo ??
-        0;
-
-
-    const shootoutWins =
-        row.shootout_wins ??
-        row.vb ??
-        0;
-
-
-    const overtimeLosses =
-        row.overtime_losses ??
-        row.po ??
-        0;
-
-
-    const shootoutLosses =
-        row.shootout_losses ??
-        row.pb ??
-        0;
-
-
-    const losses =
-        row.losses ??
-        row.p ??
-        0;
-
-
-    const points =
-        row.points ??
-        row.o ??
-        0;
-
-
-    const logoHtml =
-        logo
-            ? `
-                <img
-                    class="team-logo"
-                    src="${escapeHtml(
-                        publicImage(logo)
-                    )}"
-                    alt=""
-                    onerror="this.style.display='none'"
-                >
-            `
-            : `
-                <div class="team-logo-placeholder">
-                    ${escapeHtml(
-                        teamName
-                            .charAt(0)
-                            .toUpperCase()
-                    )}
-                </div>
-            `;
-
-
-    return `
-
-        <tr
-            class="${
-                isOurTeam(row)
-                    ? "my-team"
-                    : ""
-            }"
-        >
-
-            <td>
-
-                <div
-                    class="place ${
-                        Number(place) <= 3
-                            ? "top"
-                            : ""
-                    }"
-                >
-                    ${escapeHtml(place)}
+                <div class="legend-title">
+                    Обозначения
                 </div>
 
-            </td>
-
-
-            <td>
-
-                <div class="team-cell">
-
-                    ${logoHtml}
+                <div class="legend-grid">
 
                     <div>
+                        <strong>И</strong>
+                        — игры
+                    </div>
 
-                        <div class="team-name">
-                            ${escapeHtml(teamName)}
-                        </div>
+                    <div>
+                        <strong>В</strong>
+                        — победы
+                    </div>
 
-                        ${
-                            isOurTeam(row)
-                                ? `
-                                    <div class="team-mark">
-                                        ХК ЧЕЛНЫ 2011
-                                    </div>
-                                `
-                                : ""
-                        }
+                    <div>
+                        <strong>ВО</strong>
+                        — победы в ОТ
+                    </div>
 
+                    <div>
+                        <strong>ВБ</strong>
+                        — победы по буллитам
+                    </div>
+
+                    <div>
+                        <strong>ПО</strong>
+                        — поражения в ОТ
+                    </div>
+
+                    <div>
+                        <strong>ПБ</strong>
+                        — поражения по буллитам
+                    </div>
+
+                    <div>
+                        <strong>П</strong>
+                        — поражения
+                    </div>
+
+                    <div>
+                        <strong>О</strong>
+                        — очки
                     </div>
 
                 </div>
 
-            </td>
+            </div>
 
 
-            <td>
-                ${escapeHtml(games)}
-            </td>
+            <!-- =================================================
+                 EMPTY
+            ================================================== -->
 
+            <div
+                id="standingsEmpty"
+                class="empty-state hidden"
+            >
 
-            <td>
-                ${escapeHtml(wins)}
-            </td>
-
-
-            <td>
-                ${escapeHtml(overtimeWins)}
-            </td>
-
-
-            <td>
-                ${escapeHtml(shootoutWins)}
-            </td>
-
-
-            <td>
-                ${escapeHtml(overtimeLosses)}
-            </td>
-
-
-            <td>
-                ${escapeHtml(shootoutLosses)}
-            </td>
-
-
-            <td>
-                ${escapeHtml(losses)}
-            </td>
-
-
-            <td>
-
-                <div class="points">
-                    ${escapeHtml(points)}
+                <div class="empty-state-icon">
+                    🏆
                 </div>
 
-            </td>
+                <div class="empty-state-title">
+                    Таблица пока пуста
+                </div>
 
-        </tr>
+                <div class="empty-state-text">
+                    Данные появятся после заполнения таблицы
+                    в административной панели.
+                </div>
 
-    `;
-}
+            </div>
 
+        </section>
 
-/* =========================================================
-   BACK
-========================================================= */
-
-function goBack() {
-
-    if (
-        window.history.length > 1
-    ) {
-
-        window.history.back();
-
-        return;
-    }
+    </main>
 
 
-    window.location.href =
-        "index.html";
-}
+    <!-- =====================================================
+         BOTTOM NAV
+    ====================================================== -->
+
+    <nav class="bottom-nav">
+
+        <div class="bottom-nav-inner">
+
+            <a
+                href="index.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Главная
+                </span>
+            </a>
 
 
-/* =========================================================
-   INIT
-========================================================= */
+            <a
+                href="matches.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ⚔
+                </span>
 
-async function init() {
-
-    await loadSettings();
-
-    await loadStandings();
-
-}
-
-
-init();
+                <span>
+                    Матчи
+                </span>
+            </a>
 
 
-/* =========================================================
-   AUTO REFRESH
-========================================================= */
+            <a
+                href="roster.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ◎
+                </span>
 
-setInterval(
+                <span>
+                    Состав
+                </span>
+            </a>
+
+
+            <a
+                href="standings.html"
+                class="bottom-nav-item active"
+            >
+                <span class="bottom-nav-icon">
+                    ≡
+                </span>
+
+                <span>
+                    Таблица
+                </span>
+            </a>
+
+
+            <a
+                href="news.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ◈
+                </span>
+
+                <span>
+                    Новости
+                </span>
+            </a>
+
+        </div>
+
+    </nav>
+
+</div>
+
+
+<!-- =====================================================
+     SCRIPTS
+====================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="config.js"></script>
+
+<script src="app.js"></script>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
     async () => {
 
-        await loadStandings();
+        if (
+            typeof initializeSite ===
+            "function"
+        ) {
+            await initializeSite();
+        }
 
-    },
-    60000
+        if (
+            typeof initStandingsPage ===
+            "function"
+        ) {
+            await initStandingsPage();
+        }
+
+    }
 );
 
 </script>
