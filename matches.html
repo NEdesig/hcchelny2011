@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -34,11 +35,7 @@ background:linear-gradient(135deg,var(--primary),var(--secondary));
 border-radius:0 0 25px 25px;
 }
 
-.header{
-display:flex;
-align-items:center;
-gap:12px;
-}
+.header{display:flex;align-items:center;gap:12px}
 
 .logo{
 width:55px;
@@ -48,15 +45,8 @@ border-radius:50%;
 object-fit:contain;
 }
 
-.club{
-font-size:20px;
-font-weight:900;
-}
-
-.season{
-font-size:12px;
-opacity:.7;
-}
+.club{font-size:20px;font-weight:900}
+.season{font-size:12px;opacity:.7}
 
 main{
 max-width:700px;
@@ -70,10 +60,7 @@ color:var(--muted);
 letter-spacing:1.5px;
 }
 
-h1{
-font-size:30px;
-margin:8px 0 18px;
-}
+h1{font-size:30px;margin:8px 0 18px}
 
 .card{
 background:var(--card);
@@ -99,6 +86,7 @@ margin-top:14px;
 
 .team{
 width:45%;
+min-width:0;
 display:flex;
 flex-direction:column;
 align-items:center;
@@ -112,14 +100,11 @@ object-fit:contain;
 margin-bottom:7px;
 }
 
-.team-logo.empty{
-display:none;
-}
-
 .team-name{
 font-size:17px;
 font-weight:800;
-line-height:1.15;
+line-height:1.2;
+overflow-wrap:anywhere;
 }
 
 .team-city{
@@ -149,6 +134,13 @@ margin-top:7px;
 text-align:center;
 }
 
+.message{
+text-align:center;
+color:var(--muted);
+padding:20px 10px;
+line-height:1.5;
+}
+
 .bottom{
 position:fixed;
 bottom:0;
@@ -160,6 +152,7 @@ border-top:1px solid var(--border);
 display:flex;
 justify-content:space-around;
 align-items:center;
+z-index:10;
 }
 
 .bottom a{
@@ -181,20 +174,9 @@ margin-bottom:4px;
 }
 
 @media(max-width:430px){
-
-.team-logo{
-width:48px;
-height:48px;
-}
-
-.team-name{
-font-size:15px;
-}
-
-.team-city{
-font-size:10px;
-}
-
+.team-logo{width:48px;height:48px}
+.team-name{font-size:15px}
+.team-city{font-size:10px}
 }
 </style>
 </head>
@@ -202,481 +184,296 @@ font-size:10px;
 <body>
 
 <header>
-
-<div class="header">
-
-<img id="logo" class="logo" src="logo.svg">
-
-<div>
-
-<div class="club" id="siteName">
-ХК ЧЕЛНЫ 2011
-</div>
-
-<div class="season">
-СЕЗОН 2026/27
-</div>
-
-</div>
-
-</div>
-
+  <div class="header">
+    <img id="logo" class="logo" src="logo.svg" alt="Логотип клуба">
+    <div>
+      <div class="club" id="siteName">ХК ЧЕЛНЫ 2011</div>
+      <div class="season">СЕЗОН 2026/27</div>
+    </div>
+  </div>
 </header>
 
 <main>
-
-<div class="label">ХК ЧЕЛНЫ 2011</div>
-
-<h1>Матчи</h1>
-
-<div id="matches">
-<div class="card">Загрузка...</div>
-</div>
-
+  <div class="label">ХК ЧЕЛНЫ 2011</div>
+  <h1>Матчи</h1>
+  <div id="matches">
+    <div class="card message">Загрузка матчей...</div>
+  </div>
 </main>
 
 <nav class="bottom">
-
-<a href="index.html">
-<span class="icon">⌂</span>
-Главная
-</a>
-
-<a class="active" href="matches.html">
-<span class="icon">🏒</span>
-Матчи
-</a>
-
-<a href="roster.html">
-<span class="icon">👥</span>
-Состав
-</a>
-
-<a href="standings.html">
-<span class="icon">📊</span>
-Таблица
-</a>
-
-<a href="news.html">
-<span class="icon">📰</span>
-Новости
-</a>
-
+  <a href="index.html">
+    <span class="icon">⌂</span>
+    Главная
+  </a>
+  <a class="active" href="matches.html">
+    <span class="icon">🏒</span>
+    Матчи
+  </a>
+  <a href="roster.html">
+    <span class="icon">👥</span>
+    Состав
+  </a>
+  <a href="standings.html">
+    <span class="icon">📊</span>
+    Таблица
+  </a>
+  <a href="news.html">
+    <span class="icon">📰</span>
+    Новости
+  </a>
 </nav>
 
 <script>
+const SUPABASE_URL = "https://jxlbojosxaaqnyuzohnw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
 
-const SUPABASE_URL="https://jxlbojosxaaqnyuzohnw.supabase.co";
-
-const SUPABASE_KEY="sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
-
-const headers={
-apikey:SUPABASE_KEY,
-Authorization:"Bearer "+SUPABASE_KEY
+const headers = {
+  apikey: SUPABASE_KEY,
+  Authorization: "Bearer " + SUPABASE_KEY
 };
 
-async function getData(table,query=""){
+let teams = [];
+let teamsMap = new Map();
 
-const r=await fetch(
-SUPABASE_URL+"/rest/v1/"+table+"?select=*"+query,
-{headers}
-);
+async function getData(table, query = "") {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/${table}?select=*${query}`,
+    { headers }
+  );
 
-return await r.json();
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `Ошибка загрузки ${table}`);
+  }
 
+  return await response.json();
 }
 
-function esc(v){
-
-return String(v??"")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;");
-
+function esc(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
-function dateRu(v){
+function dateRu(value) {
+  if (!value) return "";
 
-if(!v)return "";
+  const date = new Date(value + (value.length === 10 ? "T12:00:00" : ""));
 
-return new Date(v).toLocaleDateString(
-"ru-RU",
-{
-day:"numeric",
-month:"long",
-year:"numeric"
-}
-);
+  if (Number.isNaN(date.getTime())) return value;
 
-}
-
-async function settings(){
-
-const a=await getData("settings","&limit=1");
-
-if(!a.length)return;
-
-const s=a[0];
-
-const r=document.documentElement.style;
-
-if(s.primary_color)r.setProperty("--primary",s.primary_color);
-if(s.secondary_color)r.setProperty("--secondary",s.secondary_color);
-if(s.background_color)r.setProperty("--bg",s.background_color);
-if(s.card_color)r.setProperty("--card",s.card_color);
-if(s.text_color)r.setProperty("--text",s.text_color);
-if(s.muted_text_color)r.setProperty("--muted",s.muted_text_color);
-if(s.button_color)r.setProperty("--button",s.button_color);
-if(s.border_color)r.setProperty("--border",s.border_color);
-if(s.border_radius)r.setProperty("--radius",s.border_radius+"px");
-
-if(s.site_name){
-
-document.title=s.site_name+" — Матчи";
-
-document.getElementById("siteName").textContent=
-s.site_name;
-
+  return date.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
 }
 
-if(s.logo_url)
-document.getElementById("logo").src=s.logo_url;
+async function settings() {
+  try {
+    const data = await getData("settings", "&limit=1");
+    if (!data.length) return;
 
-if(s.favicon_url)
-document.getElementById("favicon").href=s.favicon_url;
+    const s = data[0];
+    const root = document.documentElement.style;
 
-if(s.background_image)
-document.body.style.backgroundImage=
-`url("${s.background_image}")`;
+    if (s.primary_color) root.setProperty("--primary", s.primary_color);
+    if (s.secondary_color) root.setProperty("--secondary", s.secondary_color);
+    if (s.background_color) root.setProperty("--bg", s.background_color);
+    if (s.card_color) root.setProperty("--card", s.card_color);
+    if (s.text_color) root.setProperty("--text", s.text_color);
+    if (s.muted_text_color) root.setProperty("--muted", s.muted_text_color);
+    if (s.button_color) root.setProperty("--button", s.button_color);
+    if (s.border_color) root.setProperty("--border", s.border_color);
 
+    if (s.border_radius !== null && s.border_radius !== undefined) {
+      root.setProperty("--radius", Number(s.border_radius) + "px");
+    }
+
+    if (s.site_name) {
+      document.title = s.site_name + " — Матчи";
+      document.getElementById("siteName").textContent = s.site_name;
+    }
+
+    if (s.logo_url) {
+      document.getElementById("logo").src = s.logo_url;
+    }
+
+    if (s.favicon_url) {
+      document.getElementById("favicon").href = s.favicon_url;
+    }
+
+    if (s.background_image) {
+      document.body.style.backgroundImage = `url("${s.background_image}")`;
+      document.body.style.backgroundSize = "cover";
+      document.body.style.backgroundAttachment = "fixed";
+    }
+  } catch (error) {
+    console.error("Не удалось загрузить настройки:", error);
+  }
 }
 
+/* РЕЕСТР КОМАНД */
 
-/* =========================
-   РЕЕСТР КОМАНД
-========================= */
-
-let teams=[];
-
-let teamsMap=new Map();
-
-async function loadTeams(){
-
-try{
-
-const data=await getData(
-"teams",
-"&order=name.asc"
-);
-
-if(!Array.isArray(data)){
-
-teams=[];
-teamsMap=new Map();
-
-return;
-
+async function loadTeams() {
+  try {
+    const data = await getData("teams", "&order=name.asc");
+    teams = Array.isArray(data) ? data : [];
+    teamsMap = new Map(teams.map(team => [String(team.id), team]));
+  } catch (error) {
+    console.error("Не удалось загрузить реестр команд:", error);
+    teams = [];
+    teamsMap = new Map();
+  }
 }
 
-teams=data;
-
-teamsMap=new Map(
-teams.map(team=>[
-String(team.id),
-team
-])
-);
-
-}catch(error){
-
-console.log("Реестр команд пока недоступен");
-
-teams=[];
-teamsMap=new Map();
-
+function getTeam(id) {
+  if (id === null || id === undefined || id === "") return null;
+  return teamsMap.get(String(id)) || null;
 }
 
+function findTeamByName(name) {
+  if (!name) return null;
+
+  const normalized = String(name).trim().toLowerCase();
+
+  return teams.find(team =>
+    String(team.name || "").trim().toLowerCase() === normalized
+  ) || null;
 }
 
-function getTeam(id){
-
-if(
-id===null ||
-id===undefined ||
-id===""
-){
-
-return null;
-
+function findChelnyTeam() {
+  return teams.find(team =>
+    String(team.name || "").toLowerCase().includes("челны")
+  ) || null;
 }
 
-return teamsMap.get(String(id))||null;
-
+function teamInfo(team, fallbackName) {
+  return {
+    name: team?.name || fallbackName || "Команда",
+    city: team?.city || "",
+    logo: team?.logo_url || ""
+  };
 }
 
-function findTeamByName(name){
+function teamHTML(team) {
+  const logo = team.logo
+    ? `<img class="team-logo" src="${esc(team.logo)}" alt=""
+         onerror="this.remove()">`
+    : "";
 
-if(!name)return null;
-
-const search=String(name)
-.trim()
-.toLowerCase();
-
-return teams.find(team=>
-String(team.name||"")
-.trim()
-.toLowerCase()===search
-)||null;
-
+  return `
+    <div class="team">
+      ${logo}
+      <div class="team-name">${esc(team.name)}</div>
+      ${team.city ? `<div class="team-city">${esc(team.city)}</div>` : ""}
+    </div>
+  `;
 }
 
-function findChelnyTeam(){
+/* МАТЧИ */
 
-return teams.find(team=>
-String(team.name||"")
-.toLowerCase().includes("челны")
-)||null;
+async function load() {
+  const box = document.getElementById("matches");
 
+  try {
+    const data = await getData("matches", "&order=date.asc,time.asc");
+
+    if (!Array.isArray(data) || !data.length) {
+      box.innerHTML = '<div class="card message">Матчей пока нет.</div>';
+      return;
+    }
+
+    box.innerHTML = data.map(match => {
+      let team1;
+      let team2;
+
+      const homeTeam = getTeam(match.home_team_id);
+      const awayTeam = getTeam(match.away_team_id);
+
+      if (match.home_team_id || match.away_team_id) {
+        team1 = teamInfo(homeTeam, "ХК Челны");
+        team2 = teamInfo(awayTeam, match.opponent || "Соперник");
+      } else {
+        const home =
+          match.home === true ||
+          String(match.home).toLowerCase() === "true";
+
+        if (home) {
+          team1 = teamInfo(findChelnyTeam(), "ХК Челны");
+          team2 = teamInfo(findTeamByName(match.opponent), match.opponent || "Соперник");
+        } else {
+          team1 = teamInfo(findTeamByName(match.opponent), match.opponent || "Соперник");
+          team2 = teamInfo(findChelnyTeam(), "ХК Челны");
+        }
+      }
+
+      let score = "— : —";
+
+      const hasHomeScore =
+        match.home_score !== null &&
+        match.home_score !== undefined &&
+        match.home_score !== "";
+
+      const hasAwayScore =
+        match.away_score !== null &&
+        match.away_score !== undefined &&
+        match.away_score !== "";
+
+      if (hasHomeScore && hasAwayScore) {
+        score = `${match.home_score} : ${match.away_score}`;
+      } else if (
+        match.score !== null &&
+        match.score !== undefined &&
+        match.score !== ""
+      ) {
+        score = match.score;
+      }
+
+      return `
+        <div class="card">
+          <div class="date">
+            ${esc(dateRu(match.date))}
+            ${match.time ? " · " + esc(String(match.time).slice(0, 5)) : ""}
+          </div>
+
+          <div class="teams">
+            ${teamHTML(team1)}
+            <div class="vs">VS</div>
+            ${teamHTML(team2)}
+          </div>
+
+          <div class="score">${esc(score)}</div>
+
+          ${match.tournament ? `<div class="muted">${esc(match.tournament)}</div>` : ""}
+          ${match.status ? `<div class="muted">${esc(match.status)}</div>` : ""}
+          ${match.venue ? `<div class="muted">${esc(match.venue)}</div>` : ""}
+        </div>
+      `;
+    }).join("");
+
+  } catch (error) {
+    console.error("Ошибка загрузки матчей:", error);
+    box.innerHTML = `
+      <div class="card message">
+        Не удалось загрузить матчи.<br>
+        Попробуй обновить страницу позже.
+      </div>
+    `;
+  }
 }
 
-function teamInfo(team,fallbackName){
-
-if(team){
-
-return {
-
-name:team.name||fallbackName||"Команда",
-
-city:team.city||"",
-
-logo:team.logo_url||""
-
-};
-
-}
-
-return {
-
-name:fallbackName||"Команда",
-
-city:"",
-
-logo:""
-
-};
-
-}
-
-function teamHTML(team){
-
-const logo=team.logo
-? `<img class="team-logo" src="${esc(team.logo)}" alt="">`
-: "";
-
-return `
-
-<div class="team">
-
-${logo}
-
-<div class="team-name">
-${esc(team.name)}
-</div>
-
-${
-team.city
-? `<div class="team-city">${esc(team.city)}</div>`
-: ""
-}
-
-</div>
-
-`;
-
-}
-
-
-/* =========================
-   МАТЧИ
-========================= */
-
-async function load(){
-
-const data=await getData(
-"matches",
-"&order=date.asc,time.asc"
-);
-
-const box=document.getElementById("matches");
-
-if(!data.length){
-
-box.innerHTML=
-'<div class="card">Матчей пока нет</div>';
-
-return;
-
-}
-
-box.innerHTML=data.map(m=>{
-
-let team1;
-let team2;
-
-
-/*
-  Новый вариант:
-  home_team_id / away_team_id
-*/
-
-const homeTeam=
-getTeam(m.home_team_id);
-
-const awayTeam=
-getTeam(m.away_team_id);
-
-if(homeTeam || awayTeam){
-
-team1=teamInfo(
-homeTeam,
-"ХК Челны"
-);
-
-team2=teamInfo(
-awayTeam,
-m.opponent||"Соперник"
-);
-
-}else{
-
-/*
-  Совместимость со старой структурой
-*/
-
-const home=
-m.home===true ||
-String(m.home).toLowerCase()==="true";
-
-if(home){
-
-team1=teamInfo(
-findChelnyTeam(),
-"ХК Челны"
-);
-
-team2=teamInfo(
-findTeamByName(m.opponent),
-m.opponent||"Соперник"
-);
-
-}else{
-
-team1=teamInfo(
-findTeamByName(m.opponent),
-m.opponent||"Соперник"
-);
-
-team2=teamInfo(
-findChelnyTeam(),
-"ХК Челны"
-);
-
-}
-
-}
-
-let score="— : —";
-
-if(
-m.score!==null &&
-m.score!==undefined &&
-m.score!==""
-){
-
-score=m.score;
-
-}else if(
-m.home_score!==null &&
-m.home_score!==undefined &&
-m.away_score!==null &&
-m.away_score!==undefined
-){
-
-score=
-m.home_score+
-" : "+
-m.away_score;
-
-}
-
-return `
-
-<div class="card">
-
-<div class="date">
-
-${esc(dateRu(m.date))}
-
-${m.time?" · "+esc(m.time):""}
-
-</div>
-
-<div class="teams">
-
-${teamHTML(team1)}
-
-<div class="vs">
-VS
-</div>
-
-${teamHTML(team2)}
-
-</div>
-
-<div class="score">
-${esc(score)}
-</div>
-
-${
-m.tournament
-? `<div class="muted">${esc(m.tournament)}</div>`
-: ""
-}
-
-${
-m.status
-? `<div class="muted">${esc(m.status)}</div>`
-: ""
-}
-
-${
-m.venue
-? `<div class="muted">${esc(m.venue)}</div>`
-: ""
-}
-
-</div>
-
-`;
-
-}).join("");
-
-}
-
-
-async function init(){
-
-await settings();
-
-await loadTeams();
-
-await load();
-
+async function init() {
+  await settings();
+  await loadTeams();
+  await load();
 }
 
 init();
-
 </script>
 
 </body>
