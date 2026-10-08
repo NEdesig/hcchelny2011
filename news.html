@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
 
@@ -8,889 +9,311 @@
         content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
 
-    <meta name="theme-color" content="#000056">
+    <meta
+        name="theme-color"
+        content="#000056"
+    >
 
     <title>Новости — ХК Челны 2011</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            background: #f4f6fa;
-            color: #10152b;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-        }
-
-        button,
-        a {
-            font: inherit;
-        }
-
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .page {
-            width: 100%;
-            max-width: 760px;
-            margin: 0 auto;
-            padding-bottom: 40px;
-        }
-
-        /* HEADER */
-
-        .header {
-            background: #000056;
-            color: white;
-            padding:
-                calc(14px + env(safe-area-inset-top))
-                18px
-                18px;
-            border-radius: 0 0 25px 25px;
-        }
-
-        .header-top {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .back {
-            width: 42px;
-            height: 42px;
-            border: 0;
-            border-radius: 13px;
-            background: rgba(255,255,255,.12);
-            color: white;
-            font-size: 23px;
-            cursor: pointer;
-        }
-
-        .header-title {
-            flex: 1;
-        }
-
-        .header-title strong {
-            display: block;
-            font-size: 20px;
-            font-weight: 900;
-        }
-
-        .header-title span {
-            display: block;
-            margin-top: 3px;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: .14em;
-            opacity: .6;
-        }
-
-        /* FILTERS */
-
-        .filters {
-            display: flex;
-            gap: 7px;
-            overflow-x: auto;
-            padding: 15px 14px 2px;
-            scrollbar-width: none;
-        }
-
-        .filters::-webkit-scrollbar {
-            display: none;
-        }
-
-        .filter {
-            flex: 0 0 auto;
-            border: 0;
-            border-radius: 20px;
-            padding: 9px 14px;
-            background: white;
-            color: #72798c;
-            font-size: 11px;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 3px 12px rgba(0,0,86,.05);
-        }
-
-        .filter.active {
-            background: #000056;
-            color: white;
-        }
-
-        /* NEWS */
-
-        .news-list {
-            display: grid;
-            gap: 12px;
-            padding: 14px;
-        }
-
-        .news-card {
-            background: white;
-            border-radius: 21px;
-            overflow: hidden;
-            box-shadow: 0 7px 25px rgba(0,0,86,.06);
-            cursor: pointer;
-            transition:
-                transform .18s ease,
-                box-shadow .18s ease;
-        }
-
-        .news-card:active {
-            transform: scale(.985);
-        }
-
-        .news-image-wrap {
-            position: relative;
-            width: 100%;
-            height: 190px;
-            background: #e9edf5;
-        }
-
-        .news-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .news-tag {
-            position: absolute;
-            left: 12px;
-            bottom: 12px;
-            padding: 6px 9px;
-            border-radius: 8px;
-            background: #ffcd00;
-            color: #000056;
-            font-size: 9px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: .05em;
-        }
-
-        .news-content {
-            padding: 15px 16px 17px;
-        }
-
-        .news-date {
-            color: #8b91a2;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-        }
-
-        .news-title {
-            margin-top: 7px;
-            font-size: 17px;
-            line-height: 1.15;
-            font-weight: 900;
-        }
-
-        .news-description {
-            margin-top: 7px;
-            color: #747b8e;
-            font-size: 11px;
-            line-height: 1.45;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        /* MODAL */
-
-        .modal {
-            position: fixed;
-            inset: 0;
-            z-index: 100;
-            background: rgba(0,0,30,.55);
-            display: none;
-            align-items: flex-end;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal.open {
-            display: flex;
-        }
-
-        .modal-card {
-            width: 100%;
-            max-width: 760px;
-            max-height: 92vh;
-            overflow-y: auto;
-            background: white;
-            border-radius: 27px 27px 0 0;
-            animation: modalUp .25s ease;
-        }
-
-        @keyframes modalUp {
-            from {
-                transform: translateY(100%);
-            }
-
-            to {
-                transform: translateY(0);
-            }
-        }
-
-        .modal-image {
-            width: 100%;
-            max-height: 340px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .modal-content {
-            padding: 20px;
-        }
-
-        .modal-tag {
-            display: inline-flex;
-            padding: 6px 9px;
-            border-radius: 8px;
-            background: #ffcd00;
-            color: #000056;
-            font-size: 9px;
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-
-        .modal-title {
-            margin: 12px 0 7px;
-            font-size: 25px;
-            line-height: 1.08;
-            font-weight: 900;
-        }
-
-        .modal-date {
-            color: #8b91a2;
-            font-size: 10px;
-        }
-
-        .modal-text {
-            margin-top: 20px;
-            color: #343a4d;
-            font-size: 14px;
-            line-height: 1.65;
-            white-space: pre-wrap;
-        }
-
-        .modal-close {
-            width: 100%;
-            margin-top: 22px;
-            padding: 14px;
-            border: 0;
-            border-radius: 15px;
-            background: #000056;
-            color: white;
-            font-weight: 900;
-            cursor: pointer;
-        }
-
-        /* EMPTY / LOADING */
-
-        .state {
-            padding: 70px 20px;
-            text-align: center;
-            color: #8a90a3;
-            font-size: 13px;
-        }
-
-        .error {
-            margin: 14px;
-            padding: 15px;
-            border-radius: 15px;
-            background: #fff0f0;
-            color: #a51d25;
-            font-size: 12px;
-        }
-
-        @media (min-width: 700px) {
-            .news-list {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .news-card:first-child {
-                grid-column: span 2;
-            }
-
-            .news-card:first-child .news-image-wrap {
-                height: 280px;
-            }
-
-            .modal {
-                align-items: center;
-                padding: 20px;
-            }
-
-            .modal-card {
-                border-radius: 27px;
-                max-height: 90vh;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="page">
 
-    <header class="header">
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
-        <div class="header-top">
+    <header class="site-header">
 
-            <button
-                class="back"
-                onclick="history.back()"
+        <div class="header-inner">
+
+            <a
+                href="index.html"
+                class="header-back"
+                aria-label="На главную"
             >
                 ‹
-            </button>
+            </a>
 
-            <div class="header-title">
-                <strong id="teamTitle">
+            <img
+                id="siteLogo"
+                class="header-logo"
+                src=""
+                alt="ХК Челны 2011"
+            >
+
+            <div class="header-brand">
+
+                <div
+                    id="siteTitle"
+                    class="header-brand-title"
+                >
                     ХК Челны 2011
-                </strong>
+                </div>
 
-                <span>
-                    Новости команды
-                </span>
+                <div
+                    id="siteSubtitle"
+                    class="header-brand-subtitle"
+                >
+                    Набережные Челны
+                </div>
+
             </div>
+
+            <div class="header-spacer"></div>
 
         </div>
 
     </header>
 
-    <nav class="filters" id="filters">
-        <button
-            class="filter active"
-            data-category="all"
-        >
-            Все
-        </button>
-    </nav>
 
-    <main
-        class="news-list"
-        id="newsList"
-    >
-        <div class="state">
-            Загрузка новостей…
-        </div>
+    <!-- =====================================================
+         CONTENT
+    ====================================================== -->
+
+    <main class="container">
+
+        <section class="section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h1 class="section-title">
+                        Новости
+                    </h1>
+
+                    <div class="section-subtitle">
+                        Последние события команды
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 NEWS FILTERS
+            ================================================== -->
+
+            <div
+                id="newsFilters"
+                class="tabs news-tabs"
+            >
+
+                <button
+                    type="button"
+                    class="tab-button active"
+                    data-filter="all"
+                >
+                    Все
+                </button>
+
+                <button
+                    type="button"
+                    class="tab-button"
+                    data-filter="Матч"
+                >
+                    Матчи
+                </button>
+
+                <button
+                    type="button"
+                    class="tab-button"
+                    data-filter="Команда"
+                >
+                    Команда
+                </button>
+
+                <button
+                    type="button"
+                    class="tab-button"
+                    data-filter="Другое"
+                >
+                    Другое
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 NEWS GRID
+            ================================================== -->
+
+            <div
+                id="newsGrid"
+                class="news-grid"
+            >
+
+                <div class="loading-state">
+                    Загрузка новостей…
+                </div>
+
+            </div>
+
+        </section>
+
     </main>
 
-</div>
 
-<!-- MODAL -->
+    <!-- =====================================================
+         NEWS MODAL
+    ====================================================== -->
 
-<div
-    class="modal"
-    id="newsModal"
-    onclick="closeOutside(event)"
->
+    <div
+        id="newsModal"
+        class="modal hidden"
+        aria-hidden="true"
+    >
 
-    <article class="modal-card">
+        <div
+            class="modal-backdrop"
+            data-close-modal
+        ></div>
 
-        <img
-            id="modalImage"
-            class="modal-image"
-            alt=""
-        >
-
-        <div class="modal-content">
-
-            <div
-                id="modalTag"
-                class="modal-tag"
-            ></div>
-
-            <h1
-                id="modalTitle"
-                class="modal-title"
-            ></h1>
-
-            <div
-                id="modalDate"
-                class="modal-date"
-            ></div>
-
-            <div
-                id="modalText"
-                class="modal-text"
-            ></div>
+        <div class="modal-dialog">
 
             <button
+                type="button"
                 class="modal-close"
-                onclick="closeModal()"
+                data-close-modal
+                aria-label="Закрыть"
             >
-                Закрыть
+                ×
             </button>
+
+            <div
+                id="newsModalContent"
+                class="modal-content"
+            ></div>
 
         </div>
 
-    </article>
+    </div>
+
+
+    <!-- =====================================================
+         BOTTOM NAV
+    ====================================================== -->
+
+    <nav class="bottom-nav">
+
+        <div class="bottom-nav-inner">
+
+            <a
+                href="index.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Главная
+                </span>
+            </a>
+
+
+            <a
+                href="matches.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ⚔
+                </span>
+
+                <span>
+                    Матчи
+                </span>
+            </a>
+
+
+            <a
+                href="roster.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ◎
+                </span>
+
+                <span>
+                    Состав
+                </span>
+            </a>
+
+
+            <a
+                href="standings.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ≡
+                </span>
+
+                <span>
+                    Таблица
+                </span>
+            </a>
+
+
+            <a
+                href="news.html"
+                class="bottom-nav-item active"
+            >
+                <span class="bottom-nav-icon">
+                    ◈
+                </span>
+
+                <span>
+                    Новости
+                </span>
+            </a>
+
+        </div>
+
+    </nav>
 
 </div>
+
+
+<!-- =====================================================
+     SCRIPTS
+====================================================== -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script src="config.js"></script>
+
+<script src="app.js"></script>
+
+
 <script>
-const SUPABASE_URL =
-    "https://jxlbojosxaaqnyuzohnw.supabase.co";
-
-const SUPABASE_KEY =
-    "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
-
-const STORAGE_BUCKET = "site-media";
-
-const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
-
-let news = [];
-let activeCategory = "all";
-
-/* ================================
-   HELPERS
-================================ */
-
-function escapeHTML(value) {
-    return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-function imageUrl(url) {
-
-    if (!url) return "";
-
-    if (
-        url.startsWith("http://") ||
-        url.startsWith("https://") ||
-        url.startsWith("data:")
-    ) {
-        return url;
-    }
-
-    return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${url}`;
-}
-
-function formatDate(value) {
-
-    if (!value) return "";
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-        return value;
-    }
-
-    return date.toLocaleDateString(
-        "ru-RU",
-        {
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-        }
-    );
-}
-
-function getTitle(item) {
-
-    return (
-        item.title ||
-        item.name ||
-        "Без названия"
-    );
-}
-
-function getDescription(item) {
-
-    return (
-        item.description ||
-        item.excerpt ||
-        item.preview ||
-        ""
-    );
-}
-
-function getText(item) {
-
-    return (
-        item.content ||
-        item.text ||
-        item.body ||
-        item.description ||
-        ""
-    );
-}
-
-function getImage(item) {
-
-    return imageUrl(
-        item.image_url ||
-        item.image ||
-        item.photo_url ||
-        item.cover_url
-    );
-}
-
-function getCategory(item) {
-
-    return (
-        item.category ||
-        item.tag ||
-        item.type ||
-        "Новости"
-    );
-}
-
-/* ================================
-   LOAD SETTINGS
-================================ */
-
-async function loadSettings() {
-
-    const { data } = await db
-        .from("settings")
-        .select("*");
-
-    const settings = data || [];
-
-    const item = settings.find(
-        x =>
-            x.key === "team_name" ||
-            x.name === "team_name"
-    );
-
-    if (item?.value) {
-        document.getElementById(
-            "teamTitle"
-        ).textContent = item.value;
-
-        document.title =
-            `${item.value} — Новости`;
-    }
-}
-
-/* ================================
-   LOAD NEWS
-================================ */
-
-async function loadNews() {
-
-    const list =
-        document.getElementById("newsList");
-
-    const { data, error } = await db
-        .from("news")
-        .select("*")
-        .order(
-            "created_at",
-            { ascending: false }
-        );
-
-    if (error) {
-
-        console.error(error);
-
-        list.innerHTML = `
-            <div class="error">
-                Не удалось загрузить новости.
-            </div>
-        `;
-
-        return;
-    }
-
-    news = data || [];
-
-    buildFilters();
-    renderNews();
-}
-
-/* ================================
-   FILTERS
-================================ */
-
-function buildFilters() {
-
-    const filters =
-        document.getElementById("filters");
-
-    const categories = [
-        ...new Set(
-            news
-                .map(getCategory)
-                .filter(Boolean)
-        )
-    ];
-
-    filters.innerHTML = `
-        <button
-            class="filter active"
-            data-category="all"
-            onclick="setCategory('all')"
-        >
-            Все
-        </button>
-    `;
-
-    categories.forEach(category => {
-
-        filters.insertAdjacentHTML(
-            "beforeend",
-            `
-                <button
-                    class="filter"
-                    data-category="${escapeHTML(category)}"
-                    onclick="setCategory('${escapeHTML(category).replaceAll("'", "\\'")}')"
-                >
-                    ${escapeHTML(category)}
-                </button>
-            `
-        );
-    });
-}
-
-function setCategory(category) {
-
-    activeCategory = category;
-
-    document
-        .querySelectorAll(".filter")
-        .forEach(button => {
-
-            button.classList.toggle(
-                "active",
-                button.dataset.category === category
-            );
-        });
-
-    renderNews();
-}
-
-/* ================================
-   RENDER
-================================ */
-
-function renderNews() {
-
-    const list =
-        document.getElementById("newsList");
-
-    const filtered =
-        activeCategory === "all"
-            ? news
-            : news.filter(
-                item =>
-                    getCategory(item) ===
-                    activeCategory
-            );
-
-    if (!filtered.length) {
-
-        list.innerHTML = `
-            <div class="state">
-                Новостей пока нет.
-            </div>
-        `;
-
-        return;
-    }
-
-    list.innerHTML =
-        filtered
-            .map(renderCard)
-            .join("");
-}
-
-function renderCard(item) {
-
-    const image = getImage(item);
-    const title = getTitle(item);
-    const description = getDescription(item);
-    const category = getCategory(item);
-
-    return `
-        <article
-            class="news-card"
-            onclick="openNews('${String(item.id).replaceAll("'", "\\'")}')"
-        >
-
-            <div class="news-image-wrap">
-
-                ${
-                    image
-                    ? `
-                        <img
-                            class="news-image"
-                            src="${escapeHTML(image)}"
-                            alt=""
-                            loading="lazy"
-                        >
-                    `
-                    : ""
-                }
-
-                <div class="news-tag">
-                    ${escapeHTML(category)}
-                </div>
-
-            </div>
-
-            <div class="news-content">
-
-                <div class="news-date">
-                    ${escapeHTML(
-                        formatDate(
-                            item.created_at ||
-                            item.published_at ||
-                            item.date
-                        )
-                    )}
-                </div>
-
-                <div class="news-title">
-                    ${escapeHTML(title)}
-                </div>
-
-                ${
-                    description
-                    ? `
-                        <div class="news-description">
-                            ${escapeHTML(description)}
-                        </div>
-                    `
-                    : ""
-                }
-
-            </div>
-
-        </article>
-    `;
-}
-
-/* ================================
-   OPEN NEWS
-================================ */
-
-function openNews(id) {
-
-    const item =
-        news.find(
-            item =>
-                String(item.id) === String(id)
-        );
-
-    if (!item) return;
-
-    const image = getImage(item);
-
-    const modal =
-        document.getElementById("newsModal");
-
-    const modalImage =
-        document.getElementById("modalImage");
-
-    if (image) {
-
-        modalImage.src = image;
-        modalImage.style.display = "block";
-
-    } else {
-
-        modalImage.removeAttribute("src");
-        modalImage.style.display = "none";
-    }
-
-    document.getElementById(
-        "modalTag"
-    ).textContent = getCategory(item);
-
-    document.getElementById(
-        "modalTitle"
-    ).textContent = getTitle(item);
-
-    document.getElementById(
-        "modalDate"
-    ).textContent =
-        formatDate(
-            item.created_at ||
-            item.published_at ||
-            item.date
-        );
-
-    document.getElementById(
-        "modalText"
-    ).textContent = getText(item);
-
-    modal.classList.add("open");
-
-    document.body.style.overflow = "hidden";
-}
-
-/* ================================
-   CLOSE
-================================ */
-
-function closeModal() {
-
-    document
-        .getElementById("newsModal")
-        .classList.remove("open");
-
-    document.body.style.overflow = "";
-}
-
-function closeOutside(event) {
-
-    if (
-        event.target ===
-        document.getElementById("newsModal")
-    ) {
-        closeModal();
-    }
-}
 
 document.addEventListener(
-    "keydown",
-    event => {
+    "DOMContentLoaded",
+    async () => {
 
-        if (event.key === "Escape") {
-            closeModal();
+        if (
+            typeof initializeSite ===
+            "function"
+        ) {
+            await initializeSite();
+        }
+
+        if (
+            typeof initNewsPage ===
+            "function"
+        ) {
+            await initNewsPage();
         }
 
     }
 );
 
-/* ================================
-   START
-================================ */
-
-async function init() {
-
-    await loadSettings();
-    await loadNews();
-
-}
-
-init();
 </script>
 
 </body>
