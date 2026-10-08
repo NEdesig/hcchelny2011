@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Админка — ХК Челны 2011</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+body{
+background:#06132f;
+color:white;
+font-family:Arial,sans-serif;
+padding-bottom:30px;
+}
+
+header{
+background:#081b46;
+padding:18px;
+border-bottom:1px solid #19376b;
+}
+
+header h1{
+font-size:21px;
+}
+
+header p{
+color:#9fb1d5;
+font-size:13px;
+margin-top:5px;
+}
+
+main{
+max-width:700px;
+margin:auto;
+padding:16px;
+}
+
+.card{
+background:#0b1f49;
+border:1px solid #19376b;
+border-radius:16px;
+padding:17px;
+margin-bottom:15px;
+}
+
+input,
+select{
+width:100%;
+padding:13px;
+margin-top:8px;
+margin-bottom:12px;
+
+border-radius:10px;
+border:1px solid #35558b;
+
+background:#06132f;
+color:white;
+
+font-size:15px;
+}
+
+button{
+border:0;
+border-radius:10px;
+padding:12px 15px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.primary{
+background:#ffcd00;
+color:#06132f;
+width:100%;
+}
+
+.secondary{
+background:#1d4f91;
+color:white;
+}
+
+.danger{
+background:#8e2432;
+color:white;
+}
+
+.logout{
+background:#8e2432;
+color:white;
+margin-top:10px;
+width:100%;
+}
+
+.player{
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+gap:10px;
+
+padding:12px 0;
+
+border-bottom:1px solid #19345f;
+}
+
+.player:last-child{
+border-bottom:0;
+}
+
+.player-info{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.number{
+width:42px;
+height:42px;
+
+border-radius:10px;
+
+background:#ffcd00;
+color:#06132f;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-weight:bold;
+flex-shrink:0;
+}
+
+.name{
+font-weight:bold;
+}
+
+.position{
+color:#9fb1d5;
+font-size:12px;
+margin-top:3px;
+}
+
+.actions{
+display:flex;
+gap:5px;
+}
+
+.status{
+padding:12px;
+border-radius:10px;
+margin-bottom:15px;
+background:#0b1f49;
+color:#9fb1d5;
+}
+
+.hidden{
+display:none;
+}
+
+.login-title{
+margin-bottom:15px;
+}
+
+.error{
+background:#5b1825;
+padding:12px;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+.success{
+background:#155b39;
+padding:12px;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<header>
+
+<h1>⚙️ Админка</h1>
+
+<p>ХК Челны 2011</p>
+
+</header>
+
+
+<main>
+
+
+<!-- LOGIN -->
+
+<section id="loginCard"
+class="card">
+
+<h2 class="login-title">
+🔐 Вход администратора
+</h2>
+
+<div id="loginError"
+class="error hidden">
+Неверный email или пароль.
+</div>
+
+<input
+id="email"
+type="email"
+placeholder="Email">
+
+<input
+id="password"
+type="password"
+placeholder="Пароль">
+
+<button
+class="primary"
+onclick="login()">
+
+Войти
+
+</button>
+
+</section>
+
+
+<!-- ADMIN -->
+
+<section
+id="adminPanel"
+class="hidden">
+
+
+<div id="message"></div>
+
+
+<div class="card">
+
+<h2>
+➕ Добавить игрока
+</h2>
+
+<br>
+
+<input
+id="playerName"
+placeholder="ФИО игрока">
+
+<input
+id="playerNumber"
+type="number"
+placeholder="Номер">
+
+<select id="playerPosition">
+
+<option value="Вратарь">
+Вратарь
+</option>
+
+<option value="Защитник">
+Защитник
+</option>
+
+<option value="Нападающий">
+Нападающий
+</option>
+
+</select>
+
+<button
+class="primary"
+onclick="addPlayer()">
+
+Добавить игрока
+
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+👥 Состав
+</h2>
+
+<br>
+
+<div id="playersList">
+
+Загрузка...
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<button
+class="logout"
+onclick="logout()">
+
+Выйти из админки
+
+</button>
+
+</div>
+
+
+</section>
+
+</main>
+
+
+<script>
+
+
+/* ============================
+SUPABASE
+============================ */
+
+
+const SUPABASE_URL =
+"https://jxlbojosxaaqnyuzohnw.supabase.co";
+
+
+const SUPABASE_KEY =
+"sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
+
+
+let accessToken = null;
+
+
+/* ============================
+LOGIN
+============================ */
+
+
+async function login(){
+
+const email =
+document.getElementById("email").value.trim();
+
+const password =
+document.getElementById("password").value;
+
+
+const response = await fetch(
+
+SUPABASE_URL +
+"/auth/v1/token?grant_type=password",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":
+"application/json",
+
+"apikey":
+SUPABASE_KEY
+
+},
+
+body:JSON.stringify({
+
+email:email,
+
+password:password
+
+})
+
+});
+
+
+const data =
+await response.json();
+
+
+if(!response.ok){
+
+document
+.getElementById("loginError")
+.classList.remove("hidden");
+
+return;
+
+}
+
+
+accessToken =
+data.access_token;
+
+
+document
+.getElementById("loginCard")
+.classList.add("hidden");
+
+
+document
+.getElementById("adminPanel")
+.classList.remove("hidden");
+
+
+loadPlayers();
+
+}
+
+
+/* ============================
+ЗАГРУЗКА ИГРОКОВ
+============================ */
+
+
+async function loadPlayers(){
+
+const response = await fetch(
+
+SUPABASE_URL +
+"/rest/v1/players?select=*&order=number.asc",
+
+{
+
+headers:{
+
+"apikey":
+SUPABASE_KEY,
+
+"Authorization":
+"Bearer " + accessToken
+
+}
+
+});
+
+
+const players =
+await response.json();
+
+
+const list =
+document.getElementById("playersList");
+
+
+if(!players.length){
+
+list.innerHTML =
+"<p>Состав пуст.</p>";
+
+return;
+
+}
+
+
+list.innerHTML = "";
+
+
+players.forEach(player => {
+
+const div =
+document.createElement("div");
+
+div.className =
+"player";
+
+
+div.innerHTML = `
+
+<div class="player-info">
+
+<div class="number">
+#${player.number}
+</div>
+
+<div>
+
+<div class="name">
+${escapeHTML(player.name)}
+</div>
+
+<div class="position">
+${escapeHTML(player.position)}
+</div>
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="editPlayer(${player.id})">
+
+Изм.
+
+</button>
+
+<button
+class="danger"
+onclick="deletePlayer(${player.id})">
+
+×
+</button>
+
+</div>
+
+`;
+
+
+list.appendChild(div);
+
+});
+
+}
+
+
+/* ============================
+ДОБАВЛЕНИЕ
+============================ */
+
+
+async function addPlayer(){
+
+const name =
+document
+.getElementById("playerName")
+.value.trim();
+
+
+const number =
+Number(
+document
+.getElementById("playerNumber")
+.value
+);
+
+
+const position =
+document
+.getElementById("playerPosition")
+.value;
+
+
+if(!name || !number){
+
+showMessage(
+"Заполни имя и номер.",
+false
+);
+
+return;
+
+}
+
+
+const response =
+await fetch(
+
+SUPABASE_URL +
+"/rest/v1/players",
+
+{
+
+method:"POST",
+
+headers:{
+
+"apikey":
+SUPABASE_KEY,
+
+"Authorization":
+"Bearer " + accessToken,
+
+"Content-Type":
+"application/json",
+
+"Prefer":
+"return=minimal"
+
+},
+
+body:JSON.stringify({
+
+name:name,
+
+number:number,
+
+position:position
+
+})
+
+});
+
+
+if(!response.ok){
+
+const error =
+await response.text();
+
+console.log(error);
+
+showMessage(
+"Не удалось добавить игрока.",
+false
+);
+
+return;
+
+}
+
+
+document
+.getElementById("playerName")
+.value = "";
+
+document
+.getElementById("playerNumber")
+.value = "";
+
+
+showMessage(
+"Игрок успешно добавлен!",
+true
+);
+
+
+loadPlayers();
+
+}
+
+
+/* ============================
+РЕДАКТИРОВАНИЕ
+============================ */
+
+
+async function editPlayer(id){
+
+const name =
+prompt("Новое ФИО игрока:");
+
+if(name === null){
+return;
+}
+
+
+const number =
+prompt("Новый номер:");
+
+if(number === null){
+return;
+}
+
+
+const position =
+prompt(
+"Позиция: Вратарь / Защитник / Нападающий"
+);
+
+if(position === null){
+return;
+}
+
+
+const response =
+await fetch(
+
+SUPABASE_URL +
+"/rest/v1/players?id=eq." +
+id,
+
+{
+
+method:"PATCH",
+
+headers:{
+
+"apikey":
+SUPABASE_KEY,
+
+"Authorization":
+"Bearer " + accessToken,
+
+"Content-Type":
+"application/json"
+
+},
+
+body:JSON.stringify({
+
+name:name.trim(),
+
+number:Number(number),
+
+position:position.trim()
+
+})
+
+});
+
+
+if(!response.ok){
+
+showMessage(
+"Ошибка при изменении игрока.",
+false
+);
+
+return;
+
+}
+
+
+showMessage(
+"Игрок изменён!",
+true
+);
+
+
+loadPlayers();
+
+}
+
+
+/* ============================
+УДАЛЕНИЕ
+============================ */
+
+
+async function deletePlayer(id){
+
+if(
+!confirm(
+"Удалить этого игрока?"
+)
+){
+
+return;
+
+}
+
+
+const response =
+await fetch(
+
+SUPABASE_URL +
+"/rest/v1/players?id=eq." +
+id,
+
+{
+
+method:"DELETE",
+
+headers:{
+
+"apikey":
+SUPABASE_KEY,
+
+"Authorization":
+"Bearer " + accessToken
+
+}
+
+});
+
+
+if(!response.ok){
+
+showMessage(
+"Не удалось удалить игрока.",
+false
+);
+
+return;
+
+}
+
+
+showMessage(
+"Игрок удалён.",
+true
+);
+
+
+loadPlayers();
+
+}
+
+
+/* ============================
+ВЫХОД
+============================ */
+
+
+function logout(){
+
+accessToken = null;
+
+document
+.getElementById("adminPanel")
+.classList.add("hidden");
+
+
+document
+.getElementById("loginCard")
+.classList.remove("hidden");
+
+}
+
+
+/* ============================
+СООБЩЕНИЯ
+============================ */
+
+
+function showMessage(text,success){
+
+const message =
+document.getElementById("message");
+
+
+message.className =
+success
+? "success"
+: "error";
+
+
+message.textContent =
+text;
+
+}
+
+
+/* ============================
+ЗАЩИТА HTML
+============================ */
+
+
+function escapeHTML(text){
+
+return String(text)
+
+.replaceAll("&","&amp;")
+
+.replaceAll("<","&lt;")
+
+.replaceAll(">","&gt;")
+
+.replaceAll('"',"&quot;")
+
+.replaceAll("'","&#039;");
+
+}
+
+</script>
+
+
+</body>
+
+</html>
