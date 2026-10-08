@@ -18,171 +18,91 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        html {
-            scroll-behavior: smooth;
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f4f6fa;
+            color: #10152b;
+            font-family: Arial, sans-serif;
         }
 
         body {
-            margin: 0;
-            background: #f5f7fb;
-            color: #111827;
-            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
         }
 
-        button {
+        button,
+        a {
             font: inherit;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 760px;
+            margin: 0 auto;
+            padding-bottom: 40px;
+        }
+
+        /* HEADER */
+
+        .header {
+            background: #000056;
+            color: white;
+            padding:
+                calc(14px + env(safe-area-inset-top))
+                18px
+                18px;
+            border-radius: 0 0 25px 25px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back {
+            width: 42px;
+            height: 42px;
             border: 0;
+            border-radius: 13px;
+            background: rgba(255,255,255,.12);
+            color: white;
+            font-size: 23px;
             cursor: pointer;
         }
 
-        .hidden {
-            display: none !important;
-        }
-
-        /* =========================
-           HEADER
-        ========================= */
-
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-
-            height: 72px;
-
-            display: flex;
-            align-items: center;
-
-            padding: 0 18px;
-
-            background: #000056;
-            color: #fff;
-
-            box-shadow: 0 4px 20px rgba(0,0,86,.16);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-
-            gap: 12px;
-
-            min-width: 0;
-        }
-
-        .back-button {
-            width: 40px;
-            height: 40px;
-
-            flex: 0 0 40px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 12px;
-
-            background: rgba(255,255,255,.12);
-            color: #fff;
-
-            font-size: 23px;
-
-            transition: .2s ease;
-        }
-
-        .back-button:active {
-            transform: scale(.92);
-        }
-
-        .header-logo {
-            width: 42px;
-            height: 42px;
-
-            object-fit: contain;
-
-            border-radius: 10px;
-        }
-
         .header-title {
-            min-width: 0;
+            flex: 1;
         }
 
-        .header-title h1 {
-            margin: 0;
-
-            font-size: 18px;
-            line-height: 1.1;
-
+        .header-title strong {
+            display: block;
+            font-size: 20px;
             font-weight: 900;
-
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .header-title span {
             display: block;
-
             margin-top: 3px;
-
-            font-size: 10px;
-            font-weight: 700;
-
-            color: rgba(255,255,255,.65);
-
-            letter-spacing: .08em;
+            font-size: 9px;
             text-transform: uppercase;
+            letter-spacing: .14em;
+            opacity: .6;
         }
 
-        /* =========================
-           MAIN
-        ========================= */
-
-        main {
-            width: 100%;
-            max-width: 900px;
-
-            margin: 0 auto;
-
-            padding: 20px 14px 50px;
-        }
-
-        .page-heading {
-            margin-bottom: 18px;
-        }
-
-        .page-heading h2 {
-            margin: 0;
-
-            font-size: 30px;
-            line-height: 1.05;
-
-            font-weight: 950;
-            letter-spacing: -.04em;
-        }
-
-        .page-heading p {
-            margin: 7px 0 0;
-
-            color: #70798a;
-
-            font-size: 13px;
-            line-height: 1.4;
-        }
-
-        /* =========================
-           FILTERS
-        ========================= */
+        /* FILTERS */
 
         .filters {
             display: flex;
-            gap: 8px;
-
+            gap: 7px;
             overflow-x: auto;
-
-            padding-bottom: 3px;
-            margin-bottom: 20px;
-
+            padding: 15px 14px 2px;
             scrollbar-width: none;
         }
 
@@ -190,59 +110,41 @@
             display: none;
         }
 
-        .filter-button {
+        .filter {
             flex: 0 0 auto;
-
-            padding: 10px 15px;
-
-            border-radius: 12px;
-
-            background: #fff;
-            color: #626b7b;
-
+            border: 0;
+            border-radius: 20px;
+            padding: 9px 14px;
+            background: white;
+            color: #72798c;
             font-size: 11px;
-            font-weight: 900;
-
-            box-shadow:
-                0 2px 8px rgba(0,0,0,.05);
-
-            transition: .2s ease;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 3px 12px rgba(0,0,86,.05);
         }
 
-        .filter-button.active {
+        .filter.active {
             background: #000056;
-            color: #fff;
+            color: white;
         }
 
-        .filter-button:active {
-            transform: scale(.96);
-        }
-
-        /* =========================
-           NEWS LIST
-        ========================= */
+        /* NEWS */
 
         .news-list {
-            display: flex;
-            flex-direction: column;
+            display: grid;
             gap: 12px;
+            padding: 14px;
         }
 
         .news-card {
+            background: white;
+            border-radius: 21px;
             overflow: hidden;
-
-            background: #fff;
-
-            border-radius: 20px;
-
-            border: 1px solid rgba(0,0,86,.05);
-
-            box-shadow:
-                0 5px 20px rgba(15,23,42,.06);
-
+            box-shadow: 0 7px 25px rgba(0,0,86,.06);
+            cursor: pointer;
             transition:
-                transform .2s ease,
-                box-shadow .2s ease;
+                transform .18s ease,
+                box-shadow .18s ease;
         }
 
         .news-card:active {
@@ -251,492 +153,181 @@
 
         .news-image-wrap {
             position: relative;
-
             width: 100%;
-            aspect-ratio: 16 / 9;
-
-            overflow: hidden;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #000056,
-                    #0875dc
-                );
+            height: 190px;
+            background: #e9edf5;
         }
 
         .news-image {
             width: 100%;
             height: 100%;
-
             object-fit: cover;
-
             display: block;
-        }
-
-        .news-image-placeholder {
-            width: 100%;
-            height: 100%;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            color: rgba(255,255,255,.8);
-
-            font-size: 42px;
         }
 
         .news-tag {
             position: absolute;
             left: 12px;
             bottom: 12px;
-
             padding: 6px 9px;
-
             border-radius: 8px;
-
             background: #ffcd00;
             color: #000056;
-
             font-size: 9px;
-            font-weight: 950;
-
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: .04em;
+            letter-spacing: .05em;
         }
 
         .news-content {
-            padding: 15px 15px 16px;
+            padding: 15px 16px 17px;
         }
 
-        .news-meta {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-
-            margin-bottom: 7px;
-
-            color: #9299a7;
-
+        .news-date {
+            color: #8b91a2;
             font-size: 9px;
-            font-weight: 800;
-        }
-
-        .news-meta-dot {
-            width: 3px;
-            height: 3px;
-
-            border-radius: 50%;
-
-            background: #b7bdc8;
+            text-transform: uppercase;
+            letter-spacing: .08em;
         }
 
         .news-title {
-            margin: 0;
-
-            color: #151b28;
-
-            font-size: 18px;
+            margin-top: 7px;
+            font-size: 17px;
             line-height: 1.15;
-
-            font-weight: 950;
-
-            letter-spacing: -.025em;
+            font-weight: 900;
         }
 
         .news-description {
-            margin: 8px 0 0;
-
-            color: #687181;
-
-            font-size: 12px;
-            line-height: 1.5;
-
+            margin-top: 7px;
+            color: #747b8e;
+            font-size: 11px;
+            line-height: 1.45;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        .news-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            margin-top: 13px;
-        }
-
-        .read-more {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-
-            color: #0875dc;
-
-            font-size: 10px;
-            font-weight: 900;
-        }
-
-        .read-arrow {
-            font-size: 14px;
-        }
-
-        /* =========================
-           FEATURED
-        ========================= */
-
-        .featured {
-            position: relative;
-
-            overflow: hidden;
-
-            min-height: 310px;
-
-            margin-bottom: 18px;
-
-            border-radius: 22px;
-
-            background: #000056;
-
-            box-shadow:
-                0 9px 28px rgba(0,0,86,.18);
-
-            cursor: pointer;
-        }
-
-        .featured-image {
-            position: absolute;
-            inset: 0;
-
-            width: 100%;
-            height: 100%;
-
-            object-fit: cover;
-        }
-
-        .featured-overlay {
-            position: absolute;
-            inset: 0;
-
-            background:
-                linear-gradient(
-                    to top,
-                    rgba(0,0,25,.94) 0%,
-                    rgba(0,0,25,.55) 42%,
-                    rgba(0,0,25,.05) 100%
-                );
-        }
-
-        .featured-content {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-
-            padding: 20px;
-        }
-
-        .featured-tag {
-            display: inline-flex;
-
-            padding: 6px 9px;
-
-            border-radius: 7px;
-
-            background: #ffcd00;
-            color: #000056;
-
-            font-size: 9px;
-            font-weight: 950;
-
-            text-transform: uppercase;
-        }
-
-        .featured-title {
-            margin: 9px 0 0;
-
-            color: #fff;
-
-            font-size: 24px;
-            line-height: 1.05;
-
-            font-weight: 950;
-
-            letter-spacing: -.04em;
-        }
-
-        .featured-description {
-            margin: 8px 0 0;
-
-            max-width: 600px;
-
-            color: rgba(255,255,255,.75);
-
-            font-size: 11px;
-            line-height: 1.45;
-
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .featured-meta {
-            margin-top: 10px;
-
-            color: rgba(255,255,255,.55);
-
-            font-size: 9px;
-            font-weight: 700;
-        }
-
-        /* =========================
-           EMPTY
-        ========================= */
-
-        .empty {
-            padding: 45px 20px;
-
-            text-align: center;
-
-            background: #fff;
-
-            border-radius: 20px;
-
-            color: #838b9a;
-
-            box-shadow:
-                0 4px 18px rgba(15,23,42,.04);
-        }
-
-        .empty-icon {
-            font-size: 36px;
-
-            margin-bottom: 8px;
-        }
-
-        .empty-title {
-            color: #303847;
-
-            font-size: 15px;
-            font-weight: 900;
-        }
-
-        .empty-text {
-            margin-top: 5px;
-
-            font-size: 11px;
-            line-height: 1.45;
-        }
-
-        /* =========================
-           LOADER
-        ========================= */
-
-        .loader-wrap {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            padding: 65px 0;
-        }
-
-        .loader {
-            width: 32px;
-            height: 32px;
-
-            border: 3px solid #dfe4ed;
-            border-top-color: #000056;
-
-            border-radius: 50%;
-
-            animation: spin .7s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* =========================
-           ARTICLE MODAL
-        ========================= */
+        /* MODAL */
 
         .modal {
             position: fixed;
             inset: 0;
-
-            z-index: 1000;
-
-            display: flex;
+            z-index: 100;
+            background: rgba(0,0,30,.55);
+            display: none;
             align-items: flex-end;
             justify-content: center;
-
-            background: rgba(0,0,30,.58);
-
-            opacity: 0;
-            pointer-events: none;
-
-            transition: .25s ease;
+            backdrop-filter: blur(5px);
         }
 
-        .modal.active {
-            opacity: 1;
-            pointer-events: auto;
+        .modal.open {
+            display: flex;
         }
 
-        .modal-window {
+        .modal-card {
             width: 100%;
-            max-width: 800px;
-
-            max-height: 94vh;
-
+            max-width: 760px;
+            max-height: 92vh;
             overflow-y: auto;
-
-            background: #f5f7fb;
-
-            border-radius: 26px 26px 0 0;
-
-            transform: translateY(30px);
-
-            transition: .25s ease;
+            background: white;
+            border-radius: 27px 27px 0 0;
+            animation: modalUp .25s ease;
         }
 
-        .modal.active .modal-window {
-            transform: translateY(0);
+        @keyframes modalUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
         }
 
-        .modal-header {
-            position: sticky;
-            top: 0;
-            z-index: 5;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            padding: 14px 16px;
-
-            background: #000056;
-
-            color: #fff;
-        }
-
-        .modal-header-title {
-            font-size: 15px;
-            font-weight: 900;
-        }
-
-        .modal-close {
-            width: 36px;
-            height: 36px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 10px;
-
-            background: rgba(255,255,255,.12);
-            color: #fff;
-
-            font-size: 20px;
-        }
-
-        .article-image {
+        .modal-image {
             width: 100%;
-            max-height: 420px;
-
+            max-height: 340px;
             object-fit: cover;
-
             display: block;
         }
 
-        .article-content {
-            padding: 20px 16px 40px;
+        .modal-content {
+            padding: 20px;
         }
 
-        .article-tag {
+        .modal-tag {
             display: inline-flex;
-
             padding: 6px 9px;
-
-            border-radius: 7px;
-
+            border-radius: 8px;
             background: #ffcd00;
             color: #000056;
-
             font-size: 9px;
-            font-weight: 950;
-
+            font-weight: 900;
             text-transform: uppercase;
         }
 
-        .article-title {
-            margin: 10px 0 0;
-
-            font-size: 27px;
+        .modal-title {
+            margin: 12px 0 7px;
+            font-size: 25px;
             line-height: 1.08;
-
-            font-weight: 950;
-
-            letter-spacing: -.04em;
-
-            color: #111827;
+            font-weight: 900;
         }
 
-        .article-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-
-            margin-top: 10px;
-
-            color: #858d9c;
-
+        .modal-date {
+            color: #8b91a2;
             font-size: 10px;
-            font-weight: 700;
         }
 
-        .article-text {
+        .modal-text {
             margin-top: 20px;
-
-            color: #3e4757;
-
+            color: #343a4d;
             font-size: 14px;
-            line-height: 1.7;
-
-            white-space: pre-line;
+            line-height: 1.65;
+            white-space: pre-wrap;
         }
 
-        /* =========================
-           DESKTOP
-        ========================= */
+        .modal-close {
+            width: 100%;
+            margin-top: 22px;
+            padding: 14px;
+            border: 0;
+            border-radius: 15px;
+            background: #000056;
+            color: white;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        /* EMPTY / LOADING */
+
+        .state {
+            padding: 70px 20px;
+            text-align: center;
+            color: #8a90a3;
+            font-size: 13px;
+        }
+
+        .error {
+            margin: 14px;
+            padding: 15px;
+            border-radius: 15px;
+            background: #fff0f0;
+            color: #a51d25;
+            font-size: 12px;
+        }
 
         @media (min-width: 700px) {
-
-            .header {
-                padding: 0 28px;
-            }
-
-            main {
-                padding: 32px 20px 60px;
-            }
-
             .news-list {
-                display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 14px;
             }
 
             .news-card:first-child {
-                grid-column: 1 / -1;
+                grid-column: span 2;
             }
 
             .news-card:first-child .news-image-wrap {
-                aspect-ratio: 2.4 / 1;
+                height: 280px;
             }
 
             .modal {
@@ -744,16 +335,9 @@
                 padding: 20px;
             }
 
-            .modal-window {
-                border-radius: 26px;
+            .modal-card {
+                border-radius: 27px;
                 max-height: 90vh;
-            }
-
-            .news-card:hover {
-                transform: translateY(-2px);
-
-                box-shadow:
-                    0 10px 30px rgba(15,23,42,.09);
             }
         }
     </style>
@@ -761,169 +345,129 @@
 
 <body>
 
-<header class="header">
+<div class="page">
 
-    <div class="header-left">
+    <header class="header">
 
-        <button
-            class="back-button"
-            onclick="goBack()"
-            aria-label="Назад"
-        >
-            ‹
-        </button>
+        <div class="header-top">
 
-        <img
-            id="headerLogo"
-            class="header-logo"
-            src=""
-            alt=""
-        >
+            <button
+                class="back"
+                onclick="history.back()"
+            >
+                ‹
+            </button>
 
-        <div class="header-title">
+            <div class="header-title">
+                <strong id="teamTitle">
+                    ХК Челны 2011
+                </strong>
 
-            <h1 id="headerTeamName">
-                ХК Челны 2011
-            </h1>
-
-            <span id="headerSeason">
-                Сезон 2026/27
-            </span>
+                <span>
+                    Новости команды
+                </span>
+            </div>
 
         </div>
 
-    </div>
+    </header>
 
-</header>
-
-
-<main>
-
-    <div class="page-heading">
-
-        <h2>
-            Новости
-        </h2>
-
-        <p>
-            Последние события команды,
-            матчи и важные новости.
-        </p>
-
-    </div>
-
-
-    <div
-        class="filters"
-        id="filters"
-    >
-
+    <nav class="filters" id="filters">
         <button
-            class="filter-button active"
-            data-filter="all"
-            onclick="setFilter('all')"
+            class="filter active"
+            data-category="all"
         >
             Все
         </button>
+    </nav>
 
-    </div>
-
-
-    <div id="content">
-
-        <div class="loader-wrap">
-            <div class="loader"></div>
+    <main
+        class="news-list"
+        id="newsList"
+    >
+        <div class="state">
+            Загрузка новостей…
         </div>
+    </main>
 
-    </div>
+</div>
 
-</main>
-
-
-<!-- =========================
-     ARTICLE MODAL
-========================= -->
+<!-- MODAL -->
 
 <div
     class="modal"
     id="newsModal"
-    onclick="closeModalOutside(event)"
+    onclick="closeOutside(event)"
 >
 
-    <div class="modal-window">
+    <article class="modal-card">
 
-        <div class="modal-header">
+        <img
+            id="modalImage"
+            class="modal-image"
+            alt=""
+        >
 
-            <div class="modal-header-title">
-                Новость
-            </div>
+        <div class="modal-content">
+
+            <div
+                id="modalTag"
+                class="modal-tag"
+            ></div>
+
+            <h1
+                id="modalTitle"
+                class="modal-title"
+            ></h1>
+
+            <div
+                id="modalDate"
+                class="modal-date"
+            ></div>
+
+            <div
+                id="modalText"
+                class="modal-text"
+            ></div>
 
             <button
                 class="modal-close"
                 onclick="closeModal()"
             >
-                ×
+                Закрыть
             </button>
 
         </div>
 
-        <div id="articleContent"></div>
-
-    </div>
+    </article>
 
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-
-/* =========================================================
-   CONFIG
-========================================================= */
-
 const SUPABASE_URL =
     "https://jxlbojosxaaqnyuzohnw.supabase.co";
 
 const SUPABASE_KEY =
     "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
 
-const STORAGE_BUCKET =
-    "site-media";
+const STORAGE_BUCKET = "site-media";
 
-
-const db =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-
-/* =========================================================
-   STATE
-========================================================= */
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
 
 let news = [];
+let activeCategory = "all";
 
-let currentFilter = "all";
-
-let currentNews = null;
-
-
-/* =========================================================
+/* ================================
    HELPERS
-========================================================= */
+================================ */
 
-function escapeHtml(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "";
-    }
-
-    return String(value)
+function escapeHTML(value) {
+    return String(value ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -931,44 +475,29 @@ function escapeHtml(value) {
         .replaceAll("'", "&#039;");
 }
 
+function imageUrl(url) {
 
-function publicImage(url) {
-
-    if (!url) {
-        return "";
-    }
+    if (!url) return "";
 
     if (
         url.startsWith("http://") ||
-        url.startsWith("https://")
+        url.startsWith("https://") ||
+        url.startsWith("data:")
     ) {
         return url;
     }
 
-    const cleanPath =
-        url
-            .replace(/^\/+/, "")
-            .replace(/^site-media\//, "");
-
-    return (
-        `${SUPABASE_URL}` +
-        `/storage/v1/object/public/` +
-        `${STORAGE_BUCKET}/${cleanPath}`
-    );
+    return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${url}`;
 }
 
+function formatDate(value) {
 
-function formatDate(dateValue) {
+    if (!value) return "";
 
-    if (!dateValue) {
-        return "";
-    }
-
-    const date =
-        new Date(dateValue);
+    const date = new Date(value);
 
     if (Number.isNaN(date.getTime())) {
-        return dateValue;
+        return value;
     }
 
     return date.toLocaleDateString(
@@ -981,43 +510,7 @@ function formatDate(dateValue) {
     );
 }
 
-
-function formatTime(dateValue) {
-
-    if (!dateValue) {
-        return "";
-    }
-
-    const date =
-        new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) {
-        return "";
-    }
-
-    return date.toLocaleTimeString(
-        "ru-RU",
-        {
-            hour: "2-digit",
-            minute: "2-digit"
-        }
-    );
-}
-
-
-function getNewsDate(item) {
-
-    return (
-        item.published_at ||
-        item.created_at ||
-        item.date ||
-        item.news_date ||
-        null
-    );
-}
-
-
-function getNewsTitle(item) {
+function getTitle(item) {
 
     return (
         item.title ||
@@ -1026,20 +519,17 @@ function getNewsTitle(item) {
     );
 }
 
-
-function getNewsDescription(item) {
+function getDescription(item) {
 
     return (
         item.description ||
         item.excerpt ||
-        item.short_description ||
-        item.text ||
+        item.preview ||
         ""
     );
 }
 
-
-function getNewsText(item) {
+function getText(item) {
 
     return (
         item.content ||
@@ -1050,574 +540,245 @@ function getNewsText(item) {
     );
 }
 
+function getImage(item) {
 
-function getNewsImage(item) {
-
-    return (
+    return imageUrl(
         item.image_url ||
-        item.photo_url ||
         item.image ||
-        item.cover_url ||
-        ""
+        item.photo_url ||
+        item.cover_url
     );
 }
 
-
-function getNewsTag(item) {
+function getCategory(item) {
 
     return (
-        item.tag ||
         item.category ||
+        item.tag ||
         item.type ||
         "Новости"
     );
 }
 
-
-/* =========================================================
-   SETTINGS
-========================================================= */
+/* ================================
+   LOAD SETTINGS
+================================ */
 
 async function loadSettings() {
 
-    try {
+    const { data } = await db
+        .from("settings")
+        .select("*");
 
-        const { data, error } =
-            await db
-                .from("settings")
-                .select("*")
-                .limit(1)
-                .maybeSingle();
+    const settings = data || [];
 
-        if (error) {
+    const item = settings.find(
+        x =>
+            x.key === "team_name" ||
+            x.name === "team_name"
+    );
 
-            console.warn(
-                "Ошибка настроек:",
-                error
-            );
+    if (item?.value) {
+        document.getElementById(
+            "teamTitle"
+        ).textContent = item.value;
 
-            return;
-        }
-
-        if (!data) {
-            return;
-        }
-
-        const teamName =
-            data.team_name ||
-            data.name ||
-            "ХК Челны 2011";
-
-        const season =
-            data.season ||
-            "2026/27";
-
-
-        document
-            .getElementById("headerTeamName")
-            .textContent = teamName;
-
-        document
-            .getElementById("headerSeason")
-            .textContent =
-                `Сезон ${season}`;
-
-
-        const logo =
-            data.logo_url ||
-            data.logo ||
-            data.team_logo;
-
-        if (logo) {
-
-            const image =
-                document.getElementById(
-                    "headerLogo"
-                );
-
-            image.src =
-                publicImage(logo);
-
-        }
-
-
-        if (data.font_main) {
-
-            const style =
-                document.createElement("style");
-
-            style.textContent = `
-                body {
-                    font-family:
-                        "${data.font_main}",
-                        Arial,
-                        sans-serif;
-                }
-            `;
-
-            document.head.appendChild(style);
-        }
-
-    } catch (error) {
-
-        console.error(error);
+        document.title =
+            `${item.value} — Новости`;
     }
 }
 
-
-/* =========================================================
+/* ================================
    LOAD NEWS
-========================================================= */
+================================ */
 
 async function loadNews() {
 
-    const { data, error } =
-        await db
-            .from("news")
-            .select("*");
+    const list =
+        document.getElementById("newsList");
+
+    const { data, error } = await db
+        .from("news")
+        .select("*")
+        .order(
+            "created_at",
+            { ascending: false }
+        );
 
     if (error) {
 
-        console.error(
-            "Ошибка загрузки новостей:",
-            error
-        );
+        console.error(error);
 
-        document
-            .getElementById("content")
-            .innerHTML = `
-                <div class="empty">
-
-                    <div class="empty-icon">
-                        ⚠️
-                    </div>
-
-                    <div class="empty-title">
-                        Не удалось загрузить новости
-                    </div>
-
-                    <div class="empty-text">
-                        Проверьте подключение
-                        к Supabase.
-                    </div>
-
-                </div>
-            `;
+        list.innerHTML = `
+            <div class="error">
+                Не удалось загрузить новости.
+            </div>
+        `;
 
         return;
     }
 
     news = data || [];
 
-
-    news.sort(
-        (a, b) => {
-
-            const dateA =
-                new Date(
-                    getNewsDate(a) || 0
-                ).getTime();
-
-            const dateB =
-                new Date(
-                    getNewsDate(b) || 0
-                ).getTime();
-
-            return dateB - dateA;
-        }
-    );
-
-
     buildFilters();
-
-    render();
+    renderNews();
 }
 
-
-/* =========================================================
+/* ================================
    FILTERS
-========================================================= */
+================================ */
 
 function buildFilters() {
 
     const filters =
-        document.getElementById(
-            "filters"
-        );
+        document.getElementById("filters");
 
+    const categories = [
+        ...new Set(
+            news
+                .map(getCategory)
+                .filter(Boolean)
+        )
+    ];
 
-    const categories = [];
-
-    news.forEach(item => {
-
-        const tag =
-            getNewsTag(item);
-
-        if (
-            tag &&
-            !categories.includes(tag)
-        ) {
-            categories.push(tag);
-        }
-
-    });
-
-
-    let html = `
+    filters.innerHTML = `
         <button
-            class="filter-button active"
-            data-filter="all"
-            onclick="setFilter('all')"
+            class="filter active"
+            data-category="all"
+            onclick="setCategory('all')"
         >
             Все
         </button>
     `;
 
-
     categories.forEach(category => {
 
-        html += `
-            <button
-                class="filter-button"
-                data-filter="${escapeHtml(category)}"
-                onclick="setFilter('${escapeHtml(category)}')"
-            >
-                ${escapeHtml(category)}
-            </button>
-        `;
-
+        filters.insertAdjacentHTML(
+            "beforeend",
+            `
+                <button
+                    class="filter"
+                    data-category="${escapeHTML(category)}"
+                    onclick="setCategory('${escapeHTML(category).replaceAll("'", "\\'")}')"
+                >
+                    ${escapeHTML(category)}
+                </button>
+            `
+        );
     });
-
-
-    filters.innerHTML = html;
 }
 
+function setCategory(category) {
 
-function setFilter(filter) {
-
-    currentFilter = filter;
-
+    activeCategory = category;
 
     document
-        .querySelectorAll(".filter-button")
+        .querySelectorAll(".filter")
         .forEach(button => {
 
             button.classList.toggle(
                 "active",
-                button.dataset.filter === filter
+                button.dataset.category === category
             );
-
         });
 
-
-    render();
+    renderNews();
 }
 
-
-/* =========================================================
-   FILTER NEWS
-========================================================= */
-
-function getFilteredNews() {
-
-    if (currentFilter === "all") {
-        return news;
-    }
-
-    return news.filter(
-        item =>
-            getNewsTag(item) ===
-            currentFilter
-    );
-}
-
-
-/* =========================================================
+/* ================================
    RENDER
-========================================================= */
+================================ */
 
-function render() {
+function renderNews() {
 
-    const container =
-        document.getElementById(
-            "content"
-        );
+    const list =
+        document.getElementById("newsList");
 
     const filtered =
-        getFilteredNews();
+        activeCategory === "all"
+            ? news
+            : news.filter(
+                item =>
+                    getCategory(item) ===
+                    activeCategory
+            );
 
+    if (!filtered.length) {
 
-    if (filtered.length === 0) {
-
-        container.innerHTML = `
-            <div class="empty">
-
-                <div class="empty-icon">
-                    📰
-                </div>
-
-                <div class="empty-title">
-                    Новостей пока нет
-                </div>
-
-                <div class="empty-text">
-                    Новости появятся здесь
-                    после публикации через админ-панель.
-                </div>
-
+        list.innerHTML = `
+            <div class="state">
+                Новостей пока нет.
             </div>
         `;
 
         return;
     }
 
-
-    const featured =
-        filtered[0];
-
-    const rest =
-        filtered.slice(1);
-
-
-    let html = "";
-
-
-    html += renderFeatured(
-        featured
-    );
-
-
-    if (rest.length > 0) {
-
-        html += `
-            <div class="news-list">
-                ${
-                    rest
-                        .map(renderNewsCard)
-                        .join("")
-                }
-            </div>
-        `;
-
-    }
-
-
-    container.innerHTML = html;
+    list.innerHTML =
+        filtered
+            .map(renderCard)
+            .join("");
 }
 
+function renderCard(item) {
 
-/* =========================================================
-   FEATURED NEWS
-========================================================= */
-
-function renderFeatured(item) {
-
-    const title =
-        getNewsTitle(item);
-
-    const description =
-        getNewsDescription(item);
-
-    const image =
-        getNewsImage(item);
-
-    const tag =
-        getNewsTag(item);
-
-    const date =
-        getNewsDate(item);
-
-
-    const imageHtml =
-        image
-            ? `
-                <img
-                    class="featured-image"
-                    src="${escapeHtml(
-                        publicImage(image)
-                    )}"
-                    alt=""
-                    onerror="this.style.display='none'"
-                >
-            `
-            : "";
-
-
-    return `
-        <article
-            class="featured"
-            onclick="openNews(${Number(item.id)})"
-        >
-
-            ${imageHtml}
-
-            <div class="featured-overlay"></div>
-
-            <div class="featured-content">
-
-                <span class="featured-tag">
-                    ${escapeHtml(tag)}
-                </span>
-
-                <h3 class="featured-title">
-                    ${escapeHtml(title)}
-                </h3>
-
-                ${
-                    description
-                        ? `
-                            <div class="featured-description">
-                                ${escapeHtml(
-                                    description
-                                )}
-                            </div>
-                        `
-                        : ""
-                }
-
-                <div class="featured-meta">
-
-                    ${escapeHtml(
-                        formatDate(date)
-                    )}
-
-                    ${
-                        formatTime(date)
-                            ? `
-                                ·
-                                ${escapeHtml(
-                                    formatTime(date)
-                                )}
-                            `
-                            : ""
-                    }
-
-                </div>
-
-            </div>
-
-        </article>
-    `;
-}
-
-
-/* =========================================================
-   NEWS CARD
-========================================================= */
-
-function renderNewsCard(item) {
-
-    const title =
-        getNewsTitle(item);
-
-    const description =
-        getNewsDescription(item);
-
-    const image =
-        getNewsImage(item);
-
-    const tag =
-        getNewsTag(item);
-
-    const date =
-        getNewsDate(item);
-
-
-    const imageHtml =
-        image
-            ? `
-                <img
-                    class="news-image"
-                    src="${escapeHtml(
-                        publicImage(image)
-                    )}"
-                    alt=""
-                    loading="lazy"
-                    onerror="this.style.display='none'"
-                >
-            `
-            : `
-                <div class="news-image-placeholder">
-                    🏒
-                </div>
-            `;
-
+    const image = getImage(item);
+    const title = getTitle(item);
+    const description = getDescription(item);
+    const category = getCategory(item);
 
     return `
         <article
             class="news-card"
-            onclick="openNews(${Number(item.id)})"
+            onclick="openNews('${String(item.id).replaceAll("'", "\\'")}')"
         >
 
             <div class="news-image-wrap">
 
-                ${imageHtml}
+                ${
+                    image
+                    ? `
+                        <img
+                            class="news-image"
+                            src="${escapeHTML(image)}"
+                            alt=""
+                            loading="lazy"
+                        >
+                    `
+                    : ""
+                }
 
                 <div class="news-tag">
-                    ${escapeHtml(tag)}
+                    ${escapeHTML(category)}
                 </div>
 
             </div>
 
-
             <div class="news-content">
 
-                <div class="news-meta">
-
-                    <span>
-                        ${escapeHtml(
-                            formatDate(date)
-                        )}
-                    </span>
-
-                    ${
-                        formatTime(date)
-                            ? `
-                                <span class="news-meta-dot"></span>
-
-                                <span>
-                                    ${escapeHtml(
-                                        formatTime(date)
-                                    )}
-                                </span>
-                            `
-                            : ""
-                    }
-
+                <div class="news-date">
+                    ${escapeHTML(
+                        formatDate(
+                            item.created_at ||
+                            item.published_at ||
+                            item.date
+                        )
+                    )}
                 </div>
 
-
-                <h3 class="news-title">
-                    ${escapeHtml(title)}
-                </h3>
-
+                <div class="news-title">
+                    ${escapeHTML(title)}
+                </div>
 
                 ${
                     description
-                        ? `
-                            <div class="news-description">
-                                ${escapeHtml(
-                                    description
-                                )}
-                            </div>
-                        `
-                        : ""
+                    ? `
+                        <div class="news-description">
+                            ${escapeHTML(description)}
+                        </div>
+                    `
+                    : ""
                 }
-
-
-                <div class="news-footer">
-
-                    <div class="read-more">
-
-                        Читать новость
-
-                        <span class="read-arrow">
-                            →
-                        </span>
-
-                    </div>
-
-                </div>
 
             </div>
 
@@ -1625,218 +786,111 @@ function renderNewsCard(item) {
     `;
 }
 
-
-/* =========================================================
+/* ================================
    OPEN NEWS
-========================================================= */
+================================ */
 
 function openNews(id) {
 
     const item =
         news.find(
-            newsItem =>
-                Number(newsItem.id) ===
-                Number(id)
+            item =>
+                String(item.id) === String(id)
         );
 
-    if (!item) {
-        return;
+    if (!item) return;
+
+    const image = getImage(item);
+
+    const modal =
+        document.getElementById("newsModal");
+
+    const modalImage =
+        document.getElementById("modalImage");
+
+    if (image) {
+
+        modalImage.src = image;
+        modalImage.style.display = "block";
+
+    } else {
+
+        modalImage.removeAttribute("src");
+        modalImage.style.display = "none";
     }
 
+    document.getElementById(
+        "modalTag"
+    ).textContent = getCategory(item);
 
-    currentNews = item;
+    document.getElementById(
+        "modalTitle"
+    ).textContent = getTitle(item);
 
+    document.getElementById(
+        "modalDate"
+    ).textContent =
+        formatDate(
+            item.created_at ||
+            item.published_at ||
+            item.date
+        );
 
-    const title =
-        getNewsTitle(item);
+    document.getElementById(
+        "modalText"
+    ).textContent = getText(item);
 
-    const image =
-        getNewsImage(item);
+    modal.classList.add("open");
 
-    const tag =
-        getNewsTag(item);
-
-    const date =
-        getNewsDate(item);
-
-    const text =
-        getNewsText(item);
-
-
-    const imageHtml =
-        image
-            ? `
-                <img
-                    class="article-image"
-                    src="${escapeHtml(
-                        publicImage(image)
-                    )}"
-                    alt=""
-                >
-            `
-            : "";
-
-
-    document
-        .getElementById(
-            "articleContent"
-        )
-        .innerHTML = `
-
-            ${imageHtml}
-
-            <div class="article-content">
-
-                <span class="article-tag">
-                    ${escapeHtml(tag)}
-                </span>
-
-
-                <h1 class="article-title">
-                    ${escapeHtml(title)}
-                </h1>
-
-
-                <div class="article-meta">
-
-                    <span>
-                        ${escapeHtml(
-                            formatDate(date)
-                        )}
-                    </span>
-
-                    ${
-                        formatTime(date)
-                            ? `
-                                <span>•</span>
-
-                                <span>
-                                    ${escapeHtml(
-                                        formatTime(date)
-                                    )}
-                                </span>
-                            `
-                            : ""
-                    }
-
-                </div>
-
-
-                <div class="article-text">
-                    ${escapeHtml(text)}
-                </div>
-
-            </div>
-
-        `;
-
-
-    document
-        .getElementById("newsModal")
-        .classList.add("active");
-
-
-    document.body.style.overflow =
-        "hidden";
+    document.body.style.overflow = "hidden";
 }
 
-
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
+/* ================================
+   CLOSE
+================================ */
 
 function closeModal() {
 
     document
         .getElementById("newsModal")
-        .classList.remove("active");
+        .classList.remove("open");
 
-    document.body.style.overflow =
-        "";
-
-    currentNews = null;
+    document.body.style.overflow = "";
 }
 
-
-function closeModalOutside(event) {
+function closeOutside(event) {
 
     if (
-        event.target.id ===
-        "newsModal"
+        event.target ===
+        document.getElementById("newsModal")
     ) {
-
         closeModal();
     }
 }
-
-
-/* =========================================================
-   BACK
-========================================================= */
-
-function goBack() {
-
-    if (
-        window.history.length > 1
-    ) {
-
-        window.history.back();
-
-        return;
-    }
-
-    window.location.href =
-        "index.html";
-}
-
-
-/* =========================================================
-   KEYBOARD
-========================================================= */
 
 document.addEventListener(
     "keydown",
     event => {
 
-        if (
-            event.key === "Escape"
-        ) {
-
+        if (event.key === "Escape") {
             closeModal();
         }
 
     }
 );
 
-
-/* =========================================================
-   INITIALIZE
-========================================================= */
+/* ================================
+   START
+================================ */
 
 async function init() {
 
     await loadSettings();
-
     await loadNews();
+
 }
 
-
 init();
-
-
-/* =========================================================
-   AUTO REFRESH
-========================================================= */
-
-setInterval(
-    async () => {
-
-        await loadNews();
-
-    },
-    60000
-);
-
 </script>
 
 </body>
