@@ -1,5666 +1,1121 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    <meta charset="UTF-8">
 
-<title>Админка — ХК Челны 2011</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+    <meta
+        name="theme-color"
+        content="#000056"
+    >
 
-<style>
+    <title>Админ-панель — ХК Челны 2011</title>
 
-:root{
-  --navy:#000056;
-  --blue:#0875dc;
-  --yellow:#ffcd00;
-  --white:#fff;
-
-  --bg:#f3f5fa;
-  --card:#fff;
-  --text:#10152b;
-  --muted:#737b91;
-  --border:#e4e7ef;
-  --danger:#d62828;
-  --success:#159447;
-}
-
-*{
-  box-sizing:border-box;
-}
-
-html{
-  scroll-behavior:smooth;
-}
-
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,sans-serif;
-}
-
-button,
-input,
-textarea,
-select{
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-}
-
-.hidden{
-  display:none!important;
-}
-
-
-/* ================================
-   LOGIN
-================================ */
-
-#authScreen{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:
-    radial-gradient(
-      circle at top,
-      #0875dc 0,
-      #000056 55%,
-      #05051f 100%
-    );
-}
-
-.auth-card{
-  width:100%;
-  max-width:420px;
-  background:#fff;
-  border-radius:26px;
-  padding:28px;
-  box-shadow:0 20px 60px #00000040;
-}
-
-.auth-logo{
-  width:76px;
-  height:76px;
-  border-radius:50%;
-  background:var(--navy);
-  color:#fff;
-  display:grid;
-  place-items:center;
-  margin:0 auto 18px;
-  font-weight:900;
-  overflow:hidden;
-}
-
-.auth-logo img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-}
-
-.auth-title{
-  text-align:center;
-  font-size:25px;
-  font-weight:900;
-}
-
-.auth-subtitle{
-  text-align:center;
-  color:var(--muted);
-  margin-top:6px;
-  margin-bottom:24px;
-  font-size:13px;
-}
-
-
-/* ================================
-   INPUTS
-================================ */
-
-.field{
-  margin-bottom:15px;
-}
-
-.field label{
-  display:block;
-  font-size:12px;
-  font-weight:800;
-  margin-bottom:7px;
-}
-
-.field input,
-.field textarea,
-.field select{
-  width:100%;
-  border:1px solid var(--border);
-  background:#fff;
-  border-radius:12px;
-  padding:12px 13px;
-  outline:none;
-  color:var(--text);
-}
-
-.field textarea{
-  min-height:100px;
-  resize:vertical;
-}
-
-.field input:focus,
-.field textarea:focus,
-.field select:focus{
-  border-color:var(--blue);
-  box-shadow:0 0 0 3px #0875dc18;
-}
-
-
-/* ================================
-   BUTTONS
-================================ */
-
-.btn{
-  border:0;
-  border-radius:12px;
-  padding:12px 15px;
-  font-weight:800;
-  transition:.15s;
-}
-
-.btn:active{
-  transform:scale(.97);
-}
-
-.btn-primary{
-  background:var(--blue);
-  color:#fff;
-}
-
-.btn-navy{
-  background:var(--navy);
-  color:#fff;
-}
-
-.btn-yellow{
-  background:var(--yellow);
-  color:#111;
-}
-
-.btn-danger{
-  background:#ffe3e3;
-  color:var(--danger);
-}
-
-.btn-success{
-  background:#ddf5e5;
-  color:var(--success);
-}
-
-.btn-light{
-  background:#eef1f7;
-  color:var(--text);
-}
-
-.btn-block{
-  width:100%;
-}
-
-.actions{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-
-/* ================================
-   ADMIN
-================================ */
-
-#adminScreen{
-  min-height:100vh;
-}
-
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:50;
-
-  background:linear-gradient(
-    135deg,
-    var(--navy),
-    var(--blue)
-  );
-
-  color:#fff;
-  padding:
-    14px
-    14px
-    15px;
-
-  box-shadow:
-    0 5px 20px #00000025;
-}
-
-.topbar-inner{
-  max-width:1100px;
-  margin:auto;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:11px;
-}
-
-.brand-logo{
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  background:#fff;
-  color:var(--navy);
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-  font-size:10px;
-  font-weight:900;
-}
-
-.brand-logo img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-}
-
-.brand-title{
-  font-weight:900;
-  font-size:16px;
-}
-
-.brand-subtitle{
-  font-size:10px;
-  opacity:.7;
-  margin-top:2px;
-}
-
-.logout{
-  background:#ffffff18;
-  border:1px solid #ffffff35;
-  color:#fff;
-  border-radius:10px;
-  padding:9px 11px;
-  font-size:11px;
-  font-weight:800;
-}
-
-
-/* ================================
-   LAYOUT
-================================ */
-
-.layout{
-  max-width:1100px;
-  margin:auto;
-  display:grid;
-  grid-template-columns:230px 1fr;
-  min-height:calc(100vh - 73px);
-}
-
-.sidebar{
-  background:#fff;
-  border-right:1px solid var(--border);
-  padding:14px;
-}
-
-.sidebar button{
-  width:100%;
-  text-align:left;
-  border:0;
-  background:transparent;
-  padding:12px;
-  border-radius:11px;
-  font-weight:800;
-  color:#5c6478;
-  margin-bottom:3px;
-}
-
-.sidebar button.active{
-  background:#e8f2ff;
-  color:var(--blue);
-}
-
-.content{
-  padding:20px;
-}
-
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-}
-
-.page-title{
-  font-size:25px;
-  font-weight:900;
-  margin-bottom:5px;
-}
-
-.page-description{
-  color:var(--muted);
-  font-size:12px;
-  margin-bottom:20px;
-}
-
-
-/* ================================
-   CARDS
-================================ */
-
-.panel{
-  background:#fff;
-  border-radius:18px;
-  padding:18px;
-  margin-bottom:16px;
-  border:1px solid var(--border);
-}
-
-.panel-title{
-  font-size:17px;
-  font-weight:900;
-  margin-bottom:14px;
-}
-
-.grid{
-  display:grid;
-  gap:12px;
-}
-
-.grid-2{
-  grid-template-columns:1fr 1fr;
-}
-
-.grid-3{
-  grid-template-columns:repeat(3,1fr);
-}
-
-.item{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:15px;
-  padding:14px;
-}
-
-.item-title{
-  font-weight:900;
-  font-size:14px;
-}
-
-.item-muted{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:4px;
-}
-
-.item-actions{
-  display:flex;
-  gap:7px;
-  margin-top:12px;
-  flex-wrap:wrap;
-}
-
-.item-actions button{
-  padding:8px 10px;
-  border:0;
-  border-radius:9px;
-  font-size:11px;
-  font-weight:800;
-}
-
-
-/* ================================
-   TABLE
-================================ */
-
-.table-wrap{
-  overflow:auto;
-  background:#fff;
-  border-radius:15px;
-  border:1px solid var(--border);
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  min-width:650px;
-}
-
-th{
-  background:var(--navy);
-  color:#fff;
-  padding:11px 8px;
-  font-size:11px;
-  text-align:left;
-}
-
-td{
-  padding:10px 8px;
-  border-bottom:1px solid var(--border);
-  font-size:12px;
-}
-
-tr:last-child td{
-  border-bottom:0;
-}
-
-
-/* ================================
-   IMAGE
-================================ */
-
-.preview{
-  width:100%;
-  max-width:180px;
-  height:130px;
-  object-fit:cover;
-  border-radius:12px;
-  background:#eef1f7;
-  display:block;
-  margin-bottom:10px;
-}
-
-.upload-box{
-  border:2px dashed #cdd3df;
-  border-radius:14px;
-  padding:18px;
-  text-align:center;
-  color:var(--muted);
-}
-
-.upload-box input{
-  margin-top:10px;
-}
-
-
-/* ================================
-   COLOR
-================================ */
-
-.color-row{
-  display:grid;
-  grid-template-columns:70px 1fr;
-  gap:10px;
-  align-items:center;
-}
-
-.color-row input[type=color]{
-  width:70px;
-  height:45px;
-  padding:2px;
-}
-
-
-/* ================================
-   TOAST
-================================ */
-
-#toast{
-  position:fixed;
-  left:50%;
-  bottom:20px;
-  transform:translateX(-50%);
-  z-index:100;
-  background:#11182e;
-  color:#fff;
-  border-radius:12px;
-  padding:12px 17px;
-  font-size:12px;
-  font-weight:700;
-  box-shadow:0 10px 30px #00000035;
-  display:none;
-}
-
-
-/* ================================
-   MODAL
-================================ */
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:#00000075;
-  z-index:80;
-  display:none;
-  align-items:flex-end;
-  justify-content:center;
-  padding:12px;
-}
-
-.modal.open{
-  display:flex;
-}
-
-.modal-box{
-  background:#fff;
-  width:100%;
-  max-width:700px;
-  max-height:92vh;
-  overflow:auto;
-  border-radius:22px 22px 15px 15px;
-  padding:20px;
-}
-
-.modal-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:15px;
-}
-
-.modal-title{
-  font-size:19px;
-  font-weight:900;
-}
-
-.close{
-  width:34px;
-  height:34px;
-  border:0;
-  border-radius:50%;
-  background:#eef1f7;
-  font-size:18px;
-}
-
-
-/* ================================
-   MOBILE
-================================ */
-
-.mobile-nav{
-  display:none;
-}
-
-@media(max-width:700px){
-
-  .layout{
-    display:block;
-  }
-
-  .sidebar{
-    display:none;
-  }
-
-  .content{
-    padding:
-      16px
-      14px
-      90px;
-  }
-
-  .mobile-nav{
-    position:fixed;
-    left:0;
-    right:0;
-    bottom:0;
-    z-index:60;
-
-    display:flex;
-
-    background:#fff;
-    border-top:1px solid var(--border);
-
-    padding:
-      8px
-      5px
-      calc(8px + env(safe-area-inset-bottom));
-  }
-
-  .mobile-nav button{
-    flex:1;
-    border:0;
-    background:transparent;
-    color:#7a8295;
-    font-size:9px;
-    font-weight:700;
-  }
-
-  .mobile-nav button.active{
-    color:var(--blue);
-  }
-
-  .mobile-nav .ico{
-    display:block;
-    font-size:19px;
-    margin-bottom:3px;
-  }
-
-  .grid-2,
-  .grid-3{
-    grid-template-columns:1fr;
-  }
-
-  .page-title{
-    font-size:23px;
-  }
-
-}
-
-
-/* ================================
-   CHECKBOX
-================================ */
-
-.check{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:12px;
-  font-weight:700;
-  margin-bottom:10px;
-}
-
-.check input{
-  width:18px;
-  height:18px;
-}
-
-</style>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 
 <body>
 
+<div class="admin-page">
 
-<!-- =====================================================
-     AUTH
-===================================================== -->
+    <!-- =====================================================
+         AUTH SCREEN
+    ====================================================== -->
 
-<section id="authScreen">
+    <section
+        id="authScreen"
+        class="auth-screen"
+    >
 
-  <div class="auth-card">
+        <div class="auth-card">
 
-    <div class="auth-logo" id="authLogo">
-      Ч2011
-    </div>
+            <div class="auth-logo-wrap">
 
-    <div class="auth-title">
-      ХК Челны 2011
-    </div>
+                <img
+                    id="authLogo"
+                    class="auth-logo"
+                    src=""
+                    alt="ХК Челны 2011"
+                >
 
-    <div class="auth-subtitle">
-      Панель администратора
-    </div>
-
-    <form id="loginForm">
-
-      <div class="field">
-
-        <label>
-          E-mail
-        </label>
-
-        <input
-          id="loginEmail"
-          type="email"
-          required
-          autocomplete="email"
-          placeholder="admin@example.com"
-        >
-
-      </div>
+            </div>
 
 
-      <div class="field">
+            <div class="auth-title">
+                ХК Челны 2011
+            </div>
 
-        <label>
-          Пароль
-        </label>
-
-        <input
-          id="loginPassword"
-          type="password"
-          required
-          autocomplete="current-password"
-          placeholder="••••••••"
-        >
-
-      </div>
+            <div class="auth-subtitle">
+                Административная панель
+            </div>
 
 
-      <button
-        class="btn btn-primary btn-block"
-        type="submit"
-      >
-        Войти
-      </button>
+            <form
+                id="loginForm"
+                class="auth-form"
+            >
 
-    </form>
+                <label class="form-field">
 
-  </div>
+                    <span>
+                        Email
+                    </span>
 
-</section>
+                    <input
+                        id="loginEmail"
+                        type="email"
+                        autocomplete="username"
+                        placeholder="Введите email"
+                        required
+                    >
 
-
-
-<!-- =====================================================
-     ADMIN
-===================================================== -->
-
-<section
-  id="adminScreen"
-  class="hidden"
->
+                </label>
 
 
-<header class="topbar">
+                <label class="form-field">
 
-  <div class="topbar-inner">
+                    <span>
+                        Пароль
+                    </span>
 
-    <div class="brand">
+                    <input
+                        id="loginPassword"
+                        type="password"
+                        autocomplete="current-password"
+                        placeholder="Введите пароль"
+                        required
+                    >
 
-      <div
-        class="brand-logo"
-        id="brandLogo"
-      >
-        Ч2011
-      </div>
+                </label>
 
-      <div>
 
-        <div class="brand-title">
-          ХК Челны 2011
+                <button
+                    type="submit"
+                    class="button button-primary button-full"
+                >
+                    Войти
+                </button>
+
+
+                <div
+                    id="loginError"
+                    class="form-error hidden"
+                ></div>
+
+            </form>
+
         </div>
 
-        <div class="brand-subtitle">
-          Панель управления
-        </div>
-
-      </div>
-
-    </div>
+    </section>
 
 
-    <button
-      class="logout"
-      onclick="logout()"
+    <!-- =====================================================
+         ADMIN APP
+    ====================================================== -->
+
+    <section
+        id="adminApp"
+        class="admin-app hidden"
     >
-      Выйти
-    </button>
 
-  </div>
+        <!-- =================================================
+             ADMIN HEADER
+        ================================================== -->
 
-</header>
+        <header class="admin-header">
+
+            <div class="admin-header-left">
 
+                <a
+                    href="index.html"
+                    class="admin-back-button"
+                >
+                    ‹
+                </a>
+
+                <div>
+
+                    <div class="admin-header-title">
+                        Админ-панель
+                    </div>
 
+                    <div class="admin-header-subtitle">
+                        ХК Челны 2011
+                    </div>
 
-<div class="layout">
+                </div>
 
+            </div>
 
-<!-- =====================================================
-     SIDEBAR
-===================================================== -->
 
-<aside class="sidebar">
+            <button
+                id="logoutButton"
+                type="button"
+                class="admin-logout-button"
+            >
+                Выйти
+            </button>
 
-  <button
-    class="active"
-    data-page="dashboard"
-  >
-    🏠 Главная
-  </button>
+        </header>
 
-  <button data-page="matches">
-    🏒 Матчи
-  </button>
 
-  <button data-page="players">
-    👥 Игроки
-  </button>
+        <!-- =================================================
+             ADMIN NAV
+        ================================================== -->
 
-  <button data-page="teams">
-    🏳️ Команды
-  </button>
+        <nav class="admin-nav">
 
-  <button data-page="news">
-    📰 Новости
-  </button>
+            <button
+                type="button"
+                class="admin-nav-item active"
+                data-admin-section="matches"
+            >
+                <span>⚔</span>
+                Матчи
+            </button>
 
-  <button data-page="standings">
-    📊 Таблица
-  </button>
 
-  <button data-page="achievements">
-    🏆 Достижения
-  </button>
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-admin-section="archive"
+            >
+                <span>◷</span>
+                Архив
+            </button>
 
-  <button data-page="media">
-    📸 Медиа
-  </button>
 
-  <button data-page="birthdays">
-    🎂 Именинники
-  </button>
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-admin-section="players"
+            >
+                <span>◎</span>
+                Состав
+            </button>
 
-  <button data-page="products">
-    🛍 Товары
-  </button>
 
-  <button data-page="design">
-    🎨 Дизайн
-  </button>
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-admin-section="news"
+            >
+                <span>◈</span>
+                Новости
+            </button>
 
-</aside>
 
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-admin-section="table"
+            >
+                <span>≡</span>
+                Таблица
+            </button>
 
 
-<!-- =====================================================
-     CONTENT
-===================================================== -->
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-admin-section="content"
+            >
+                <span>◆</span>
+                Контент
+            </button>
 
-<main class="content">
 
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-admin-section="design"
+            >
+                <span>✦</span>
+                Дизайн
+            </button>
 
-<!-- =====================================================
-     DASHBOARD
-===================================================== -->
+        </nav>
 
-<section
-  id="page-dashboard"
-  class="page active"
->
 
-  <div class="page-title">
-    Главная
-  </div>
+        <!-- =================================================
+             ADMIN CONTENT
+        ================================================== -->
 
-  <div class="page-description">
-    Управление сайтом ХК Челны 2011
-  </div>
+        <main class="admin-container">
 
 
-  <div class="grid grid-3">
+            <!-- =================================================
+                 MATCHES
+            ================================================== -->
 
-    <div class="panel">
+            <section
+                id="adminSectionMatches"
+                class="admin-section"
+            >
 
-      <div class="item-muted">
-        Матчи
-      </div>
+                <div class="admin-section-header">
 
-      <div
-        id="countMatches"
-        style="
-          font-size:30px;
-          font-weight:900;
-          margin-top:5px;
-        "
-      >
-        —
-      </div>
+                    <div>
 
-    </div>
+                        <h1>
+                            Матчи
+                        </h1>
 
+                        <p>
+                            Создание и редактирование матчей
+                        </p>
 
-    <div class="panel">
+                    </div>
 
-      <div class="item-muted">
-        Игроки
-      </div>
+                    <button
+                        id="addMatchButton"
+                        type="button"
+                        class="button button-primary"
+                    >
+                        + Добавить матч
+                    </button>
 
-      <div
-        id="countPlayers"
-        style="
-          font-size:30px;
-          font-weight:900;
-          margin-top:5px;
-        "
-      >
-        —
-      </div>
+                </div>
 
-    </div>
 
+                <div
+                    id="adminMatchesList"
+                    class="admin-list"
+                >
 
-    <div class="panel">
+                    <div class="loading-state">
+                        Загрузка…
+                    </div>
 
-      <div class="item-muted">
-        Новости
-      </div>
+                </div>
 
-      <div
-        id="countNews"
-        style="
-          font-size:30px;
-          font-weight:900;
-          margin-top:5px;
-        "
-      >
-        —
-      </div>
+            </section>
 
-    </div>
 
-  </div>
+            <!-- =================================================
+                 ARCHIVE
+            ================================================== -->
 
+            <section
+                id="adminSectionArchive"
+                class="admin-section hidden"
+            >
 
-  <div class="panel">
+                <div class="admin-section-header">
 
-    <div class="panel-title">
-      Быстрые действия
-    </div>
+                    <div>
 
-    <div class="actions">
+                        <h1>
+                            Архив
+                        </h1>
 
-      <button
-        class="btn btn-primary"
-        onclick="openEditor('match')"
-      >
-        + Матч
-      </button>
+                        <p>
+                            Завершённые матчи и события
+                        </p>
 
-      <button
-        class="btn btn-primary"
-        onclick="openEditor('player')"
-      >
-        + Игрок
-      </button>
+                    </div>
 
-      <button
-        class="btn btn-primary"
-        onclick="openEditor('news')"
-      >
-        + Новость
-      </button>
+                </div>
 
-      <button
-        class="btn btn-light"
-        onclick="openPage('design')"
-      >
-        🎨 Дизайн
-      </button>
 
-    </div>
+                <div
+                    id="adminArchiveList"
+                    class="admin-list"
+                ></div>
 
-  </div>
+            </section>
 
 
-  <div class="panel">
+            <!-- =================================================
+                 PLAYERS
+            ================================================== -->
 
-    <div class="panel-title">
-      Последний добавленный матч
-    </div>
+            <section
+                id="adminSectionPlayers"
+                class="admin-section hidden"
+            >
 
-    <div id="dashboardLastMatch">
-      Загрузка...
-    </div>
+                <div class="admin-section-header">
 
-  </div>
+                    <div>
 
-</section>
+                        <h1>
+                            Состав
+                        </h1>
 
+                        <p>
+                            Игроки и сезонная статистика
+                        </p>
 
+                    </div>
 
-<!-- =====================================================
-     MATCHES
-===================================================== -->
+                    <button
+                        id="addPlayerButton"
+                        type="button"
+                        class="button button-primary"
+                    >
+                        + Добавить игрока
+                    </button>
 
-<section
-  id="page-matches"
-  class="page"
->
+                </div>
 
-  <div class="page-title">
-    Матчи
-  </div>
 
-  <div class="page-description">
-    Создание и редактирование матчей
-  </div>
+                <div
+                    id="adminPlayersList"
+                    class="admin-list"
+                ></div>
 
+            </section>
 
-  <div class="panel">
 
-    <button
-      class="btn btn-primary"
-      onclick="openEditor('match')"
-    >
-      + Добавить матч
-    </button>
+            <!-- =================================================
+                 NEWS
+            ================================================== -->
 
-  </div>
+            <section
+                id="adminSectionNews"
+                class="admin-section hidden"
+            >
 
+                <div class="admin-section-header">
 
-  <div
-    id="matchesAdminList"
-    class="grid"
-  >
-    Загрузка...
-  </div>
+                    <div>
 
-</section>
+                        <h1>
+                            Новости
+                        </h1>
 
+                        <p>
+                            Публикации команды
+                        </p>
 
+                    </div>
 
-<!-- =====================================================
-     PLAYERS
-===================================================== -->
+                    <button
+                        id="addNewsButton"
+                        type="button"
+                        class="button button-primary"
+                    >
+                        + Добавить новость
+                    </button>
 
-<section
-  id="page-players"
-  class="page"
->
+                </div>
 
-  <div class="page-title">
-    Игроки
-  </div>
 
-  <div class="page-description">
-    Состав команды и персональные данные
-  </div>
+                <div
+                    id="adminNewsList"
+                    class="admin-list"
+                ></div>
 
+            </section>
 
-  <div class="panel">
 
-    <button
-      class="btn btn-primary"
-      onclick="openEditor('player')"
-    >
-      + Добавить игрока
-    </button>
+            <!-- =================================================
+                 STANDINGS
+            ================================================== -->
 
-  </div>
+            <section
+                id="adminSectionTable"
+                class="admin-section hidden"
+            >
 
+                <div class="admin-section-header">
 
-  <div
-    id="playersAdminList"
-    class="grid grid-2"
-  >
-    Загрузка...
-  </div>
+                    <div>
 
-</section>
+                        <h1>
+                            Таблица
+                        </h1>
 
+                        <p>
+                            Турнирная таблица
+                        </p>
 
+                    </div>
 
-<!-- =====================================================
-     TEAMS
-===================================================== -->
+                    <button
+                        id="addStandingButton"
+                        type="button"
+                        class="button button-primary"
+                    >
+                        + Добавить команду
+                    </button>
 
-<section
-  id="page-teams"
-  class="page"
->
+                </div>
 
-  <div class="page-title">
-    Команды
-  </div>
 
-  <div class="page-description">
-    Реестр команд и логотипов
-  </div>
+                <div
+                    id="adminStandingsList"
+                    class="admin-list"
+                ></div>
 
+            </section>
 
-  <div class="panel">
 
-    <button
-      class="btn btn-primary"
-      onclick="openEditor('team')"
-    >
-      + Добавить команду
-    </button>
+            <!-- =================================================
+                 CONTENT
+            ================================================== -->
 
-  </div>
+            <section
+                id="adminSectionContent"
+                class="admin-section hidden"
+            >
 
+                <div class="admin-section-header">
 
-  <div
-    id="teamsAdminList"
-    class="grid grid-2"
-  >
-    Загрузка...
-  </div>
+                    <div>
 
-</section>
+                        <h1>
+                            Контент
+                        </h1>
 
+                        <p>
+                            Достижения, дни рождения, товары и блоки
+                        </p>
 
+                    </div>
 
-<!-- =====================================================
-     NEWS
-===================================================== -->
+                </div>
 
-<section
-  id="page-news"
-  class="page"
->
 
-  <div class="page-title">
-    Новости
-  </div>
+                <!-- ACHIEVEMENTS -->
 
-  <div class="page-description">
-    Публикации команды
-  </div>
+                <div class="admin-block">
 
+                    <div class="admin-block-header">
 
-  <div class="panel">
+                        <div>
 
-    <button
-      class="btn btn-primary"
-      onclick="openEditor('news')"
-    >
-      + Добавить новость
-    </button>
+                            <h2>
+                                Достижения
+                            </h2>
 
-  </div>
+                            <p>
+                                Результаты команды
+                            </p>
 
+                        </div>
 
-  <div
-    id="newsAdminList"
-    class="grid"
-  >
-    Загрузка...
-  </div>
+                        <button
+                            id="addAchievementButton"
+                            type="button"
+                            class="button button-secondary"
+                        >
+                            + Добавить
+                        </button>
 
-</section>
+                    </div>
 
 
+                    <div
+                        id="adminAchievementsList"
+                        class="admin-list compact"
+                    ></div>
 
-<!-- =====================================================
-     STANDINGS
-===================================================== -->
+                </div>
 
-<section
-  id="page-standings"
-  class="page"
->
 
-  <div class="page-title">
-    Турнирная таблица
-  </div>
+                <!-- BIRTHDAYS -->
 
-  <div class="page-description">
-    Таблица заполняется вручную
-  </div>
+                <div class="admin-block">
 
+                    <div class="admin-block-header">
 
-  <div class="panel">
+                        <div>
 
-    <button
-      class="btn btn-primary"
-      onclick="openEditor('standing')"
-    >
-      + Добавить строку
-    </button>
+                            <h2>
+                                Дни рождения
+                            </h2>
 
-  </div>
+                            <p>
+                                Поздравления игроков
+                            </p>
 
+                        </div>
 
-  <div
-    id="standingsAdminList"
-  >
-    Загрузка...
-  </div>
+                        <button
+                            id="addBirthdayButton"
+                            type="button"
+                            class="button button-secondary"
+                        >
+                            + Добавить
+                        </button>
 
-</section>
+                    </div>
 
 
+                    <div
+                        id="adminBirthdaysList"
+                        class="admin-list compact"
+                    ></div>
 
-<!-- =====================================================
-     ACHIEVEMENTS
-===================================================== -->
+                </div>
 
-<section
-  id="page-achievements"
-  class="page"
->
 
-  <div class="page-title">
-    Достижения
-  </div>
+                <!-- PRODUCTS -->
 
-  <div class="page-description">
-    Кубки, турниры и командные достижения
-  </div>
+                <div class="admin-block">
 
+                    <div class="admin-block-header">
 
-  <div class="panel">
+                        <div>
 
-    <button
-      class="btn btn-primary"
-      onclick="openEditor('achievement')"
-    >
-      + Добавить достижение
-    </button>
+                            <h2>
+                                Товары
+                            </h2>
 
-  </div>
+                            <p>
+                                Раздел клубной продукции
+                            </p>
 
+                        </div>
 
-  <div
-    id="achievementsAdminList"
-    class="grid grid-2"
-  >
-    Загрузка...
-  </div>
+                        <button
+                            id="addProductButton"
+                            type="button"
+                            class="button button-secondary"
+                        >
+                            + Добавить
+                        </button>
 
-</section>
+                    </div>
 
 
+                    <div
+                        id="adminProductsList"
+                        class="admin-list compact"
+                    ></div>
 
-<!-- =====================================================
-     MEDIA
-===================================================== -->
+                </div>
 
-<section
-  id="page-media"
-  class="page"
->
+            </section>
 
-  <div class="page-title">
-    Медиа
-  </div>
 
-  <div class="page-description">
-    Фотоальбомы команды
-  </div>
+            <!-- =================================================
+                 DESIGN
+            ================================================== -->
 
+            <section
+                id="adminSectionDesign"
+                class="admin-section hidden"
+            >
 
-  <div class="panel">
+                <div class="admin-section-header">
 
-    <button
-      class="btn btn-primary"
-      onclick="openEditor('album')"
-    >
-      + Добавить альбом
-    </button>
+                    <div>
 
-  </div>
+                        <h1>
+                            Дизайн
+                        </h1>
 
+                        <p>
+                            Настройки внешнего вида сайта
+                        </p>
 
-  <div
-    id="albumsAdminList"
-    class="grid grid-2"
-  >
-    Загрузка...
-  </div>
+                    </div>
 
-</section>
+                </div>
 
 
+                <!-- LOGO -->
 
-<!-- =====================================================
-     BIRTHDAYS
-===================================================== -->
+                <div class="admin-block">
 
-<section
-  id="page-birthdays"
-  class="page"
->
+                    <div class="admin-block-header">
 
-  <div class="page-title">
-    Именинники
-  </div>
+                        <div>
 
-  <div class="page-description">
-    Дни рождения игроков
-  </div>
+                            <h2>
+                                Логотип
+                            </h2>
 
+                            <p>
+                                Загрузка с телефона
+                            </p>
 
-  <div class="panel">
+                        </div>
 
-    <button
-      class="btn btn-primary"
-      onclick="openEditor('birthday')"
-    >
-      + Добавить именинника
-    </button>
+                    </div>
 
-  </div>
 
+                    <div class="upload-area">
 
-  <div
-    id="birthdaysAdminList"
-    class="grid grid-2"
-  >
-    Загрузка...
-  </div>
+                        <img
+                            id="adminLogoPreview"
+                            class="upload-preview logo-preview"
+                            src=""
+                            alt=""
+                        >
 
-</section>
+                        <label
+                            class="upload-button"
+                            for="logoFile"
+                        >
+                            Выбрать логотип
+                        </label>
 
+                        <input
+                            id="logoFile"
+                            type="file"
+                            accept="image/*"
+                            hidden
+                        >
 
+                    </div>
 
-<!-- =====================================================
-     PRODUCTS
-===================================================== -->
+                </div>
 
-<section
-  id="page-products"
-  class="page"
->
 
-  <div class="page-title">
-    Товары
-  </div>
+                <!-- COLORS -->
 
-  <div class="page-description">
-    Управление товарами команды
-  </div>
+                <div class="admin-block">
 
+                    <div class="admin-block-header">
 
-  <div class="panel">
+                        <div>
 
-    <button
-      class="btn btn-primary"
-      onclick="openEditor('product')"
-    >
-      + Добавить товар
-    </button>
+                            <h2>
+                                Цвета
+                            </h2>
 
-  </div>
+                            <p>
+                                Можно изменить HEX-кодом
+                            </p>
 
+                        </div>
 
-  <div
-    id="productsAdminList"
-    class="grid grid-2"
-  >
-    Загрузка...
-  </div>
+                    </div>
 
-</section>
 
+                    <div class="design-grid">
 
+                        <label class="color-field">
 
-<!-- =====================================================
-     DESIGN
-===================================================== -->
+                            <span>
+                                Основной
+                            </span>
 
-<section
-  id="page-design"
-  class="page"
->
+                            <input
+                                id="colorPrimary"
+                                type="text"
+                                value="#000056"
+                                maxlength="7"
+                            >
 
-  <div class="page-title">
-    Дизайн
-  </div>
+                        </label>
 
-  <div class="page-description">
-    Цвета, название команды, логотип и шрифты
-  </div>
 
+                        <label class="color-field">
 
-  <div class="panel">
+                            <span>
+                                Вторичный
+                            </span>
 
-    <div class="panel-title">
-      Название команды
-    </div>
+                            <input
+                                id="colorSecondary"
+                                type="text"
+                                value="#0875dc"
+                                maxlength="7"
+                            >
 
-    <div class="field">
+                        </label>
 
-      <label>
-        Название
-      </label>
 
-      <input
-        id="designTeamName"
-        value="ХК Челны 2011"
-      >
+                        <label class="color-field">
 
-    </div>
+                            <span>
+                                Акцент
+                            </span>
 
-  </div>
+                            <input
+                                id="colorAccent"
+                                type="text"
+                                value="#ffcd00"
+                                maxlength="7"
+                            >
 
+                        </label>
 
-  <div class="panel">
 
-    <div class="panel-title">
-      Цвета
-    </div>
+                        <label class="color-field">
 
+                            <span>
+                                Белый
+                            </span>
 
-    <div class="field">
+                            <input
+                                id="colorWhite"
+                                type="text"
+                                value="#ffffff"
+                                maxlength="7"
+                            >
 
-      <label>
-        Основной цвет
-      </label>
+                        </label>
 
-      <div class="color-row">
+                    </div>
 
-        <input
-          type="color"
-          id="colorPrimaryPicker"
-          value="#000056"
-        >
 
-        <input
-          id="colorPrimary"
-          value="#000056"
-        >
+                    <button
+                        id="saveColorsButton"
+                        type="button"
+                        class="button button-primary"
+                    >
+                        Сохранить цвета
+                    </button>
 
-      </div>
+                </div>
 
-    </div>
 
+                <!-- FONTS -->
 
-    <div class="field">
+                <div class="admin-block">
 
-      <label>
-        Вторичный цвет
-      </label>
+                    <div class="admin-block-header">
 
-      <div class="color-row">
+                        <div>
 
-        <input
-          type="color"
-          id="colorSecondaryPicker"
-          value="#0875dc"
-        >
+                            <h2>
+                                Шрифты
+                            </h2>
 
-        <input
-          id="colorSecondary"
-          value="#0875dc"
-        >
+                            <p>
+                                Stapel, Stengazeta, Christopher
+                            </p>
 
-      </div>
+                        </div>
 
-    </div>
+                    </div>
 
 
-    <div class="field">
+                    <div class="form-grid">
 
-      <label>
-        Акцентный цвет
-      </label>
+                        <label class="form-field">
 
-      <div class="color-row">
+                            <span>
+                                Основной шрифт
+                            </span>
 
-        <input
-          type="color"
-          id="colorAccentPicker"
-          value="#ffcd00"
-        >
+                            <input
+                                id="fontMain"
+                                type="text"
+                                value="Stapel"
+                            >
 
-        <input
-          id="colorAccent"
-          value="#ffcd00"
-        >
+                        </label>
 
-      </div>
 
-    </div>
+                        <label class="form-field">
 
+                            <span>
+                                Заголовки
+                            </span>
 
-    <div class="field">
+                            <input
+                                id="fontHeading"
+                                type="text"
+                                value="Stapel"
+                            >
 
-      <label>
-        Белый
-      </label>
+                        </label>
 
-      <div class="color-row">
 
-        <input
-          type="color"
-          id="colorWhitePicker"
-          value="#ffffff"
-        >
+                        <label class="form-field">
 
-        <input
-          id="colorWhite"
-          value="#ffffff"
-        >
+                            <span>
+                                Второй
+                            </span>
 
-      </div>
+                            <input
+                                id="fontSecondary"
+                                type="text"
+                                value="Stengazeta"
+                            >
 
-    </div>
+                        </label>
 
 
-    <button
-      class="btn btn-primary"
-      onclick="saveDesign()"
-    >
-      Сохранить цвета
-    </button>
+                        <label class="form-field">
 
-  </div>
+                            <span>
+                                Третий
+                            </span>
 
+                            <input
+                                id="fontThird"
+                                type="text"
+                                value="Christopher"
+                            >
 
-  <div class="panel">
+                        </label>
 
-    <div class="panel-title">
-      Логотип
-    </div>
+                    </div>
 
-    <div id="logoPreview">
-      Загрузка...
-    </div>
 
+                    <div class="upload-area">
 
-    <div class="upload-box">
+                        <label
+                            class="upload-button"
+                            for="fontFile"
+                        >
+                            Загрузить файл шрифта
+                        </label>
 
-      Загрузить новый логотип
+                        <input
+                            id="fontFile"
+                            type="file"
+                            accept=".woff,.woff2,.ttf,.otf"
+                            hidden
+                        >
 
-      <br>
+                        <div
+                            id="fontFileName"
+                            class="upload-file-name"
+                        >
+                            Файл не выбран
+                        </div>
 
-      <input
-        type="file"
-        id="logoFile"
-        accept="image/*"
-      >
+                    </div>
 
-    </div>
 
+                    <button
+                        id="saveFontsButton"
+                        type="button"
+                        class="button button-primary"
+                    >
+                        Сохранить шрифты
+                    </button>
 
-    <br>
+                </div>
 
-    <button
-      class="btn btn-primary"
-      onclick="uploadLogo()"
-    >
-      Сохранить логотип
-    </button>
 
-  </div>
+                <!-- HOMEPAGE BLOCKS -->
 
+                <div class="admin-block">
 
-  <div class="panel">
+                    <div class="admin-block-header">
 
-    <div class="panel-title">
-      Шрифты
-    </div>
+                        <div>
 
+                            <h2>
+                                Главная страница
+                            </h2>
 
-    <div class="field">
+                            <p>
+                                Какие блоки показывать посетителям
+                            </p>
 
-      <label>
-        Основной шрифт
-      </label>
+                        </div>
 
-      <input
-        type="file"
-        id="fontMainFile"
-        accept=".ttf,.otf,.woff,.woff2"
-      >
+                    </div>
 
-    </div>
 
+                    <div class="toggle-list">
 
-    <div class="field">
+                        <label class="toggle-row">
 
-      <label>
-        Заголовочный шрифт
-      </label>
+                            <span>
+                                Матч Дэй
+                            </span>
 
-      <input
-        type="file"
-        id="fontHeadingFile"
-        accept=".ttf,.otf,.woff,.woff2"
-      >
+                            <input
+                                id="showMatchday"
+                                type="checkbox"
+                                checked
+                            >
 
-    </div>
+                        </label>
 
 
-    <div class="field">
+                        <label class="toggle-row">
 
-      <label>
-        Дополнительный шрифт
-      </label>
+                            <span>
+                                Последний матч
+                            </span>
 
-      <input
-        type="file"
-        id="fontSecondaryFile"
-        accept=".ttf,.otf,.woff,.woff2"
-      >
+                            <input
+                                id="showLastMatch"
+                                type="checkbox"
+                                checked
+                            >
 
-    </div>
+                        </label>
 
 
-    <button
-      class="btn btn-primary"
-      onclick="uploadFonts()"
-    >
-      Сохранить шрифты
-    </button>
+                        <label class="toggle-row">
 
-  </div>
+                            <span>
+                                Статистика
+                            </span>
 
-</section>
+                            <input
+                                id="showStats"
+                                type="checkbox"
+                                checked
+                            >
 
+                        </label>
 
-</main>
+
+                        <label class="toggle-row">
+
+                            <span>
+                                Новости
+                            </span>
+
+                            <input
+                                id="showNews"
+                                type="checkbox"
+                                checked
+                            >
+
+                        </label>
+
+
+                        <label class="toggle-row">
+
+                            <span>
+                                Состав
+                            </span>
+
+                            <input
+                                id="showRoster"
+                                type="checkbox"
+                                checked
+                            >
+
+                        </label>
+
+
+                        <label class="toggle-row">
+
+                            <span>
+                                Достижения
+                            </span>
+
+                            <input
+                                id="showAchievements"
+                                type="checkbox"
+                                checked
+                            >
+
+                        </label>
+
+
+                        <label class="toggle-row">
+
+                            <span>
+                                Дни рождения
+                            </span>
+
+                            <input
+                                id="showBirthdays"
+                                type="checkbox"
+                                checked
+                            >
+
+                        </label>
+
+                    </div>
+
+
+                    <button
+                        id="saveHomepageButton"
+                        type="button"
+                        class="button button-primary"
+                    >
+                        Сохранить блоки
+                    </button>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </section>
 
 </div>
 
 
-<!-- MOBILE NAV -->
-
-<nav class="mobile-nav">
-
-  <button
-    class="active"
-    data-page="dashboard"
-  >
-    <span class="ico">⌂</span>
-    Главная
-  </button>
-
-  <button data-page="matches">
-    <span class="ico">🏒</span>
-    Матчи
-  </button>
-
-  <button data-page="players">
-    <span class="ico">👥</span>
-    Игроки
-  </button>
-
-  <button data-page="news">
-    <span class="ico">📰</span>
-    Новости
-  </button>
-
-  <button data-page="design">
-    <span class="ico">🎨</span>
-    Дизайн
-  </button>
-
-</nav>
-
-</section>
-
-
-
 <!-- =====================================================
-     MODAL
-===================================================== -->
+     GLOBAL MODAL
+====================================================== -->
 
 <div
-  id="modal"
-  class="modal"
+    id="adminModal"
+    class="modal hidden"
+    aria-hidden="true"
 >
 
-  <div class="modal-box">
+    <div
+        class="modal-backdrop"
+        data-close-admin-modal
+    ></div>
 
-    <div class="modal-head">
+    <div class="modal-dialog">
 
-      <div
-        id="modalTitle"
-        class="modal-title"
-      >
-        Редактирование
-      </div>
+        <button
+            type="button"
+            class="modal-close"
+            data-close-admin-modal
+            aria-label="Закрыть"
+        >
+            ×
+        </button>
 
-      <button
-        class="close"
-        onclick="closeModal()"
-      >
-        ×
-      </button>
+        <div
+            id="adminModalContent"
+            class="modal-content"
+        ></div>
 
     </div>
-
-    <div id="modalContent"></div>
-
-  </div>
 
 </div>
 
 
-<div id="toast"></div>
+<!-- =====================================================
+     TOAST
+====================================================== -->
 
+<div
+    id="toast"
+    class="toast hidden"
+></div>
+
+
+<!-- =====================================================
+     SCRIPTS
+====================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="config.js"></script>
+
+<script src="admin.js"></script>
 
 
 <script>
 
-/* =====================================================
-   SUPABASE
-===================================================== */
-
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-
-
-/* =====================================================
-   STATE
-===================================================== */
-
-let currentUser = null;
-
-let matches = [];
-let players = [];
-let teams = [];
-let news = [];
-let standings = [];
-let achievements = [];
-let albums = [];
-let birthdays = [];
-let products = [];
-
-let editingId = null;
-
-
-/* =====================================================
-   HELPERS
-===================================================== */
-
-function $(id){
-  return document.getElementById(id);
-}
-
-
-function toast(message){
-
-  const box = $("toast");
-
-  box.textContent = message;
-
-  box.style.display = "block";
-
-  clearTimeout(
-    toast.timer
-  );
-
-  toast.timer =
-    setTimeout(
-      () => {
-        box.style.display = "none";
-      },
-      2500
-    );
-
-}
-
-
-function escapeHtml(value){
-
-  return String(
-    value ?? ""
-  )
-  .replace(/&/g,"&amp;")
-  .replace(/</g,"&lt;")
-  .replace(/>/g,"&gt;")
-  .replace(/"/g,"&quot;")
-  .replace(/'/g,"&#039;");
-
-}
-
-
-function publicImage(url){
-
-  if(!url){
-    return "";
-  }
-
-  if(
-    url.startsWith("http://") ||
-    url.startsWith("https://")
-  ){
-    return url;
-  }
-
-  return (
-    SUPABASE_URL +
-    "/storage/v1/object/public/" +
-    STORAGE_BUCKET +
-    "/" +
-    url.replace(/^\/+/,"")
-  );
-
-}
-
-
-async function uploadFile(
-  file,
-  folder
-){
-
-  if(!file){
-    return null;
-  }
-
-  const ext =
-    file.name
-      .split(".")
-      .pop()
-      .toLowerCase();
-
-  const filename =
-    `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .storage
-      .from(STORAGE_BUCKET)
-      .upload(
-        filename,
-        file,
-        {
-          upsert:false,
-          contentType:file.type
-        }
-      );
-
-  if(error){
-    throw error;
-  }
-
-  return filename;
-
-}
-
-
-async function removeFile(path){
-
-  if(!path){
-    return;
-  }
-
-  try{
-
-    await supabaseClient
-      .storage
-      .from(STORAGE_BUCKET)
-      .remove([path]);
-
-  }catch(error){
-
-    console.warn(
-      "Storage remove:",
-      error
-    );
-
-  }
-
-}
-
-
-/* =====================================================
-   AUTH
-===================================================== */
-
-async function checkAuth(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .auth
-      .getSession();
-
-
-  if(error){
-
-    console.error(
-      error
-    );
-
-    showAuth();
-
-    return;
-
-  }
-
-
-  if(data.session){
-
-    currentUser =
-      data.session.user;
-
-    await showAdmin();
-
-  }else{
-
-    showAuth();
-
-  }
-
-}
-
-
-function showAuth(){
-
-  $("authScreen")
-    .classList.remove("hidden");
-
-  $("adminScreen")
-    .classList.add("hidden");
-
-}
-
-
-async function showAdmin(){
-
-  $("authScreen")
-    .classList.add("hidden");
-
-  $("adminScreen")
-    .classList.remove("hidden");
-
-  await loadAll();
-
-}
-
-
-$("loginForm")
-  .addEventListener(
-    "submit",
-    async event => {
-
-      event.preventDefault();
-
-
-      const email =
-        $("loginEmail").value.trim();
-
-      const password =
-        $("loginPassword").value;
-
-
-      const {
-        error
-      } =
-        await supabaseClient
-          .auth
-          .signInWithPassword({
-            email,
-            password
-          });
-
-
-      if(error){
-
-        toast(
-          error.message
-        );
-
-        return;
-
-      }
-
-
-      toast("Вход выполнен");
-
-      await checkAuth();
-
-    }
-  );
-
-
-async function logout(){
-
-  await supabaseClient
-    .auth
-    .signOut();
-
-  location.reload();
-
-}
-
-
-/* =====================================================
-   NAVIGATION
-===================================================== */
-
-function openPage(name){
-
-  document
-    .querySelectorAll(".page")
-    .forEach(
-      page => {
-
-        page.classList.toggle(
-          "active",
-          page.id ===
-          "page-" + name
-        );
-
-      }
-    );
-
-
-  document
-    .querySelectorAll(
-      ".sidebar button,.mobile-nav button"
-    )
-    .forEach(
-      button => {
-
-        button.classList.toggle(
-          "active",
-          button.dataset.page === name
-        );
-
-      }
-    );
-
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
-
-}
-
-
-document
-  .querySelectorAll(
-    ".sidebar button,.mobile-nav button"
-  )
-  .forEach(
-    button => {
-
-      button.addEventListener(
-        "click",
-        () =>
-          openPage(
-            button.dataset.page
-          )
-      );
-
-    }
-  );
-
-
-/* =====================================================
-   LOAD ALL
-===================================================== */
-
-async function loadAll(){
-
-  await Promise.allSettled([
-
-    loadTeams(),
-    loadMatches(),
-    loadPlayers(),
-    loadNews(),
-    loadStandings(),
-    loadAchievements(),
-    loadAlbums(),
-    loadBirthdays(),
-    loadProducts(),
-    loadDesignSettings()
-
-  ]);
-
-  updateCounters();
-
-}
-
-
-/* =====================================================
-   TEAMS
-===================================================== */
-
-async function loadTeams(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("teams")
-      .select("*")
-      .order("name");
-
-  if(error){
-
-    console.error(error);
-
-    return;
-
-  }
-
-  teams =
-    data || [];
-
-  renderTeams();
-
-  renderTeamOptions();
-
-  renderLogo();
-
-}
-
-
-function renderTeams(){
-
-  const box =
-    $("teamsAdminList");
-
-  if(!teams.length){
-
-    box.innerHTML =
-      `<div class="panel">
-        Команд пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    teams
-      .map(
-        team => `
-
-          <div class="item">
-
-            ${
-              team.logo_url
-                ?
-                `<img
-                  class="preview"
-                  src="${escapeHtml(
-                    publicImage(
-                      team.logo_url
-                    )
-                  )}"
-                >`
-                :
-                ""
-            }
-
-            <div class="item-title">
-              ${escapeHtml(
-                team.name
-              )}
-            </div>
-
-            <div class="item-muted">
-              ${escapeHtml(
-                team.short_name || ""
-              )}
-            </div>
-
-            <div class="item-actions">
-
-              <button
-                class="btn-light"
-                onclick="editTeam(${team.id})"
-              >
-                Изменить
-              </button>
-
-              <button
-                class="btn-danger"
-                onclick="deleteTeam(${team.id})"
-              >
-                Удалить
-              </button>
-
-            </div>
-
-          </div>
-
-        `
-      )
-      .join("");
-
-}
-
-
-function renderTeamOptions(){
-
-  const options =
-    teams
-      .map(
-        team =>
-          `<option value="${team.id}">
-            ${escapeHtml(team.name)}
-          </option>`
-      )
-      .join("");
-
-  document
-    .querySelectorAll(
-      ".team-select"
-    )
-    .forEach(
-      select => {
-
-        select.innerHTML =
-          `<option value="">
-            Выберите команду
-          </option>` +
-          options;
-
-      }
-    );
-
-}
-
-
-/* =====================================================
-   MATCHES
-===================================================== */
-
-async function loadMatches(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("matches")
-      .select("*")
-      .order("date",{ascending:false})
-      .order("time",{ascending:false});
-
-  if(error){
-
-    console.error(error);
-
-    return;
-
-  }
-
-  matches =
-    data || [];
-
-  renderMatches();
-
-}
-
-
-function renderMatches(){
-
-  const box =
-    $("matchesAdminList");
-
-
-  if(!matches.length){
-
-    box.innerHTML =
-      `<div class="panel">
-        Матчей пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    matches
-      .map(
-        match => {
-
-          const home =
-            teams.find(
-              t =>
-                String(t.id) ===
-                String(match.home_team_id)
-            );
-
-          const away =
-            teams.find(
-              t =>
-                String(t.id) ===
-                String(match.away_team_id)
-            );
-
-
-          return `
-
-            <div class="item">
-
-              <div class="item-title">
-
-                ${
-                  escapeHtml(
-                    home?.name ||
-                    match.home_team ||
-                    "Команда"
-                  )
-                }
-
-                —
-
-                ${
-                  escapeHtml(
-                    away?.name ||
-                    match.opponent ||
-                    "Соперник"
-                  )
-                }
-
-              </div>
-
-
-              <div class="item-muted">
-
-                ${escapeHtml(
-                  match.date || ""
-                )}
-
-                ${
-                  match.time
-                    ?
-                    " · " +
-                    escapeHtml(
-                      String(
-                        match.time
-                      ).slice(0,5)
-                    )
-                    :
-                    ""
-                }
-
-                ${
-                  match.tournament
-                    ?
-                    " · " +
-                    escapeHtml(
-                      match.tournament
-                    )
-                    :
-                    ""
-                }
-
-              </div>
-
-
-              <div class="item-muted">
-
-                Статус:
-
-                <b>
-                  ${escapeHtml(
-                    match.status ||
-                    "scheduled"
-                  )}
-                </b>
-
-                &nbsp;
-
-                Счёт:
-
-                <b>
-
-                  ${
-                    match.home_score ??
-                    "—"
-                  }
-
-                  :
-
-                  ${
-                    match.away_score ??
-                    "—"
-                  }
-
-                </b>
-
-              </div>
-
-
-              <div class="item-actions">
-
-                <button
-                  class="btn-light"
-                  onclick="editMatch(${match.id})"
-                >
-                  Изменить
-                </button>
-
-                <button
-                  class="btn-success"
-                  onclick="openMatchEvents(${match.id})"
-                >
-                  События
-                </button>
-
-                <button
-                  class="btn-danger"
-                  onclick="deleteMatch(${match.id})"
-                >
-                  Удалить
-                </button>
-
-              </div>
-
-            </div>
-
-          `;
-
-        }
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   PLAYERS
-===================================================== */
-
-async function loadPlayers(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("players")
-      .select("*")
-      .order("number");
-
-  if(error){
-
-    console.error(error);
-
-    return;
-
-  }
-
-  players =
-    data || [];
-
-  renderPlayers();
-
-}
-
-
-function renderPlayers(){
-
-  const box =
-    $("playersAdminList");
-
-
-  if(!players.length){
-
-    box.innerHTML =
-      `<div class="panel">
-        Игроков пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    players
-      .map(
-        player => {
-
-          const photo =
-            player.photo_url ||
-            player.image_url;
-
-
-          return `
-
-            <div class="item">
-
-              ${
-                photo
-                  ?
-                  `<img
-                    class="preview"
-                    src="${escapeHtml(
-                      publicImage(photo)
-                    )}"
-                  >`
-                  :
-                  ""
-              }
-
-
-              <div class="item-title">
-
-                #${escapeHtml(
-                  player.number ??
-                  player.jersey_number ??
-                  ""
-                )}
-
-                ·
-
-                ${escapeHtml(
-                  player.name ||
-                  player.full_name ||
-                  "Игрок"
-                )}
-
-              </div>
-
-
-              <div class="item-muted">
-
-                ${escapeHtml(
-                  player.position ||
-                  ""
-                )}
-
-                ${
-                  player.birth_date
-                    ?
-                    " · " +
-                    escapeHtml(
-                      player.birth_date
-                    )
-                    :
-                    ""
-                }
-
-              </div>
-
-
-              <div class="item-muted">
-
-                ${
-                  player.height_cm
-                    ?
-                    player.height_cm +
-                    " см"
-                    :
-                    ""
-                }
-
-                ${
-                  player.weight_kg
-                    ?
-                    " · " +
-                    player.weight_kg +
-                    " кг"
-                    :
-                    ""
-                }
-
-              </div>
-
-
-              <div class="item-actions">
-
-                <button
-                  class="btn-light"
-                  onclick="editPlayer(${player.id})"
-                >
-                  Изменить
-                </button>
-
-                <button
-                  class="btn-danger"
-                  onclick="deletePlayer(${player.id})"
-                >
-                  Удалить
-                </button>
-
-              </div>
-
-            </div>
-
-          `;
-
-        }
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   NEWS
-===================================================== */
-
-async function loadNews(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("news")
-      .select("*")
-      .order("date",{ascending:false})
-      .order("created_at",{ascending:false});
-
-  if(error){
-
-    console.error(error);
-
-    return;
-
-  }
-
-  news =
-    data || [];
-
-  renderNews();
-
-}
-
-
-function renderNews(){
-
-  const box =
-    $("newsAdminList");
-
-
-  if(!news.length){
-
-    box.innerHTML =
-      `<div class="panel">
-        Новостей пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    news
-      .map(
-        item => `
-
-          <div class="item">
-
-            ${
-              item.image_url
-                ?
-                `<img
-                  class="preview"
-                  src="${escapeHtml(
-                    publicImage(
-                      item.image_url
-                    )
-                  )}"
-                >`
-                :
-                ""
-            }
-
-
-            <div class="item-title">
-
-              ${escapeHtml(
-                item.title ||
-                "Новость"
-              )}
-
-            </div>
-
-
-            <div class="item-muted">
-
-              ${escapeHtml(
-                item.date ||
-                ""
-              )}
-
-              ${
-                item.tag
-                  ?
-                  " · " +
-                  escapeHtml(
-                    item.tag
-                  )
-                  :
-                  ""
-              }
-
-            </div>
-
-
-            <div class="item-actions">
-
-              <button
-                class="btn-light"
-                onclick="editNews(${item.id})"
-              >
-                Изменить
-              </button>
-
-              <button
-                class="btn-danger"
-                onclick="deleteNews(${item.id})"
-              >
-                Удалить
-              </button>
-
-            </div>
-
-          </div>
-
-        `
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   STANDINGS
-===================================================== */
-
-async function loadStandings(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("standings")
-      .select("*")
-      .order("place");
-
-  if(error){
-
-    console.error(error);
-
-    return;
-
-  }
-
-  standings =
-    data || [];
-
-  renderStandings();
-
-}
-
-
-function renderStandings(){
-
-  const box =
-    $("standingsAdminList");
-
-
-  if(!standings.length){
-
-    box.innerHTML =
-      `<div class="panel">
-        Таблица пока пуста.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML = `
-
-    <div class="table-wrap">
-
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>Место</th>
-            <th>Команда</th>
-            <th>И</th>
-            <th>В</th>
-            <th>ВО</th>
-            <th>ВБ</th>
-            <th>ПО</th>
-            <th>ПБ</th>
-            <th>П</th>
-            <th>О</th>
-            <th></th>
-
-          </tr>
-
-        </thead>
-
-
-        <tbody>
-
-          ${
-            standings
-              .map(
-                row => `
-
-                  <tr>
-
-                    <td>
-                      ${escapeHtml(
-                        row.place ??
-                        ""
-                      )}
-                    </td>
-
-                    <td>
-                      ${escapeHtml(
-                        row.team ||
-                        row.team_name ||
-                        ""
-                      )}
-                    </td>
-
-                    <td>
-                      ${escapeHtml(
-                        row.games ??
-                        row.gp ??
-                        0
-                      )}
-                    </td>
-
-                    <td>
-                      ${escapeHtml(
-                        row.wins ??
-                        0
-                      )}
-                    </td>
-
-                    <td>
-                      ${escapeHtml(
-                        row.wins_ot ??
-                        0
-                      )}
-                    </td>
-
-                    <td>
-                      ${escapeHtml(
-                        row.wins_so ??
-                        0
-                      )}
-                    </td>
-
-                    <td>
-                      ${escapeHtml(
-                        row.losses_ot ??
-                        0
-                      )}
-                    </td>
-
-                    <td>
-                      ${escapeHtml(
-                        row.losses_so ??
-                        0
-                      )}
-                    </td>
-
-                    <td>
-                      ${escapeHtml(
-                        row.losses ??
-                        0
-                      )}
-                    </td>
-
-                    <td>
-                      <b>
-                        ${escapeHtml(
-                          row.points ??
-                          0
-                        )}
-                      </b>
-                    </td>
-
-                    <td>
-
-                      <button
-                        class="btn-light"
-                        onclick="editStanding(${row.id})"
-                      >
-                        ✎
-                      </button>
-
-                      <button
-                        class="btn-danger"
-                        onclick="deleteStanding(${row.id})"
-                      >
-                        ×
-                      </button>
-
-                    </td>
-
-                  </tr>
-
-                `
-              )
-              .join("")
-          }
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =====================================================
-   ACHIEVEMENTS
-===================================================== */
-
-async function loadAchievements(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("achievements")
-      .select("*")
-      .order("created_at",{ascending:false});
-
-  if(error){
-
-    console.error(error);
-
-    return;
-
-  }
-
-  achievements =
-    data || [];
-
-  renderAchievements();
-
-}
-
-
-function renderAchievements(){
-
-  const box =
-    $("achievementsAdminList");
-
-
-  if(!achievements.length){
-
-    box.innerHTML =
-      `<div class="panel">
-        Достижений пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    achievements
-      .map(
-        item => `
-
-          <div class="item">
-
-            ${
-              item.image_url
-                ?
-                `<img
-                  class="preview"
-                  src="${escapeHtml(
-                    publicImage(
-                      item.image_url
-                    )
-                  )}"
-                >`
-                :
-                ""
-            }
-
-
-            <div class="item-title">
-
-              ${escapeHtml(
-                item.title ||
-                "Достижение"
-              )}
-
-            </div>
-
-
-            <div class="item-muted">
-
-              ${escapeHtml(
-                item.description ||
-                ""
-              )}
-
-            </div>
-
-
-            <div class="item-actions">
-
-              <button
-                class="btn-light"
-                onclick="editAchievement(${item.id})"
-              >
-                Изменить
-              </button>
-
-              <button
-                class="btn-danger"
-                onclick="deleteAchievement(${item.id})"
-              >
-                Удалить
-              </button>
-
-            </div>
-
-          </div>
-
-        `
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   ALBUMS
-===================================================== */
-
-async function loadAlbums(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("albums")
-      .select("*")
-      .order("created_at",{ascending:false});
-
-  if(error){
-
-    console.error(error);
-
-    return;
-
-  }
-
-  albums =
-    data || [];
-
-  renderAlbums();
-
-}
-
-
-function renderAlbums(){
-
-  const box =
-    $("albumsAdminList");
-
-
-  if(!albums.length){
-
-    box.innerHTML =
-      `<div class="panel">
-        Альбомов пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    albums
-      .map(
-        item => `
-
-          <div class="item">
-
-            ${
-              item.cover_url
-                ?
-                `<img
-                  class="preview"
-                  src="${escapeHtml(
-                    publicImage(
-                      item.cover_url
-                    )
-                  )}"
-                >`
-                :
-                ""
-            }
-
-
-            <div class="item-title">
-
-              ${escapeHtml(
-                item.title ||
-                "Альбом"
-              )}
-
-            </div>
-
-
-            <div class="item-muted">
-
-              ${escapeHtml(
-                item.description ||
-                ""
-              )}
-
-            </div>
-
-
-            <div class="item-actions">
-
-              <button
-                class="btn-light"
-                onclick="editAlbum(${item.id})"
-              >
-                Изменить
-              </button>
-
-              <button
-                class="btn-danger"
-                onclick="deleteAlbum(${item.id})"
-              >
-                Удалить
-              </button>
-
-            </div>
-
-          </div>
-
-        `
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   BIRTHDAYS
-===================================================== */
-
-async function loadBirthdays(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("birthdays")
-      .select("*")
-      .order("birthday");
-
-  if(error){
-
-    console.error(error);
-
-    return;
-
-  }
-
-  birthdays =
-    data || [];
-
-  renderBirthdays();
-
-}
-
-
-function renderBirthdays(){
-
-  const box =
-    $("birthdaysAdminList");
-
-
-  if(!birthdays.length){
-
-    box.innerHTML =
-      `<div class="panel">
-        Именинников пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    birthdays
-      .map(
-        item => `
-
-          <div class="item">
-
-            ${
-              item.image_url
-                ?
-                `<img
-                  class="preview"
-                  src="${escapeHtml(
-                    publicImage(
-                      item.image_url
-                    )
-                  )}"
-                >`
-                :
-                ""
-            }
-
-
-            <div class="item-title">
-
-              ${escapeHtml(
-                item.name ||
-                "Игрок"
-              )}
-
-            </div>
-
-
-            <div class="item-muted">
-
-              🎂 ${escapeHtml(
-                item.birthday ||
-                ""
-              )}
-
-            </div>
-
-
-            <div class="item-actions">
-
-              <button
-                class="btn-light"
-                onclick="editBirthday(${item.id})"
-              >
-                Изменить
-              </button>
-
-              <button
-                class="btn-danger"
-                onclick="deleteBirthday(${item.id})"
-              >
-                Удалить
-              </button>
-
-            </div>
-
-          </div>
-
-        `
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   PRODUCTS
-===================================================== */
-
-async function loadProducts(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("products")
-      .select("*")
-      .order("created_at",{ascending:false});
-
-  if(error){
-
-    console.error(error);
-
-    return;
-
-  }
-
-  products =
-    data || [];
-
-  renderProducts();
-
-}
-
-
-function renderProducts(){
-
-  const box =
-    $("productsAdminList");
-
-
-  if(!products.length){
-
-    box.innerHTML =
-      `<div class="panel">
-        Товаров пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    products
-      .map(
-        item => `
-
-          <div class="item">
-
-            ${
-              item.image_url
-                ?
-                `<img
-                  class="preview"
-                  src="${escapeHtml(
-                    publicImage(
-                      item.image_url
-                    )
-                  )}"
-                >`
-                :
-                ""
-            }
-
-
-            <div class="item-title">
-
-              ${escapeHtml(
-                item.name ||
-                "Товар"
-              )}
-
-            </div>
-
-
-            <div class="item-muted">
-
-              ${
-                item.price !== null &&
-                item.price !== undefined
-                  ?
-                  escapeHtml(
-                    item.price
-                  ) + " ₽"
-                  :
-                  ""
-              }
-
-            </div>
-
-
-            <div class="item-actions">
-
-              <button
-                class="btn-light"
-                onclick="editProduct(${item.id})"
-              >
-                Изменить
-              </button>
-
-              <button
-                class="btn-danger"
-                onclick="deleteProduct(${item.id})"
-              >
-                Удалить
-              </button>
-
-            </div>
-
-          </div>
-
-        `
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   EDITOR
-===================================================== */
-
-function openEditor(type,id=null){
-
-  editingId =
-    id;
-
-  $("modal")
-    .classList.add("open");
-
-
-  if(type === "match")
-    renderMatchEditor(id);
-
-  if(type === "player")
-    renderPlayerEditor(id);
-
-  if(type === "team")
-    renderTeamEditor(id);
-
-  if(type === "news")
-    renderNewsEditor(id);
-
-  if(type === "standing")
-    renderStandingEditor(id);
-
-  if(type === "achievement")
-    renderAchievementEditor(id);
-
-  if(type === "album")
-    renderAlbumEditor(id);
-
-  if(type === "birthday")
-    renderBirthdayEditor(id);
-
-  if(type === "product")
-    renderProductEditor(id);
-
-}
-
-
-function closeModal(){
-
-  $("modal")
-    .classList.remove("open");
-
-  $("modalContent").innerHTML = "";
-
-  editingId = null;
-
-}
-
-
-/* =====================================================
-   MATCH EDITOR
-===================================================== */
-
-function renderMatchEditor(id){
-
-  const item =
-    matches.find(
-      x =>
-        String(x.id) ===
-        String(id)
-    ) || {};
-
-
-  $("modalTitle").textContent =
-    id
-      ?
-      "Редактировать матч"
-      :
-      "Добавить матч";
-
-
-  $("modalContent").innerHTML = `
-
-    <div class="field">
-
-      <label>
-        Дата
-      </label>
-
-      <input
-        id="matchDate"
-        type="date"
-        value="${escapeHtml(
-          item.date || ""
-        )}"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Время
-      </label>
-
-      <input
-        id="matchTime"
-        type="time"
-        value="${escapeHtml(
-          String(
-            item.time || ""
-          ).slice(0,5)
-        )}"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Турнир
-      </label>
-
-      <input
-        id="matchTournament"
-        value="${escapeHtml(
-          item.tournament || ""
-        )}"
-        placeholder="Первенство ПФО"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Домашняя команда
-      </label>
-
-      <select
-        id="matchHome"
-        class="team-select"
-      >
-
-        <option value="">
-          Выберите команду
-        </option>
-
-        ${
-          teams
-            .map(
-              team => `
-                <option
-                  value="${team.id}"
-                  ${
-                    String(
-                      item.home_team_id
-                    ) ===
-                    String(team.id)
-                      ?
-                      "selected"
-                      :
-                      ""
-                  }
-                >
-                  ${escapeHtml(
-                    team.name
-                  )}
-                </option>
-              `
-            )
-            .join("")
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
+
+        if (
+            typeof initializeAdmin ===
+            "function"
+        ) {
+            await initializeAdmin();
         }
 
-      </select>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Гостевая команда
-      </label>
-
-      <select
-        id="matchAway"
-        class="team-select"
-      >
-
-        <option value="">
-          Выберите команду
-        </option>
-
-        ${
-          teams
-            .map(
-              team => `
-                <option
-                  value="${team.id}"
-                  ${
-                    String(
-                      item.away_team_id
-                    ) ===
-                    String(team.id)
-                      ?
-                      "selected"
-                      :
-                      ""
-                  }
-                >
-                  ${escapeHtml(
-                    team.name
-                  )}
-                </option>
-              `
-            )
-            .join("")
-        }
-
-      </select>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Соперник, если команды нет в реестре
-      </label>
-
-      <input
-        id="matchOpponent"
-        value="${escapeHtml(
-          item.opponent || ""
-        )}"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Место проведения
-      </label>
-
-      <input
-        id="matchVenue"
-        value="${escapeHtml(
-          item.venue || ""
-        )}"
-        placeholder="ЛД «Челны»"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Статус
-      </label>
-
-      <select id="matchStatus">
-
-        <option
-          value="scheduled"
-          ${
-            item.status === "scheduled" ||
-            !item.status
-              ?
-              "selected"
-              :
-              ""
-          }
-        >
-          Предстоящий
-        </option>
-
-        <option
-          value="live"
-          ${
-            item.status === "live"
-              ?
-              "selected"
-              :
-              ""
-          }
-        >
-          LIVE
-        </option>
-
-        <option
-          value="finished"
-          ${
-            item.status === "finished"
-              ?
-              "selected"
-              :
-              ""
-          }
-        >
-          Завершён
-        </option>
-
-        <option
-          value="postponed"
-          ${
-            item.status === "postponed"
-              ?
-              "selected"
-              :
-              ""
-          }
-        >
-          Перенесён
-        </option>
-
-        <option
-          value="cancelled"
-          ${
-            item.status === "cancelled"
-              ?
-              "selected"
-              :
-              ""
-          }
-        >
-          Отменён
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <div class="grid grid-2">
-
-      <div class="field">
-
-        <label>
-          Счёт хозяев
-        </label>
-
-        <input
-          id="matchHomeScore"
-          type="number"
-          min="0"
-          value="${escapeHtml(
-            item.home_score ??
-            ""
-          )}"
-        >
-
-      </div>
-
-
-      <div class="field">
-
-        <label>
-          Счёт гостей
-        </label>
-
-        <input
-          id="matchAwayScore"
-          type="number"
-          min="0"
-          value="${escapeHtml(
-            item.away_score ??
-            ""
-          )}"
-        >
-
-      </div>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Ссылка на трансляцию
-      </label>
-
-      <input
-        id="matchStream"
-        type="url"
-        value="${escapeHtml(
-          item.stream_url || ""
-        )}"
-        placeholder="https://..."
-      >
-
-    </div>
-
-
-    <div class="actions">
-
-      <button
-        class="btn btn-primary"
-        onclick="saveMatch()"
-      >
-        Сохранить
-      </button>
-
-      <button
-        class="btn btn-light"
-        onclick="closeModal()"
-      >
-        Отмена
-      </button>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =====================================================
-   SAVE MATCH
-===================================================== */
-
-async function saveMatch(){
-
-  const payload = {
-
-    date:
-      $("matchDate").value,
-
-    time:
-      $("matchTime").value,
-
-    tournament:
-      $("matchTournament").value.trim(),
-
-    home_team_id:
-      $("matchHome").value
-        ?
-        Number(
-          $("matchHome").value
-        )
-        :
-        null,
-
-    away_team_id:
-      $("matchAway").value
-        ?
-        Number(
-          $("matchAway").value
-        )
-        :
-        null,
-
-    opponent:
-      $("matchOpponent").value.trim(),
-
-    venue:
-      $("matchVenue").value.trim(),
-
-    status:
-      $("matchStatus").value,
-
-    home_score:
-      $("matchHomeScore").value === ""
-        ?
-        null
-        :
-        Number(
-          $("matchHomeScore").value
-        ),
-
-    away_score:
-      $("matchAwayScore").value === ""
-        ?
-        null
-        :
-        Number(
-          $("matchAwayScore").value
-        ),
-
-    stream_url:
-      $("matchStream").value.trim()
-
-  };
-
-
-  let result;
-
-
-  if(editingId){
-
-    result =
-      await supabaseClient
-        .from("matches")
-        .update(payload)
-        .eq(
-          "id",
-          editingId
-        );
-
-  }else{
-
-    result =
-      await supabaseClient
-        .from("matches")
-        .insert(
-          payload
-        );
-
-  }
-
-
-  if(result.error){
-
-    toast(
-      result.error.message
-    );
-
-    return;
-
-  }
-
-
-  toast("Матч сохранён");
-
-  closeModal();
-
-  await loadMatches();
-
-  updateCounters();
-
-}
-
-
-/* =====================================================
-   DELETE MATCH
-===================================================== */
-
-async function deleteMatch(id){
-
-  if(
-    !confirm(
-      "Удалить этот матч?"
-    )
-  ){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("matches")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
-
-
-  if(error){
-
-    toast(
-      error.message
-    );
-
-    return;
-
-  }
-
-
-  toast("Матч удалён");
-
-  await loadMatches();
-
-}
-
-
-/* =====================================================
-   PLAYER EDITOR
-===================================================== */
-
-function renderPlayerEditor(id){
-
-  const item =
-    players.find(
-      x =>
-        String(x.id) ===
-        String(id)
-    ) || {};
-
-
-  $("modalTitle").textContent =
-    id
-      ?
-      "Редактировать игрока"
-      :
-      "Добавить игрока";
-
-
-  $("modalContent").innerHTML = `
-
-    <div class="field">
-
-      <label>
-        ФИО
-      </label>
-
-      <input
-        id="playerName"
-        value="${escapeHtml(
-          item.name ||
-          item.full_name ||
-          ""
-        )}"
-      >
-
-    </div>
-
-
-    <div class="grid grid-2">
-
-      <div class="field">
-
-        <label>
-          Номер
-        </label>
-
-        <input
-          id="playerNumber"
-          type="number"
-          value="${escapeHtml(
-            item.number ??
-            item.jersey_number ??
-            ""
-          )}"
-        >
-
-      </div>
-
-
-      <div class="field">
-
-        <label>
-          Позиция
-        </label>
-
-        <select id="playerPosition">
-
-          <option value="">
-            Выберите
-          </option>
-
-          <option
-            value="Вратарь"
-            ${
-              item.position === "Вратарь"
-                ?
-                "selected"
-                :
-                ""
-            }
-          >
-            Вратарь
-          </option>
-
-          <option
-            value="Защитник"
-            ${
-              item.position === "Защитник"
-                ?
-                "selected"
-                :
-                ""
-            }
-          >
-            Защитник
-          </option>
-
-          <option
-            value="Нападающий"
-            ${
-              item.position === "Нападающий"
-                ?
-                "selected"
-                :
-                ""
-            }
-          >
-            Нападающий
-          </option>
-
-        </select>
-
-      </div>
-
-    </div>
-
-
-    <div class="grid grid-2">
-
-      <div class="field">
-
-        <label>
-          Дата рождения
-        </label>
-
-        <input
-          id="playerBirth"
-          type="date"
-          value="${escapeHtml(
-            item.birth_date || ""
-          )}"
-        >
-
-      </div>
-
-
-      <div class="field">
-
-        <label>
-          Рост, см
-        </label>
-
-        <input
-          id="playerHeight"
-          type="number"
-          value="${escapeHtml(
-            item.height_cm ??
-            ""
-          )}"
-        >
-
-      </div>
-
-    </div>
-
-
-    <div class="grid grid-2">
-
-      <div class="field">
-
-        <label>
-          Вес, кг
-        </label>
-
-        <input
-          id="playerWeight"
-          type="number"
-          step="0.1"
-          value="${escapeHtml(
-            item.weight_kg ??
-            ""
-          )}"
-        >
-
-      </div>
-
-
-      <div>
-
-        <label class="check">
-
-          <input
-            id="playerCaptain"
-            type="checkbox"
-            ${
-              item.is_captain ||
-              item.captain
-                ?
-                "checked"
-                :
-                ""
-            }
-          >
-
-          Капитан
-
-        </label>
-
-
-        <label class="check">
-
-          <input
-            id="playerAssistant"
-            type="checkbox"
-            ${
-              item.is_assistant ||
-              item.assistant
-                ?
-                "checked"
-                :
-                ""
-            }
-          >
-
-          Ассистент
-
-        </label>
-
-      </div>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Фото
-      </label>
-
-      ${
-        item.photo_url ||
-        item.image_url
-          ?
-          `<img
-            class="preview"
-            src="${escapeHtml(
-              publicImage(
-                item.photo_url ||
-                item.image_url
-              )
-            )}"
-          >`
-          :
-          ""
-      }
-
-      <input
-        id="playerPhoto"
-        type="file"
-        accept="image/*"
-      >
-
-    </div>
-
-
-    <div class="actions">
-
-      <button
-        class="btn btn-primary"
-        onclick="savePlayer()"
-      >
-        Сохранить
-      </button>
-
-      <button
-        class="btn btn-light"
-        onclick="closeModal()"
-      >
-        Отмена
-      </button>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =====================================================
-   SAVE PLAYER
-===================================================== */
-
-async function savePlayer(){
-
-  const existing =
-    players.find(
-      x =>
-        String(x.id) ===
-        String(editingId)
-    ) || {};
-
-
-  let photo =
-    existing.photo_url ||
-    existing.image_url ||
-    null;
-
-
-  const file =
-    $("playerPhoto").files[0];
-
-
-  try{
-
-    if(file){
-
-      photo =
-        await uploadFile(
-          file,
-          "players"
-        );
-
     }
+);
 
+</script>
 
-    const payload = {
-
-      name:
-        $("playerName").value.trim(),
-
-      number:
-        $("playerNumber").value === ""
-          ?
-          null
-          :
-          Number(
-            $("playerNumber").value
-          ),
-
-      position:
-        $("playerPosition").value,
-
-      birth_date:
-        $("playerBirth").value ||
-        null,
-
-      height_cm:
-        $("playerHeight").value === ""
-          ?
-          null
-          :
-          Number(
-            $("playerHeight").value
-          ),
-
-      weight_kg:
-        $("playerWeight").value === ""
-          ?
-          null
-          :
-          Number(
-            $("playerWeight").value
-          ),
-
-      is_captain:
-        $("playerCaptain").checked,
-
-      is_assistant:
-        $("playerAssistant").checked,
-
-      photo_url:
-        photo
-
-    };
-
-
-    let result;
-
-
-    if(editingId){
-
-      result =
-        await supabaseClient
-          .from("players")
-          .update(payload)
-          .eq(
-            "id",
-            editingId
-          );
-
-    }else{
-
-      result =
-        await supabaseClient
-          .from("players")
-          .insert(
-            payload
-          );
-
-    }
-
-
-    if(result.error){
-
-      throw result.error;
-
-    }
-
-
-    toast("Игрок сохранён");
-
-    closeModal();
-
-    await loadPlayers();
-
-    updateCounters();
-
-  }catch(error){
-
-    toast(
-      error.message
-    );
-
-  }
-
-}
-
-
-/* =====================================================
-   DELETE PLAYER
-===================================================== */
-
-async function deletePlayer(id){
-
-  if(
-    !confirm(
-      "Удалить игрока?"
-    )
-  ){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("players")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
-
-
-  if(error){
-
-    toast(
-      error.message
-    );
-
-    return;
-
-  }
-
-
-  toast("Игрок удалён");
-
-  await loadPlayers();
-
-}
-
-
-/* =====================================================
-   TEAM EDITOR
-===================================================== */
-
-function renderTeamEditor(id){
-
-  const item =
-    teams.find(
-      x =>
-        String(x.id) ===
-        String(id)
-    ) || {};
-
-
-  $("modalTitle").textContent =
-    id
-      ?
-      "Редактировать команду"
-      :
-      "Добавить команду";
-
-
-  $("modalContent").innerHTML = `
-
-    <div class="field">
-
-      <label>
-        Название
-      </label>
-
-      <input
-        id="teamName"
-        value="${escapeHtml(
-          item.name || ""
-        )}"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Короткое название
-      </label>
-
-      <input
-        id="teamShort"
-        value="${escapeHtml(
-          item.short_name || ""
-        )}"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Логотип
-      </label>
-
-      ${
-        item.logo_url
-          ?
-          `<img
-            class="preview"
-            src="${escapeHtml(
-              publicImage(
-                item.logo_url
-              )
-            )}"
-          >`
-          :
-          ""
-      }
-
-      <input
-        id="teamLogo"
-        type="file"
-        accept="image/*"
-      >
-
-    </div>
-
-
-    <div class="actions">
-
-      <button
-        class="btn btn-primary"
-        onclick="saveTeam()"
-      >
-        Сохранить
-      </button>
-
-    </div>
-
-  `;
-
-}
-
-
-async function saveTeam(){
-
-  const existing =
-    teams.find(
-      x =>
-        String(x.id) ===
-        String(editingId)
-    ) || {};
-
-
-  let logo =
-    existing.logo_url ||
-    null;
-
-
-  const file =
-    $("teamLogo").files[0];
-
-
-  try{
-
-    if(file){
-
-      logo =
-        await uploadFile(
-          file,
-          "teams"
-        );
-
-    }
-
-
-    const payload = {
-
-      name:
-        $("teamName").value.trim(),
-
-      short_name:
-        $("teamShort").value.trim(),
-
-      logo_url:
-        logo
-
-    };
-
-
-    let result;
-
-
-    if(editingId){
-
-      result =
-        await supabaseClient
-          .from("teams")
-          .update(payload)
-          .eq(
-            "id",
-            editingId
-          );
-
-    }else{
-
-      result =
-        await supabaseClient
-          .from("teams")
-          .insert(
-            payload
-          );
-
-    }
-
-
-    if(result.error)
-      throw result.error;
-
-
-    toast("Команда сохранена");
-
-    closeModal();
-
-    await loadTeams();
-
-  }catch(error){
-
-    toast(
-      error.message
-    );
-
-  }
-
-}
-
-
-function editTeam(id){
-  openEditor(
-    "team",
-    id
-  );
-}
-
-
-async function deleteTeam(id){
-
-  if(
-    !confirm(
-      "Удалить команду?"
-    )
-  ){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("teams")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
-
-
-  if(error){
-
-    toast(
-      error.message
-    );
-
-    return;
-
-  }
-
-
-  toast("Команда удалена");
-
-  await loadTeams();
-
-}
-
-
-/* =====================================================
-   NEWS EDITOR
-===================================================== */
-
-function renderNewsEditor(id){
-
-  const item =
-    news.find(
-      x =>
-        String(x.id) ===
-        String(id)
-    ) || {};
-
-
-  $("modalTitle").textContent =
-    id
-      ?
-      "Редактировать новость"
-      :
-      "Добавить новость";
-
-
-  $("modalContent").innerHTML = `
-
-    <div class="field">
-
-      <label>
-        Заголовок
-      </label>
-
-      <input
-        id="newsTitle"
-        value="${escapeHtml(
-          item.title || ""
-        )}"
-      >
-
-    </div>
-
-
-    <div class="grid grid-2">
-
-      <div class="field">
-
-        <label>
-          Дата
-        </label>
-
-        <input
-          id="newsDate"
-          type="date"
-          value="${escapeHtml(
-            item.date || ""
-          )}"
-        >
-
-      </div>
-
-
-      <div class="field">
-
-        <label>
-          Тег
-        </label>
-
-        <input
-          id="newsTag"
-          value="${escapeHtml(
-            item.tag || ""
-          )}"
-          placeholder="АНОНС"
-        >
-
-      </div>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Текст
-      </label>
-
-      <textarea
-        id="newsText"
-      >${escapeHtml(
-        item.description ||
-        item.content ||
-        item.text ||
-        ""
-      )}</textarea>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Изображение
-      </label>
-
-      ${
-        item.image_url
-          ?
-          `<img
-            class="preview"
-            src="${escapeHtml(
-              publicImage(
-                item.image_url
-              )
-            )}"
-          >`
-          :
-          ""
-      }
-
-      <input
-        id="newsImage"
-        type="file"
-        accept="image/*"
-      >
-
-    </div>
-
-
-    <button
-      class="btn btn-primary"
-      onclick="saveNews()"
-    >
-      Сохранить
-    </button>
-
-  `;
-
-}
-
-
-async function saveNews(){
-
-  const existing =
-    news.find(
-      x =>
-        String(x.id) ===
-        String(editingId)
-    ) || {};
-
-
-  let image =
-    existing.image_url ||
-    null;
-
-
-  const file =
-    $("newsImage").files[0];
-
-
-  try{
-
-    if(file){
-
-      image =
-        await uploadFile(
-          file,
-          "news"
-        );
-
-    }
-
-
-    const payload = {
-
-      title:
-        $("newsTitle").value.trim(),
-
-      date:
-        $("newsDate").value ||
-        null,
-
-      tag:
-        $("newsTag").value.trim(),
-
-      description:
-        $("newsText").value.trim(),
-
-      image_url:
-        image
-
-    };
-
-
-    let result;
-
-
-    if(editingId){
-
-      result =
-        await supabaseClient
-          .from("news")
-          .update(payload)
-          .eq(
-            "id",
-            editingId
-          );
-
-    }else{
-
-      result =
-        await supabaseClient
-          .from("news")
-          .insert(
-            payload
-          );
-
-    }
-
-
-    if(result.error)
-      throw result.error;
-
-
-    toast("Новость сохранена");
-
-    closeModal();
-
-    await loadNews();
-
-    updateCounters();
-
-  }catch(error){
-
-    toast(
-      error.message
-    );
-
-  }
-
-}
-
-
-function editNews(id){
-  openEditor(
-    "news",
-    id
-  );
-}
-
-
-async function deleteNews(id){
-
-  if(
-    !confirm(
-      "Удалить новость?"
-    )
-  ){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("news")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
-
-
-  if(error){
-
-    toast(
-      error.message
-    );
-
-    return;
-
-  }
-
-
-  toast("Новость удалена");
-
-  await loadNews();
-
-}
-
-
-/* =====================================================
-   STANDINGS EDITOR
-===================================================== */
-
-function renderStandingEditor(id){
-
-  const item =
-    standings.find(
-      x =>
-        String(x.id) ===
-        String(id)
-    ) || {};
-
-
-  $("modalTitle").textContent =
-    id
-      ?
-      "Редактировать таблицу"
-      :
-      "Добавить команду в таблицу";
-
-
-  $("modalContent").innerHTML = `
-
-    <div class="grid grid-2">
-
-      <div class="field">
-
-        <label>
-          Место
-        </label>
-
-        <input
-          id="standPlace"
-          type="number"
-          value="${escapeHtml(
-            item.place ??
-            ""
-          )}"
-        >
-
-      </div>
-
-
-      <div class="field">
-
-        <label>
-          Команда
-        </label>
-
-        <input
-          id="standTeam"
-          value="${escapeHtml(
-            item.team ||
-            item.team_name ||
-            ""
-          )}"
-        >
-
-      </div>
-
-    </div>
-
-
-    <div class="grid grid-2">
-
-      <div class="field">
-        <label>И</label>
-        <input
-          id="standGames"
-          type="number"
-          value="${item.games ?? 0}"
-        >
-      </div>
-
-      <div class="field">
-        <label>В</label>
-        <input
-          id="standWins"
-          type="number"
-          value="${item.wins ?? 0}"
-        >
-      </div>
-
-      <div class="field">
-        <label>ВО</label>
-        <input
-          id="standWinsOT"
-          type="number"
-          value="${item.wins_ot ?? 0}"
-        >
-      </div>
-
-      <div class="field">
-        <label>ВБ</label>
-        <input
-          id="standWinsSO"
-          type="number"
-          value="${item.wins_so ?? 0}"
-        >
-      </div>
-
-      <div class="field">
-        <label>ПО</label>
-        <input
-          id="standLossOT"
-          type="number"
-          value="${item.losses_ot ?? 0}"
-        >
-      </div>
-
-      <div class="field">
-        <label>ПБ</label>
-        <input
-          id="standLossSO"
-          type="number"
-          value="${item.losses_so ?? 0}"
-        >
-      </div>
-
-      <div class="field">
-        <label>П</label>
-        <input
-          id="standLoss"
-          type="number"
-          value="${item.losses ?? 0}"
-        >
-      </div>
-
-      <div class="field">
-        <label>О</label>
-        <input
-          id="standPoints"
-          type="number"
-          value="${item.points ?? 0}"
-        >
-      </div>
-
-    </div>
-
-
-    <button
-      class="btn btn-primary"
-      onclick="saveStanding()"
-    >
-      Сохранить
-    </button>
-
-  `;
-
-}
-
-
-async function saveStanding(){
-
-  const payload = {
-
-    place:
-      Number(
-        $("standPlace").value
-      ),
-
-    team:
-      $("standTeam").value.trim(),
-
-    games:
-      Number(
-        $("standGames").value
-      ),
-
-    wins:
-      Number(
-        $("standWins").value
-      ),
-
-    wins_ot:
-      Number(
-        $("standWinsOT").value
-      ),
-
-    wins_so:
-      Number(
-        $("standWinsSO").value
-      ),
-
-    losses_ot:
-      Number(
-        $("standLossOT").value
-      ),
-
-    losses_so:
-      Number(
-        $("standLossSO").value
-      ),
-
-    losses:
-      Number(
-        $("standLoss").value
-      ),
-
-    points:
-      Number(
-        $("standPoints").value
-      )
-
-  };
-
-
-  let result;
-
-
-  if(editingId){
-
-    result =
-      await supabaseClient
-        .from("standings")
-        .update(payload)
-        .eq(
-          "id",
-          editingId
-        );
-
-  }else{
-
-    result =
-      await supabaseClient
-        .from("standings")
-        .insert(
-          payload
-        );
-
-  }
-
-
-  if(result.error){
-
-    toast(
-      result.error.message
-    );
-
-    return;
-
-  }
-
-
-  toast("Таблица сохранена");
-
-  closeModal();
-
-  await loadStandings();
-
-}
-
-
-function editStanding(id){
-  openEditor(
-    "standing",
-    id
-  );
-}
-
-
-async function deleteStanding(id){
-
-  if(
-    !confirm(
-      "Удалить строку?"
-    )
-  ){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("standings")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
-
-
-  if(error){
-
-    toast(
-      error.message
-    );
-
-    return;
-
-  }
-
-
-  await loadStandings();
-
-}
-
-
-/* =====================================================
-   ACHIEVEMENT EDITOR
-===================================================== */
-
-function renderAchievementEditor(id){
-
-  const item =
-    achievements.find(
-      x =>
-        String(x.id) ===
-        String(id)
-    ) || {};
-
-
-  $("modalTitle").textContent =
-    id
-      ?
-      "Редактировать достижение"
-      :
-      "Добавить достижение";
-
-
-  $("modalContent").innerHTML = `
-
-    <div class="field">
-
-      <label>
-        Название
-      </label>
-
-      <input
-        id="achievementTitle"
-        value="${escapeHtml(
-          item.title || ""
-        )}"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Описание
-      </label>
-
-      <textarea
-        id="achievementDescription"
-      >${escapeHtml(
-        item.description || ""
-      )}</textarea>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Фото
-      </label>
-
-      <input
-        id="achievementImage"
-        type="file"
-        accept="image/*"
-      >
-
-    </div>
-
-
-    <button
-      class="btn btn-primary"
-      onclick="saveAchievement()"
-    >
-      Сохранить
-    </button>
-
-  `;
-
-}
-
-
-async function saveAchievement(){
-
-  const existing =
-    achievements.find(
-      x =>
-        String(x.id) ===
-        String(editingId)
-    ) || {};
-
-
-  let image =
-    existing.image_url ||
-    null;
-
-
-  const file =
-    $("achievementImage").files[0];
-
-
-  try{
-
-    if(file){
-
-      image =
-        await uploadFile(
-          file,
-          "achievements"
-        );
-
-    }
-
-
-    const payload = {
-
-      title:
-        $("achievementTitle").value.trim(),
-
-      description:
-        $("achievementDescription")
-          .value
-          .trim(),
-
-      image_url:
-        image
-
-    };
-
-
-    let result;
-
-
-    if(editingId){
-
-      result =
-        await supabaseClient
-          .from("achievements")
-          .update(payload)
-          .eq(
-            "id",
-            editingId
-          );
-
-    }else{
-
-      result =
-        await supabaseClient
-          .from("achievements")
-          .insert(
-            payload
-          );
-
-    }
-
-
-    if(result.error)
-      throw result.error;
-
-
-    toast("Достижение сохранено");
-
-    closeModal();
-
-    await loadAchievements();
-
-  }catch(error){
-
-    toast(
-      error.message
-    );
-
-  }
-
-}
-
-
-function editAchievement(id){
-  openEditor(
-    "achievement",
-    id
-  );
-}
-
-
-async function deleteAchievement(id){
-
-  if(
-    !confirm(
-      "Удалить достижение?"
-    )
-  ){
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("achievements")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
-
-
-  if(error){
-
-    toast(
-      error.message
-    );
-
-    return;
-
-  }
-
-
-  await loadAchievements();
-
-}
-
-
-/* =====================================================
-   ALBUM EDITOR
-===================================================== */
-
-function renderAlbumEditor(id){
-
-  const item =
-    albums.find(
-      x =>
-        String(x.id) ===
-        String(id)
-    ) || {};
-
-
-  $("modalTitle").textContent =
-    id
-      ?
-      "Редактировать альбом"
-      :
-      "Добавить альбом";
-
-
-  $("modalContent").innerHTML = `
-
-    <div class="field">
-
-      <label>
-        Название
-      </label>
-
-      <input
-        id="albumTitle"
-        value="${escapeHtml(
-          item.title || ""
-        )}"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Описание
-      </label>
-
-      <textarea
-        id="albumDescription"
-      >${escapeHtml(
-        item.description || ""
-      )}</textarea>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Обложка
-      </label>
-
-      <input
-        id="albumCover"
-        type="file"
-        accept="image/*"
-      >
-
-    </div>
-
-
-    <button
-      class="btn btn-primary"
-      onclick="saveAlbum()"
-    >
-      Сохранить
-    </button>
-
-  `;
-
-}
-
-
-async function saveAlbum(){
-
-  const existing =
-    albums.find(
-      x =>
-        String(x.id) ===
-        String(editingId)
-    ) || {};
-
-
-  let cover =
-    existing.cover_url ||
-    existing.image_url ||
-    null;
-
-
-  const file =
-    $("albumCover").files[0];
-
-
-  try{
-
-    if(file){
-
-      cover =
-        await uploadFile(
-          file,
-          "albums"
-        );
-
-    }
-
-
-    const payload = {
-
-      title:
-        $("albumTitle").value.trim(),
-
-      description:
-        $("albumDescription")
-          .value
-          .trim(),
-
-      cover_url:
-        cover
-
-    };
-
-
-    let result;
-
-
-    if(editingId){
-
-      result =
-        await supabaseClient
-          .from("albums")
-          .update(payload
+</body>
+</html>
