@@ -1,169 +1,86 @@
-// ======================================================
-// ХК ЧЕЛНЫ 2011 — CONFIG
-// ======================================================
+// ============================================================
+// ХК ЧЕЛНЫ 2011
+// CONFIG
+// ============================================================
+
+const SUPABASE_URL =
+    "https://jxlbojosxaaqnyuzohnw.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
+
+const STORAGE_BUCKET = "site-media";
+
+
+// ============================================================
+// ОСНОВНЫЕ НАСТРОЙКИ САЙТА
+// ============================================================
 
 const SITE_CONFIG = {
 
-    // --------------------------------------------------
-    // SUPABASE
-    // --------------------------------------------------
+    teamName: "ХК Челны 2011",
 
-    supabaseUrl:
-        "https://jxlbojosxaaqnyuzohnw.supabase.co",
+    season: "2026/27",
 
-    supabaseKey:
-        "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL",
-
-    storageBucket:
-        "site-media",
-
-
-    // --------------------------------------------------
-    // КОМАНДА
-    // --------------------------------------------------
-
-    teamName:
-        "ХК Челны 2011",
-
-    shortTeamName:
-        "Челны",
-
-    season:
-        "2026/27",
-
-    birthYear:
-        "2011",
-
-
-    // --------------------------------------------------
-    // ЦВЕТА
-    // --------------------------------------------------
+    city: "Набережные Челны",
 
     colors: {
-
-        primary:
-            "#000056",
-
-        secondary:
-            "#0875dc",
-
-        accent:
-            "#ffcd00",
-
-        white:
-            "#ffffff",
-
-        background:
-            "#050b22",
-
-        surface:
-            "#0d1738",
-
-        text:
-            "#ffffff",
-
-        muted:
-            "#aab5d5"
+        primary: "#000056",
+        secondary: "#0875dc",
+        accent: "#ffcd00",
+        white: "#ffffff"
     },
-
-
-    // --------------------------------------------------
-    // ШРИФТЫ
-    // --------------------------------------------------
 
     fonts: {
-
-        main:
-            "Stapel",
-
-        heading:
-            "Stapel",
-
-        secondary:
-            "Stengazeta",
-
-        third:
-            "Christopher"
+        main: "Stapel",
+        heading: "Stapel",
+        secondary: "Stengazeta",
+        third: "Christopher"
     },
 
+    storage: {
+        bucket: STORAGE_BUCKET,
 
-    // --------------------------------------------------
-    // СТАНДАРТНЫЕ НАСТРОЙКИ
-    // --------------------------------------------------
-
-    defaults: {
-
-        logo:
-            "",
-
-        title:
-            "ХК ЧЕЛНЫ",
-
-        subtitle:
-            "СЕЗОН 2026/27 · 2011 ГОД",
-
-        city:
-            "НАБЕРЕЖНЫЕ ЧЕЛНЫ"
+        folders: {
+            logo: "logo",
+            players: "players",
+            news: "news",
+            matches: "matches",
+            media: "media",
+            products: "products",
+            icons: "icons",
+            fonts: "fonts"
+        }
     },
 
-
-    // --------------------------------------------------
-    // СТРАНИЦЫ
-    // --------------------------------------------------
-
-    pages: {
-
-        home:
-            "index.html",
-
-        matches:
-            "matches.html",
-
-        match:
-            "match.html",
-
-        news:
-            "news.html",
-
-        roster:
-            "roster.html",
-
-        player:
-            "player.html",
-
-        standings:
-            "standings.html",
-
-        media:
-            "media.html",
-
-        products:
-            "products.html",
-
-        team:
-            "team.html",
-
-        referees:
-            "referees.html",
-
-        teams:
-            "teams.html",
-
-        admin:
-            "admin.html"
+    navigation: {
+        home: "index.html",
+        matches: "matches.html",
+        roster: "roster.html",
+        standings: "standings.html",
+        news: "news.html",
+        admin: "admin.html"
     }
+
 };
 
 
-// ======================================================
+// ============================================================
 // SUPABASE CLIENT
-// ======================================================
+// ============================================================
 
 let db = null;
 
 function initSupabase() {
 
-    if (typeof supabase === "undefined") {
+    if (db) {
+        return db;
+    }
+
+    if (
+        !window.supabase ||
+        !window.supabase.createClient
+    ) {
         console.error(
             "Supabase JS не подключён."
         );
@@ -171,50 +88,18 @@ function initSupabase() {
         return null;
     }
 
-    if (!db) {
-
-        db = supabase.createClient(
-            SITE_CONFIG.supabaseUrl,
-            SITE_CONFIG.supabaseKey
-        );
-    }
+    db = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
     return db;
 }
 
 
-// ======================================================
-// STORAGE
-// ======================================================
-
-function getStorageUrl(path) {
-
-    if (!path) {
-        return "";
-    }
-
-    // Если уже полноценная ссылка
-    if (
-        path.startsWith("http://") ||
-        path.startsWith("https://") ||
-        path.startsWith("data:")
-    ) {
-        return path;
-    }
-
-    return (
-        SITE_CONFIG.supabaseUrl +
-        "/storage/v1/object/public/" +
-        SITE_CONFIG.storageBucket +
-        "/" +
-        path
-    );
-}
-
-
-// ======================================================
+// ============================================================
 // API
-// ======================================================
+// ============================================================
 
 async function apiRequest(
     table,
@@ -230,154 +115,591 @@ async function apiRequest(
     }
 
     const {
-
         select = "*",
-
-        filters = {},
-
+        filters = [],
         order,
-
         limit,
-
-        single = false
-
+        single = false,
+        insert,
+        update,
+        upsert,
+        delete: deleteRows = false
     } = options;
 
-
     let query = client
-        .from(table)
-        .select(select);
+        .from(table);
 
+    // SELECT
 
-    // Фильтры
-    Object.entries(filters).forEach(
-        ([key, value]) => {
+    if (insert !== undefined) {
+
+        query = query.insert(insert);
+
+    } else if (upsert !== undefined) {
+
+        query = query.upsert(upsert);
+
+    } else if (update !== undefined) {
+
+        query = query.update(update);
+
+    } else if (deleteRows) {
+
+        query = query.delete();
+
+    }
+
+    // SELECT
+
+    query = query.select(select);
+
+    // FILTERS
+
+    if (Array.isArray(filters)) {
+
+        filters.forEach(filter => {
+
+            if (!filter || !filter.column) {
+                return;
+            }
+
+            const operator =
+                filter.operator || "eq";
+
+            const value =
+                filter.value;
 
             if (
-                value !== undefined &&
-                value !== null &&
-                value !== ""
+                operator === "eq"
             ) {
-
                 query = query.eq(
-                    key,
+                    filter.column,
                     value
                 );
             }
-        }
-    );
 
+            else if (
+                operator === "neq"
+            ) {
+                query = query.neq(
+                    filter.column,
+                    value
+                );
+            }
 
-    // Сортировка
+            else if (
+                operator === "gt"
+            ) {
+                query = query.gt(
+                    filter.column,
+                    value
+                );
+            }
+
+            else if (
+                operator === "gte"
+            ) {
+                query = query.gte(
+                    filter.column,
+                    value
+                );
+            }
+
+            else if (
+                operator === "lt"
+            ) {
+                query = query.lt(
+                    filter.column,
+                    value
+                );
+            }
+
+            else if (
+                operator === "lte"
+            ) {
+                query = query.lte(
+                    filter.column,
+                    value
+                );
+            }
+
+            else if (
+                operator === "ilike"
+            ) {
+                query = query.ilike(
+                    filter.column,
+                    value
+                );
+            }
+
+            else if (
+                operator === "in"
+            ) {
+                query = query.in(
+                    filter.column,
+                    value
+                );
+            }
+
+        });
+
+    }
+
+    // ORDER
+
     if (order) {
 
         query = query.order(
             order.column,
             {
                 ascending:
-                    order.ascending !== false
+                    order.ascending !== false,
+                nullsFirst:
+                    order.nullsFirst ?? false
             }
+        );
+
+    }
+
+    // LIMIT
+
+    if (
+        Number.isInteger(limit) &&
+        limit > 0
+    ) {
+
+        query = query.limit(limit);
+
+    }
+
+    // SINGLE
+
+    if (single) {
+        query = query.maybeSingle();
+    }
+
+    const result =
+        await query;
+
+    if (result.error) {
+        console.error(
+            `Supabase error [${table}]:`,
+            result.error
+        );
+
+        throw result.error;
+    }
+
+    return result.data;
+}
+
+
+// ============================================================
+// STORAGE
+// ============================================================
+
+function getStorageUrl(path) {
+
+    if (!path) {
+        return "";
+    }
+
+    if (
+        path.startsWith("http://") ||
+        path.startsWith("https://") ||
+        path.startsWith("data:")
+    ) {
+        return path;
+    }
+
+    return (
+        `${SUPABASE_URL}` +
+        `/storage/v1/object/public/` +
+        `${STORAGE_BUCKET}/${path}`
+    );
+}
+
+
+async function uploadFile(
+    file,
+    folder = "media"
+) {
+
+    const client = initSupabase();
+
+    if (!client) {
+        throw new Error(
+            "Supabase не инициализирован."
         );
     }
 
-
-    // Лимит
-    if (limit) {
-        query = query.limit(limit);
+    if (!file) {
+        throw new Error(
+            "Файл не выбран."
+        );
     }
 
+    const extension =
+        file.name.includes(".")
+            ? file.name
+                .split(".")
+                .pop()
+                .toLowerCase()
+            : "bin";
 
-    // Одна запись
-    if (single) {
-        query = query.single();
-    }
+    const randomPart =
+        Math.random()
+            .toString(36)
+            .substring(2, 10);
 
+    const timestamp =
+        Date.now();
+
+    const safeFolder =
+        String(folder)
+            .replace(/[^a-zA-Z0-9/_-]/g, "");
+
+    const path =
+        `${safeFolder}/` +
+        `${timestamp}_${randomPart}.${extension}`;
 
     const {
-        data,
         error
-    } = await query;
-
+    } = await client.storage
+        .from(STORAGE_BUCKET)
+        .upload(
+            path,
+            file,
+            {
+                cacheControl: "3600",
+                upsert: false
+            }
+        );
 
     if (error) {
         console.error(
-            `Ошибка таблицы ${table}:`,
+            "Ошибка загрузки файла:",
             error
         );
 
         throw error;
     }
 
+    return {
+        path,
+        url: getStorageUrl(path)
+    };
+}
+
+
+async function deleteFile(path) {
+
+    if (!path) {
+        return;
+    }
+
+    // Если это полный URL —
+    // пытаемся достать путь после bucket.
+
+    let storagePath = path;
+
+    const marker =
+        `/object/public/${STORAGE_BUCKET}/`;
+
+    if (path.includes(marker)) {
+
+        storagePath =
+            path.split(marker)[1];
+
+    }
+
+    const client =
+        initSupabase();
+
+    if (!client) {
+        throw new Error(
+            "Supabase не инициализирован."
+        );
+    }
+
+    const {
+        error
+    } = await client.storage
+        .from(STORAGE_BUCKET)
+        .remove([
+            storagePath
+        ]);
+
+    if (error) {
+        console.error(
+            "Ошибка удаления файла:",
+            error
+        );
+
+        throw error;
+    }
+}
+
+
+// ============================================================
+// SETTINGS
+// ============================================================
+
+let siteSettings = {};
+
+
+async function loadSettings() {
+
+    try {
+
+        const data =
+            await apiRequest(
+                "settings",
+                {
+                    select: "*"
+                }
+            );
+
+        siteSettings = {};
+
+        (data || []).forEach(item => {
+
+            const key =
+                item.key ||
+                item.name;
+
+            if (!key) {
+                return;
+            }
+
+            siteSettings[key] =
+                item.value;
+        });
+
+        return siteSettings;
+
+    } catch (error) {
+
+        console.error(
+            "Не удалось загрузить settings:",
+            error
+        );
+
+        return {};
+    }
+}
+
+
+function getSetting(
+    key,
+    fallback = ""
+) {
+
+    if (
+        siteSettings &&
+        siteSettings[key] !== undefined &&
+        siteSettings[key] !== null
+    ) {
+        return siteSettings[key];
+    }
+
+    return fallback;
+}
+
+
+async function saveSetting(
+    key,
+    value
+) {
+
+    const client =
+        initSupabase();
+
+    if (!client) {
+        throw new Error(
+            "Supabase не инициализирован."
+        );
+    }
+
+    const existing =
+        await client
+            .from("settings")
+            .select("id")
+            .or(
+                `key.eq.${key},name.eq.${key}`
+            )
+            .limit(1)
+            .maybeSingle();
+
+    if (existing.error) {
+        throw existing.error;
+    }
+
+    let result;
+
+    if (existing.data) {
+
+        result =
+            await client
+                .from("settings")
+                .update({
+                    value: String(value)
+                })
+                .eq(
+                    "id",
+                    existing.data.id
+                );
+
+    } else {
+
+        result =
+            await client
+                .from("settings")
+                .insert({
+                    key,
+                    value: String(value)
+                });
+    }
+
+    if (result.error) {
+        throw result.error;
+    }
+
+    siteSettings[key] =
+        String(value);
+
+    return true;
+}
+
+
+// ============================================================
+// AUTH
+// ============================================================
+
+async function getSession() {
+
+    const client =
+        initSupabase();
+
+    if (!client) {
+        return null;
+    }
+
+    const {
+        data,
+        error
+    } = await client.auth.getSession();
+
+    if (error) {
+        console.error(
+            "Ошибка получения сессии:",
+            error
+        );
+
+        return null;
+    }
+
+    return data.session;
+}
+
+
+async function signIn(
+    email,
+    password
+) {
+
+    const client =
+        initSupabase();
+
+    if (!client) {
+        throw new Error(
+            "Supabase не инициализирован."
+        );
+    }
+
+    const {
+        data,
+        error
+    } = await client.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        throw error;
+    }
 
     return data;
 }
 
 
-// ======================================================
-// УВЕДОМЛЕНИЯ
-// ======================================================
+async function signOut() {
 
-function showToast(
-    message,
-    type = "success"
-) {
+    const client =
+        initSupabase();
 
-    let toast =
-        document.querySelector(
-            ".site-toast"
-        );
-
-
-    if (!toast) {
-
-        toast =
-            document.createElement(
-                "div"
-            );
-
-        toast.className =
-            "site-toast";
-
-        document.body.appendChild(
-            toast
-        );
+    if (!client) {
+        return;
     }
 
+    const {
+        error
+    } = await client.auth.signOut();
 
-    toast.textContent =
-        message;
-
-
-    toast.dataset.type =
-        type;
-
-
-    toast.classList.add(
-        "show"
-    );
-
-
-    clearTimeout(
-        window.__toastTimer
-    );
-
-
-    window.__toastTimer =
-        setTimeout(() => {
-
-            toast.classList.remove(
-                "show"
-            );
-
-        }, 3000);
+    if (error) {
+        throw error;
+    }
 }
 
 
-// ======================================================
-// ФОРМАТ ДАТЫ
-// ======================================================
+// ============================================================
+// COMMON HELPERS
+// ============================================================
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
 
 function formatDate(
+    value,
+    options = {}
+) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const date =
+        new Date(value);
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return String(value);
+    }
+
+    return date.toLocaleDateString(
+        "ru-RU",
+        {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            ...options
+        }
+    );
+}
+
+
+function formatDateShort(
     value
 ) {
 
@@ -385,19 +707,16 @@ function formatDate(
         return "—";
     }
 
-
     const date =
         new Date(value);
-
 
     if (
         Number.isNaN(
             date.getTime()
         )
     ) {
-        return value;
+        return String(value);
     }
-
 
     return date.toLocaleDateString(
         "ru-RU",
@@ -410,152 +729,99 @@ function formatDate(
 }
 
 
-// ======================================================
-// ФОРМАТ ВРЕМЕНИ
-// ======================================================
-
-function formatTime(
-    value
-) {
-
-    if (!value) {
-        return "—";
-    }
-
-
-    if (
-        typeof value === "string" &&
-        /^\d{2}:\d{2}/.test(value)
-    ) {
-
-        return value.slice(
-            0,
-            5
-        );
-    }
-
-
-    const date =
-        new Date(value);
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-        return value;
-    }
-
-
-    return date.toLocaleTimeString(
-        "ru-RU",
-        {
-            hour: "2-digit",
-            minute: "2-digit"
-        }
-    );
-}
-
-
-// ======================================================
-// ДЕНЬ НЕДЕЛИ
-// ======================================================
-
-function getWeekday(
-    value
-) {
+function formatTime(value) {
 
     if (!value) {
         return "";
     }
-
-
-    const date =
-        new Date(value);
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-        return "";
-    }
-
-
-    return date.toLocaleDateString(
-        "ru-RU",
-        {
-            weekday: "long"
-        }
-    );
-}
-
-
-// ======================================================
-// ЭКРАНИРОВАНИЕ HTML
-// ======================================================
-
-function escapeHTML(
-    value
-) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "";
-    }
-
 
     return String(value)
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
+        .slice(0, 5);
 }
 
 
-// ======================================================
-// URL ПАРАМЕТР
-// ======================================================
-
-function getQueryParam(
-    name
+function showToast(
+    message,
+    type = "success"
 ) {
 
-    const params =
-        new URLSearchParams(
-            window.location.search
+    let toast =
+        document.getElementById(
+            "globalToast"
         );
 
+    if (!toast) {
 
-    return params.get(
-        name
+        toast =
+            document.createElement(
+                "div"
+            );
+
+        toast.id =
+            "globalToast";
+
+        toast.style.cssText = `
+            position: fixed;
+            left: 16px;
+            right: 16px;
+            bottom: calc(20px + env(safe-area-inset-bottom));
+            z-index: 99999;
+            padding: 14px 16px;
+            border-radius: 15px;
+            color: #fff;
+            background: #000056;
+            font: 700 13px Arial,sans-serif;
+            box-shadow: 0 12px 30px rgba(0,0,0,.22);
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: .2s ease;
+        `;
+
+        document.body.appendChild(
+            toast
+        );
+    }
+
+    toast.textContent =
+        message;
+
+    toast.style.background =
+        type === "error"
+            ? "#c62828"
+            : type === "warning"
+                ? "#8a6500"
+                : "#000056";
+
+    requestAnimationFrame(() => {
+
+        toast.style.transform =
+            "translateY(0)";
+
+        toast.style.opacity =
+            "1";
+    });
+
+    clearTimeout(
+        toast._timer
     );
+
+    toast._timer =
+        setTimeout(() => {
+
+            toast.style.transform =
+                "translateY(20px)";
+
+            toast.style.opacity =
+                "0";
+
+        }, 2600);
 }
 
 
-// ======================================================
-// НАВИГАЦИЯ
-// ======================================================
+// ============================================================
+// PAGE NAVIGATION
+// ============================================================
 
 function goTo(
     page,
@@ -564,10 +830,9 @@ function goTo(
 
     const url =
         new URL(
-            SITE_CONFIG.pages[page] || page,
+            page,
             window.location.href
         );
-
 
     Object.entries(params)
         .forEach(
@@ -577,84 +842,150 @@ function goTo(
                     value !== undefined &&
                     value !== null
                 ) {
-
                     url.searchParams.set(
                         key,
                         value
                     );
                 }
+
             }
         );
 
-
     window.location.href =
-        url.href;
+        url.toString();
 }
 
 
-// ======================================================
-// CSS-ПЕРЕМЕННЫЕ
-// ======================================================
+// ============================================================
+// APPLY DESIGN
+// ============================================================
 
-function applyDefaultColors() {
+function applySiteColors() {
 
     const root =
         document.documentElement;
 
-
     root.style.setProperty(
         "--primary",
-        SITE_CONFIG.colors.primary
+        getSetting(
+            "color_primary",
+            SITE_CONFIG.colors.primary
+        )
     );
 
     root.style.setProperty(
         "--secondary",
-        SITE_CONFIG.colors.secondary
+        getSetting(
+            "color_secondary",
+            SITE_CONFIG.colors.secondary
+        )
     );
 
     root.style.setProperty(
         "--accent",
-        SITE_CONFIG.colors.accent
+        getSetting(
+            "color_accent",
+            SITE_CONFIG.colors.accent
+        )
     );
 
     root.style.setProperty(
         "--white",
-        SITE_CONFIG.colors.white
-    );
-
-    root.style.setProperty(
-        "--background",
-        SITE_CONFIG.colors.background
-    );
-
-    root.style.setProperty(
-        "--surface",
-        SITE_CONFIG.colors.surface
-    );
-
-    root.style.setProperty(
-        "--text",
-        SITE_CONFIG.colors.text
-    );
-
-    root.style.setProperty(
-        "--muted",
-        SITE_CONFIG.colors.muted
+        getSetting(
+            "color_white",
+            SITE_CONFIG.colors.white
+        )
     );
 }
 
 
-// ======================================================
-// INIT
-// ======================================================
+function applySiteFonts() {
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+    const root =
+        document.documentElement;
 
-        applyDefaultColors();
+    root.style.setProperty(
+        "--font-main",
+        getSetting(
+            "font_main",
+            SITE_CONFIG.fonts.main
+        )
+    );
 
-        initSupabase();
+    root.style.setProperty(
+        "--font-heading",
+        getSetting(
+            "font_heading",
+            SITE_CONFIG.fonts.heading
+        )
+    );
 
-    }
-);
+    root.style.setProperty(
+        "--font-secondary",
+        getSetting(
+            "font_secondary",
+            SITE_CONFIG.fonts.secondary
+        )
+    );
+
+    root.style.setProperty(
+        "--font-third",
+        getSetting(
+            "font_third",
+            SITE_CONFIG.fonts.third
+        )
+    );
+}
+
+
+async function initializeSite() {
+
+    initSupabase();
+
+    await loadSettings();
+
+    applySiteColors();
+    applySiteFonts();
+
+    return {
+        settings: siteSettings,
+        config: SITE_CONFIG
+    };
+}
+
+
+// ============================================================
+// EXPORT-LIKE GLOBAL OBJECT
+// ============================================================
+
+window.SiteConfig = SITE_CONFIG;
+
+window.HK = {
+    db,
+    initSupabase,
+    apiRequest,
+
+    getStorageUrl,
+    uploadFile,
+    deleteFile,
+
+    loadSettings,
+    getSetting,
+    saveSetting,
+
+    getSession,
+    signIn,
+    signOut,
+
+    escapeHTML,
+    formatDate,
+    formatDateShort,
+    formatTime,
+
+    showToast,
+    goTo,
+
+    applySiteColors,
+    applySiteFonts,
+    initializeSite
+};
