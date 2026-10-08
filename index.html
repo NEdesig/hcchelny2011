@@ -1,3505 +1,582 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    <meta charset="UTF-8">
 
-<title>ХК Челны 2011</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
 
-<style>
-:root{
-  --navy:#000056;
-  --blue:#0875dc;
-  --yellow:#ffcd00;
-  --white:#fff;
-  --bg:#f3f5fa;
-  --text:#10152b;
-  --muted:#737b91;
+    <meta name="theme-color" content="#000056">
 
-  --font-main:Arial,sans-serif;
-  --font-heading:Arial,sans-serif;
-  --font-secondary:Arial,sans-serif;
-}
+    <title>ХК Челны 2011</title>
 
-*{
-  box-sizing:border-box;
-}
-
-html{
-  scroll-behavior:smooth;
-}
-
-body{
-  margin:0;
-  font-family:var(--font-main);
-  background:var(--bg);
-  color:var(--text);
-}
-
-h1,
-h2,
-h3,
-.club,
-.section h2,
-.hero h1,
-.achievement-title,
-.album-title{
-  font-family:var(--font-heading);
-}
-
-.label,
-.muted,
-.date,
-.season,
-.more{
-  font-family:var(--font-secondary);
-}
-
-button{
-  font:inherit;
-  cursor:pointer;
-}
-
-img{
-  max-width:100%;
-}
-
-header{
-  background:linear-gradient(145deg,#000056,#0875dc);
-  color:white;
-  padding:22px 16px 28px;
-  border-radius:0 0 26px 26px;
-}
-
-.top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.logo{
-  width:54px;
-  height:54px;
-  border:2px solid white;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-  font-weight:900;
-  font-size:12px;
-  flex-shrink:0;
-}
-
-.logo img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-}
-
-.club{
-  font-size:21px;
-  font-weight:900;
-  line-height:1.05;
-}
-
-.season{
-  font-size:12px;
-  opacity:.75;
-  margin-top:4px;
-}
-
-.menu{
-  font-size:26px;
-}
-
-.hero{
-  margin-top:24px;
-}
-
-.label{
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:1.5px;
-  opacity:.7;
-}
-
-.hero h1{
-  font-size:34px;
-  margin:5px 0;
-}
-
-.next{
-  background:white;
-  color:var(--text);
-  border-radius:18px;
-  padding:16px;
-  margin-top:18px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-}
-
-.next img{
-  width:42px;
-  height:42px;
-  object-fit:contain;
-}
-
-.next-team{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  min-width:0;
-}
-
-.next-team-name{
-  font-size:15px;
-  font-weight:800;
-}
-
-.vs{
-  font-size:12px;
-  color:var(--blue);
-  font-weight:900;
-}
-
-main{
-  padding:18px 14px 90px;
-}
-
-.section{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin:18px 2px 10px;
-  gap:10px;
-}
-
-.section h2{
-  font-size:21px;
-  margin:0;
-}
-
-.more{
-  font-size:12px;
-  color:var(--blue);
-  font-weight:700;
-}
-
-.cards{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-
-.card{
-  background:white;
-  border-radius:18px;
-  padding:16px;
-  box-shadow:0 5px 20px #15204a10;
-}
-
-.card .big{
-  font-size:28px;
-  font-weight:900;
-}
-
-.muted{
-  color:var(--muted);
-  font-size:12px;
-}
-
-.news{
-  margin-top:12px;
-  overflow:hidden;
-}
-
-.news-image{
-  width:calc(100% + 32px);
-  height:170px;
-  object-fit:cover;
-  margin:-16px -16px 13px;
-}
-
-.news h3{
-  margin:5px 0;
-  font-size:16px;
-}
-
-.date{
-  font-size:11px;
-  color:#8a91a5;
-}
-
-.result{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.score{
-  font-size:30px;
-  font-weight:900;
-}
-
-.win{
-  color:#159447;
-  font-weight:800;
-  font-size:11px;
-}
-
-.teams{
-  font-size:16px;
-  font-weight:800;
-  margin:3px 0;
-}
-
-.match-card{
-  margin-bottom:12px;
-}
-
-.match-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-}
-
-.status{
-  display:inline-block;
-  padding:5px 8px;
-  border-radius:8px;
-  font-size:9px;
-  font-weight:900;
-  text-transform:uppercase;
-  background:#edf0f7;
-  color:#555d73;
-}
-
-.status.live{
-  background:#ffe2e2;
-  color:#bd1e1e;
-}
-
-.status.finished{
-  background:#ddf5e5;
-  color:#13833d;
-}
-
-.status.scheduled{
-  background:#e5f1ff;
-  color:#0875dc;
-}
-
-.status.postponed{
-  background:#fff0d6;
-  color:#a56300;
-}
-
-.status.cancelled{
-  background:#eeeef2;
-  color:#777;
-}
-
-.match-teams{
-  display:grid;
-  grid-template-columns:1fr auto 1fr;
-  align-items:center;
-  gap:8px;
-  margin-top:14px;
-}
-
-.match-team{
-  text-align:center;
-}
-
-.match-team img{
-  width:52px;
-  height:52px;
-  object-fit:contain;
-  display:block;
-  margin:0 auto 7px;
-}
-
-.match-team-name{
-  font-size:13px;
-  font-weight:800;
-}
-
-.match-score{
-  font-size:22px;
-  font-weight:900;
-  white-space:nowrap;
-}
-
-.match-info{
-  margin-top:12px;
-  padding-top:10px;
-  border-top:1px solid #edf0f5;
-  font-size:11px;
-  color:#737b91;
-}
-
-.player-card{
-  text-align:center;
-  overflow:hidden;
-}
-
-.player-photo{
-  width:100%;
-  height:150px;
-  object-fit:cover;
-  background:#edf0f6;
-  border-radius:13px;
-  margin-bottom:10px;
-}
-
-.player-number{
-  font-size:24px;
-  font-weight:900;
-}
-
-.player-name{
-  font-size:14px;
-  font-weight:800;
-  margin-top:3px;
-}
-
-.achievement{
-  overflow:hidden;
-}
-
-.achievement-image{
-  width:100%;
-  height:150px;
-  object-fit:cover;
-  border-radius:13px;
-  margin-bottom:11px;
-  background:#edf0f6;
-}
-
-.achievement-title{
-  font-size:16px;
-  font-weight:900;
-}
-
-.achievement-description{
-  margin-top:5px;
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.4;
-}
-
-.album{
-  overflow:hidden;
-}
-
-.album-cover{
-  width:100%;
-  height:160px;
-  object-fit:cover;
-  border-radius:13px;
-  background:#edf0f6;
-  margin-bottom:11px;
-}
-
-.album-title{
-  font-size:16px;
-  font-weight:900;
-}
-
-.album-description{
-  margin-top:5px;
-  font-size:12px;
-  color:var(--muted);
-}
-
-.birthday{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.birthday-photo{
-  width:58px;
-  height:58px;
-  border-radius:50%;
-  object-fit:cover;
-  background:#edf0f6;
-  flex-shrink:0;
-}
-
-.birthday-name{
-  font-size:15px;
-  font-weight:900;
-}
-
-.birthday-date{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:4px;
-}
-
-.empty{
-  background:white;
-  border-radius:16px;
-  padding:18px;
-  color:var(--muted);
-  font-size:13px;
-  text-align:center;
-}
-
-.table-wrap{
-  background:white;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 5px 20px #15204a10;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
-}
-
-th{
-  background:var(--navy);
-  color:white;
-  padding:11px 7px;
-}
-
-td{
-  padding:11px 7px;
-  border-bottom:1px solid #edf0f5;
-  text-align:center;
-}
-
-td:nth-child(2),
-th:nth-child(2){
-  text-align:left;
-}
-
-tr:last-child td{
-  border-bottom:0;
-}
-
-.bottom{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:white;
-  border-top:1px solid #e6e8ef;
-  display:flex;
-  justify-content:space-around;
-  padding:10px 5px calc(10px + env(safe-area-inset-bottom));
-  z-index:20;
-}
-
-.nav-btn{
-  border:0;
-  background:transparent;
-  color:#7b8295;
-  font-size:10px;
-  text-align:center;
-  padding:0;
-  cursor:pointer;
-  font-family:inherit;
-  flex:1;
-}
-
-.nav-btn.active{
-  color:var(--blue);
-  font-weight:800;
-}
-
-.nav-btn .ico{
-  font-size:19px;
-  display:block;
-  margin-bottom:3px;
-}
-
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-}
-
-.more-menu{
-  display:grid;
-  gap:10px;
-}
-
-.more-item{
-  background:white;
-  border-radius:18px;
-  padding:17px;
-  font-weight:800;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-@media(min-width:700px){
-
-  body{
-    max-width:700px;
-    margin:auto;
-  }
-
-  .bottom{
-    max-width:700px;
-    margin:auto;
-  }
-
-}
-</style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
+<div class="page">
 
-  <div class="top">
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
-    <div class="logo" id="headerLogo">
-      Ч2011
-    </div>
+    <header class="site-header">
 
-    <div style="flex:1">
+        <div class="header-inner">
 
-      <div class="club">
-        ХК ЧЕЛНЫ
-      </div>
+            <img
+                id="siteLogo"
+                class="header-logo"
+                src=""
+                alt="ХК Челны 2011"
+            >
 
-      <div class="season">
-        СЕЗОН 2026/27 · 2011 ГОД
-      </div>
+            <div class="header-brand">
 
-    </div>
+                <div
+                    id="siteTitle"
+                    class="header-brand-title"
+                >
+                    ХК Челны 2011
+                </div>
 
-    <div class="menu">
-      ☰
-    </div>
+                <div
+                    id="siteSubtitle"
+                    class="header-brand-subtitle"
+                >
+                    Набережные Челны · 2011
+                </div>
 
-  </div>
+            </div>
 
-  <div class="hero">
+            <a
+                class="header-action"
+                href="news.html"
+                aria-label="Новости"
+            >
+                ⋯
+            </a>
 
-    <div class="label">
-      Ближайший матч
-    </div>
-
-    <h1>
-      МАТЧ ДЭЙ
-    </h1>
-
-    <div class="next" id="heroMatch">
-
-      <div style="width:100%;text-align:center">
-
-        <div class="muted">
-          Загрузка...
         </div>
 
-      </div>
+    </header>
 
-    </div>
 
-  </div>
+    <!-- =====================================================
+         CONTENT
+    ====================================================== -->
 
-</header>
+    <main class="container">
 
-<main>
+        <!-- =================================================
+             MATCHDAY
+        ================================================== -->
 
-<section id="home" class="page active">
+        <section
+            id="nextMatchSection"
+            class="section"
+        >
 
-  <div class="section">
+            <div class="section-header">
 
-    <h2>
-      Последний матч
-    </h2>
+                <div>
+                    <h2 class="section-title">
+                        Матч Дэй
+                    </h2>
 
-    <span
-      class="more"
-      onclick="openPage('matches')"
-    >
-      Все матчи →
-    </span>
+                    <div class="section-subtitle">
+                        Ближайшая игра команды
+                    </div>
+                </div>
 
-  </div>
+                <a
+                    href="matches.html"
+                    class="section-link"
+                >
+                    Все матчи
+                </a>
 
-  <div id="lastMatchBox">
+            </div>
 
-    <div class="empty">
-      Загрузка...
-    </div>
 
-  </div>
+            <div
+                id="nextMatch"
+                class="match-card"
+            >
 
-  <div class="section">
+                <div class="loading-state">
+                    Загрузка…
+                </div>
 
-    <h2>
-      Команда
-    </h2>
+            </div>
 
-    <span
-      class="more"
-      onclick="openPage('roster')"
-    >
-      Состав →
-    </span>
+        </section>
 
-  </div>
 
-  <div class="cards">
+        <!-- =================================================
+             LAST MATCH
+        ================================================== -->
 
-    <div class="card">
+        <section
+            id="lastMatchSection"
+            class="section"
+        >
 
-      <div class="big">
-        2011
-      </div>
+            <div class="section-header">
 
-      <div class="muted">
-        Год рождения
-      </div>
+                <div>
+                    <h2 class="section-title">
+                        Последний матч
+                    </h2>
 
-    </div>
+                    <div class="section-subtitle">
+                        Результат последней сыгранной встречи
+                    </div>
+                </div>
 
-    <div class="card">
+                <a
+                    href="matches.html"
+                    class="section-link"
+                >
+                    Архив
+                </a>
 
-      <div class="big">
-        #18
-      </div>
+            </div>
 
-      <div class="muted">
-        Капитан
-      </div>
 
-    </div>
+            <div
+                id="lastMatch"
+                class="match-card"
+            >
 
-  </div>
+                <div class="loading-state">
+                    Загрузка…
+                </div>
 
-  <div class="section">
+            </div>
 
-    <h2>
-      Новости
-    </h2>
+        </section>
 
-    <span class="more">
-      Все новости →
-    </span>
 
-  </div>
+        <!-- =================================================
+             TOP 3 STATS
+        ================================================== -->
 
-  <div id="homeNews">
+        <section
+            id="statsSection"
+            class="section"
+        >
 
-    <div class="empty">
-      Загрузка...
-    </div>
+            <div class="section-header">
 
-  </div>
+                <div>
+                    <h2 class="section-title">
+                        Статистика
+                    </h2>
 
-  <div id="homeBirthdaysSection">
+                    <div class="section-subtitle">
+                        Лидеры команды
+                    </div>
+                </div>
 
-    <div class="section">
+            </div>
 
-      <h2>
-        🎂 Именинники
-      </h2>
 
-    </div>
+            <div
+                id="statsGrid"
+                class="stats-grid"
+            >
 
-    <div id="homeBirthdays">
+                <div
+                    class="stat-card"
+                    data-stat="scorers"
+                >
 
-      <div class="empty">
-        Загрузка...
-      </div>
+                    <div class="stat-header">
 
-    </div>
+                        <div class="stat-title">
+                            Бомбардиры
+                        </div>
 
-  </div>
+                        <div class="stat-arrow">
+                            ↓
+                        </div>
 
-  <div id="homeAchievementsSection">
+                    </div>
 
-    <div class="section">
+                    <div
+                        class="stat-content"
+                        id="scorersContent"
+                    ></div>
 
-      <h2>
-        🏆 Достижения
-      </h2>
+                </div>
 
-    </div>
 
-    <div id="homeAchievements">
+                <div
+                    class="stat-card"
+                    data-stat="snipers"
+                >
 
-      <div class="empty">
-        Загрузка...
-      </div>
+                    <div class="stat-header">
 
-    </div>
+                        <div class="stat-title">
+                            Снайперы
+                        </div>
 
-  </div>
+                        <div class="stat-arrow">
+                            ↓
+                        </div>
 
-  <div id="homeMediaSection">
+                    </div>
 
-    <div class="section">
+                    <div
+                        class="stat-content"
+                        id="snipersContent"
+                    ></div>
 
-      <h2>
-        📸 Медиа
-      </h2>
+                </div>
 
-    </div>
 
-    <div id="homeMedia">
+                <div
+                    class="stat-card"
+                    data-stat="plusminus"
+                >
 
-      <div class="empty">
-        Загрузка...
-      </div>
+                    <div class="stat-header">
 
-    </div>
+                        <div class="stat-title">
+                            Плюс / минус
+                        </div>
 
-  </div>
+                        <div class="stat-arrow">
+                            ↓
+                        </div>
 
-</section>
+                    </div>
 
+                    <div
+                        class="stat-content"
+                        id="plusminusContent"
+                    ></div>
 
-<section id="matches" class="page">
+                </div>
 
-  <div class="section">
 
-    <h2>
-      Матчи
-    </h2>
+                <div
+                    class="stat-card"
+                    data-stat="defenders"
+                >
 
-  </div>
+                    <div class="stat-header">
 
-  <div id="matchesList">
+                        <div class="stat-title">
+                            Защитники
+                        </div>
 
-    <div class="empty">
-      Загрузка...
-    </div>
+                        <div class="stat-arrow">
+                            ↓
+                        </div>
 
-  </div>
+                    </div>
 
-</section>
+                    <div
+                        class="stat-content"
+                        id="defendersContent"
+                    ></div>
 
+                </div>
 
-<section id="roster" class="page">
+            </div>
 
-  <div class="section">
+        </section>
 
-    <h2>
-      Состав команды
-    </h2>
 
-  </div>
+        <!-- =================================================
+             NEWS
+        ================================================== -->
 
-  <div
-    id="playersList"
-    class="cards"
-  >
+        <section
+            id="newsSection"
+            class="section"
+        >
 
-    <div
-      class="empty"
-      style="grid-column:1/-1"
-    >
-      Загрузка...
-    </div>
+            <div class="section-header">
 
-  </div>
+                <div>
+                    <h2 class="section-title">
+                        Новости
+                    </h2>
 
-</section>
+                    <div class="section-subtitle">
+                        Последние события команды
+                    </div>
+                </div>
 
+                <a
+                    href="news.html"
+                    class="section-link"
+                >
+                    Все новости
+                </a>
 
-<section id="table" class="page">
+            </div>
 
-  <div class="section">
 
-    <h2>
-      Турнирная таблица
-    </h2>
+            <div
+                id="newsGrid"
+                class="news-grid"
+            >
 
-  </div>
+                <div class="loading-state">
+                    Загрузка…
+                </div>
 
-  <div id="standingsBox">
+            </div>
 
-    <div class="empty">
-      Загрузка...
-    </div>
+        </section>
 
-  </div>
 
-</section>
+        <!-- =================================================
+             ROSTER
+        ================================================== -->
 
+        <section
+            id="rosterSection"
+            class="section"
+        >
 
-<section id="more" class="page">
+            <div class="section-header">
 
-  <div class="section">
+                <div>
+                    <h2 class="section-title">
+                        Команда
+                    </h2>
 
-    <h2>
-      Ещё
-    </h2>
+                    <div class="section-subtitle">
+                        Игроки ХК Челны 2011
+                    </div>
+                </div>
 
-  </div>
+                <a
+                    href="roster.html"
+                    class="section-link"
+                >
+                    Весь состав
+                </a>
 
-  <div class="more-menu">
+            </div>
 
-    <div
-      class="more-item"
-      onclick="showSection('achievements')"
-    >
 
-      <span>
-        🏆 Достижения
-      </span>
+            <div
+                id="playersGrid"
+                class="players-grid"
+            >
 
-      <span>
-        →
-      </span>
+                <div class="loading-state">
+                    Загрузка…
+                </div>
 
-    </div>
+            </div>
 
-    <div
-      class="more-item"
-      onclick="showSection('media')"
-    >
+        </section>
 
-      <span>
-        📸 Медиа
-      </span>
 
-      <span>
-        →
-      </span>
+        <!-- =================================================
+             ACHIEVEMENTS
+        ================================================== -->
 
-    </div>
+        <section
+            id="achievementsSection"
+            class="section"
+        >
 
-    <div
-      class="more-item"
-      onclick="showSection('birthdays')"
-    >
+            <div class="section-header">
 
-      <span>
-        🎂 Именинники
-      </span>
+                <div>
+                    <h2 class="section-title">
+                        Достижения
+                    </h2>
 
-      <span>
-        →
-      </span>
+                    <div class="section-subtitle">
+                        Главные результаты команды
+                    </div>
+                </div>
 
-    </div>
+            </div>
 
-    <div
-      class="more-item"
-      onclick="openPage('matches')"
-    >
 
-      <span>
-        🏒 Все матчи
-      </span>
+            <div
+                id="achievements"
+                class="achievements"
+            >
 
-      <span>
-        →
-      </span>
+                <div class="loading-state">
+                    Загрузка…
+                </div>
 
-    </div>
+            </div>
 
-    <div
-      class="more-item"
-      onclick="openPage('roster')"
-    >
+        </section>
 
-      <span>
-        👥 Состав
-      </span>
 
-      <span>
-        →
-      </span>
+        <!-- =================================================
+             BIRTHDAYS
+        ================================================== -->
 
-    </div>
+        <section
+            id="birthdaysSection"
+            class="section"
+        >
 
-  </div>
+            <div class="section-header">
 
-  <div
-    id="extraSection"
-    style="margin-top:20px"
-  ></div>
+                <div>
+                    <h2 class="section-title">
+                        Дни рождения
+                    </h2>
 
-</section>
+                    <div class="section-subtitle">
+                        Поздравляем игроков
+                    </div>
+                </div>
 
-</main>
+            </div>
 
 
-<nav
-  class="bottom"
-  id="bottomNav"
->
+            <div
+                id="birthdays"
+                class="birthdays"
+            >
 
-  <button
-    class="nav-btn active"
-    data-page="home"
-  >
+                <div class="loading-state">
+                    Загрузка…
+                </div>
 
-    <span class="ico">
-      ⌂
-    </span>
+            </div>
 
-    Главная
+        </section>
 
-  </button>
+    </main>
 
 
-  <button
-    class="nav-btn"
-    data-page="matches"
-  >
+    <!-- =====================================================
+         BOTTOM NAV
+    ====================================================== -->
 
-    <span class="ico">
-      🏒
-    </span>
+    <nav class="bottom-nav">
 
-    Матчи
+        <div class="bottom-nav-inner">
 
-  </button>
+            <a
+                href="index.html"
+                class="bottom-nav-item active"
+            >
+                <span class="bottom-nav-icon">
+                    ⌂
+                </span>
 
+                <span>
+                    Главная
+                </span>
+            </a>
 
-  <button
-    class="nav-btn"
-    data-page="roster"
-  >
 
-    <span class="ico">
-      👥
-    </span>
+            <a
+                href="matches.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ⚔
+                </span>
 
-    Состав
+                <span>
+                    Матчи
+                </span>
+            </a>
 
-  </button>
 
+            <a
+                href="roster.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ◎
+                </span>
 
-  <button
-    class="nav-btn"
-    data-page="table"
-  >
+                <span>
+                    Состав
+                </span>
+            </a>
 
-    <span class="ico">
-      ▥
-    </span>
 
-    Таблица
+            <a
+                href="standings.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ≡
+                </span>
 
-  </button>
+                <span>
+                    Таблица
+                </span>
+            </a>
 
 
-  <button
-    class="nav-btn"
-    data-page="more"
-  >
+            <a
+                href="news.html"
+                class="bottom-nav-item"
+            >
+                <span class="bottom-nav-icon">
+                    ◈
+                </span>
 
-    <span class="ico">
-      •••
-    </span>
+                <span>
+                    Новости
+                </span>
+            </a>
 
-    Ещё
+        </div>
 
-  </button>
+    </nav>
 
-</nav>
+</div>
 
+
+<!-- =====================================================
+     SCRIPTS
+====================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="config.js"></script>
+
+<script src="app.js"></script>
 
 <script>
 
-const SUPABASE_URL =
-  "https://jxlbojosxaaqnyuzohnw.supabase.co";
-
-const SUPABASE_KEY =
-  "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
-
-const STORAGE_BUCKET =
-  "site-media";
-
-
-/* =====================================================
-   HELPERS
-===================================================== */
-
-async function request(
-  path,
-  options = {}
-){
-
-  const response =
-    await fetch(
-      SUPABASE_URL + path,
-      {
-        ...options,
-
-        headers:{
-          apikey:SUPABASE_KEY,
-
-          Authorization:
-            "Bearer " +
-            SUPABASE_KEY,
-
-          "Content-Type":
-            "application/json",
-
-          ...(options.headers || {})
-        }
-      }
-    );
-
-  const text =
-    await response.text();
-
-  if(!response.ok){
-
-    throw new Error(
-      text ||
-      "Ошибка Supabase"
-    );
-
-  }
-
-  if(!text){
-    return [];
-  }
-
-  try{
-
-    return JSON.parse(text);
-
-  }catch{
-
-    return [];
-
-  }
-
-}
-
-
-function escapeHtml(value){
-
-  return String(
-    value ?? ""
-  )
-  .replace(
-    /&/g,
-    "&amp;"
-  )
-  .replace(
-    /</g,
-    "&lt;"
-  )
-  .replace(
-    />/g,
-    "&gt;"
-  )
-  .replace(
-    /"/g,
-    "&quot;"
-  )
-  .replace(
-    /'/g,
-    "&#039;"
-  );
-
-}
-
-
-function publicImage(url){
-
-  if(!url){
-    return "";
-  }
-
-  if(
-    url.startsWith("http://") ||
-    url.startsWith("https://")
-  ){
-
-    return url;
-
-  }
-
-  return (
-    SUPABASE_URL +
-    "/storage/v1/object/public/" +
-    STORAGE_BUCKET +
-    "/" +
-    url.replace(
-      /^\/+/,
-      ""
-    )
-  );
-
-}
-
-
-function formatDate(value){
-
-  if(!value){
-    return "";
-  }
-
-  const date =
-    new Date(value);
-
-  if(
-    Number.isNaN(
-      date.getTime()
-    )
-  ){
-
-    return String(value);
-
-  }
-
-  return date.toLocaleDateString(
-    "ru-RU",
-    {
-      day:"2-digit",
-      month:"long",
-      year:"numeric"
-    }
-  );
-
-}
-
-
-function formatShortDate(value){
-
-  if(!value){
-    return "";
-  }
-
-  const parts =
-    String(value).split("-");
-
-  if(parts.length === 3){
-
-    return (
-      parts[2] +
-      "." +
-      parts[1]
-    );
-
-  }
-
-  const date =
-    new Date(value);
-
-  if(
-    Number.isNaN(
-      date.getTime()
-    )
-  ){
-
-    return String(value);
-
-  }
-
-  return date.toLocaleDateString(
-    "ru-RU",
-    {
-      day:"2-digit",
-      month:"2-digit"
-    }
-  );
-
-}
-
-
-function teamName(team){
-
-  if(!team){
-    return "Команда";
-  }
-
-  return (
-    team.short_name ||
-    team.name ||
-    "Команда"
-  );
-
-}
-
-
-function teamLogo(team){
-
-  if(!team){
-    return "";
-  }
-
-  return publicImage(
-    team.logo_url
-  );
-
-}
-
-
-function getMatchStatus(match){
-
-  if(match.status === "live"){
-    return "live";
-  }
-
-  if(match.status === "finished"){
-    return "finished";
-  }
-
-  if(match.status === "postponed"){
-    return "postponed";
-  }
-
-  if(match.status === "cancelled"){
-    return "cancelled";
-  }
-
-  if(match.status === "scheduled"){
-    return "scheduled";
-  }
-
-  if(
-    match.home_score !== null &&
-    match.home_score !== undefined &&
-    match.away_score !== null &&
-    match.away_score !== undefined
-  ){
-
-    return "finished";
-
-  }
-
-  return "scheduled";
-
-}
-
-
-function statusText(match){
-
-  const status =
-    getMatchStatus(match);
-
-  if(status === "live"){
-    return "LIVE";
-  }
-
-  if(status === "finished"){
-    return "Завершён";
-  }
-
-  if(status === "postponed"){
-    return "Перенесён";
-  }
-
-  if(status === "cancelled"){
-    return "Отменён";
-  }
-
-  return "Предстоящий";
-
-}
-
-
-/* =====================================================
-   DESIGN / FONTS
-===================================================== */
-
-let designSettings = null;
-
-
-function loadFontFromUrl(
-  url,
-  family
-){
-
-  if(!url){
-    return;
-  }
-
-  const style =
-    document.createElement(
-      "style"
-    );
-
-  style.textContent = `
-
-    @font-face{
-
-      font-family:"${family}";
-
-      src:
-        url("${url}");
-
-      font-display:swap;
-
-    }
-
-  `;
-
-  document.head.appendChild(
-    style
-  );
-
-}
-
-
-async function loadDesign(){
-
-  try{
-
-    const data =
-      await request(
-        "/rest/v1/settings?select=font_main,font_heading,font_secondary&limit=1"
-      );
-
-    const settings =
-      data?.[0];
-
-    if(!settings){
-
-      console.log(
-        "Настройки шрифтов не найдены"
-      );
-
-      return;
-
-    }
-
-    designSettings =
-      settings;
-
-
-    /* ОСНОВНОЙ ШРИФТ */
-
-    if(settings.font_main){
-
-      loadFontFromUrl(
-        settings.font_main,
-        "SiteMainFont"
-      );
-
-      document.documentElement.style
-        .setProperty(
-          "--font-main",
-          '"SiteMainFont",Arial,sans-serif'
-        );
-
-    }
-
-
-    /* ЗАГОЛОВОЧНЫЙ ШРИФТ */
-
-    if(settings.font_heading){
-
-      loadFontFromUrl(
-        settings.font_heading,
-        "SiteHeadingFont"
-      );
-
-      document.documentElement.style
-        .setProperty(
-          "--font-heading",
-          '"SiteHeadingFont",Arial,sans-serif'
-        );
-
-    }
-
-
-    /* ДОПОЛНИТЕЛЬНЫЙ ШРИФТ */
-
-    if(settings.font_secondary){
-
-      loadFontFromUrl(
-        settings.font_secondary,
-        "SiteSecondaryFont"
-      );
-
-      document.documentElement.style
-        .setProperty(
-          "--font-secondary",
-          '"SiteSecondaryFont",Arial,sans-serif'
-        );
-
-    }
-
-
-    console.log(
-      "Шрифты сайта загружены",
-      settings
-    );
-
-  }catch(error){
-
-    console.error(
-      "Design:",
-      error
-    );
-
-  }
-
-}
-
-
-/* =====================================================
-   NAVIGATION
-===================================================== */
-
-const buttons =
-  document.querySelectorAll(
-    ".nav-btn"
-  );
-
-const pages =
-  document.querySelectorAll(
-    ".page"
-  );
-
-
-function openPage(name){
-
-  pages.forEach(
-    page => {
-
-      page.classList.toggle(
-        "active",
-        page.id === name
-      );
-
-    }
-  );
-
-
-  buttons.forEach(
-    button => {
-
-      button.classList.toggle(
-        "active",
-        button.dataset.page === name
-      );
-
-    }
-  );
-
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
-
-}
-
-
-buttons.forEach(
-  button => {
-
-    button.addEventListener(
-      "click",
-      () =>
-        openPage(
-          button.dataset.page
-        )
-    );
-
-  }
-);
-
-
-/* =====================================================
-   CACHE
-===================================================== */
-
-let teamsCache = [];
-let matchesCache = [];
-let newsCache = [];
-let playersCache = [];
-let standingsCache = [];
-let achievementsCache = [];
-let albumsCache = [];
-let birthdaysCache = [];
-
-
-/* =====================================================
-   TEAMS
-===================================================== */
-
-async function loadTeams(){
-
-  try{
-
-    teamsCache =
-      await request(
-        "/rest/v1/teams?select=*&order=name.asc"
-      );
-
-    renderHeaderLogo();
-
-  }catch(error){
-
-    console.error(
-      "Teams:",
-      error
-    );
-
-    teamsCache = [];
-
-  }
-
-}
-
-
-function findTeam(id){
-
-  return teamsCache.find(
-    team =>
-      String(team.id) ===
-      String(id)
-  );
-
-}
-
-
-function renderHeaderLogo(){
-
-  const team =
-    teamsCache.find(
-      team =>
-        String(
-          team.name || ""
-        )
-        .toLowerCase()
-        ===
-        "хк челны 2011"
-    )
-    ||
-    teamsCache.find(
-      team =>
-        String(
-          team.name || ""
-        )
-        .toLowerCase()
-        .includes("челны")
-    );
-
-
-  const box =
-    document.getElementById(
-      "headerLogo"
-    );
-
-
-  if(
-    team &&
-    team.logo_url
-  ){
-
-    box.innerHTML =
-      `<img
-        src="${escapeHtml(
-          publicImage(
-            team.logo_url
-          )
-        )}"
-        alt="ХК Челны 2011"
-      >`;
-
-  }else{
-
-    box.textContent =
-      "Ч2011";
-
-  }
-
-}
-
-
-/* =====================================================
-   MATCHES
-===================================================== */
-
-async function loadMatches(){
-
-  try{
-
-    matchesCache =
-      await request(
-        "/rest/v1/matches?select=*&order=date.asc,time.asc"
-      );
-
-    prepareMatches();
-
-    renderHero();
-    renderMatches();
-    renderLastMatch();
-
-  }catch(error){
-
-    console.error(
-      "Matches:",
-      error
-    );
-
-
-    document.getElementById(
-      "heroMatch"
-    ).innerHTML =
-      `<div style="width:100%;text-align:center">
-
-        <div class="muted">
-          Матчи пока недоступны.
-        </div>
-
-      </div>`;
-
-
-    document.getElementById(
-      "matchesList"
-    ).innerHTML =
-      `<div class="empty">
-        Не удалось загрузить матчи.
-      </div>`;
-
-
-    document.getElementById(
-      "lastMatchBox"
-    ).innerHTML =
-      `<div class="empty">
-        Последний матч недоступен.
-      </div>`;
-
-  }
-
-}
-
-
-function prepareMatches(){
-
-  matchesCache =
-    matchesCache.map(
-      match => {
-
-        const home =
-          findTeam(
-            match.home_team_id
-          );
-
-        const away =
-          findTeam(
-            match.away_team_id
-          );
-
-        return {
-          ...match,
-          homeTeam:home,
-          awayTeam:away
-        };
-
-      }
-    );
-
-
-  matchesCache =
-    matchesCache.map(
-      match => {
-
-        if(
-          !match.awayTeam &&
-          match.opponent
-        ){
-
-          match.awayTeam = {
-
-            name:
-              match.opponent,
-
-            short_name:
-              match.opponent
-
-          };
-
-        }
-
-
-        if(
-          !match.homeTeam
-        ){
-
-          match.homeTeam =
-            teamsCache.find(
-              team =>
-                String(
-                  team.name || ""
-                )
-                .toLowerCase()
-                .includes("челны")
-            );
-
-        }
-
-
-        return match;
-
-      }
-    );
-
-}
-
-
-function matchDateTime(match){
-
-  const date =
-    match.date || "";
-
-  const time =
-    match.time || "00:00";
-
-  const value =
-    `${date}T${time}`;
-
-  const result =
-    new Date(value);
-
-
-  if(
-    Number.isNaN(
-      result.getTime()
-    )
-  ){
-
-    return new Date(
-      "2999-12-31"
-    );
-
-  }
-
-  return result;
-
-}
-
-
-function renderHero(){
-
-  const box =
-    document.getElementById(
-      "heroMatch"
-    );
-
-
-  const now =
-    new Date();
-
-
-  const upcoming =
-    matchesCache
-      .filter(
-        match => {
-
-          const date =
-            matchDateTime(
-              match
-            );
-
-          const status =
-            getMatchStatus(
-              match
-            );
-
-
-          return (
-            date >= now &&
-            status !== "finished" &&
-            status !== "cancelled" &&
-            status !== "postponed"
-          );
-
-        }
-      )
-      .sort(
-        (a,b) =>
-          matchDateTime(a) -
-          matchDateTime(b)
-      )[0];
-
-
-  if(!upcoming){
-
-    box.innerHTML =
-      `<div style="width:100%;text-align:center">
-
-        <div class="muted">
-          Ближайших матчей нет
-        </div>
-
-      </div>`;
-
-    return;
-
-  }
-
-
-  const home =
-    upcoming.homeTeam ||
-    {};
-
-
-  const away =
-    upcoming.awayTeam ||
-    {};
-
-
-  const homeLogo =
-    teamLogo(home);
-
-
-  const awayLogo =
-    teamLogo(away);
-
-
-  const homeHtml =
-    homeLogo
-      ?
-      `<img
-        src="${escapeHtml(homeLogo)}"
-        alt=""
-      >`
-      :
-      "";
-
-
-  const awayHtml =
-    awayLogo
-      ?
-      `<img
-        src="${escapeHtml(awayLogo)}"
-        alt=""
-      >`
-      :
-      "";
-
-
-  box.innerHTML = `
-
-    <div style="flex:1">
-
-      <div class="muted">
-
-        ${escapeHtml(
-          formatShortDate(
-            upcoming.date
-          )
-        )}
-
-        ${
-          upcoming.time
-            ?
-            " · " +
-            escapeHtml(
-              String(
-                upcoming.time
-              ).slice(0,5)
-            )
-            :
-            ""
-        }
-
-      </div>
-
-
-      <div class="next-team">
-
-        ${homeHtml}
-
-        <div class="next-team-name">
-
-          ${escapeHtml(
-            teamName(home)
-          )}
-
-        </div>
-
-      </div>
-
-
-      <div class="next-team">
-
-        ${awayHtml}
-
-        <div class="next-team-name">
-
-          ${escapeHtml(
-            teamName(away)
-          )}
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="vs">
-      VS
-    </div>
-
-  `;
-
-}
-
-
-function renderMatchCard(match){
-
-  const home =
-    match.homeTeam ||
-    {};
-
-
-  const away =
-    match.awayTeam ||
-    {};
-
-
-  const homeLogo =
-    teamLogo(home);
-
-
-  const awayLogo =
-    teamLogo(away);
-
-
-  const homeScore =
-    match.home_score ??
-    "—";
-
-
-  const awayScore =
-    match.away_score ??
-    "—";
-
-
-  return `
-
-    <div class="card match-card">
-
-      <div class="match-head">
-
-        <div>
-
-          <div class="date">
-
-            ${escapeHtml(
-              formatDate(
-                match.date
-              )
-            )}
-
-            ${
-              match.time
-                ?
-                " · " +
-                escapeHtml(
-                  String(
-                    match.time
-                  ).slice(0,5)
-                )
-                :
-                ""
-            }
-
-          </div>
-
-
-          <div class="muted">
-
-            ${escapeHtml(
-              match.tournament ||
-              "Матч"
-            )}
-
-          </div>
-
-        </div>
-
-
-        <span
-          class="status ${
-            getMatchStatus(
-              match
-            )
-          }"
-        >
-
-          ${escapeHtml(
-            statusText(match)
-          )}
-
-        </span>
-
-      </div>
-
-
-      <div class="match-teams">
-
-        <div class="match-team">
-
-          ${
-            homeLogo
-              ?
-              `<img
-                src="${escapeHtml(homeLogo)}"
-                alt=""
-              >`
-              :
-              ""
-          }
-
-
-          <div class="match-team-name">
-
-            ${escapeHtml(
-              teamName(home)
-            )}
-
-          </div>
-
-        </div>
-
-
-        <div class="match-score">
-
-          ${escapeHtml(
-            String(homeScore)
-          )}
-
-          :
-
-          ${escapeHtml(
-            String(awayScore)
-          )}
-
-        </div>
-
-
-        <div class="match-team">
-
-          ${
-            awayLogo
-              ?
-              `<img
-                src="${escapeHtml(awayLogo)}"
-                alt=""
-              >`
-              :
-              ""
-          }
-
-
-          <div class="match-team-name">
-
-            ${escapeHtml(
-              teamName(away)
-            )}
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      ${
-        match.venue
-          ?
-          `<div class="match-info">
-
-            📍 ${escapeHtml(
-              match.venue
-            )}
-
-          </div>`
-          :
-          ""
-      }
-
-    </div>
-
-  `;
-
-}
-
-
-function renderMatches(){
-
-  const box =
-    document.getElementById(
-      "matchesList"
-    );
-
-
-  if(
-    !matchesCache.length
-  ){
-
-    box.innerHTML =
-      `<div class="empty">
-        Матчей пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    matchesCache
-      .map(
-        renderMatchCard
-      )
-      .join("");
-
-}
-
-
-function renderLastMatch(){
-
-  const box =
-    document.getElementById(
-      "lastMatchBox"
-    );
-
-
-  const finished =
-    matchesCache
-      .filter(
-        match =>
-          getMatchStatus(
-            match
-          ) === "finished"
-      )
-      .sort(
-        (a,b) =>
-          matchDateTime(b) -
-          matchDateTime(a)
-      )[0];
-
-
-  if(!finished){
-
-    box.innerHTML =
-      `<div class="empty">
-        Завершённых матчей пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  const home =
-    finished.homeTeam ||
-    {};
-
-
-  const away =
-    finished.awayTeam ||
-    {};
-
-
-  const homeScore =
-    finished.home_score ??
-    "—";
-
-
-  const awayScore =
-    finished.away_score ??
-    "—";
-
-
-  box.innerHTML = `
-
-    <div class="card result">
-
-      <div>
-
-        <div class="muted">
-
-          ${escapeHtml(
-            finished.tournament ||
-            "Матч"
-          )}
-
-        </div>
-
-
-        <div class="teams">
-
-          ${escapeHtml(
-            teamName(home)
-          )}
-
-        </div>
-
-
-        <div class="teams">
-
-          ${escapeHtml(
-            teamName(away)
-          )}
-
-        </div>
-
-      </div>
-
-
-      <div>
-
-        <div class="score">
-
-          ${escapeHtml(
-            String(homeScore)
-          )}
-
-          :
-
-          ${escapeHtml(
-            String(awayScore)
-          )}
-
-        </div>
-
-
-        <div class="win">
-          РЕЗУЛЬТАТ
-        </div>
-
-      </div>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =====================================================
-   NEWS
-===================================================== */
-
-async function loadNews(){
-
-  try{
-
-    newsCache =
-      await request(
-        "/rest/v1/news?select=*&order=date.desc,created_at.desc"
-      );
-
-    renderHomeNews();
-
-  }catch(error){
-
-    console.error(
-      "News:",
-      error
-    );
-
-
-    document.getElementById(
-      "homeNews"
-    ).innerHTML =
-      `<div class="empty">
-        Новостей пока нет.
-      </div>`;
-
-  }
-
-}
-
-
-function renderHomeNews(){
-
-  const box =
-    document.getElementById(
-      "homeNews"
-    );
-
-
-  if(
-    !newsCache.length
-  ){
-
-    box.innerHTML =
-      `<div class="empty">
-        Новостей пока нет.
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    newsCache
-      .slice(0,3)
-      .map(
-        item => {
-
-          const title =
-            item.title ||
-            item.name ||
-            "Новость";
-
-
-          const description =
-            item.description ||
-            item.content ||
-            item.text ||
-            "";
-
-
-          const image =
-            item.image_url
-              ?
-              `<img
-                class="news-image"
-                src="${escapeHtml(
-                  publicImage(
-                    item.image_url
-                  )
-                )}"
-                alt=""
-              >`
-              :
-              "";
-
-
-          return `
-
-            <div class="card news">
-
-              ${image}
-
-
-              <div class="date">
-
-                ${escapeHtml(
-                  formatDate(
-                    item.date ||
-                    item.created_at
-                  )
-                )}
-
-              </div>
-
-
-              <h3>
-
-                ${escapeHtml(
-                  title
-                )}
-
-              </h3>
-
-
-              ${
-                description
-                  ?
-                  `<div class="muted">
-
-                    ${escapeHtml(
-                      description
-                    )}
-
-                  </div>`
-                  :
-                  ""
-              }
-
-            </div>
-
-          `;
-
-        }
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   PLAYERS
-===================================================== */
-
-async function loadPlayers(){
-
-  try{
-
-    playersCache =
-      await request(
-        "/rest/v1/players?select=*"
-      );
-
-    renderPlayers();
-
-  }catch(error){
-
-    console.error(
-      "Players:",
-      error
-    );
-
-
-    document.getElementById(
-      "playersList"
-    ).innerHTML =
-      `<div
-        class="empty"
-        style="grid-column:1/-1"
-      >
-
-        Состав пока недоступен.
-
-      </div>`;
-
-  }
-
-}
-
-
-function renderPlayers(){
-
-  const box =
-    document.getElementById(
-      "playersList"
-    );
-
-
-  if(
-    !playersCache.length
-  ){
-
-    box.innerHTML =
-      `<div
-        class="empty"
-        style="grid-column:1/-1"
-      >
-
-        Игроков пока нет.
-
-      </div>`;
-
-    return;
-
-  }
-
-
-  const sorted =
-    [...playersCache].sort(
-      (a,b) =>
-        Number(
-          a.number ??
-          a.jersey_number ??
-          999
-        )
-        -
-        Number(
-          b.number ??
-          b.jersey_number ??
-          999
-        )
-    );
-
-
-  box.innerHTML =
-    sorted
-      .map(
-        player => {
-
-          const name =
-            player.name ||
-            player.full_name ||
-            "Игрок";
-
-
-          const number =
-            player.number ??
-            player.jersey_number ??
-            "";
-
-
-          const position =
-            player.position ||
-            player.role ||
-            "";
-
-
-          const photo =
-            player.photo_url ||
-            player.image_url ||
-            "";
-
-
-          return `
-
-            <div class="card player-card">
-
-              ${
-                photo
-                  ?
-                  `<img
-                    class="player-photo"
-                    src="${escapeHtml(
-                      publicImage(photo)
-                    )}"
-                    alt="${escapeHtml(name)}"
-                  >`
-                  :
-                  `<div
-                    class="player-photo"
-                  ></div>`
-              }
-
-
-              <div class="player-number">
-
-                #${escapeHtml(
-                  String(number)
-                )}
-
-              </div>
-
-
-              <div class="player-name">
-
-                ${escapeHtml(name)}
-
-              </div>
-
-
-              ${
-                position
-                  ?
-                  `<div class="muted">
-
-                    ${escapeHtml(
-                      position
-                    )}
-
-                  </div>`
-                  :
-                  ""
-              }
-
-            </div>
-
-          `;
-
-        }
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   STANDINGS
-===================================================== */
-
-async function loadStandings(){
-
-  try{
-
-    standingsCache =
-      await request(
-        "/rest/v1/standings?select=*&order=place.asc"
-      );
-
-    renderStandings();
-
-  }catch(error){
-
-    console.error(
-      "Standings:",
-      error
-    );
-
-
-    document.getElementById(
-      "standingsBox"
-    ).innerHTML =
-      `<div class="empty">
-
-        Турнирная таблица пока недоступна.
-
-      </div>`;
-
-  }
-
-}
-
-
-function renderStandings(){
-
-  const box =
-    document.getElementById(
-      "standingsBox"
-    );
-
-
-  if(
-    !standingsCache.length
-  ){
-
-    box.innerHTML =
-      `<div class="empty">
-
-        Турнирной таблицы пока нет.
-
-      </div>`;
-
-    return;
-
-  }
-
-
-  const rows =
-    [...standingsCache].sort(
-      (a,b) =>
-        Number(
-          a.place ??
-          a.position ??
-          999
-        )
-        -
-        Number(
-          b.place ??
-          b.position ??
-          999
-        )
-    );
-
-
-  box.innerHTML = `
-
-    <div class="table-wrap">
-
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>#</th>
-            <th>Команда</th>
-            <th>И</th>
-            <th>О</th>
-
-          </tr>
-
-        </thead>
-
-
-        <tbody>
-
-          ${rows
-            .map(
-              row => {
-
-                const place =
-                  row.place ??
-                  row.position ??
-                  "";
-
-
-                const name =
-                  row.team ||
-                  row.name ||
-                  row.team_name ||
-                  "Команда";
-
-
-                const games =
-                  row.games ??
-                  row.gp ??
-                  0;
-
-
-                const points =
-                  row.points ??
-                  row.pts ??
-                  0;
-
-
-                return `
-
-                  <tr>
-
-                    <td>
-
-                      ${escapeHtml(
-                        String(place)
-                      )}
-
-                    </td>
-
-
-                    <td>
-
-                      ${escapeHtml(
-                        name
-                      )}
-
-                    </td>
-
-
-                    <td>
-
-                      ${escapeHtml(
-                        String(games)
-                      )}
-
-                    </td>
-
-
-                    <td>
-
-                      <b>
-
-                        ${escapeHtml(
-                          String(points)
-                        )}
-
-                      </b>
-
-                    </td>
-
-                  </tr>
-
-                `;
-
-              }
-            )
-            .join("")}
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =====================================================
-   ACHIEVEMENTS
-===================================================== */
-
-async function loadAchievements(){
-
-  try{
-
-    achievementsCache =
-      await request(
-        "/rest/v1/achievements?select=*&order=created_at.desc"
-      );
-
-    renderAchievements();
-
-  }catch(error){
-
-    console.error(
-      "Achievements:",
-      error
-    );
-
-
-    document.getElementById(
-      "homeAchievements"
-    ).innerHTML =
-      `<div class="empty">
-
-        Достижения пока недоступны.
-
-      </div>`;
-
-  }
-
-}
-
-
-function achievementHtml(item){
-
-  const title =
-    item.title ||
-    "Достижение";
-
-
-  const description =
-    item.description ||
-    "";
-
-
-  const image =
-    item.image_url
-      ?
-      `<img
-        class="achievement-image"
-        src="${escapeHtml(
-          publicImage(
-            item.image_url
-          )
-        )}"
-        alt=""
-      >`
-      :
-      "";
-
-
-  return `
-
-    <div class="card achievement">
-
-      ${image}
-
-
-      <div class="achievement-title">
-
-        ${escapeHtml(title)}
-
-      </div>
-
-
-      ${
-        description
-          ?
-          `<div class="achievement-description">
-
-            ${escapeHtml(
-              description
-            )}
-
-          </div>`
-          :
-          ""
-      }
-
-    </div>
-
-  `;
-
-}
-
-
-function renderAchievements(){
-
-  const box =
-    document.getElementById(
-      "homeAchievements"
-    );
-
-
-  if(
-    !achievementsCache.length
-  ){
-
-    box.innerHTML =
-      `<div class="empty">
-
-        Достижений пока нет.
-
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    achievementsCache
-      .slice(0,3)
-      .map(
-        achievementHtml
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   ALBUMS / MEDIA
-===================================================== */
-
-async function loadAlbums(){
-
-  try{
-
-    albumsCache =
-      await request(
-        "/rest/v1/albums?select=*&order=created_at.desc"
-      );
-
-    renderAlbums();
-
-  }catch(error){
-
-    console.error(
-      "Albums:",
-      error
-    );
-
-
-    document.getElementById(
-      "homeMedia"
-    ).innerHTML =
-      `<div class="empty">
-
-        Медиа пока недоступно.
-
-      </div>`;
-
-  }
-
-}
-
-
-function albumHtml(item){
-
-  const title =
-    item.title ||
-    "Альбом";
-
-
-  const description =
-    item.description ||
-    "";
-
-
-  const cover =
-    item.cover_url ||
-    item.image_url ||
-    "";
-
-
-  return `
-
-    <div class="card album">
-
-      ${
-        cover
-          ?
-          `<img
-            class="album-cover"
-            src="${escapeHtml(
-              publicImage(
-                cover
-              )
-            )}"
-            alt=""
-          >`
-          :
-          `<div class="album-cover"></div>`
-      }
-
-
-      <div class="album-title">
-
-        ${escapeHtml(title)}
-
-      </div>
-
-
-      ${
-        description
-          ?
-          `<div class="album-description">
-
-            ${escapeHtml(
-              description
-            )}
-
-          </div>`
-          :
-          ""
-      }
-
-    </div>
-
-  `;
-
-}
-
-
-function renderAlbums(){
-
-  const box =
-    document.getElementById(
-      "homeMedia"
-    );
-
-
-  if(
-    !albumsCache.length
-  ){
-
-    box.innerHTML =
-      `<div class="empty">
-
-        Альбомов пока нет.
-
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    albumsCache
-      .slice(0,3)
-      .map(
-        albumHtml
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   BIRTHDAYS
-===================================================== */
-
-async function loadBirthdays(){
-
-  try{
-
-    birthdaysCache =
-      await request(
-        "/rest/v1/birthdays?select=*&order=birthday.asc"
-      );
-
-    renderBirthdays();
-
-  }catch(error){
-
-    console.error(
-      "Birthdays:",
-      error
-    );
-
-
-    document.getElementById(
-      "homeBirthdays"
-    ).innerHTML =
-      `<div class="empty">
-
-        Именинники пока недоступны.
-
-      </div>`;
-
-  }
-
-}
-
-
-function birthdayHtml(item){
-
-  const name =
-    item.name ||
-    "Игрок";
-
-
-  const birthday =
-    item.birthday ||
-    "";
-
-
-  const photo =
-    item.image_url ||
-    item.photo_url ||
-    "";
-
-
-  return `
-
-    <div class="card birthday">
-
-      ${
-        photo
-          ?
-          `<img
-            class="birthday-photo"
-            src="${escapeHtml(
-              publicImage(photo)
-            )}"
-            alt=""
-          >`
-          :
-          `<div
-            class="birthday-photo"
-          ></div>`
-      }
-
-
-      <div>
-
-        <div class="birthday-name">
-
-          ${escapeHtml(name)}
-
-        </div>
-
-
-        <div class="birthday-date">
-
-          🎂 ${escapeHtml(
-            formatDateOnly(
-              birthday
-            )
-          )}
-
-        </div>
-
-      </div>
-
-    </div>
-
-  `;
-
-}
-
-
-function formatDateOnly(value){
-
-  if(!value){
-    return "";
-  }
-
-
-  const parts =
-    String(value).split("-");
-
-
-  if(parts.length === 3){
-
-    return (
-      parts[2] +
-      "." +
-      parts[1] +
-      "." +
-      parts[0]
-    );
-
-  }
-
-
-  return String(value);
-
-}
-
-
-function renderBirthdays(){
-
-  const box =
-    document.getElementById(
-      "homeBirthdays"
-    );
-
-
-  if(
-    !birthdaysCache.length
-  ){
-
-    box.innerHTML =
-      `<div class="empty">
-
-        Именинников пока нет.
-
-      </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    birthdaysCache
-      .slice(0,3)
-      .map(
-        birthdayHtml
-      )
-      .join("");
-
-}
-
-
-/* =====================================================
-   EXTRA PAGES
-===================================================== */
-
-function showSection(type){
-
-  openPage("more");
-
-
-  const box =
-    document.getElementById(
-      "extraSection"
-    );
-
-
-  if(type === "achievements"){
-
-    box.innerHTML = `
-
-      <div class="section">
-
-        <h2>
-          🏆 Достижения
-        </h2>
-
-      </div>
-
-
-      <div style="
-        display:grid;
-        gap:12px;
-      ">
-
-        ${
-          achievementsCache.length
-            ?
-            achievementsCache
-              .map(
-                achievementHtml
-              )
-              .join("")
-            :
-            `<div class="empty">
-
-              Достижений пока нет.
-
-            </div>`
-        }
-
-      </div>
-
-    `;
-
-  }
-
-
-  if(type === "media"){
-
-    box.innerHTML = `
-
-      <div class="section">
-
-        <h2>
-          📸 Медиа
-        </h2>
-
-      </div>
-
-
-      <div style="
-        display:grid;
-        gap:12px;
-      ">
-
-        ${
-          albumsCache.length
-            ?
-            albumsCache
-              .map(
-                albumHtml
-              )
-              .join("")
-            :
-            `<div class="empty">
-
-              Альбомов пока нет.
-
-            </div>`
-        }
-
-      </div>
-
-    `;
-
-  }
-
-
-  if(type === "birthdays"){
-
-    box.innerHTML = `
-
-      <div class="section">
-
-        <h2>
-          🎂 Именинники
-        </h2>
-
-      </div>
-
-
-      <div style="
-        display:grid;
-        gap:10px;
-      ">
-
-        ${
-          birthdaysCache.length
-            ?
-            birthdaysCache
-              .map(
-                birthdayHtml
-              )
-              .join("")
-            :
-            `<div class="empty">
-
-              Именинников пока нет.
-
-            </div>`
-        }
-
-      </div>
-
-    `;
-
-  }
-
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
-
-}
-
-
-/* =====================================================
-   INIT
-===================================================== */
-
-async function init(){
-
-  console.log(
-    "ХК Челны 2011: запуск сайта"
-  );
-
-
-  const loaders = [
-
-    ["Дизайн",loadDesign],
-
-    ["Команды",loadTeams],
-
-    ["Матчи",loadMatches],
-
-    ["Новости",loadNews],
-
-    ["Игроки",loadPlayers],
-
-    ["Таблица",loadStandings],
-
-    ["Достижения",loadAchievements],
-
-    ["Медиа",loadAlbums],
-
-    ["Именинники",loadBirthdays]
-
-  ];
-
-
-  for(
-    const [name,loader]
-    of loaders
-  ){
-
-    try{
-
-      console.log(
-        "Загрузка:",
-        name
-      );
-
-
-      await loader();
-
-
-      console.log(
-        "Готово:",
-        name
-      );
-
-    }catch(error){
-
-      console.error(
-        `Ошибка загрузки ${name}:`,
-        error
-      );
-
-    }
-
-  }
-
-
-  console.log(
-    "ХК Челны 2011: сайт загружен"
-  );
-
-}
-
-
 document.addEventListener(
-  "DOMContentLoaded",
-  init
-);
+    "DOMContentLoaded",
+    async () => {
 
+        if (
+            typeof initializeSite ===
+            "function"
+        ) {
+            await initializeSite();
+        }
 
-/* =====================================================
-   AUTO REFRESH
-===================================================== */
-
-setInterval(
-  async () => {
-
-    try{
-
-      await loadDesign();
-
-      await loadTeams();
-
-      await loadMatches();
-
-      await loadNews();
-
-      await loadAchievements();
-
-      await loadAlbums();
-
-      await loadBirthdays();
-
-    }catch(error){
-
-      console.error(
-        "Auto refresh:",
-        error
-      );
+        if (
+            typeof initHomePage ===
+            "function"
+        ) {
+            await initHomePage();
+        }
 
     }
-
-  },
-  60000
 );
 
 </script>
