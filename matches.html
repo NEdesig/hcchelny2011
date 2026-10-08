@@ -90,21 +90,63 @@ text-transform:uppercase;
 }
 
 .teams{
-font-size:18px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+margin-top:14px;
+}
+
+.team{
+width:45%;
+display:flex;
+flex-direction:column;
+align-items:center;
+text-align:center;
+}
+
+.team-logo{
+width:55px;
+height:55px;
+object-fit:contain;
+margin-bottom:7px;
+}
+
+.team-logo.empty{
+display:none;
+}
+
+.team-name{
+font-size:17px;
 font-weight:800;
-margin-top:8px;
+line-height:1.15;
+}
+
+.team-city{
+font-size:11px;
+color:var(--muted);
+margin-top:4px;
+}
+
+.vs{
+font-size:12px;
+font-weight:900;
+color:var(--muted);
+flex-shrink:0;
 }
 
 .score{
 font-size:29px;
 font-weight:900;
-margin-top:9px;
+text-align:center;
+margin-top:14px;
 }
 
 .muted{
 color:var(--muted);
 font-size:13px;
 margin-top:7px;
+text-align:center;
 }
 
 .bottom{
@@ -136,6 +178,23 @@ font-weight:800;
 display:block;
 font-size:21px;
 margin-bottom:4px;
+}
+
+@media(max-width:430px){
+
+.team-logo{
+width:48px;
+height:48px;
+}
+
+.team-name{
+font-size:15px;
+}
+
+.team-city{
+font-size:10px;
+}
+
 }
 </style>
 </head>
@@ -263,26 +322,22 @@ const s=a[0];
 const r=document.documentElement.style;
 
 if(s.primary_color)r.setProperty("--primary",s.primary_color);
-
 if(s.secondary_color)r.setProperty("--secondary",s.secondary_color);
-
 if(s.background_color)r.setProperty("--bg",s.background_color);
-
 if(s.card_color)r.setProperty("--card",s.card_color);
-
 if(s.text_color)r.setProperty("--text",s.text_color);
-
 if(s.muted_text_color)r.setProperty("--muted",s.muted_text_color);
-
 if(s.button_color)r.setProperty("--button",s.button_color);
-
 if(s.border_color)r.setProperty("--border",s.border_color);
-
 if(s.border_radius)r.setProperty("--radius",s.border_radius+"px");
 
 if(s.site_name){
+
 document.title=s.site_name+" — Матчи";
-document.getElementById("siteName").textContent=s.site_name;
+
+document.getElementById("siteName").textContent=
+s.site_name;
+
 }
 
 if(s.logo_url)
@@ -296,6 +351,155 @@ document.body.style.backgroundImage=
 `url("${s.background_image}")`;
 
 }
+
+
+/* =========================
+   РЕЕСТР КОМАНД
+========================= */
+
+let teams=[];
+
+let teamsMap=new Map();
+
+async function loadTeams(){
+
+try{
+
+const data=await getData(
+"teams",
+"&order=name.asc"
+);
+
+if(!Array.isArray(data)){
+
+teams=[];
+teamsMap=new Map();
+
+return;
+
+}
+
+teams=data;
+
+teamsMap=new Map(
+teams.map(team=>[
+String(team.id),
+team
+])
+);
+
+}catch(error){
+
+console.log("Реестр команд пока недоступен");
+
+teams=[];
+teamsMap=new Map();
+
+}
+
+}
+
+function getTeam(id){
+
+if(
+id===null ||
+id===undefined ||
+id===""
+){
+
+return null;
+
+}
+
+return teamsMap.get(String(id))||null;
+
+}
+
+function findTeamByName(name){
+
+if(!name)return null;
+
+const search=String(name)
+.trim()
+.toLowerCase();
+
+return teams.find(team=>
+String(team.name||"")
+.trim()
+.toLowerCase()===search
+)||null;
+
+}
+
+function findChelnyTeam(){
+
+return teams.find(team=>
+String(team.name||"")
+.toLowerCase().includes("челны")
+)||null;
+
+}
+
+function teamInfo(team,fallbackName){
+
+if(team){
+
+return {
+
+name:team.name||fallbackName||"Команда",
+
+city:team.city||"",
+
+logo:team.logo_url||""
+
+};
+
+}
+
+return {
+
+name:fallbackName||"Команда",
+
+city:"",
+
+logo:""
+
+};
+
+}
+
+function teamHTML(team){
+
+const logo=team.logo
+? `<img class="team-logo" src="${esc(team.logo)}" alt="">`
+: "";
+
+return `
+
+<div class="team">
+
+${logo}
+
+<div class="team-name">
+${esc(team.name)}
+</div>
+
+${
+team.city
+? `<div class="team-city">${esc(team.city)}</div>`
+: ""
+}
+
+</div>
+
+`;
+
+}
+
+
+/* =========================
+   МАТЧИ
+========================= */
 
 async function load(){
 
@@ -317,42 +521,140 @@ return;
 
 box.innerHTML=data.map(m=>{
 
+let team1;
+let team2;
+
+
+/*
+  Новый вариант:
+  home_team_id / away_team_id
+*/
+
+const homeTeam=
+getTeam(m.home_team_id);
+
+const awayTeam=
+getTeam(m.away_team_id);
+
+if(homeTeam || awayTeam){
+
+team1=teamInfo(
+homeTeam,
+"ХК Челны"
+);
+
+team2=teamInfo(
+awayTeam,
+m.opponent||"Соперник"
+);
+
+}else{
+
+/*
+  Совместимость со старой структурой
+*/
+
 const home=
 m.home===true ||
 String(m.home).toLowerCase()==="true";
 
-const team1=home?
-"ХК Челны":
-m.opponent||"Соперник";
+if(home){
 
-const team2=home?
-m.opponent||"Соперник":
-"ХК Челны";
+team1=teamInfo(
+findChelnyTeam(),
+"ХК Челны"
+);
+
+team2=teamInfo(
+findTeamByName(m.opponent),
+m.opponent||"Соперник"
+);
+
+}else{
+
+team1=teamInfo(
+findTeamByName(m.opponent),
+m.opponent||"Соперник"
+);
+
+team2=teamInfo(
+findChelnyTeam(),
+"ХК Челны"
+);
+
+}
+
+}
+
+let score="— : —";
+
+if(
+m.score!==null &&
+m.score!==undefined &&
+m.score!==""
+){
+
+score=m.score;
+
+}else if(
+m.home_score!==null &&
+m.home_score!==undefined &&
+m.away_score!==null &&
+m.away_score!==undefined
+){
+
+score=
+m.home_score+
+" : "+
+m.away_score;
+
+}
 
 return `
 
 <div class="card">
 
 <div class="date">
+
 ${esc(dateRu(m.date))}
+
 ${m.time?" · "+esc(m.time):""}
+
 </div>
 
 <div class="teams">
-${esc(team1)}
+
+${teamHTML(team1)}
+
+<div class="vs">
+VS
 </div>
 
-<div class="teams">
-${esc(team2)}
+${teamHTML(team2)}
+
 </div>
 
 <div class="score">
-${esc(m.score||"— : —")}
+${esc(score)}
 </div>
 
-<div class="muted">
-${esc(m.status||"")}
-</div>
+${
+m.tournament
+? `<div class="muted">${esc(m.tournament)}</div>`
+: ""
+}
+
+${
+m.status
+? `<div class="muted">${esc(m.status)}</div>`
+: ""
+}
+
+${
+m.venue
+? `<div class="muted">${esc(m.venue)}</div>`
+: ""
+}
 
 </div>
 
@@ -362,8 +664,18 @@ ${esc(m.status||"")}
 
 }
 
-settings();
-load();
+
+async function init(){
+
+await settings();
+
+await loadTeams();
+
+await load();
+
+}
+
+init();
 
 </script>
 
