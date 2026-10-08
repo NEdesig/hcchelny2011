@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<title>Магазин — ХК Челны 2011</title>
+
+<link id="favicon"
+rel="icon"
+href="logo.svg">
+
+<style>
+
+:root{
+--primary:#000056;
+--secondary:#0875dc;
+--bg:#050b22;
+--card:#0d1738;
+--text:#fff;
+--muted:#aab5d5;
+--button:#ffcd00;
+--border:#26345f;
+--radius:16px;
+}
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:var(--bg);
+color:var(--text);
+}
+
+header{
+padding:18px;
+background:linear-gradient(
+135deg,
+var(--primary),
+var(--secondary)
+);
+border-radius:0 0 25px 25px;
+}
+
+.header{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.logo{
+width:55px;
+height:55px;
+background:#fff;
+border-radius:50%;
+object-fit:contain;
+}
+
+.club{
+font-size:20px;
+font-weight:900;
+}
+
+.season{
+font-size:12px;
+opacity:.7;
+}
+
+main{
+max-width:900px;
+margin:auto;
+padding:18px 14px 100px;
+}
+
+.label{
+font-size:11px;
+color:var(--muted);
+letter-spacing:1.5px;
+}
+
+h1{
+font-size:30px;
+margin:8px 0 18px;
+}
+
+.search{
+width:100%;
+padding:14px;
+border-radius:12px;
+border:1px solid var(--border);
+background:var(--card);
+color:var(--text);
+font-size:15px;
+outline:none;
+margin-bottom:12px;
+}
+
+.categories{
+display:flex;
+gap:8px;
+overflow-x:auto;
+padding-bottom:10px;
+}
+
+.category{
+border:1px solid var(--border);
+background:var(--card);
+color:var(--muted);
+border-radius:20px;
+padding:9px 14px;
+white-space:nowrap;
+cursor:pointer;
+}
+
+.category.active{
+background:var(--button);
+color:#111;
+border-color:var(--button);
+font-weight:800;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+}
+
+.product{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:var(--radius);
+overflow:hidden;
+cursor:pointer;
+transition:.2s;
+}
+
+.product:active{
+transform:scale(.97);
+}
+
+.product-image{
+width:100%;
+height:170px;
+object-fit:cover;
+background:#111a38;
+}
+
+.product-info{
+padding:13px;
+}
+
+.product-title{
+font-weight:900;
+font-size:16px;
+margin-bottom:7px;
+}
+
+.product-category{
+font-size:11px;
+color:var(--muted);
+margin-bottom:8px;
+}
+
+.price{
+font-size:19px;
+font-weight:900;
+color:var(--button);
+}
+
+.empty{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:var(--radius);
+padding:25px;
+text-align:center;
+color:var(--muted);
+grid-column:1/-1;
+}
+
+/* МОДАЛЬНОЕ ОКНО */
+
+.modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.75);
+display:none;
+align-items:flex-end;
+justify-content:center;
+z-index:100;
+}
+
+.modal.show{
+display:flex;
+}
+
+.modal-box{
+width:100%;
+max-width:650px;
+max-height:90vh;
+overflow-y:auto;
+background:var(--card);
+border-radius:25px 25px 0 0;
+padding:18px;
+animation:up .25s ease;
+}
+
+@keyframes up{
+from{
+transform:translateY(100%);
+}
+to{
+transform:translateY(0);
+}
+}
+
+.modal-image{
+width:100%;
+max-height:330px;
+object-fit:contain;
+border-radius:15px;
+background:#111a38;
+}
+
+.close{
+float:right;
+font-size:25px;
+cursor:pointer;
+}
+
+.modal-title{
+font-size:25px;
+font-weight:900;
+margin:15px 0 5px;
+}
+
+.modal-price{
+font-size:24px;
+font-weight:900;
+color:var(--button);
+margin:10px 0;
+}
+
+.modal-description{
+color:var(--muted);
+font-size:15px;
+line-height:1.6;
+}
+
+.seller{
+margin-top:18px;
+padding:14px;
+border:1px solid var(--border);
+border-radius:13px;
+}
+
+.seller-name{
+font-weight:900;
+margin-bottom:5px;
+}
+
+.seller-contact{
+color:var(--button);
+word-break:break-word;
+}
+
+.bottom{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:72px;
+background:var(--card);
+border-top:1px solid var(--border);
+display:flex;
+justify-content:space-around;
+align-items:center;
+z-index:20;
+}
+
+.bottom a{
+color:var(--muted);
+text-decoration:none;
+font-size:10px;
+text-align:center;
+}
+
+.bottom a.active{
+color:var(--button);
+font-weight:800;
+}
+
+.icon{
+display:block;
+font-size:21px;
+margin-bottom:4px;
+}
+
+@media(max-width:500px){
+
+.products{
+grid-template-columns:repeat(2,1fr);
+}
+
+.product-image{
+height:145px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="header">
+
+<img id="logo"
+class="logo"
+src="logo.svg">
+
+<div>
+
+<div id="siteName"
+class="club">
+ХК ЧЕЛНЫ 2011
+</div>
+
+<div class="season">
+МАГАЗИН
+</div>
+
+</div>
+
+</div>
+
+</header>
+
+<main>
+
+<div class="label">
+ХК ЧЕЛНЫ 2011
+</div>
+
+<h1>Магазин</h1>
+
+<input
+id="search"
+class="search"
+placeholder="🔎 Найти товар..."
+>
+
+<div id="categories"
+class="categories">
+</div>
+
+<div id="products"
+class="products">
+
+<div class="empty">
+Загрузка товаров...
+</div>
+
+</div>
+
+</main>
+
+<!-- МОДАЛЬНОЕ ОКНО ТОВАРА -->
+
+<div id="modal"
+class="modal"
+onclick="closeOutside(event)">
+
+<div class="modal-box">
+
+<div
+class="close"
+onclick="closeModal()">
+×
+</div>
+
+<img
+id="modalImage"
+class="modal-image"
+src=""
+>
+
+<div
+id="modalTitle"
+class="modal-title">
+</div>
+
+<div
+id="modalPrice"
+class="modal-price">
+</div>
+
+<div
+id="modalDescription"
+class="modal-description">
+</div>
+
+<div class="seller">
+
+<div class="seller-name">
+Продавец
+</div>
+
+<div
+id="modalSeller"
+class="seller-contact">
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<nav class="bottom">
+
+<a href="index.html">
+<span class="icon">⌂</span>
+Главная
+</a>
+
+<a href="matches.html">
+<span class="icon">🏒</span>
+Матчи
+</a>
+
+<a href="roster.html">
+<span class="icon">👥</span>
+Состав
+</a>
+
+<a href="standings.html">
+<span class="icon">📊</span>
+Таблица
+</a>
+
+<a class="active" href="shop.html">
+<span class="icon">🛍️</span>
+Магазин
+</a>
+
+</nav>
+
+<script>
+
+const SUPABASE_URL=
+"https://jxlbojosxaaqnyuzohnw.supabase.co";
+
+const SUPABASE_KEY=
+"sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
+
+const headers={
+apikey:SUPABASE_KEY,
+Authorization:"Bearer "+SUPABASE_KEY
+};
+
+let allProducts=[];
+let currentCategory="Все";
+
+async function getData(table,query=""){
+
+const r=await fetch(
+SUPABASE_URL+
+"/rest/v1/"+
+table+
+"?select=*"+
+query,
+{headers}
+);
+
+if(!r.ok)
+throw new Error(r.status);
+
+return await r.json();
+
+}
+
+function esc(v){
+
+return String(v??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;");
+
+}
+
+function price(v){
+
+if(v===null||v===undefined||v==="")
+return "Цена не указана";
+
+return Number(v).toLocaleString(
+"ru-RU"
+)+" ₽";
+
+}
+
+async function loadSettings(){
+
+try{
+
+const a=
+await getData("settings","&limit=1");
+
+if(!a.length)return;
+
+const s=a[0];
+
+const r=
+document.documentElement.style;
+
+const colors={
+primary_color:"--primary",
+secondary_color:"--secondary",
+background_color:"--bg",
+card_color:"--card",
+text_color:"--text",
+muted_text_color:"--muted",
+button_color:"--button",
+border_color:"--border"
+};
+
+for(const key in colors){
+
+if(s[key])
+r.setProperty(
+colors[key],
+s[key]
+);
+
+}
+
+if(s.border_radius)
+r.setProperty(
+"--radius",
+s.border_radius+"px"
+);
+
+if(s.site_name){
+
+document.title=
+s.site_name+" — Магазин";
+
+document.getElementById(
+"siteName"
+).textContent=s.site_name;
+
+}
+
+if(s.logo_url)
+document.getElementById("logo").src=
+s.logo_url;
+
+if(s.favicon_url)
+document.getElementById("favicon").href=
+s.favicon_url;
+
+if(s.background_image)
+document.body.style.backgroundImage=
+`url("${s.background_image}")`;
+
+}catch(e){
+
+console.log(e);
+
+}
+
+}
+
+function renderCategories(){
+
+const categories=[
+"Все",
+...new Set(
+allProducts
+.map(p=>p.category)
+.filter(Boolean)
+)
+];
+
+document.getElementById(
+"categories"
+).innerHTML=
+categories.map(c=>`
+
+<button
+class="category ${c===currentCategory?"active":""}"
+onclick="selectCategory('${esc(c)}')">
+
+${esc(c)}
+
+</button>
+
+`).join("");
+
+}
+
+function renderProducts(){
+
+const search=
+document.getElementById("search")
+.value
+.toLowerCase()
+.trim();
+
+let products=
+allProducts.filter(p=>
+p.is_available!==false
+);
+
+if(currentCategory!=="Все"){
+
+products=
+products.filter(p=>
+p.category===currentCategory
+);
+
+}
+
+if(search){
+
+products=
+products.filter(p=>
+String(p.title||"")
+.toLowerCase()
+.includes(search) ||
+
+String(p.description||"")
+.toLowerCase()
+.includes(search)
+);
+
+}
+
+const box=
+document.getElementById("products");
+
+if(!products.length){
+
+box.innerHTML=`
+<div class="empty">
+Ничего не найдено
+</div>
+`;
+
+return;
+
+}
+
+box.innerHTML=
+products.map(p=>`
+
+<div
+class="product"
+onclick="openProduct(${p.id})">
+
+<img
+class="product-image"
+src="${esc(
+p.image_url||"logo.svg"
+)}"
+onerror="this.src='logo.svg'"
+>
+
+<div class="product-info">
+
+<div class="product-category">
+${esc(p.category||"Товар")}
+</div>
+
+<div class="product-title">
+${esc(p.title)}
+</div>
+
+<div class="price">
+${price(p.price)}
+</div>
+
+</div>
+
+</div>
+
+`).join("");
+
+}
+
+function selectCategory(category){
+
+currentCategory=category;
+
+renderCategories();
+renderProducts();
+
+}
+
+function openProduct(id){
+
+const p=
+allProducts.find(x=>x.id==id);
+
+if(!p)return;
+
+document.getElementById(
+"modalImage"
+).src=
+p.image_url||"logo.svg";
+
+document.getElementById(
+"modalTitle"
+).textContent=
+p.title||"Товар";
+
+document.getElementById(
+"modalPrice"
+).textContent=
+price(p.price);
+
+document.getElementById(
+"modalDescription"
+).textContent=
+p.description||
+"Описание товара отсутствует.";
+
+document.getElementById(
+"modalSeller"
+).innerHTML=
+`
+${esc(p.seller_name||"Продавец")}
+<br>
+${esc(p.seller_contact||"Контакт не указан")}
+`;
+
+document.getElementById(
+"modal"
+).classList.add("show");
+
+}
+
+function closeModal(){
+
+document.getElementById(
+"modal"
+).classList.remove("show");
+
+}
+
+function closeOutside(e){
+
+if(e.target.id==="modal")
+closeModal();
+
+}
+
+document.getElementById(
+"search"
+).addEventListener(
+"input",
+renderProducts
+);
+
+async function loadProducts(){
+
+try{
+
+allProducts=
+await getData(
+"products",
+"&order=id.desc"
+);
+
+renderCategories();
+renderProducts();
+
+}catch(e){
+
+console.error(e);
+
+document.getElementById(
+"products"
+).innerHTML=
+`
+<div class="empty">
+Ошибка загрузки товаров
+</div>
+`;
+
+}
+
+}
+
+loadSettings();
+loadProducts();
+
+</script>
+
+</body>
+
+</html>
