@@ -1,620 +1,467 @@
+
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width,initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Таблица — ХК Челны 2011</title>
-
-<link id="favicon"
-rel="icon"
-href="logo.svg">
+<link id="favicon" rel="icon" href="logo.svg">
 
 <style>
-
 :root{
---primary:#000056;
---secondary:#0875dc;
---bg:#050b22;
---card:#0d1738;
---text:#fff;
---muted:#aab5d5;
---button:#ffcd00;
---border:#26345f;
---radius:16px;
+  --primary:#000056;
+  --secondary:#0875dc;
+  --bg:#050b22;
+  --card:#0d1738;
+  --text:#fff;
+  --muted:#aab5d5;
+  --button:#ffcd00;
+  --border:#26345f;
+  --radius:16px;
 }
 
-*{
-box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
-margin:0;
-font-family:Arial,sans-serif;
-background:var(--bg);
-color:var(--text);
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
 header{
-padding:18px;
-background:linear-gradient(
-135deg,
-var(--primary),
-var(--secondary)
-);
-border-radius:0 0 25px 25px;
+  padding:18px;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  border-radius:0 0 25px 25px;
 }
 
 .header{
-display:flex;
-align-items:center;
-gap:12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
 .logo{
-width:55px;
-height:55px;
-background:white;
-border-radius:50%;
-object-fit:contain;
+  width:55px;
+  height:55px;
+  background:white;
+  border-radius:50%;
+  object-fit:contain;
 }
 
-.club{
-font-size:20px;
-font-weight:900;
-}
-
-.season{
-font-size:12px;
-opacity:.7;
-}
+.club{font-size:20px;font-weight:900}
+.season{font-size:12px;opacity:.7}
 
 main{
-padding:18px 12px 100px;
-max-width:900px;
-margin:auto;
+  padding:18px 12px 100px;
+  max-width:900px;
+  margin:auto;
 }
 
 .label{
-font-size:11px;
-color:var(--muted);
-letter-spacing:1.5px;
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:1.5px;
 }
 
 h1{
-font-size:30px;
-margin:8px 0 18px;
+  font-size:30px;
+  margin:8px 0 18px;
 }
 
 .table-wrap{
-overflow-x:auto;
-background:var(--card);
-border:1px solid var(--border);
-border-radius:var(--radius);
+  overflow-x:auto;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
 }
 
 table{
-border-collapse:collapse;
-width:100%;
-min-width:650px;
+  border-collapse:collapse;
+  width:100%;
+  min-width:650px;
 }
 
 th,td{
-padding:12px 8px;
-border-bottom:1px solid var(--border);
-text-align:center;
-font-size:12px;
+  padding:12px 8px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+  font-size:12px;
 }
 
 th{
-font-size:10px;
-color:var(--muted);
+  font-size:10px;
+  color:var(--muted);
+  white-space:nowrap;
 }
 
+tbody tr:last-child td{border-bottom:none}
+
 td:nth-child(2){
-text-align:left;
-font-weight:800;
+  text-align:left;
+  font-weight:800;
 }
 
 .team-cell{
-display:flex;
-align-items:center;
-gap:9px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:150px;
 }
 
 .team-logo{
-width:32px;
-height:32px;
-object-fit:contain;
-flex-shrink:0;
+  width:32px;
+  height:32px;
+  object-fit:contain;
+  flex-shrink:0;
 }
 
 .team-info{
-display:flex;
-flex-direction:column;
-gap:2px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
 }
 
 .team-name{
-font-weight:800;
-line-height:1.1;
+  font-weight:800;
+  line-height:1.2;
+  overflow-wrap:anywhere;
 }
 
 .team-city{
-font-size:10px;
-font-weight:400;
-color:var(--muted);
+  font-size:10px;
+  font-weight:400;
+  color:var(--muted);
 }
 
 .points{
-font-weight:900;
-font-size:15px;
+  font-weight:900;
+  font-size:15px;
+}
+
+.message{
+  padding:24px 12px;
+  text-align:center;
+  color:var(--muted);
+  font-weight:400;
 }
 
 .bottom{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-height:72px;
-background:var(--card);
-border-top:1px solid var(--border);
-display:flex;
-justify-content:space-around;
-align-items:center;
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:72px;
+  background:var(--card);
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  z-index:10;
 }
 
 .bottom a{
-color:var(--muted);
-text-decoration:none;
-font-size:10px;
-text-align:center;
+  color:var(--muted);
+  text-decoration:none;
+  font-size:10px;
+  text-align:center;
 }
 
 .bottom a.active{
-color:var(--button);
-font-weight:800;
+  color:var(--button);
+  font-weight:800;
 }
 
 .icon{
-display:block;
-font-size:21px;
-margin-bottom:4px;
+  display:block;
+  font-size:21px;
+  margin-bottom:4px;
 }
 
+@media(max-width:430px){
+  th,td{padding:11px 7px}
+  .team-logo{width:30px;height:30px}
+}
 </style>
-
 </head>
 
 <body>
 
 <header>
-
-<div class="header">
-
-<img id="logo"
-class="logo"
-src="logo.svg">
-
-<div>
-
-<div id="siteName"
-class="club">
-ХК ЧЕЛНЫ 2011
-</div>
-
-<div class="season">
-СЕЗОН 2026/27
-</div>
-
-</div>
-
-</div>
-
+  <div class="header">
+    <img id="logo" class="logo" src="logo.svg" alt="Логотип клуба">
+    <div>
+      <div id="siteName" class="club">ХК ЧЕЛНЫ 2011</div>
+      <div class="season">СЕЗОН 2026/27</div>
+    </div>
+  </div>
 </header>
 
 <main>
+  <div class="label">ПФО · СЕЗОН 2026/27</div>
+  <h1>Таблица</h1>
 
-<div class="label">
-ПФО · СЕЗОН 2026/27
-</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>КОМАНДА</th>
+          <th>И</th>
+          <th>В</th>
+          <th>ВО</th>
+          <th>П</th>
+          <th>ПО</th>
+          <th>ЗШ</th>
+          <th>ЗП</th>
+          <th>О</th>
+        </tr>
+      </thead>
 
-<h1>Таблица</h1>
-
-<div class="table-wrap">
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>#</th>
-<th>КОМАНДА</th>
-<th>И</th>
-<th>В</th>
-<th>ВО</th>
-<th>П</th>
-<th>ПО</th>
-<th>ЗШ</th>
-<th>ЗП</th>
-<th>О</th>
-
-</tr>
-
-</thead>
-
-<tbody id="standings">
-
-<tr>
-
-<td colspan="10">
-Загрузка...
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
+      <tbody id="standings">
+        <tr>
+          <td colspan="10" class="message">Загрузка таблицы...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </main>
 
 <nav class="bottom">
-
-<a href="index.html">
-<span class="icon">⌂</span>
-Главная
-</a>
-
-<a href="matches.html">
-<span class="icon">🏒</span>
-Матчи
-</a>
-
-<a href="roster.html">
-<span class="icon">👥</span>
-Состав
-</a>
-
-<a class="active" href="standings.html">
-<span class="icon">📊</span>
-Таблица
-</a>
-
-<a href="news.html">
-<span class="icon">📰</span>
-Новости
-</a>
-
+  <a href="index.html">
+    <span class="icon">⌂</span>
+    Главная
+  </a>
+  <a href="matches.html">
+    <span class="icon">🏒</span>
+    Матчи
+  </a>
+  <a href="roster.html">
+    <span class="icon">👥</span>
+    Состав
+  </a>
+  <a class="active" href="standings.html">
+    <span class="icon">📊</span>
+    Таблица
+  </a>
+  <a href="news.html">
+    <span class="icon">📰</span>
+    Новости
+  </a>
 </nav>
 
 <script>
+const SUPABASE_URL =
+  "https://jxlbojosxaaqnyuzohnw.supabase.co";
 
-const SUPABASE_URL=
-"https://jxlbojosxaaqnyuzohnw.supabase.co";
+const SUPABASE_KEY =
+  "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
 
-const SUPABASE_KEY=
-"sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
-
-const headers={
-apikey:SUPABASE_KEY,
-Authorization:"Bearer "+SUPABASE_KEY
+const headers = {
+  apikey: SUPABASE_KEY,
+  Authorization: "Bearer " + SUPABASE_KEY
 };
 
-async function getData(table,query=""){
+let teams = [];
+let teamsMap = new Map();
 
-const r=await fetch(
-SUPABASE_URL+
-"/rest/v1/"+
-table+
-"?select=*"+
-query,
-{headers}
-);
+async function getData(table, query = "") {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/${table}?select=*${query}`,
+    { headers }
+  );
 
-return await r.json();
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `Ошибка загрузки ${table}`);
+  }
 
+  return await response.json();
 }
 
-function esc(v){
-
-return String(v??"")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;");
-
+function esc(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
-async function settings(){
+/* НАСТРОЙКИ САЙТА */
 
-const a=
-await getData("settings","&limit=1");
+async function settings() {
+  try {
+    const data = await getData("settings", "&limit=1");
+    if (!data.length) return;
 
-if(!a.length)return;
+    const s = data[0];
+    const root = document.documentElement.style;
 
-const s=a[0];
+    if (s.primary_color) root.setProperty("--primary", s.primary_color);
+    if (s.secondary_color) root.setProperty("--secondary", s.secondary_color);
+    if (s.background_color) root.setProperty("--bg", s.background_color);
+    if (s.card_color) root.setProperty("--card", s.card_color);
+    if (s.text_color) root.setProperty("--text", s.text_color);
+    if (s.muted_text_color) root.setProperty("--muted", s.muted_text_color);
+    if (s.button_color) root.setProperty("--button", s.button_color);
+    if (s.border_color) root.setProperty("--border", s.border_color);
 
-const r=document.documentElement.style;
+    if (s.border_radius !== null && s.border_radius !== undefined) {
+      root.setProperty("--radius", Number(s.border_radius) + "px");
+    }
 
-if(s.primary_color)
-r.setProperty("--primary",s.primary_color);
+    if (s.site_name) {
+      document.title = s.site_name + " — Таблица";
+      document.getElementById("siteName").textContent = s.site_name;
+    }
 
-if(s.secondary_color)
-r.setProperty("--secondary",s.secondary_color);
+    if (s.logo_url) {
+      document.getElementById("logo").src = s.logo_url;
+    }
 
-if(s.background_color)
-r.setProperty("--bg",s.background_color);
+    if (s.favicon_url) {
+      document.getElementById("favicon").href = s.favicon_url;
+    }
 
-if(s.card_color)
-r.setProperty("--card",s.card_color);
-
-if(s.text_color)
-r.setProperty("--text",s.text_color);
-
-if(s.muted_text_color)
-r.setProperty("--muted",s.muted_text_color);
-
-if(s.button_color)
-r.setProperty("--button",s.button_color);
-
-if(s.border_color)
-r.setProperty("--border",s.border_color);
-
-if(s.border_radius)
-r.setProperty("--radius",s.border_radius+"px");
-
-if(s.site_name){
-
-document.title=
-s.site_name+" — Таблица";
-
-document.getElementById(
-"siteName"
-).textContent=s.site_name;
-
+    if (s.background_image) {
+      document.body.style.backgroundImage =
+        `url("${s.background_image}")`;
+      document.body.style.backgroundSize = "cover";
+      document.body.style.backgroundAttachment = "fixed";
+    }
+  } catch (error) {
+    console.error("Ошибка загрузки настроек:", error);
+  }
 }
 
-if(s.logo_url)
-document.getElementById("logo").src=
-s.logo_url;
+/* РЕЕСТР КОМАНД */
 
-if(s.favicon_url)
-document.getElementById("favicon").href=
-s.favicon_url;
+async function loadTeams() {
+  try {
+    const data = await getData("teams", "&order=name.asc");
 
-if(s.background_image)
-document.body.style.backgroundImage=
-`url("${s.background_image}")`;
+    teams = Array.isArray(data) ? data : [];
 
+    teamsMap = new Map(
+      teams.map(team => [String(team.id), team])
+    );
+  } catch (error) {
+    console.error("Ошибка загрузки реестра команд:", error);
+    teams = [];
+    teamsMap = new Map();
+  }
 }
 
+function getTeam(id) {
+  if (id === null || id === undefined || id === "") {
+    return null;
+  }
 
-/* =========================
-   РЕЕСТР КОМАНД
-========================= */
-
-let teams=[];
-
-let teamsMap=new Map();
-
-async function loadTeams(){
-
-try{
-
-const data=await getData(
-"teams",
-"&order=name.asc"
-);
-
-if(!Array.isArray(data)){
-
-teams=[];
-teamsMap=new Map();
-
-return;
-
+  return teamsMap.get(String(id)) || null;
 }
 
-teams=data;
+function findTeamByName(name) {
+  if (!name) return null;
 
-teamsMap=new Map(
-teams.map(team=>[
-String(team.id),
-team
-])
-);
+  const search = String(name).trim().toLowerCase();
 
-}catch(error){
-
-console.log("Реестр команд пока недоступен");
-
-teams=[];
-teamsMap=new Map();
-
+  return teams.find(team =>
+    String(team.name || "").trim().toLowerCase() === search
+  ) || null;
 }
 
+/* ОТОБРАЖЕНИЕ КОМАНД */
+
+function teamHTML(row) {
+  // Сначала ищем команду по ID, затем используем старое название.
+  const team =
+    getTeam(row.team_id) ||
+    findTeamByName(row.team);
+
+  const name = team?.name || row.team || "Команда";
+  const city = team?.city || "";
+  const logo = team?.logo_url || "";
+
+  return `
+    <div class="team-cell">
+      ${
+        logo
+          ? `<img class="team-logo"
+                  src="${esc(logo)}"
+                  alt=""
+                  loading="lazy"
+                  onerror="this.style.display='none'">`
+          : ""
+      }
+
+      <div class="team-info">
+        <div class="team-name">${esc(name)}</div>
+        ${city ? `<div class="team-city">${esc(city)}</div>` : ""}
+      </div>
+    </div>
+  `;
 }
 
-function getTeam(id){
+/* ТУРНИРНАЯ ТАБЛИЦА */
 
-if(
-id===null ||
-id===undefined ||
-id===""
-){
+async function load() {
+  const box = document.getElementById("standings");
 
-return null;
+  try {
+    const data = await getData(
+      "standings",
+      "&order=position.asc"
+    );
 
+    if (!Array.isArray(data) || !data.length) {
+      box.innerHTML = `
+        <tr>
+          <td colspan="10" class="message">
+            Таблица пока не заполнена.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    box.innerHTML = data.map(row => `
+      <tr>
+        <td>${esc(row.position ?? "—")}</td>
+        <td>${teamHTML(row)}</td>
+        <td>${esc(row.games ?? 0)}</td>
+        <td>${esc(row.wins ?? 0)}</td>
+        <td>${esc(row.overtime_wins ?? 0)}</td>
+        <td>${esc(row.losses ?? 0)}</td>
+        <td>${esc(row.overtime_losses ?? 0)}</td>
+        <td>${esc(row.goals_for ?? 0)}</td>
+        <td>${esc(row.goals_against ?? 0)}</td>
+        <td class="points">${esc(row.points ?? 0)}</td>
+      </tr>
+    `).join("");
+
+  } catch (error) {
+    console.error("Ошибка загрузки таблицы:", error);
+
+    box.innerHTML = `
+      <tr>
+        <td colspan="10" class="message">
+          Не удалось загрузить таблицу.<br>
+          Попробуй обновить страницу позже.
+        </td>
+      </tr>
+    `;
+  }
 }
 
-return teamsMap.get(String(id))||null;
-
-}
-
-function findTeamByName(name){
-
-if(!name)return null;
-
-const search=String(name)
-.trim()
-.toLowerCase();
-
-return teams.find(team=>
-String(team.name||"")
-.trim()
-.toLowerCase()===search
-)||null;
-
-}
-
-
-/* =========================
-   ТАБЛИЦА
-========================= */
-
-function teamHTML(t){
-
-const team=getTeam(t.team_id);
-
-const name=
-team?.name ||
-t.team ||
-"Команда";
-
-const city=
-team?.city ||
-"";
-
-const logo=
-team?.logo_url ||
-"";
-
-return `
-
-<div class="team-cell">
-
-${
-logo
-? `<img
-class="team-logo"
-src="${esc(logo)}"
-alt="">`
-: ""
-}
-
-<div class="team-info">
-
-<div class="team-name">
-${esc(name)}
-</div>
-
-${
-city
-? `<div class="team-city">
-${esc(city)}
-</div>`
-: ""
-}
-
-</div>
-
-</div>
-
-`;
-
-}
-
-async function load(){
-
-const data=
-await getData(
-"standings",
-"&order=position.asc"
-);
-
-const box=
-document.getElementById("standings");
-
-if(!data.length){
-
-box.innerHTML=
-'<tr><td colspan="10">Таблица пока не заполнена</td></tr>';
-
-return;
-
-}
-
-box.innerHTML=data.map(t=>`
-
-<tr>
-
-<td>
-${esc(t.position)}
-</td>
-
-<td>
-${teamHTML(t)}
-</td>
-
-<td>
-${esc(t.games||0)}
-</td>
-
-<td>
-${esc(t.wins||0)}
-</td>
-
-<td>
-${esc(t.overtime_wins||0)}
-</td>
-
-<td>
-${esc(t.losses||0)}
-</td>
-
-<td>
-${esc(t.overtime_losses||0)}
-</td>
-
-<td>
-${esc(t.goals_for||0)}
-</td>
-
-<td>
-${esc(t.goals_against||0)}
-</td>
-
-<td class="points">
-${esc(t.points||0)}
-</td>
-
-</tr>
-
-`).join("");
-
-}
-
-
-async function init(){
-
-await settings();
-
-await loadTeams();
-
-await load();
-
+async function init() {
+  await settings();
+  await loadTeams();
+  await load();
 }
 
 init();
-
 </script>
 
 </body>
