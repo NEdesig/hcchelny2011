@@ -1,209 +1,296 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ХК Челны 2011</title>
+<link id="favicon" rel="icon" href="logo.svg">
 
 <style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
+:root{
+  --primary:#000056;
+  --secondary:#ffcd00;
+  --background:#f3f5fa;
+  --card:#ffffff;
+  --text:#10152b;
+  --muted:#737b91;
+  --button:#ffcd00;
+  --border:#e6e8ef;
+  --radius:18px;
+  --shadow:0 5px 20px rgba(21,32,74,.08);
 }
 
+*{box-sizing:border-box}
+
 body{
-    background:#06132f;
-    color:#fff;
-    font-family:Arial,sans-serif;
-    padding-bottom:80px;
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--background);
+  color:var(--text);
+  transition:.2s;
 }
 
 header{
-    background:#081b46;
-    padding:15px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    position:sticky;
-    top:0;
-    z-index:10;
-    border-bottom:1px solid #19376b;
+  background:linear-gradient(145deg,var(--primary),var(--secondary));
+  color:white;
+  padding:22px 16px 28px;
+  border-radius:0 0 26px 26px;
 }
 
-header img{
-    width:52px;
-    height:52px;
-    object-fit:contain;
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
 }
 
-.header-title h1{
-    font-size:20px;
+.logo{
+  width:54px;
+  height:54px;
+  border:2px solid white;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  flex-shrink:0;
+  background:white;
 }
 
-.header-title p{
-    font-size:12px;
-    color:#9fb1d5;
-    margin-top:4px;
+.logo img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
 }
 
-main{
-    max-width:700px;
-    margin:auto;
-    padding:16px;
+.club{
+  font-size:21px;
+  font-weight:900;
+  line-height:1.05;
 }
 
-.page{
-    display:none;
+.season{
+  font-size:12px;
+  opacity:.75;
+  margin-top:4px;
 }
 
-.page.active{
-    display:block;
+.menu{
+  font-size:26px;
 }
 
 .hero{
-    background:linear-gradient(135deg,#0b2b69,#07183c);
-    border-radius:20px;
-    padding:25px 20px;
-    margin-bottom:15px;
+  margin-top:24px;
 }
 
-.hero h2{
-    font-size:28px;
-    margin-bottom:8px;
+.label{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  opacity:.7;
 }
 
-.hero p{
-    color:#b9c8e8;
-    line-height:1.5;
+.hero h1{
+  font-size:34px;
+  margin:5px 0;
 }
 
-.card{
-    background:#0b1f49;
-    border:1px solid #19376b;
-    border-radius:16px;
-    padding:17px;
-    margin-bottom:15px;
-}
-
-.card h3{
-    margin-bottom:12px;
-}
-
-.match{
-    background:#081b46;
-    border-radius:15px;
-    padding:18px;
-    text-align:center;
-}
-
-.match-date{
-    color:#9fb1d5;
-    font-size:13px;
-    margin-bottom:10px;
+.next{
+  background:var(--card);
+  color:var(--text);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-top:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:var(--shadow);
 }
 
 .teams{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-}
-
-.team{
-    width:40%;
-    font-weight:bold;
+  font-size:17px;
+  font-weight:800;
 }
 
 .vs{
-    color:#ffcd00;
-    font-weight:bold;
+  font-size:12px;
+  color:var(--primary);
+  font-weight:900;
 }
 
-.position-title{
-    font-size:18px;
-    margin:22px 0 8px;
-    color:#ffcd00;
+main{
+  padding:18px 14px 90px;
 }
 
-.player{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    background:#081b46;
-    border-radius:12px;
-    padding:11px;
-    margin-bottom:7px;
+.section{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:18px 2px 12px;
 }
 
-.number{
-    width:43px;
-    height:43px;
-    background:#ffcd00;
-    color:#06132f;
-    border-radius:10px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    flex-shrink:0;
+.section h2{
+  font-size:21px;
+  margin:0;
 }
 
-.player-name{
-    font-weight:bold;
-    font-size:15px;
+.more{
+  font-size:12px;
+  color:var(--primary);
+  font-weight:700;
 }
 
-.player-position{
-    color:#9fb1d5;
-    font-size:12px;
-    margin-top:3px;
+.cards{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
 }
 
-.loading{
-    text-align:center;
-    color:#9fb1d5;
-    padding:25px 0;
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:16px;
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
 }
 
-.error{
-    background:#5b1825;
-    border:1px solid #a52b40;
-    border-radius:12px;
-    padding:15px;
-    color:#fff;
-    line-height:1.5;
+.card .big{
+  font-size:28px;
+  font-weight:900;
 }
 
-.bottom-nav{
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    height:70px;
-    background:#071936;
-    border-top:1px solid #19376b;
-    display:flex;
-    z-index:20;
+.muted{
+  color:var(--muted);
+  font-size:12px;
 }
 
-.bottom-nav button{
-    flex:1;
-    background:none;
-    border:none;
-    color:#9fb1d5;
-    font-size:11px;
+.result{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
 
-.bottom-nav button span{
-    display:block;
-    font-size:21px;
-    margin-bottom:3px;
+.score{
+  font-size:30px;
+  font-weight:900;
+  text-align:right;
 }
 
-.bottom-nav button.active{
-    color:#ffcd00;
+.status{
+  font-weight:800;
+  font-size:11px;
+  text-align:right;
+  margin-top:3px;
+}
+
+.news{
+  margin-top:12px;
+}
+
+.news h3{
+  margin:5px 0;
+  font-size:16px;
+}
+
+.date{
+  font-size:11px;
+  color:var(--muted);
+}
+
+.news-img{
+  width:100%;
+  max-height:180px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:8px;
+}
+
+.table-wrap{
+  overflow-x:auto;
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:500px;
+  font-size:12px;
+}
+
+th,td{
+  padding:11px 8px;
+  text-align:center;
+  border-bottom:1px solid var(--border);
+}
+
+th{
+  color:var(--muted);
+  font-size:10px;
+}
+
+td:first-child,
+th:first-child{
+  text-align:center;
+}
+
+.team-name{
+  text-align:left;
+  font-weight:800;
+}
+
+.place{
+  font-weight:900;
+}
+
+.empty{
+  padding:25px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.bottom{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:var(--card);
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-around;
+  padding:10px 5px calc(10px + env(safe-area-inset-bottom));
+  z-index:5;
+}
+
+.bottom a{
+  font-size:10px;
+  text-decoration:none;
+  color:var(--muted);
+  text-align:center;
+}
+
+.bottom a:first-child{
+  color:var(--primary);
+  font-weight:800;
+}
+
+.ico{
+  font-size:19px;
+  display:block;
+  margin-bottom:3px;
+}
+
+@media(min-width:700px){
+  body{
+    max-width:700px;
+    margin:auto;
+  }
+
+  .bottom{
+    max-width:700px;
+    margin:auto;
+  }
 }
 </style>
 </head>
@@ -211,454 +298,751 @@ main{
 <body>
 
 <header>
+  <div class="top">
 
-<img src="logo.svg" alt="ХК Челны 2011">
+    <div class="logo">
+      <img id="logoImg" src="logo.svg" alt="ХК Челны 2011"
+           onerror="this.style.display='none';this.parentElement.innerHTML='Ч2011'">
+    </div>
 
-<div class="header-title">
-<h1>ХК Челны 2011</h1>
-<p>Официальный сайт команды</p>
-</div>
+    <div>
+      <div class="club" id="clubName">ХК ЧЕЛНЫ</div>
+      <div class="season">СЕЗОН 2026/27 · 2011 ГОД</div>
+    </div>
 
+    <div class="menu">☰</div>
+  </div>
+
+  <div class="hero">
+    <div class="label">Ближайший матч</div>
+    <h1>МАТЧ ДЭЙ</h1>
+
+    <div class="next" id="nextMatch">
+      <div class="empty">Загрузка матча...</div>
+    </div>
+  </div>
 </header>
 
 
 <main>
 
-<!-- ГЛАВНАЯ -->
+  <!-- ПОСЛЕДНИЙ МАТЧ -->
+  <div class="section">
+    <h2>Последний матч</h2>
+    <span class="more">Все матчи →</span>
+  </div>
 
-<section id="home" class="page active">
-
-<div class="hero">
-
-<h2>ХК Челны 2011</h2>
-
-<p>
-Официальный сайт команды.
-Матчи, состав, результаты и новости.
-</p>
-
-</div>
-
-<div class="card">
-
-<h3>🏒 Ближайший матч</h3>
-
-<div class="match">
-
-<div class="match-date">
-Предстоящий матч
-</div>
-
-<div class="teams">
-
-<div class="team">
-ХК Челны 2011
-</div>
-
-<div class="vs">
-VS
-</div>
-
-<div class="team">
-Соперник
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="card">
-
-<h3>📢 Новости</h3>
-
-<p style="color:#9fb1d5;">
-Новости команды скоро появятся здесь.
-</p>
-
-</div>
-
-</section>
+  <div class="card result" id="lastMatch">
+    <div class="empty">Загрузка...</div>
+  </div>
 
 
-<!-- МАТЧИ -->
+  <!-- КОМАНДА -->
+  <div class="section">
+    <h2>Команда</h2>
+    <span class="more">Состав →</span>
+  </div>
 
-<section id="matches" class="page">
+  <div class="cards">
+    <div class="card">
+      <div class="big">2011</div>
+      <div class="muted">Год рождения</div>
+    </div>
 
-<div class="card">
-
-<h2>🏒 Матчи</h2>
-
-<br>
-
-<div class="match">
-
-<div class="match-date">
-Предстоящий матч
-</div>
-
-<div class="teams">
-
-<div class="team">
-ХК Челны 2011
-</div>
-
-<div class="vs">
-VS
-</div>
-
-<div class="team">
-Соперник
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
+    <div class="card">
+      <div class="big">#18</div>
+      <div class="muted">Капитан</div>
+    </div>
+  </div>
 
 
-<!-- СОСТАВ -->
+  <!-- НОВОСТИ -->
+  <div class="section">
+    <h2>Новости</h2>
+    <span class="more">Все новости →</span>
+  </div>
 
-<section id="roster" class="page">
-
-<div class="card">
-
-<h2>👥 Состав команды</h2>
-
-<div id="rosterList" class="loading">
-Загрузка состава...
-</div>
-
-</div>
-
-</section>
+  <div id="newsList">
+    <div class="card">
+      <div class="empty">Загрузка новостей...</div>
+    </div>
+  </div>
 
 
-<!-- ТАБЛИЦА -->
+  <!-- ТАБЛИЦА -->
+  <div class="section">
+    <h2>Таблица</h2>
+  </div>
 
-<section id="table" class="page">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>КОМАНДА</th>
+          <th>И</th>
+          <th>В</th>
+          <th>ВО</th>
+          <th>П</th>
+          <th>ПО</th>
+          <th>О</th>
+        </tr>
+      </thead>
 
-<div class="card">
-
-<h2>📊 Турнирная таблица</h2>
-
-<br>
-
-<p style="color:#9fb1d5;">
-Турнирная таблица будет добавлена позже.
-</p>
-
-</div>
-
-</section>
-
-
-<!-- НОВОСТИ -->
-
-<section id="news" class="page">
-
-<div class="card">
-
-<h2>📰 Новости</h2>
-
-<br>
-
-<p style="color:#9fb1d5;">
-Новости команды будут отображаться здесь.
-</p>
-
-</div>
-
-</section>
+      <tbody id="standingsBody">
+        <tr>
+          <td colspan="8" class="empty">Загрузка таблицы...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
 </main>
 
 
-<!-- НИЖНЕЕ МЕНЮ -->
+<nav class="bottom">
 
-<nav class="bottom-nav">
+  <a href="#">
+    <span class="ico" id="iconHome">⌂</span>
+    Главная
+  </a>
 
-<button class="active" onclick="openPage('home',this)">
-<span>⌂</span>
-Главная
-</button>
+  <a href="#matches">
+    <span class="ico" id="iconMatches">🏒</span>
+    Матчи
+  </a>
 
-<button onclick="openPage('matches',this)">
-<span>🏒</span>
-Матчи
-</button>
+  <a href="#roster">
+    <span class="ico" id="iconRoster">👥</span>
+    Состав
+  </a>
 
-<button onclick="openPage('roster',this)">
-<span>👥</span>
-Состав
-</button>
+  <a href="#table">
+    <span class="ico" id="iconTable">📊</span>
+    Таблица
+  </a>
 
-<button onclick="openPage('table',this)">
-<span>📊</span>
-Таблица
-</button>
-
-<button onclick="openPage('news',this)">
-<span>📰</span>
-Новости
-</button>
+  <a href="#news">
+    <span class="ico" id="iconNews">📰</span>
+    Новости
+  </a>
 
 </nav>
 
 
 <script>
 
-/* =========================================
-   SUPABASE
-========================================= */
-
 const SUPABASE_URL =
-"https://jxlbojosxaaqnyuzohnw.supabase.co";
+  "https://jxlbojosxaaqnyuzohnw.supabase.co";
 
 const SUPABASE_KEY =
-"sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
+  "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
 
 
-/* =========================================
-   ЗАГРУЗКА СОСТАВА
-========================================= */
-
-async function loadRoster(){
-
-    const rosterList =
-        document.getElementById("rosterList");
-
-    try{
-
-        const response = await fetch(
-            SUPABASE_URL +
-            "/rest/v1/players?select=*&order=number.asc",
-            {
-                method:"GET",
-
-                headers:{
-                    "apikey":SUPABASE_KEY,
-                    "Authorization":
-                    "Bearer " + SUPABASE_KEY
-                }
-            }
-        );
-
-        if(!response.ok){
-
-            throw new Error(
-                "Ошибка Supabase: " +
-                response.status
-            );
-
-        }
-
-        const players = await response.json();
-
-        if(players.length === 0){
-
-            rosterList.innerHTML =
-                '<p class="loading">Состав пока пуст.</p>';
-
-            return;
-        }
-
-        const goalies =
-            players.filter(
-                player =>
-                player.position === "Вратарь"
-            );
-
-        const defenders =
-            players.filter(
-                player =>
-                player.position === "Защитник"
-            );
-
-        const forwards =
-            players.filter(
-                player =>
-                player.position === "Нападающий"
-            );
+const headers = {
+  "apikey": SUPABASE_KEY,
+  "Authorization": "Bearer " + SUPABASE_KEY
+};
 
 
-        let html = "";
+// ================================
+// ЗАПРОС К SUPABASE
+// ================================
 
+async function supabaseGet(table, query="") {
 
-        /* ВРАТАРИ */
-
-        if(goalies.length > 0){
-
-            html += `
-                <h3 class="position-title">
-                    🥅 Вратари
-                </h3>
-            `;
-
-            goalies.forEach(player => {
-
-                html += createPlayer(player);
-
-            });
-
-        }
-
-
-        /* ЗАЩИТНИКИ */
-
-        if(defenders.length > 0){
-
-            html += `
-                <h3 class="position-title">
-                    🛡️ Защитники
-                </h3>
-            `;
-
-            defenders.forEach(player => {
-
-                html += createPlayer(player);
-
-            });
-
-        }
-
-
-        /* НАПАДАЮЩИЕ */
-
-        if(forwards.length > 0){
-
-            html += `
-                <h3 class="position-title">
-                    🎯 Нападающие
-                </h3>
-            `;
-
-            forwards.forEach(player => {
-
-                html += createPlayer(player);
-
-            });
-
-        }
-
-
-        rosterList.innerHTML = html;
-
+  const response = await fetch(
+    SUPABASE_URL +
+    "/rest/v1/" +
+    table +
+    "?select=*" +
+    query,
+    {
+      headers
     }
+  );
 
-    catch(error){
+  if(!response.ok){
+    throw new Error(
+      table + " " + response.status
+    );
+  }
 
-        console.error(error);
-
-        rosterList.innerHTML = `
-            <div class="error">
-                Не удалось загрузить состав.
-                <br><br>
-                Проверь подключение к Supabase.
-            </div>
-        `;
-
-    }
-
+  return await response.json();
 }
 
 
-/* =========================================
-   КАРТОЧКА ИГРОКА
-========================================= */
+// ================================
+// НАСТРОЙКИ
+// ================================
 
-function createPlayer(player){
+async function loadSettings(){
 
-    return `
-        <div class="player">
+  try{
 
-            <div class="number">
-                #${player.number}
-            </div>
+    const data =
+      await supabaseGet(
+        "settings",
+        "&limit=1"
+      );
 
-            <div>
+    if(!data.length) return;
 
-                <div class="player-name">
-                    ${escapeHTML(player.name)}
-                </div>
+    const s = data[0];
 
-                <div class="player-position">
-                    ${escapeHTML(player.position)}
-                </div>
+    const root =
+      document.documentElement;
 
-            </div>
+    if(s.primary_color)
+      root.style.setProperty(
+        "--primary",
+        s.primary_color
+      );
 
+    if(s.secondary_color)
+      root.style.setProperty(
+        "--secondary",
+        s.secondary_color
+      );
+
+    if(s.background_color)
+      root.style.setProperty(
+        "--background",
+        s.background_color
+      );
+
+    if(s.card_color)
+      root.style.setProperty(
+        "--card",
+        s.card_color
+      );
+
+    if(s.text_color)
+      root.style.setProperty(
+        "--text",
+        s.text_color
+      );
+
+    if(s.muted_text_color)
+      root.style.setProperty(
+        "--muted",
+        s.muted_text_color
+      );
+
+    if(s.button_color)
+      root.style.setProperty(
+        "--button",
+        s.button_color
+      );
+
+    if(s.border_color)
+      root.style.setProperty(
+        "--border",
+        s.border_color
+      );
+
+    if(s.border_radius)
+      root.style.setProperty(
+        "--radius",
+        s.border_radius + "px"
+      );
+
+
+    // Название сайта
+
+    if(s.site_name){
+
+      document.title =
+        s.site_name;
+
+      document.getElementById(
+        "clubName"
+      ).textContent =
+        s.site_name.toUpperCase();
+    }
+
+
+    // Логотип
+
+    if(s.logo_url){
+
+      document.getElementById(
+        "logoImg"
+      ).src = s.logo_url;
+
+    }
+
+
+    // Favicon
+
+    if(s.favicon_url){
+
+      document.getElementById(
+        "favicon"
+      ).href = s.favicon_url;
+
+    }
+
+
+    // Фон
+
+    if(s.background_image){
+
+      document.body.style.backgroundImage =
+        `url("${s.background_image}")`;
+
+      document.body.style.backgroundSize =
+        "cover";
+
+      document.body.style.backgroundAttachment =
+        "fixed";
+    }
+
+
+    // Иконки
+
+    if(s.home_icon)
+      document.getElementById(
+        "iconHome"
+      ).textContent = s.home_icon;
+
+    if(s.matches_icon)
+      document.getElementById(
+        "iconMatches"
+      ).textContent = s.matches_icon;
+
+    if(s.roster_icon)
+      document.getElementById(
+        "iconRoster"
+      ).textContent = s.roster_icon;
+
+    if(s.table_icon)
+      document.getElementById(
+        "iconTable"
+      ).textContent = s.table_icon;
+
+    if(s.news_icon)
+      document.getElementById(
+        "iconNews"
+      ).textContent = s.news_icon;
+
+  }catch(error){
+
+    console.error(
+      "Ошибка settings:",
+      error
+    );
+
+  }
+}
+
+
+// ================================
+// ДАТА
+// ================================
+
+function formatDate(date){
+
+  if(!date) return "";
+
+  const d =
+    new Date(date);
+
+  return d.toLocaleDateString(
+    "ru-RU",
+    {
+      day:"2-digit",
+      month:"long"
+    }
+  );
+}
+
+
+// ================================
+// МАТЧИ
+// ================================
+
+async function loadMatches(){
+
+  try{
+
+    const matches =
+      await supabaseGet(
+        "matches",
+        "&order=date.asc,time.asc"
+      );
+
+
+    if(!matches.length){
+
+      document.getElementById(
+        "nextMatch"
+      ).innerHTML =
+        '<div class="empty">Матчи пока не добавлены</div>';
+
+      document.getElementById(
+        "lastMatch"
+      ).innerHTML =
+        '<div class="empty">Матчи пока не добавлены</div>';
+
+      return;
+    }
+
+
+    const now =
+      new Date();
+
+
+    // Ближайший матч
+
+    let upcoming =
+      matches.find(
+        m => new Date(
+          `${m.date}T${m.time || "00:00"}`
+        ) >= now
+      );
+
+
+    if(!upcoming)
+      upcoming =
+        matches[matches.length - 1];
+
+
+    const opponent =
+      upcoming.opponent ||
+      "Соперник";
+
+
+    const home =
+      String(upcoming.home) === "true" ||
+      upcoming.home === true;
+
+
+    const team1 =
+      home
+        ? "ХК Челны"
+        : opponent;
+
+    const team2 =
+      home
+        ? opponent
+        : "ХК Челны";
+
+
+    document.getElementById(
+      "nextMatch"
+    ).innerHTML = `
+
+      <div>
+        <div class="muted">
+          ${formatDate(upcoming.date)}
+          ·
+          ${upcoming.time || ""}
         </div>
+
+        <div class="teams">
+          ${team1}
+        </div>
+
+        <div class="teams">
+          ${team2}
+        </div>
+      </div>
+
+      <div class="vs">
+        VS
+      </div>
+
     `;
 
+
+    // Последний матч
+
+    const played =
+      matches.filter(
+        m =>
+          m.status === "Завершен" ||
+          m.status === "завершен" ||
+          m.score
+      );
+
+
+    const last =
+      played.length
+        ? played[played.length - 1]
+        : matches[0];
+
+
+    const lastOpponent =
+      last.opponent ||
+      "Соперник";
+
+
+    const lastHome =
+      String(last.home) === "true" ||
+      last.home === true;
+
+
+    const lastTeam1 =
+      lastHome
+        ? "ХК Челны"
+        : lastOpponent;
+
+    const lastTeam2 =
+      lastHome
+        ? lastOpponent
+        : "ХК Челны";
+
+
+    document.getElementById(
+      "lastMatch"
+    ).innerHTML = `
+
+      <div>
+
+        <div class="muted">
+          ${formatDate(last.date)}
+        </div>
+
+        <div class="teams">
+          ${lastTeam1}
+        </div>
+
+        <div class="teams">
+          ${lastTeam2}
+        </div>
+
+      </div>
+
+      <div>
+
+        <div class="score">
+          ${last.score || "— : —"}
+        </div>
+
+        <div class="status">
+          ${last.status || "РЕЗУЛЬТАТ"}
+        </div>
+
+      </div>
+
+    `;
+
+  }catch(error){
+
+    console.error(
+      "Ошибка matches:",
+      error
+    );
+
+    document.getElementById(
+      "nextMatch"
+    ).innerHTML =
+      '<div class="empty">Не удалось загрузить матч</div>';
+
+    document.getElementById(
+      "lastMatch"
+    ).innerHTML =
+      '<div class="empty">Не удалось загрузить матч</div>';
+  }
 }
 
 
-/* =========================================
-   ЗАЩИТА ОТ HTML В ИМЕНАХ
-========================================= */
+// ================================
+// НОВОСТИ
+// ================================
 
-function escapeHTML(text){
+async function loadNews(){
 
-    return String(text)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+  try{
 
+    const news =
+      await supabaseGet(
+        "news",
+        "&order=id.desc&limit=3"
+      );
+
+
+    const container =
+      document.getElementById(
+        "newsList"
+      );
+
+
+    if(!news.length){
+
+      container.innerHTML =
+        '<div class="card empty">Новостей пока нет</div>';
+
+      return;
+    }
+
+
+    container.innerHTML =
+      news.map(n => `
+
+        <div class="card news">
+
+          ${
+            n.image_url
+            ?
+            `<img
+              class="news-img"
+              src="${n.image_url}"
+              alt=""
+              onerror="this.style.display='none'"
+            >`
+            :
+            ""
+          }
+
+          <div class="date">
+            ${formatDate(
+              n.created_at ||
+              n.date
+            )}
+          </div>
+
+          <h3>
+            ${n.title || "Новость"}
+          </h3>
+
+          <div class="muted">
+            ${n.text || ""}
+          </div>
+
+        </div>
+
+      `).join("");
+
+  }catch(error){
+
+    console.error(
+      "Ошибка news:",
+      error
+    );
+
+    document.getElementById(
+      "newsList"
+    ).innerHTML =
+      '<div class="card empty">Не удалось загрузить новости</div>';
+  }
 }
 
 
-/* =========================================
-   НАВИГАЦИЯ
-========================================= */
+// ================================
+// ТАБЛИЦА
+// ================================
 
-function openPage(pageId,button){
+async function loadStandings(){
 
-    document
-        .querySelectorAll(".page")
-        .forEach(page => {
+  try{
 
-            page.classList.remove("active");
-
-        });
-
-
-    document
-        .getElementById(pageId)
-        .classList.add("active");
+    const standings =
+      await supabaseGet(
+        "standings",
+        "&order=position.asc"
+      );
 
 
-    document
-        .querySelectorAll(".bottom-nav button")
-        .forEach(btn => {
-
-            btn.classList.remove("active");
-
-        });
+    const body =
+      document.getElementById(
+        "standingsBody"
+      );
 
 
-    button.classList.add("active");
+    if(!standings.length){
+
+      body.innerHTML = `
+        <tr>
+          <td colspan="8" class="empty">
+            Таблица пока не заполнена
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
 
 
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
+    body.innerHTML =
+      standings.map(t => `
 
+        <tr>
+
+          <td class="place">
+            ${t.position ?? ""}
+          </td>
+
+          <td class="team-name">
+            ${t.team ?? ""}
+          </td>
+
+          <td>
+            ${t.games ?? 0}
+          </td>
+
+          <td>
+            ${t.wins ?? 0}
+          </td>
+
+          <td>
+            ${t.overtime_wins ?? 0}
+          </td>
+
+          <td>
+            ${t.losses ?? 0}
+          </td>
+
+          <td>
+            ${t.overtime_losses ?? 0}
+          </td>
+
+          <td>
+            <b>${t.points ?? 0}</b>
+          </td>
+
+        </tr>
+
+      `).join("");
+
+  }catch(error){
+
+    console.error(
+      "Ошибка standings:",
+      error
+    );
+
+    document.getElementById(
+      "standingsBody"
+    ).innerHTML = `
+      <tr>
+        <td colspan="8" class="empty">
+          Не удалось загрузить таблицу
+        </td>
+      </tr>
+    `;
+  }
 }
 
 
-/* =========================================
-   ЗАПУСК
-========================================= */
+// ================================
+// ЗАПУСК
+// ================================
 
-loadRoster();
+async function init(){
+
+  await loadSettings();
+
+  await Promise.all([
+    loadMatches(),
+    loadNews(),
+    loadStandings()
+  ]);
+
+}
+
+init();
 
 </script>
 
