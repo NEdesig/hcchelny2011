@@ -1,4865 +1,4755 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
->
-
-<meta
-    name="theme-color"
-    content="#050b22"
->
-
-<title>Админка — ХК Челны 2011</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Админ-панель — ХК Челны 2011</title>
 
 <style>
-
-:root{
-    --primary:#000056;
-    --yellow:#ffcd00;
-    --bg:#050b22;
-    --card:#0d1738;
-    --text:#fff;
-    --muted:#aab5d5;
-    --border:#26345f;
-    --radius:16px;
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
+html,body{
+  margin:0;
+  padding:0;
+  font-family:Arial,sans-serif;
+  background:#050b22;
+  color:#fff;
 }
 
 body{
-    background:
-        radial-gradient(
-            circle at top,
-            rgba(0,0,86,.7),
-            transparent 40%
-        ),
-        var(--bg);
-
-    color:var(--text);
-
-    font-family:Arial,sans-serif;
-
-    min-height:100vh;
+  min-height:100vh;
 }
 
 button,
 input,
 textarea,
 select{
-    font:inherit;
+  font:inherit;
 }
 
 button{
-    cursor:pointer;
+  cursor:pointer;
 }
-
-.container{
-    width:min(
-        calc(100% - 28px),
-        1100px
-    );
-
-    margin:auto;
-}
-
-/* HEADER */
-
-.header{
-    padding:25px 0 20px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    gap:15px;
-}
-
-.header h1{
-    font-size:28px;
-
-    font-weight:900;
-
-    text-transform:uppercase;
-}
-
-.header p{
-    color:var(--muted);
-
-    font-size:12px;
-
-    margin-top:5px;
-}
-
-.logout{
-    background:transparent;
-
-    border:1px solid var(--border);
-
-    color:var(--muted);
-
-    padding:10px 14px;
-
-    border-radius:10px;
-}
-
-/* LOGIN */
 
 .login{
-    min-height:100vh;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
 }
 
 .login-box{
-    width:min(
-        calc(100% - 30px),
-        420px
-    );
-
-    background:var(--card);
-
-    border:1px solid var(--border);
-
-    border-radius:22px;
-
-    padding:25px;
-
-    box-shadow:
-        0 30px 80px rgba(0,0,0,.4);
+  width:100%;
+  max-width:420px;
+  background:#0d1738;
+  border:1px solid #26345f;
+  border-radius:22px;
+  padding:25px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
 }
 
-.login-logo{
-    width:70px;
-    height:70px;
-    object-fit:contain;
-    margin:0 auto 20px;
-    display:block;
+.logo-login{
+  text-align:center;
+  font-size:36px;
+  font-weight:900;
+  margin-bottom:5px;
 }
 
-.login-box h1{
-    text-align:center;
-    font-size:27px;
-    text-transform:uppercase;
-}
-
-.login-box p{
-    text-align:center;
-    color:var(--muted);
-    margin:8px 0 22px;
-    font-size:13px;
-}
-
-/* NAV */
-
-.tabs{
-    display:flex;
-    gap:8px;
-    overflow-x:auto;
-    padding-bottom:10px;
-    scrollbar-width:none;
-}
-
-.tabs::-webkit-scrollbar{
-    display:none;
-}
-
-.tab{
-    flex-shrink:0;
-
-    border:1px solid var(--border);
-
-    background:var(--card);
-
-    color:var(--muted);
-
-    padding:11px 15px;
-
-    border-radius:12px;
-
-    font-size:12px;
-
-    font-weight:700;
-}
-
-.tab.active{
-    background:var(--yellow);
-    color:var(--primary);
-    border-color:var(--yellow);
-}
-
-/* SECTIONS */
-
-.panel{
-    display:none;
-    padding:15px 0 80px;
-}
-
-.panel.active{
-    display:block;
-}
-
-.panel-title{
-    font-size:28px;
-    font-weight:900;
-    text-transform:uppercase;
-    margin:20px 0 15px;
-}
-
-.panel-description{
-    color:var(--muted);
-    font-size:13px;
-    line-height:1.5;
-    margin-bottom:20px;
-}
-
-/* CARD */
-
-.card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:18px;
-    margin-bottom:15px;
-}
-
-.card h3{
-    font-size:17px;
-    margin-bottom:14px;
-    text-transform:uppercase;
-}
-
-/* FORM */
-
-.form-grid{
-    display:grid;
-    grid-template-columns:
-        repeat(2,minmax(0,1fr));
-    gap:12px;
+.login-sub{
+  text-align:center;
+  color:#aab5d5;
+  font-size:13px;
+  margin-bottom:25px;
 }
 
 .field{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-
-.field.full{
-    grid-column:1/-1;
+  margin-bottom:13px;
 }
 
 .field label{
-    color:var(--muted);
-    font-size:11px;
-    text-transform:uppercase;
-    font-weight:700;
-    letter-spacing:.5px;
+  display:block;
+  font-size:12px;
+  color:#aab5d5;
+  margin-bottom:6px;
 }
 
 input,
 textarea,
 select{
-    width:100%;
-    background:#07102d;
-    border:1px solid var(--border);
-    color:var(--text);
-    padding:12px;
-    border-radius:10px;
-    outline:none;
+  width:100%;
+  border:1px solid #26345f;
+  background:#08102b;
+  color:#fff;
+  border-radius:12px;
+  padding:12px 13px;
+  outline:none;
 }
 
 textarea{
-    min-height:110px;
-    resize:vertical;
+  min-height:100px;
+  resize:vertical;
 }
 
 input:focus,
 textarea:focus,
 select:focus{
-    border-color:var(--yellow);
-}
-
-/* BUTTONS */
-
-.buttons{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    margin-top:15px;
+  border-color:#ffcd00;
 }
 
 .btn{
-    border:0;
-    padding:12px 16px;
-    border-radius:10px;
-    font-weight:800;
-    font-size:12px;
+  border:0;
+  border-radius:12px;
+  padding:12px 15px;
+  background:#ffcd00;
+  color:#050b22;
+  font-weight:900;
 }
 
-.btn-primary{
-    background:var(--yellow);
-    color:var(--primary);
+.btn.secondary{
+  background:#17234c;
+  color:#fff;
+  border:1px solid #26345f;
 }
 
-.btn-secondary{
-    background:#17244c;
-    color:var(--text);
-    border:1px solid var(--border);
+.btn.danger{
+  background:#b72828;
+  color:#fff;
 }
 
-.btn-danger{
-    background:#7c2630;
-    color:white;
+.btn.blue{
+  background:#0875dc;
+  color:#fff;
 }
 
-/* UPLOAD */
-
-.upload{
-    border:1px dashed var(--border);
-    border-radius:14px;
-    padding:15px;
-    text-align:center;
+.btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
 }
 
-.upload input{
-    background:transparent;
-    border:0;
-    padding:5px;
+.error{
+  background:#5d2027;
+  border:1px solid #a33a45;
+  color:#ffdce0;
+  border-radius:12px;
+  padding:10px;
+  font-size:13px;
+  margin-bottom:12px;
+  display:none;
 }
 
-.preview{
-    width:100%;
-    max-height:220px;
-    object-fit:cover;
-    border-radius:12px;
-    margin-top:10px;
-    display:none;
+.admin{
+  display:none;
+  min-height:100vh;
 }
 
-/* FONT */
-
-.font-box{
-    border:1px solid var(--border);
-    background:#07102d;
-    border-radius:14px;
-    padding:15px;
-    margin-top:12px;
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:#070d27;
+  border-bottom:1px solid #26345f;
+  padding:13px 15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
 
-.font-box-title{
-    font-size:15px;
-    font-weight:900;
-    margin-bottom:5px;
+.top-title{
+  font-weight:900;
+  font-size:18px;
 }
 
-.font-box-description{
-    color:var(--muted);
-    font-size:11px;
-    line-height:1.5;
-    margin-bottom:12px;
+.top-user{
+  color:#aab5d5;
+  font-size:11px;
+  max-width:170px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
-.font-current{
-    padding:10px;
-    border-radius:9px;
-    background:#0d1738;
-    border:1px solid var(--border);
-    color:var(--yellow);
-    font-size:12px;
-    margin-bottom:10px;
-    word-break:break-word;
+.wrapper{
+  max-width:1100px;
+  margin:auto;
+  padding:15px;
 }
 
-.font-preview{
-    padding:15px;
-    margin-top:10px;
-    background:#0d1738;
-    border:1px solid var(--border);
-    border-radius:10px;
-    font-size:24px;
-    min-height:60px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
+.tabs{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  padding-bottom:12px;
+  scrollbar-width:none;
 }
 
-/* ITEMS */
-
-.item{
-    display:flex;
-    align-items:center;
-    gap:13px;
-    padding:12px 0;
-    border-bottom:1px solid var(--border);
+.tabs::-webkit-scrollbar{
+  display:none;
 }
 
-.item:last-child{
-    border-bottom:0;
+.tab{
+  flex:0 0 auto;
+  border:1px solid #26345f;
+  background:#0d1738;
+  color:#aab5d5;
+  padding:10px 13px;
+  border-radius:12px;
+  font-size:12px;
+  font-weight:800;
 }
 
-.item-image{
-    width:65px;
-    height:65px;
-    border-radius:10px;
-    object-fit:cover;
-    background:var(--primary);
-    flex-shrink:0;
+.tab.active{
+  background:#ffcd00;
+  color:#050b22;
+  border-color:#ffcd00;
+}
+
+.panel{
+  display:none;
+}
+
+.panel.active{
+  display:block;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+
+.card{
+  background:#0d1738;
+  border:1px solid #26345f;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+}
+
+.card h2{
+  font-size:18px;
+  margin:0 0 14px;
+}
+
+.card h3{
+  font-size:15px;
+  margin:0 0 12px;
+}
+
+.small{
+  color:#aab5d5;
+  font-size:12px;
+  line-height:1.45;
+}
+
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.row>*{
+  flex:1;
+}
+
+.list{
+  display:grid;
+  gap:9px;
+}
+
+.list-item{
+  background:#08102b;
+  border:1px solid #26345f;
+  border-radius:13px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
 }
 
 .item-info{
-    flex:1;
-    min-width:0;
+  min-width:0;
 }
 
 .item-title{
-    font-weight:800;
-    font-size:14px;
+  font-weight:800;
+  font-size:14px;
 }
 
-.item-meta{
-    color:var(--muted);
-    font-size:11px;
-    margin-top:4px;
+.item-sub{
+  color:#aab5d5;
+  font-size:11px;
+  margin-top:3px;
 }
 
-.item-actions{
-    display:flex;
-    gap:6px;
+.preview{
+  margin-top:9px;
+  max-width:180px;
+  max-height:130px;
+  border-radius:12px;
+  object-fit:cover;
+  display:none;
 }
 
-.small-btn{
-    padding:8px 10px;
-    border-radius:8px;
-    border:1px solid var(--border);
-    background:#111e43;
-    color:white;
-    font-size:11px;
+.file{
+  padding:9px;
 }
 
-/* CHECKBOX */
-
-.check{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:12px;
-    background:#07102d;
-    border:1px solid var(--border);
-    border-radius:10px;
+.checkbox{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#fff;
+  font-size:13px;
+  margin:8px 0;
 }
 
-.check input{
-    width:auto;
+.checkbox input{
+  width:auto;
 }
 
-/* PLAYER STATS */
-
-.stats-category{
-    background:#07102d;
-    border:1px solid var(--border);
-    border-radius:15px;
-    padding:15px;
-    margin-bottom:15px;
+.notice{
+  padding:12px;
+  border-radius:13px;
+  background:#111d42;
+  color:#c7d0eb;
+  font-size:12px;
+  line-height:1.5;
+  margin-bottom:14px;
 }
-
-.stats-category-title{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    margin-bottom:15px;
-}
-
-.stats-category-title strong{
-    font-size:16px;
-    text-transform:uppercase;
-}
-
-.stats-category-title span{
-    color:var(--yellow);
-    font-size:11px;
-}
-
-.stat-row{
-    display:grid;
-
-    grid-template-columns:
-        42px
-        minmax(0,1.5fr)
-        minmax(100px,.7fr)
-        minmax(160px,1fr);
-
-    gap:8px;
-
-    align-items:center;
-
-    padding:10px 0;
-
-    border-bottom:1px solid var(--border);
-}
-
-.stat-row:last-child{
-    border-bottom:0;
-}
-
-.stat-rank{
-    width:34px;
-    height:34px;
-
-    border-radius:50%;
-
-    background:var(--primary);
-
-    color:var(--yellow);
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    font-weight:900;
-}
-
-.stat-photo{
-    display:flex;
-    flex-direction:column;
-    gap:5px;
-}
-
-.stat-photo input{
-    padding:8px;
-    font-size:10px;
-}
-
-.stat-photo small{
-    color:var(--muted);
-    font-size:9px;
-}
-
-@media(max-width:700px){
-
-    .stat-row{
-        grid-template-columns:36px 1fr;
-    }
-
-    .stat-row > .stat-field{
-        grid-column:2;
-    }
-
-    .stat-photo{
-        grid-column:2;
-    }
-
-}
-
-/* STATUS */
 
 .status{
-    position:fixed;
-    left:50%;
-    bottom:20px;
-
-    transform:
-        translate(-50%,120px);
-
-    background:var(--yellow);
-    color:var(--primary);
-
-    padding:12px 18px;
-
-    border-radius:30px;
-
-    font-size:12px;
-    font-weight:800;
-
-    transition:.3s;
-
-    z-index:999;
+  position:fixed;
+  right:15px;
+  bottom:15px;
+  z-index:300;
+  background:#101b40;
+  border:1px solid #26345f;
+  color:#fff;
+  border-radius:13px;
+  padding:12px 15px;
+  font-size:12px;
+  box-shadow:0 10px 35px rgba(0,0,0,.35);
+  transform:translateY(120px);
+  opacity:0;
+  transition:.25s;
 }
 
 .status.show{
-    transform:
-        translate(-50%,0);
+  transform:translateY(0);
+  opacity:1;
 }
 
-/* RESPONSIVE */
-
-@media(max-width:650px){
-
-    .form-grid{
-        grid-template-columns:1fr;
-    }
-
-    .field.full{
-        grid-column:auto;
-    }
-
-    .header{
-        align-items:flex-start;
-    }
-
-    .header h1{
-        font-size:22px;
-    }
-
+.status.ok{
+  border-color:#287d52;
 }
 
+.status.bad{
+  border-color:#a33a45;
+}
+
+.stat-category{
+  margin-bottom:16px;
+}
+
+.stat-title{
+  font-size:16px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+
+.stat-row{
+  background:#08102b;
+  border:1px solid #26345f;
+  border-radius:14px;
+  padding:11px;
+  margin-bottom:9px;
+}
+
+.rank{
+  width:35px;
+  height:35px;
+  border-radius:10px;
+  background:#ffcd00;
+  color:#050b22;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  flex:0 0 35px;
+}
+
+.stat-head{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-bottom:8px;
+}
+
+.stat-number{
+  font-weight:900;
+}
+
+.stat-preview{
+  width:60px;
+  height:60px;
+  object-fit:cover;
+  border-radius:12px;
+  display:none;
+  margin-top:8px;
+}
+
+.color-row{
+  display:grid;
+  grid-template-columns:1fr 80px;
+  gap:8px;
+}
+
+.color-row input[type=color]{
+  padding:4px;
+  height:44px;
+}
+
+.font-preview{
+  margin-top:8px;
+  padding:12px;
+  border-radius:12px;
+  background:#08102b;
+  color:#fff;
+  font-size:18px;
+}
+
+@media(max-width:700px){
+  .grid,
+  .grid3{
+    grid-template-columns:1fr;
+  }
+
+  .wrapper{
+    padding:10px;
+  }
+
+  .top-user{
+    max-width:110px;
+  }
+}
 </style>
-
 </head>
 
 <body>
 
-
 <!-- LOGIN -->
-
 <div id="loginScreen" class="login">
+  <div class="login-box">
 
-<div class="login-box">
+    <div class="logo-login">Ч2011</div>
+    <div class="login-sub">Админ-панель ХК Челны 2011</div>
 
-<img
-    class="login-logo"
-    src=""
-    id="loginLogo"
-    alt=""
->
+    <div id="loginError" class="error"></div>
 
-<h1>Админка</h1>
+    <div class="field">
+      <label>Email</label>
+      <input id="loginEmail" type="email" placeholder="admin@email.com">
+    </div>
 
-<p>
-    ХК Челны 2011
-</p>
+    <div class="field">
+      <label>Пароль</label>
+      <input id="loginPassword" type="password" placeholder="Пароль">
+    </div>
 
-<div class="field">
+    <button id="loginButton" class="btn" style="width:100%" onclick="login()">
+      ВОЙТИ
+    </button>
 
-<label>Email</label>
-
-<input
-    id="email"
-    type="email"
-    placeholder="admin@email.com"
->
-
-</div>
-
-<br>
-
-<div class="field">
-
-<label>Пароль</label>
-
-<input
-    id="password"
-    type="password"
-    placeholder="••••••••"
->
-
-</div>
-
-<div class="buttons">
-
-<button
-    class="btn btn-primary"
-    style="width:100%"
-    onclick="login()"
->
-    Войти
-</button>
-
-</div>
-
-<div
-    id="loginError"
-    style="
-        color:#ff8f8f;
-        font-size:12px;
-        margin-top:12px;
-        text-align:center;
-    "
-></div>
-
-</div>
-
+  </div>
 </div>
 
 
 <!-- ADMIN -->
+<div id="admin" class="admin">
 
-<div
-    id="adminScreen"
-    style="display:none"
->
+  <div class="topbar">
+    <div>
+      <div class="top-title">ХК Челны 2011</div>
+      <div class="top-user" id="userEmail"></div>
+    </div>
 
-<div class="container">
+    <button class="btn secondary" onclick="logout()">
+      Выйти
+    </button>
+  </div>
 
-<header class="header">
+  <div class="wrapper">
+
+    <div class="tabs">
 
-<div>
+      <button class="tab active" onclick="openTab('home',this)">
+        🏠 Главная
+      </button>
+
+      <button class="tab" onclick="openTab('news',this)">
+        📰 Новости
+      </button>
+
+      <button class="tab" onclick="openTab('media',this)">
+        🖼 Медиа
+      </button>
+
+      <button class="tab" onclick="openTab('achievements',this)">
+        🏆 Достижения
+      </button>
+
+      <button class="tab" onclick="openTab('birthdays',this)">
+        🎂 Именинники
+      </button>
+
+      <button class="tab" onclick="openTab('players',this)">
+        👥 Игроки
+      </button>
+
+      <button class="tab" onclick="openTab('playerStats',this)">
+        ⭐ ТОП игроков
+      </button>
 
-<h1>
-    ХК ЧЕЛНЫ 2011
-</h1>
+      <button class="tab" onclick="openTab('matches',this)">
+        🏒 Матчи
+      </button>
 
-<p>
-    Панель управления сайтом
-</p>
+      <button class="tab" onclick="openTab('standings',this)">
+        📊 Таблица
+      </button>
 
-</div>
-
-<button
-    class="logout"
-    onclick="logout()"
->
-    Выйти
-</button>
-
-</header>
-
-
-<!-- TABS -->
-
-<div class="tabs">
-
-<button
-    class="tab active"
-    onclick="openTab('home',this)"
->
-    🏠 Главная
-</button>
-
-<button
-    class="tab"
-    onclick="openTab('news',this)"
->
-    📰 Пресса
-</button>
-
-<button
-    class="tab"
-    onclick="openTab('media',this)"
->
-    📸 Медиа
-</button>
-
-<button
-    class="tab"
-    onclick="openTab('achievements',this)"
->
-    🏆 Достижения
-</button>
-
-<button
-    class="tab"
-    onclick="openTab('birthdays',this)"
->
-    🎂 Именинники
-</button>
-
-<button
-    class="tab"
-    onclick="openTab('players',this)"
->
-    👥 Состав
-</button>
-
-<button
-    class="tab"
-    onclick="openTab('playerStats',this)"
->
-    ⭐ ТОП игроков
-</button>
-
-<button
-    class="tab"
-    onclick="openTab('matches',this)"
->
-    🏒 Матчи
-</button>
-
-<button
-    class="tab"
-    onclick="openTab('standings',this)"
->
-    📊 Таблица
-</button>
-
-<button
-    class="tab"
-    onclick="openTab('design',this)"
->
-    🎨 Дизайн
-</button>
-
-</div>
-
-
-<!-- HOME -->
-
-<section
-    id="home"
-    class="panel active"
->
-
-<h2 class="panel-title">
-    Главная
-</h2>
-
-<p class="panel-description">
-    Здесь выбирается, что именно посетитель увидит
-    на главной странице.
-</p>
-
-<div class="card">
-
-<h3>
-    Главный анонс
-</h3>
-
-<div class="field">
-
-<label>
-    Новость с тегом «Анонс»
-</label>
-
-<select id="homeAnnouncement"></select>
-
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h3>
-    Пресса
-</h3>
-
-<div class="form-grid">
-
-<div class="field">
-
-<label>
-    Новость №1
-</label>
-
-<select id="homeNews1"></select>
-
-</div>
-
-<div class="field">
-
-<label>
-    Новость №2
-</label>
-
-<select id="homeNews2"></select>
-
-</div>
-
-<div class="field">
-
-<label>
-    Новость №3
-</label>
-
-<select id="homeNews3"></select>
-
-</div>
-
-</div>
-
-<br>
-
-<label class="check">
-
-<input
-    id="showPress"
-    type="checkbox"
-    checked
->
-
-Показывать раздел «Пресса»
-
-</label>
-
-</div>
-
-
-<div class="card">
-
-<h3>
-    Медиа
-</h3>
-
-<div class="field">
-
-<label>
-    Главный фотоальбом
-</label>
-
-<select id="homeAlbum"></select>
-
-</div>
-
-<br>
-
-<label class="check">
-
-<input
-    id="showMedia"
-    type="checkbox"
-    checked
->
-
-Показывать раздел «Медиа»
-
-</label>
-
-</div>
-
-
-<div class="card">
-
-<h3>
-    Остальные блоки
-</h3>
-
-<label class="check">
-
-<input
-    id="showAchievements"
-    type="checkbox"
-    checked
->
-
-Показывать достижения
-
-</label>
-
-<br>
-
-<label class="check">
-
-<input
-    id="showBirthdays"
-    type="checkbox"
-    checked
->
-
-Показывать именинников
-
-</label>
-
-</div>
-
-
-<button
-    class="btn btn-primary"
-    onclick="saveHome()"
->
-    Сохранить настройки главной
-</button>
-
-</section>
-
-
-<!-- NEWS -->
-
-<section
-    id="news"
-    class="panel"
->
-
-<h2 class="panel-title">
-    Пресса
-</h2>
-
-<div class="card">
-
-<h3>
-    Добавить новость
-</h3>
-
-<div class="form-grid">
-
-<div class="field full">
-
-<label>
-    Заголовок
-</label>
-
-<input
-    id="newsTitle"
-    placeholder="Например: Челны начинают сезон"
->
-
-</div>
-
-<div class="field">
-
-<label>
-    Тег
-</label>
-
-<select id="newsTag">
-
-<option value="">
-Без тега
-</option>
-
-<option value="Анонс">
-Анонс
-</option>
-
-<option value="Новости">
-Новости
-</option>
-
-<option value="Матч">
-Матч
-</option>
-
-<option value="Команда">
-Команда
-</option>
-
-<option value="Интервью">
-Интервью
-</option>
-
-<option value="Медиа">
-Медиа
-</option>
-
-</select>
-
-</div>
-
-<div class="field">
-
-<label>
-    Дата
-</label>
-
-<input
-    id="newsDate"
-    type="date"
->
-
-</div>
-
-<div class="field full">
-
-<label>
-    Короткое описание
-</label>
-
-<textarea
-    id="newsDescription"
-    placeholder="Описание, которое будет видно на главной"
-></textarea>
-
-</div>
-
-<div class="field full">
-
-<label>
-    Полный текст
-</label>
-
-<textarea
-    id="newsContent"
-    style="min-height:180px"
-></textarea>
-
-</div>
-
-</div>
-
-<br>
-
-<div class="upload">
-
-<strong>
-    Фотография
-</strong>
-
-<br>
-
-<small style="color:var(--muted)">
-    Можно выбрать прямо из галереи телефона
-</small>
-
-<input
-    id="newsImage"
-    type="file"
-    accept="image/*"
-    onchange="previewFile(this,'newsPreview')"
->
-
-<img
-    id="newsPreview"
-    class="preview"
->
-
-</div>
-
-<div class="buttons">
-
-<button
-    class="btn btn-primary"
-    onclick="saveNews()"
->
-    Добавить новость
-</button>
-
-<button
-    class="btn btn-secondary"
-    onclick="clearNewsForm()"
->
-    Очистить
-</button>
-
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h3>
-    Новости
-</h3>
-
-<div id="newsList"></div>
-
-</div>
-
-</section>
-
-
-<!-- MEDIA -->
-
-<section
-    id="media"
-    class="panel"
->
-
-<h2 class="panel-title">
-    Медиа
-</h2>
-
-<p class="panel-description">
-    Создавай фотоальбомы. Для каждого альбома можно
-    установить отдельную обложку.
-</p>
-
-<div class="card">
-
-<h3>
-    Новый альбом
-</h3>
-
-<div class="form-grid">
-
-<div class="field">
-
-<label>
-    Название
-</label>
-
-<input
-    id="albumTitle"
-    placeholder="Например: Турнир в Казани"
->
-
-</div>
-
-<div class="field">
-
-<label>
-    Короткое описание
-</label>
-
-<input
-    id="albumDescription"
-    placeholder="Фотографии с турнира"
->
-
-</div>
-
-</div>
-
-<br>
-
-<div class="upload">
-
-<strong>
-    Обложка альбома
-</strong>
-
-<input
-    id="albumCover"
-    type="file"
-    accept="image/*"
-    onchange="previewFile(this,'albumPreview')"
->
-
-<img
-    id="albumPreview"
-    class="preview"
->
-
-</div>
-
-<div class="buttons">
-
-<button
-    class="btn btn-primary"
-    onclick="createAlbum()"
->
-    Создать альбом
-</button>
-
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h3>
-    Альбомы
-</h3>
-
-<div id="albumList"></div>
-
-</div>
-
-</section>
-
-
-<!-- ACHIEVEMENTS -->
-
-<section
-    id="achievements"
-    class="panel"
->
-
-<h2 class="panel-title">
-    Достижения
-</h2>
-
-<div class="card">
-
-<h3>
-    Добавить достижение
-</h3>
-
-<div class="form-grid">
-
-<div class="field">
-
-<label>
-    Название
-</label>
-
-<input
-    id="achievementTitle"
-    placeholder="Кубок Поволжья"
->
-
-</div>
-
-<div class="field">
-
-<label>
-    Год
-</label>
-
-<input
-    id="achievementYear"
-    type="number"
-    placeholder="2026"
->
-
-</div>
-
-<div class="field full">
-
-<label>
-    Описание
-</label>
-
-<textarea
-    id="achievementDescription"
-></textarea>
-
-</div>
-
-</div>
-
-<br>
-
-<div class="upload">
-
-<strong>
-    Фото кубка
-</strong>
-
-<br>
-
-<small style="color:var(--muted)">
-    Лучше использовать PNG с прозрачным фоном
-</small>
-
-<input
-    id="achievementImage"
-    type="file"
-    accept="image/*"
-    onchange="previewFile(this,'achievementPreview')"
->
-
-<img
-    id="achievementPreview"
-    class="preview"
->
-
-</div>
-
-<div class="buttons">
-
-<button
-    class="btn btn-primary"
-    onclick="createAchievement()"
->
-    Добавить достижение
-</button>
-
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h3>
-    Список достижений
-</h3>
-
-<div id="achievementList"></div>
-
-</div>
-
-</section>
-
+      <button class="tab" onclick="openTab('shop',this)">
+        🛍 Магазин
+      </button>
 
-<!-- BIRTHDAYS -->
+      <button class="tab" onclick="openTab('design',this)">
+        🎨 Дизайн
+      </button>
 
-<section
-    id="birthdays"
-    class="panel"
->
+    </div>
+
 
-<h2 class="panel-title">
-    Наши именинники
-</h2>
+    <!-- HOME -->
+    <section id="home" class="panel active">
+
+      <div class="card">
+        <h2>🏠 Главная страница</h2>
+
+        <div class="notice">
+          Здесь можно вручную выбрать, какой матч показывать как
+          <b>предстоящий</b> и какой как <b>последний</b>.
+          Если ничего не выбрать — сайт использует автоматический режим.
+        </div>
+
+        <div class="field">
+          <label>Предстоящий матч</label>
+          <select id="homeUpcoming"></select>
+        </div>
+
+        <div class="field">
+          <label>Последний матч</label>
+          <select id="homeLastMatch"></select>
+        </div>
+
+        <div class="field">
+          <label>Главное объявление</label>
+          <select id="homeAnnouncement"></select>
+        </div>
+
+        <div class="field">
+          <label>Главная новость №1</label>
+          <select id="homePress1"></select>
+        </div>
 
-<div class="card">
+        <div class="field">
+          <label>Главная новость №2</label>
+          <select id="homePress2"></select>
+        </div>
 
-<h3>
-    Добавить именинника
-</h3>
+        <div class="field">
+          <label>Главная новость №3</label>
+          <select id="homePress3"></select>
+        </div>
 
-<div class="form-grid">
+        <div class="field">
+          <label>Главный фотоальбом</label>
+          <select id="homeAlbum"></select>
+        </div>
 
-<div class="field">
+        <label class="checkbox">
+          <input id="showPress" type="checkbox" checked>
+          Показывать раздел «Пресс»
+        </label>
 
-<label>
-    Имя
-</label>
+        <label class="checkbox">
+          <input id="showMedia" type="checkbox" checked>
+          Показывать раздел «Медиа»
+        </label>
 
-<input
-    id="birthdayName"
-    placeholder="Амир Норов"
->
+        <label class="checkbox">
+          <input id="showAchievements" type="checkbox" checked>
+          Показывать достижения
+        </label>
 
-</div>
-
-<div class="field">
-
-<label>
-    Дата рождения
-</label>
-
-<input
-    id="birthdayDate"
-    type="date"
->
-
-</div>
-
-</div>
-
-<br>
-
-<div class="upload">
-
-<strong>
-    Фото
-</strong>
-
-<input
-    id="birthdayImage"
-    type="file"
-    accept="image/*"
-    onchange="previewFile(this,'birthdayPreview')"
->
-
-<img
-    id="birthdayPreview"
-    class="preview"
->
-
-</div>
-
-<div class="buttons">
-
-<button
-    class="btn btn-primary"
-    onclick="createBirthday()"
->
-    Добавить
-</button>
-
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h3>
-    Именинники
-</h3>
-
-<div id="birthdayList"></div>
-
-</div>
-
-</section>
-
-
-<!-- PLAYERS -->
-
-<section
-    id="players"
-    class="panel"
->
-
-<h2 class="panel-title">
-    Состав
-</h2>
-
-<div class="card">
-
-<h3>
-    Добавить игрока
-</h3>
-
-<div class="form-grid">
-
-<div class="field">
-
-<label>
-    Номер
-</label>
-
-<input
-    id="playerNumber"
-    type="number"
->
-
-</div>
-
-<div class="field">
-
-<label>
-    ФИО
-</label>
-
-<input
-    id="playerName"
->
-
-</div>
-
-<div class="field">
-
-<label>
-    Амплуа
-</label>
-
-<select id="playerPosition">
-
-<option value="Вратарь">
-Вратарь
-</option>
-
-<option value="Защитник">
-Защитник
-</option>
-
-<option value="Нападающий">
-Нападающий
-</option>
-
-</select>
-
-</div>
-
-</div>
-
-<div class="buttons">
-
-<button
-    class="btn btn-primary"
-    onclick="createPlayer()"
->
-    Добавить игрока
-</button>
-
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h3>
-    Игроки
-</h3>
-
-<div id="playerList"></div>
-
-</div>
-
-</section>
-
-
-<!-- PLAYER STATS -->
-
-<section
-    id="playerStats"
-    class="panel"
->
-
-<h2 class="panel-title">
-    ТОП игроков
-</h2>
-
-<p class="panel-description">
-    Здесь вручную задаются четыре рейтинга для главной
-    страницы. Для каждой категории можно выбрать до
-    трёх игроков, указать статистику и загрузить фото.
-</p>
-
-
-<div class="stats-category">
-
-<div class="stats-category-title">
-
-<strong>
-    🏒 Бомбардиры
-</strong>
-
-<span>
-    ТОП-3
-</span>
-
-</div>
-
-<div id="scorersRows"></div>
-
-</div>
-
-
-<div class="stats-category">
-
-<div class="stats-category-title">
-
-<strong>
-    🎯 Снайперы
-</strong>
-
-<span>
-    ТОП-3
-</span>
-
-</div>
-
-<div id="snipersRows"></div>
-
-</div>
-
-
-<div class="stats-category">
-
-<div class="stats-category-title">
-
-<strong>
-    ➕➖ Плюс / минус
-</strong>
-
-<span>
-    ТОП-3
-</span>
-
-</div>
-
-<div id="plusMinusRows"></div>
-
-</div>
-
-
-<div class="stats-category">
-
-<div class="stats-category-title">
-
-<strong>
-    🛡️ Бомбардиры-защитники
-</strong>
-
-<span>
-    ТОП-3
-</span>
-
-</div>
-
-<div id="defenseScorersRows"></div>
-
-</div>
+        <label class="checkbox">
+          <input id="showBirthdays" type="checkbox" checked>
+          Показывать именинников
+        </label>
 
+        <div class="actions">
+          <button class="btn" onclick="saveHomeSettings()">
+            СОХРАНИТЬ ГЛАВНУЮ
+          </button>
+        </div>
+      </div>
 
-<div class="buttons">
+    </section>
 
-<button
-    class="btn btn-primary"
-    onclick="saveAllPlayerStats()"
->
-    Сохранить статистику игроков
-</button>
 
-<button
-    class="btn btn-secondary"
-    onclick="loadPlayerStatsAdmin()"
->
-    Обновить
-</button>
+    <!-- NEWS -->
+    <section id="news" class="panel">
 
-</div>
-
-</section>
-
-
-<!-- MATCHES -->
-
-<section
-    id="matches"
-    class="panel"
->
-
-<h2 class="panel-title">
-    Матчи
-</h2>
-
-<div class="card">
-
-<h3>
-    Добавить матч
-</h3>
-
-<div class="form-grid">
-
-<div class="field">
-
-<label>
-    Дата
-</label>
-
-<input
-    id="matchDate"
-    type="date"
->
-
-</div>
-
-<div class="field">
-
-<label>
-    Время
-</label>
-
-<input
-    id="matchTime"
-    type="time"
->
-
-</div>
-
-<div class="field">
-
-<label>
-    Соперник
-</label>
-
-<input
-    id="matchOpponent"
->
-
-</div>
-
-<div class="field">
-
-<label>
-    Место
-</label>
-
-<select id="matchHomeAway">
-
-<option value="home">
-Дома
-</option>
-
-<option value="away">
-В гостях
-</option>
-
-</select>
-
-</div>
-
-<div class="field">
-
-<label>
-    Счёт
-</label>
-
-<input
-    id="matchScore"
-    placeholder="5:2"
->
-
-</div>
-
-<div class="field">
-
-<label>
-    Статус
-</label>
-
-<select id="matchStatus">
-
-<option value="scheduled">
-Предстоящий
-</option>
-
-<option value="finished">
-Завершён
-</option>
-
-</select>
-
-</div>
-
-</div>
-
-<div class="buttons">
-
-<button
-    class="btn btn-primary"
-    onclick="createMatch()"
->
-    Добавить матч
-</button>
-
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h3>
-    Матчи
-</h3>
-
-<div id="matchList"></div>
+      <div class="card">
 
-</div>
-
-</section>
-
+        <h2>📰 Добавить новость</h2>
 
-<!-- STANDINGS -->
+        <div class="field">
+          <label>Заголовок</label>
+          <input id="newsTitle" placeholder="Например: Победа в матче">
+        </div>
 
-<section
-    id="standings"
-    class="panel"
->
+        <div class="field">
+          <label>Тег</label>
+          <input id="newsTag" placeholder="Новость / Анонс / Матч">
+        </div>
 
-<h2 class="panel-title">
-    Таблица
-</h2>
+        <div class="field">
+          <label>Дата</label>
+          <input id="newsDate" type="date">
+        </div>
 
-<div class="card">
+        <div class="field">
+          <label>Краткое описание</label>
+          <textarea id="newsDescription"></textarea>
+        </div>
 
-<h3>
-    Добавить команду
-</h3>
+        <div class="field">
+          <label>Полный текст</label>
+          <textarea id="newsContent"></textarea>
+        </div>
 
-<div class="form-grid">
+        <div class="field">
+          <label>Фото</label>
+          <input id="newsImage" class="file" type="file" accept="image/*"
+                 onchange="previewFile(this,'newsPreview')">
+          <img id="newsPreview" class="preview">
+        </div>
 
-<div class="field">
+        <button class="btn" onclick="addNews()">
+          ОПУБЛИКОВАТЬ
+        </button>
 
-<label>
-    Место
-</label>
+      </div>
 
-<input
-    id="tablePosition"
-    type="number"
->
+      <div class="card">
+        <h2>Опубликованные новости</h2>
+        <div id="newsList" class="list"></div>
+      </div>
 
-</div>
-
-<div class="field">
+    </section>
 
-<label>
-    Команда
-</label>
 
-<input
-    id="tableTeam"
->
+    <!-- MEDIA -->
+    <section id="media" class="panel">
 
-</div>
+      <div class="card">
 
-<div class="field">
+        <h2>🖼 Новый фотоальбом</h2>
 
-<label>
-    И
-</label>
+        <div class="field">
+          <label>Название</label>
+          <input id="albumTitle" placeholder="Матч против ...">
+        </div>
 
-<input
-    id="tableGames"
-    type="number"
->
+        <div class="field">
+          <label>Описание</label>
+          <textarea id="albumDescription"></textarea>
+        </div>
 
-</div>
+        <div class="field">
+          <label>Обложка</label>
+          <input id="albumCover" class="file" type="file" accept="image/*"
+                 onchange="previewFile(this,'albumPreview')">
+          <img id="albumPreview" class="preview">
+        </div>
 
-<div class="field">
+        <button class="btn" onclick="addAlbum()">
+          СОЗДАТЬ АЛЬБОМ
+        </button>
 
-<label>
-    В
-</label>
+      </div>
 
-<input
-    id="tableWins"
-    type="number"
->
+      <div class="card">
+        <h2>Альбомы</h2>
+        <div id="albumsList" class="list"></div>
+      </div>
 
-</div>
+    </section>
 
-<div class="field">
 
-<label>
-    ВО
-</label>
+    <!-- ACHIEVEMENTS -->
+    <section id="achievements" class="panel">
 
-<input
-    id="tableOvertimeWins"
-    type="number"
->
+      <div class="card">
 
-</div>
+        <h2>🏆 Добавить достижение</h2>
 
-<div class="field">
+        <div class="field">
+          <label>Название</label>
+          <input id="achievementTitle"
+                 placeholder="Например: Кубок Поволжья">
+        </div>
 
-<label>
-    П
-</label>
+        <div class="field">
+          <label>Описание</label>
+          <textarea id="achievementDescription"></textarea>
+        </div>
 
-<input
-    id="tableLosses"
-    type="number"
->
+        <div class="field">
+          <label>Фото трофея</label>
+          <input id="achievementImage"
+                 class="file"
+                 type="file"
+                 accept="image/*"
+                 onchange="previewFile(this,'achievementPreview')">
 
-</div>
+          <img id="achievementPreview" class="preview">
+        </div>
 
-<div class="field">
+        <button class="btn" onclick="addAchievement()">
+          ДОБАВИТЬ
+        </button>
 
-<label>
-    ПО
-</label>
+      </div>
 
-<input
-    id="tableOvertimeLosses"
-    type="number"
->
+      <div class="card">
+        <h2>Достижения</h2>
+        <div id="achievementsList" class="list"></div>
+      </div>
 
-</div>
+    </section>
 
-<div class="field">
 
-<label>
-    О
-</label>
+    <!-- BIRTHDAYS -->
+    <section id="birthdays" class="panel">
 
-<input
-    id="tablePoints"
-    type="number"
->
+      <div class="card">
 
-</div>
+        <h2>🎂 Добавить именинника</h2>
 
-</div>
+        <div class="field">
+          <label>Имя и фамилия</label>
+          <input id="birthdayName">
+        </div>
 
-<div class="buttons">
+        <div class="field">
+          <label>Дата рождения</label>
+          <input id="birthdayDate" type="date">
+        </div>
 
-<button
-    class="btn btn-primary"
-    onclick="createStanding()"
->
-    Добавить
-</button>
+        <div class="field">
+          <label>Фото</label>
+          <input id="birthdayImage"
+                 class="file"
+                 type="file"
+                 accept="image/*"
+                 onchange="previewFile(this,'birthdayPreview')">
 
-</div>
+          <img id="birthdayPreview" class="preview">
+        </div>
 
-</div>
+        <button class="btn" onclick="addBirthday()">
+          ДОБАВИТЬ
+        </button>
 
+      </div>
 
-<div class="card">
+      <div class="card">
+        <h2>Именинники</h2>
+        <div id="birthdaysList" class="list"></div>
+      </div>
 
-<h3>
-    Команды
-</h3>
+    </section>
 
-<div id="standingList"></div>
 
-</div>
+    <!-- PLAYERS -->
+    <section id="players" class="panel">
 
-</section>
+      <div class="card">
 
+        <h2>👥 Добавить игрока</h2>
 
-<!-- DESIGN -->
+        <div class="grid">
 
-<section
-    id="design"
-    class="panel"
->
+          <div class="field">
+            <label>Номер</label>
+            <input id="playerNumber" type="number">
+          </div>
 
-<h2 class="panel-title">
-    Дизайн
-</h2>
+          <div class="field">
+            <label>Имя и фамилия</label>
+            <input id="playerName">
+          </div>
 
-<p class="panel-description">
-    Здесь глобально меняется внешний вид всего сайта.
-</p>
+        </div>
 
+        <div class="field">
+          <label>Позиция</label>
 
-<div class="card">
+          <select id="playerPosition">
+            <option value="Вратарь">Вратарь</option>
+            <option value="Защитник">Защитник</option>
+            <option value="Нападающий">Нападающий</option>
+          </select>
+        </div>
 
-<h3>
-    Основные настройки
-</h3>
+        <div class="field">
+          <label>Фото игрока</label>
+          <input id="playerImage"
+                 class="file"
+                 type="file"
+                 accept="image/*"
+                 onchange="previewFile(this,'playerPreview')">
 
-<div class="form-grid">
+          <img id="playerPreview" class="preview">
+        </div>
 
-<div class="field full">
+        <button class="btn" onclick="addPlayer()">
+          ДОБАВИТЬ ИГРОКА
+        </button>
 
-<label>
-    Название сайта
-</label>
+      </div>
 
-<input
-    id="designSiteName"
-    value="ХК Челны 2011"
->
+      <div class="card">
+        <h2>Состав</h2>
+        <div id="playersList" class="list"></div>
+      </div>
 
-</div>
+    </section>
 
-<div class="field">
 
-<label>
-    Основной цвет
-</label>
+    <!-- PLAYER STATS -->
+    <section id="playerStats" class="panel">
 
-<input
-    id="designPrimary"
-    type="color"
-    value="#000056"
->
+      <div class="card">
 
-</div>
+        <h2>⭐ ТОП игроков</h2>
 
-<div class="field">
+        <div class="notice">
+          Для каждой категории выбери до 3 игроков.
+          Можно указать любое значение статистики:
+          например <b>35 очков</b>, <b>28 голов</b>, <b>+14</b>.
+        </div>
 
-<label>
-    Жёлтый цвет
-</label>
+      </div>
 
-<input
-    id="designSecondary"
-    type="color"
-    value="#ffcd00"
->
 
-</div>
+      <div class="card stat-category">
 
-<div class="field">
+        <div class="stat-title">
+          🥇 Бомбардиры
+        </div>
 
-<label>
-    Фон
-</label>
+        <div id="scorersRows"></div>
 
-<input
-    id="designBackground"
-    type="color"
-    value="#050b22"
->
+        <button class="btn" onclick="savePlayerStatsCategory('scorers')">
+          СОХРАНИТЬ БОМБАРДИРОВ
+        </button>
 
-</div>
+      </div>
 
-<div class="field">
 
-<label>
-    Цвет карточек
-</label>
+      <div class="card stat-category">
 
-<input
-    id="designCard"
-    type="color"
-    value="#0d1738"
->
+        <div class="stat-title">
+          🎯 Снайперы
+        </div>
 
-</div>
+        <div id="snipersRows"></div>
 
-<div class="field">
+        <button class="btn" onclick="savePlayerStatsCategory('snipers')">
+          СОХРАНИТЬ СНАЙПЕРОВ
+        </button>
 
-<label>
-    Цвет текста
-</label>
+      </div>
 
-<input
-    id="designText"
-    type="color"
-    value="#ffffff"
->
 
-</div>
+      <div class="card stat-category">
 
-<div class="field">
+        <div class="stat-title">
+          ➕➖ Плюс / минус
+        </div>
 
-<label>
-    Вторичный текст
-</label>
+        <div id="plus_minusRows"></div>
 
-<input
-    id="designMuted"
-    type="color"
-    value="#aab5d5"
->
+        <button class="btn" onclick="savePlayerStatsCategory('plus_minus')">
+          СОХРАНИТЬ ПЛЮС / МИНУС
+        </button>
 
-</div>
+      </div>
 
-<div class="field">
 
-<label>
-    Цвет рамок
-</label>
+      <div class="card stat-category">
 
-<input
-    id="designBorder"
-    type="color"
-    value="#26345f"
->
+        <div class="stat-title">
+          🛡 Бомбардиры-защитники
+        </div>
 
-</div>
+        <div id="defense_scorersRows"></div>
 
-<div class="field">
+        <button class="btn" onclick="savePlayerStatsCategory('defense_scorers')">
+          СОХРАНИТЬ ЗАЩИТНИКОВ
+        </button>
 
-<label>
-    Скругление
-</label>
+      </div>
 
-<input
-    id="designRadius"
-    type="number"
-    min="0"
-    max="40"
-    value="18"
->
+    </section>
 
-</div>
 
-</div>
+    <!-- MATCHES -->
+    <section id="matches" class="panel">
 
-</div>
+      <div class="card">
 
+        <h2>🏒 Добавить матч</h2>
 
-<div class="card">
+        <div class="field">
+          <label>Дата</label>
+          <input id="matchDate" type="date">
+        </div>
 
-<h3>
-    Логотип
-</h3>
+        <div class="field">
+          <label>Время</label>
+          <input id="matchTime" type="time">
+        </div>
 
-<div class="upload">
+        <div class="field">
+          <label>Соперник</label>
+          <input id="matchOpponent">
+        </div>
 
-<input
-    id="logoFile"
-    type="file"
-    accept="image/*"
-    onchange="previewFile(this,'logoPreview')"
->
+        <div class="field">
+          <label>Турнир</label>
+          <input id="matchTournament"
+                 placeholder="ПФО · Группа Б">
+        </div>
 
-<img
-    id="logoPreview"
-    class="preview"
->
+        <div class="grid">
 
-</div>
+          <div class="field">
+            <label>Голы ХК Челны</label>
+            <input id="matchHomeScore" type="number" placeholder="—">
+          </div>
 
-</div>
+          <div class="field">
+            <label>Голы соперника</label>
+            <input id="matchAwayScore" type="number" placeholder="—">
+          </div>
 
+        </div>
 
-<div class="card">
+        <div class="field">
+          <label>Место</label>
+          <input id="matchVenue">
+        </div>
 
-<h3>
-    Шрифты сайта
-</h3>
+        <button class="btn" onclick="addMatch()">
+          ДОБАВИТЬ МАТЧ
+        </button>
 
-<p class="panel-description">
-    Загружай шрифты прямо с телефона. После сохранения
-    выбранные шрифты будут использоваться на всём сайте.
-</p>
+      </div>
 
+      <div class="card">
+        <h2>Матчи</h2>
+        <div id="matchesList" class="list"></div>
+      </div>
 
-<div class="font-box">
+    </section>
 
-<div class="font-box-title">
-    Основной шрифт
-</div>
 
-<div class="font-box-description">
-    Используется для обычного текста, карточек,
-    описаний и большинства элементов.
-</div>
+    <!-- STANDINGS -->
+    <section id="standings" class="panel">
 
-<div
-    id="currentMainFont"
-    class="font-current"
->
-    Не выбран
-</div>
+      <div class="card">
 
-<div class="upload">
+        <h2>📊 Добавить команду в таблицу</h2>
 
-<input
-    id="fontMainFile"
-    type="file"
-    accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf"
-    onchange="previewFont(this,'fontMainPreview')"
->
+        <div class="field">
+          <label>Команда</label>
+          <input id="standingTeam">
+        </div>
 
-</div>
+        <div class="grid3">
 
-<div
-    id="fontMainPreview"
-    class="font-preview"
->
-    ХК ЧЕЛНЫ 2011
-</div>
+          <div class="field">
+            <label>И</label>
+            <input id="standingGames" type="number">
+          </div>
 
-</div>
+          <div class="field">
+            <label>О</label>
+            <input id="standingPoints" type="number">
+          </div>
 
+          <div class="field">
+            <label>Место</label>
+            <input id="standingPosition" type="number">
+          </div>
 
-<div class="font-box">
+        </div>
 
-<div class="font-box-title">
-    Шрифт заголовков
-</div>
+        <button class="btn" onclick="addStanding()">
+          ДОБАВИТЬ
+        </button>
 
-<div class="font-box-description">
-    Используется для крупных заголовков,
-    названий разделов и акцентов.
-</div>
+      </div>
 
-<div
-    id="currentHeadingFont"
-    class="font-current"
->
-    Не выбран
-</div>
+      <div class="card">
+        <h2>Таблица</h2>
+        <div id="standingsList" class="list"></div>
+      </div>
 
-<div class="upload">
+    </section>
 
-<input
-    id="fontHeadingFile"
-    type="file"
-    accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf"
-    onchange="previewFont(this,'fontHeadingPreview')"
->
 
-</div>
+    <!-- SHOP -->
+    <section id="shop" class="panel">
 
-<div
-    id="fontHeadingPreview"
-    class="font-preview"
->
-    ХК ЧЕЛНЫ 2011
-</div>
+      <div class="card">
 
-</div>
+        <h2>🛍 Добавить товар</h2>
 
+        <div class="field">
+          <label>Название</label>
+          <input id="productName">
+        </div>
 
-<div class="font-box">
+        <div class="field">
+          <label>Описание</label>
+          <textarea id="productDescription"></textarea>
+        </div>
 
-<div class="font-box-title">
-    Дополнительный шрифт
-</div>
+        <div class="field">
+          <label>Цена, ₽</label>
+          <input id="productPrice" type="number">
+        </div>
 
-<div class="font-box-description">
-    Используется для даты, тегов, навигации
-    и небольших подписей.
-</div>
+        <div class="field">
+          <label>Категория</label>
+          <input id="productCategory"
+                 placeholder="Форма / Аксессуары / Другое">
+        </div>
 
-<div
-    id="currentSecondaryFont"
-    class="font-current"
->
-    Не выбран
-</div>
+        <div class="field">
+          <label>Фото</label>
+          <input id="productImage"
+                 class="file"
+                 type="file"
+                 accept="image/*"
+                 onchange="previewFile(this,'productPreview')">
 
-<div class="upload">
+          <img id="productPreview" class="preview">
+        </div>
 
-<input
-    id="fontSecondaryFile"
-    type="file"
-    accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf"
-    onchange="previewFont(this,'fontSecondaryPreview')"
->
+        <div class="field">
+          <label>Контакт продавца</label>
+          <input id="productContact"
+                 placeholder="@telegram или телефон">
+        </div>
 
-</div>
+        <button class="btn" onclick="addProduct()">
+          ДОБАВИТЬ ТОВАР
+        </button>
 
-<div
-    id="fontSecondaryPreview"
-    class="font-preview"
->
-    ХК ЧЕЛНЫ 2011
-</div>
+      </div>
 
-</div>
+      <div class="card">
+        <h2>Товары</h2>
+        <div id="productsList" class="list"></div>
+      </div>
 
+    </section>
 
-<div class="buttons">
 
-<button
-    class="btn btn-secondary"
-    onclick="clearFontFiles()"
->
-    Очистить выбранные файлы
-</button>
+    <!-- DESIGN -->
+    <section id="design" class="panel">
 
-</div>
+      <div class="card">
 
-</div>
+        <h2>🎨 Дизайн сайта</h2>
 
+        <div class="field">
+          <label>Название сайта</label>
+          <input id="designSiteName">
+        </div>
 
-<div class="card">
+        <div class="field">
+          <label>Логотип</label>
 
-<h3>
-    Иконки навигации
-</h3>
+          <input id="designLogo"
+                 class="file"
+                 type="file"
+                 accept="image/*"
+                 onchange="previewFile(this,'designLogoPreview')">
 
-<div class="form-grid">
+          <img id="designLogoPreview" class="preview">
+        </div>
 
-<div class="field">
+        <div class="field">
+          <label>Основной цвет</label>
+          <div class="color-row">
+            <input id="primaryColor" type="text">
+            <input id="primaryColorPicker" type="color">
+          </div>
+        </div>
 
-<label>
-    Главная
-</label>
+        <div class="field">
+          <label>Вторичный цвет</label>
+          <div class="color-row">
+            <input id="secondaryColor" type="text">
+            <input id="secondaryColorPicker" type="color">
+          </div>
+        </div>
 
-<input
-    id="iconHome"
-    value="⌂"
->
+        <div class="field">
+          <label>Фон</label>
+          <div class="color-row">
+            <input id="backgroundColor" type="text">
+            <input id="backgroundColorPicker" type="color">
+          </div>
+        </div>
 
-</div>
+        <div class="field">
+          <label>Цвет карточек</label>
+          <div class="color-row">
+            <input id="cardColor" type="text">
+            <input id="cardColorPicker" type="color">
+          </div>
+        </div>
 
-<div class="field">
+        <div class="field">
+          <label>Цвет текста</label>
+          <div class="color-row">
+            <input id="textColor" type="text">
+            <input id="textColorPicker" type="color">
+          </div>
+        </div>
 
-<label>
-    Матчи
-</label>
+        <div class="field">
+          <label>Приглушённый текст</label>
+          <div class="color-row">
+            <input id="mutedTextColor" type="text">
+            <input id="mutedTextColorPicker" type="color">
+          </div>
+        </div>
 
-<input
-    id="iconMatches"
-    value="🏒"
->
+        <div class="field">
+          <label>Цвет кнопок</label>
+          <div class="color-row">
+            <input id="buttonColor" type="text">
+            <input id="buttonColorPicker" type="color">
+          </div>
+        </div>
 
-</div>
+        <div class="field">
+          <label>Цвет границ</label>
+          <div class="color-row">
+            <input id="borderColor" type="text">
+            <input id="borderColorPicker" type="color">
+          </div>
+        </div>
 
-<div class="field">
+        <div class="field">
+          <label>Скругление карточек</label>
+          <input id="borderRadius" type="number">
+        </div>
 
-<label>
-    Состав
-</label>
+        <div class="field">
+          <label>Основной шрифт</label>
+          <input id="fontMain" type="file" class="file" accept=".ttf,.otf,.woff,.woff2"
+                 onchange="previewFont(this,'fontMainPreview')">
+          <div id="fontMainPreview" class="font-preview">
+            Stapel / основной шрифт
+          </div>
+        </div>
 
-<input
-    id="iconRoster"
-    value="👥"
->
+        <div class="field">
+          <label>Заголовочный шрифт</label>
+          <input id="fontHeading" type="file" class="file" accept=".ttf,.otf,.woff,.woff2"
+                 onchange="previewFont(this,'fontHeadingPreview')">
+          <div id="fontHeadingPreview" class="font-preview">
+            Stengazeta / заголовки
+          </div>
+        </div>
 
-</div>
+        <div class="field">
+          <label>Дополнительный шрифт</label>
+          <input id="fontSecondary" type="file" class="file" accept=".ttf,.otf,.woff,.woff2"
+                 onchange="previewFont(this,'fontSecondaryPreview')">
+          <div id="fontSecondaryPreview" class="font-preview">
+            Christopher / дополнительный
+          </div>
+        </div>
 
-<div class="field">
+        <h3>Иконки нижнего меню</h3>
 
-<label>
-    Таблица
-</label>
+        <div class="grid">
 
-<input
-    id="iconTable"
-    value="📊"
->
+          <div class="field">
+            <label>Главная</label>
+            <input id="homeIcon">
+          </div>
 
-</div>
+          <div class="field">
+            <label>Матчи</label>
+            <input id="matchesIcon">
+          </div>
 
-<div class="field">
+          <div class="field">
+            <label>Состав</label>
+            <input id="rosterIcon">
+          </div>
 
-<label>
-    Новости
-</label>
+          <div class="field">
+            <label>Таблица</label>
+            <input id="tableIcon">
+          </div>
 
-<input
-    id="iconNews"
-    value="📰"
->
+          <div class="field">
+            <label>Новости</label>
+            <input id="newsIcon">
+          </div>
 
-</div>
+        </div>
 
-</div>
+        <div class="actions">
 
-</div>
+          <button class="btn" onclick="saveDesign()">
+            СОХРАНИТЬ ДИЗАЙН
+          </button>
 
+          <button class="btn secondary" onclick="loadDesign()">
+            ОБНОВИТЬ
+          </button>
 
-<button
-    class="btn btn-primary"
-    onclick="saveDesign()"
->
-    Сохранить дизайн
-</button>
+        </div>
 
-</section>
+      </div>
 
-</div>
+    </section>
 
+  </div>
 </div>
 
 
-<div
-    id="status"
-    class="status"
->
-    Сохранено
-</div>
+<div id="status" class="status"></div>
 
 
 <script>
 
 /* =========================================================
    SUPABASE
-   ========================================================= */
+========================================================= */
 
 const SUPABASE_URL =
-"https://jxlbojosxaaqnyuzohnw.supabase.co";
+  "https://jxlbojosxaaqnyuzohnw.supabase.co";
 
 const SUPABASE_KEY =
-"sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
+  "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
 
-let accessToken =
-localStorage.getItem(
-    "supabase_access_token"
-);
+const STORAGE_BUCKET = "site-media";
+
+let session = null;
+
+let playersCache = [];
+let playerStatsCache = {};
+let matchesCache = [];
+let newsCache = [];
+let albumsCache = [];
+let achievementsCache = [];
+let birthdaysCache = [];
+let standingsCache = [];
+let productsCache = [];
 
 
 /* =========================================================
-   REQUEST
-   ========================================================= */
+   LOCAL SESSION
+========================================================= */
 
-async function request(
-    table,
-    method="GET",
-    body=null,
-    query=""
-){
+function saveSession(data){
 
-    const headers={
-        "apikey":SUPABASE_KEY,
+  session = data;
 
-        "Authorization":
-            `Bearer ${
-                accessToken || SUPABASE_KEY
-            }`,
+  localStorage.setItem(
+    "hcchelny_admin_session",
+    JSON.stringify(data)
+  );
+}
 
-        "Content-Type":
-            "application/json"
-    };
 
-    if(
-        method==="POST" ||
-        method==="PATCH" ||
-        method==="DELETE"
-    ){
-        headers["Prefer"]=
-            "return=representation";
-    }
+function getSavedSession(){
 
-    const response=
-        await fetch(
-            `${SUPABASE_URL}/rest/v1/${table}${query}`,
-            {
-                method,
-                headers,
-                body:
-                    body
-                    ?
-                    JSON.stringify(body)
-                    :
-                    null
-            }
-        );
+  try{
 
-    if(!response.ok){
-        throw new Error(
-            await response.text()
-        );
-    }
+    const raw =
+      localStorage.getItem("hcchelny_admin_session");
 
-    const text=
-        await response.text();
+    if(!raw) return null;
 
-    return text
-        ?
-        JSON.parse(text)
-        :
-        [];
+    return JSON.parse(raw);
+
+  }catch(e){
+
+    return null;
+  }
+}
+
+
+function clearSession(){
+
+  session = null;
+
+  localStorage.removeItem(
+    "hcchelny_admin_session"
+  );
 }
 
 
 /* =========================================================
-   LOGIN
-   ========================================================= */
+   AUTH — LOGIN
+========================================================= */
 
 async function login(){
 
-    const email=
-        document.getElementById("email")
-        .value
-        .trim();
+  const email =
+    document.getElementById("loginEmail").value.trim();
 
-    const password=
-        document.getElementById("password")
-        .value;
+  const password =
+    document.getElementById("loginPassword").value;
 
-    const error=
-        document.getElementById("loginError");
+  const error =
+    document.getElementById("loginError");
 
-    error.textContent="";
+  const button =
+    document.getElementById("loginButton");
 
-    try{
+  error.style.display = "none";
 
-        const response=
-            await fetch(
-                `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
-                {
-                    method:"POST",
+  if(!email || !password){
 
-                    headers:{
-                        "apikey":SUPABASE_KEY,
-                        "Content-Type":
-                            "application/json"
-                    },
+    error.textContent =
+      "Введите email и пароль.";
 
-                    body:JSON.stringify({
-                        email,
-                        password
-                    })
-                }
-            );
+    error.style.display = "block";
 
-        const data=
-            await response.json();
+    return;
+  }
 
-        if(!response.ok){
+  button.disabled = true;
+  button.textContent = "ВХОД...";
 
-            throw new Error(
-                data.error_description ||
-                data.msg ||
-                "Ошибка входа"
-            );
-        }
+  try{
 
-        accessToken=
-            data.access_token;
+    const response = await fetch(
+      `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
+      {
+        method:"POST",
 
-        localStorage.setItem(
-            "supabase_access_token",
-            accessToken
-        );
+        headers:{
+          apikey:SUPABASE_KEY,
+          "Content-Type":"application/json"
+        },
 
-        showAdmin();
+        body:JSON.stringify({
+          email,
+          password
+        })
+      }
+    );
 
-    }catch(error){
+    const data = await response.json();
 
-        document.getElementById(
-            "loginError"
-        ).textContent=
-            error.message;
+    if(!response.ok){
+
+      throw new Error(
+        data.error_description ||
+        data.msg ||
+        data.message ||
+        "Ошибка входа"
+      );
     }
+
+    saveSession(data);
+
+    showAdmin();
+
+  }catch(errorObject){
+
+    error.textContent =
+      errorObject.message ||
+      "Не удалось войти.";
+
+    error.style.display = "block";
+
+  }finally{
+
+    button.disabled = false;
+    button.textContent = "ВОЙТИ";
+  }
+}
+
+
+/* =========================================================
+   REFRESH TOKEN
+========================================================= */
+
+async function refreshSession(){
+
+  if(!session || !session.refresh_token){
+
+    return false;
+  }
+
+  try{
+
+    const response = await fetch(
+      `${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,
+      {
+        method:"POST",
+
+        headers:{
+          apikey:SUPABASE_KEY,
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+          refresh_token:session.refresh_token
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+
+      clearSession();
+
+      return false;
+    }
+
+    saveSession(data);
+
+    return true;
+
+  }catch(e){
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+   ENSURE VALID SESSION
+========================================================= */
+
+async function ensureSession(){
+
+  if(!session){
+
+    return false;
+  }
+
+  /*
+    Supabase обычно возвращает expires_at.
+    Проверяем токен заранее — за 60 секунд.
+  */
+
+  if(session.expires_at){
+
+    const now =
+      Math.floor(Date.now()/1000);
+
+    if(
+      Number(session.expires_at)
+      <= now + 60
+    ){
+
+      return await refreshSession();
+    }
+  }
+
+  return true;
+}
+
+
+/* =========================================================
+   API REQUEST
+========================================================= */
+
+async function request(
+  path,
+  options={},
+  retry=true
+){
+
+  const valid =
+    await ensureSession();
+
+  const headers = {
+
+    apikey:SUPABASE_KEY,
+
+    "Content-Type":
+      "application/json",
+
+    ...(options.headers || {})
+  };
+
+
+  if(
+    session &&
+    session.access_token
+  ){
+
+    headers.Authorization =
+      `Bearer ${session.access_token}`;
+  }
+
+
+  let response;
+
+  try{
+
+    response =
+      await fetch(
+        `${SUPABASE_URL}${path}`,
+        {
+          ...options,
+          headers
+        }
+      );
+
+  }catch(error){
+
+    throw error;
+  }
+
+
+  /*
+    JWT expired / 401.
+    Обновляем токен и повторяем запрос.
+  */
+
+  if(
+    (
+      response.status === 401 ||
+      response.status === 403
+    ) &&
+    retry &&
+    session &&
+    session.refresh_token
+  ){
+
+    const refreshed =
+      await refreshSession();
+
+    if(refreshed){
+
+      return await request(
+        path,
+        options,
+        false
+      );
+    }
+
+    showLogin();
+
+    throw new Error(
+      "Сессия закончилась. Войдите снова."
+    );
+  }
+
+
+  const text =
+    await response.text();
+
+  let data = null;
+
+  try{
+
+    data =
+      text ? JSON.parse(text) : null;
+
+  }catch(e){
+
+    data = text;
+  }
+
+
+  /*
+    Иногда PostgREST возвращает PGRST303.
+  */
+
+  if(
+    retry &&
+    session &&
+    session.refresh_token &&
+    data &&
+    (
+      data.code === "PGRST303" ||
+      String(data.message || "")
+        .toLowerCase()
+        .includes("jwt expired")
+    )
+  ){
+
+    const refreshed =
+      await refreshSession();
+
+    if(refreshed){
+
+      return await request(
+        path,
+        options,
+        false
+      );
+    }
+
+    showLogin();
+
+    throw new Error(
+      "Сессия закончилась. Войдите снова."
+    );
+  }
+
+
+  if(!response.ok){
+
+    const message =
+      data?.message ||
+      data?.error_description ||
+      data?.error ||
+      text ||
+      "Ошибка Supabase";
+
+    throw new Error(message);
+  }
+
+
+  return data;
+}
+
+
+/* =========================================================
+   STARTUP
+========================================================= */
+
+window.addEventListener(
+  "load",
+  async function(){
+
+    session =
+      getSavedSession();
+
+    if(!session){
+
+      showLogin();
+
+      return;
+    }
+
+    const valid =
+      await ensureSession();
+
+    if(!valid){
+
+      showLogin();
+
+      return;
+    }
+
+    showAdmin();
+  }
+);
+
+
+/* =========================================================
+   SHOW / HIDE
+========================================================= */
+
+function showAdmin(){
+
+  document.getElementById(
+    "loginScreen"
+  ).style.display = "none";
+
+  document.getElementById(
+    "admin"
+  ).style.display = "block";
+
+  document.getElementById(
+    "userEmail"
+  ).textContent =
+    session?.user?.email || "";
+
+  loadEverything();
+}
+
+
+function showLogin(){
+
+  clearSession();
+
+  document.getElementById(
+    "admin"
+  ).style.display = "none";
+
+  document.getElementById(
+    "loginScreen"
+  ).style.display = "flex";
 }
 
 
 function logout(){
 
-    localStorage.removeItem(
-        "supabase_access_token"
-    );
+  clearSession();
 
-    location.reload();
-}
-
-
-function showAdmin(){
-
-    document.getElementById(
-        "loginScreen"
-    ).style.display="none";
-
-    document.getElementById(
-        "adminScreen"
-    ).style.display="block";
-
-    initAdmin();
+  showLogin();
 }
 
 
 /* =========================================================
    TABS
-   ========================================================= */
+========================================================= */
 
-function openTab(
-    id,
-    button
-){
+function openTab(id,button){
 
-    document
-        .querySelectorAll(".panel")
-        .forEach(
-            x=>x.classList.remove("active")
-        );
+  document
+    .querySelectorAll(".panel")
+    .forEach(
+      x => x.classList.remove("active")
+    );
 
-    document
-        .querySelectorAll(".tab")
-        .forEach(
-            x=>x.classList.remove("active")
-        );
+  document
+    .querySelectorAll(".tab")
+    .forEach(
+      x => x.classList.remove("active")
+    );
 
-    document
-        .getElementById(id)
-        .classList.add("active");
+  document
+    .getElementById(id)
+    .classList.add("active");
 
-    button.classList.add("active");
+  button.classList.add("active");
 
-    if(id==="home")
-        loadHomeData();
+  if(id === "playerStats"){
 
-    if(id==="news")
-        loadNews();
+    loadPlayerStatsAdmin();
+  }
 
-    if(id==="media")
-        loadAlbums();
+  if(id === "design"){
 
-    if(id==="achievements")
-        loadAchievements();
+    loadDesign();
+  }
 
-    if(id==="birthdays")
-        loadBirthdays();
+  if(id === "home"){
 
-    if(id==="players")
-        loadPlayers();
-
-    if(id==="playerStats")
-        loadPlayerStatsAdmin();
-
-    if(id==="matches")
-        loadMatches();
-
-    if(id==="standings")
-        loadStandings();
-
-    if(id==="design")
-        loadDesign();
+    loadHomeSettings();
+  }
 }
 
 
 /* =========================================================
    STATUS
-   ========================================================= */
+========================================================= */
 
-function notify(message){
+function status(message,type="ok"){
 
-    const el=
-        document.getElementById("status");
+  const box =
+    document.getElementById("status");
 
-    el.textContent=message;
+  box.textContent = message;
 
-    el.classList.add("show");
+  box.className =
+    `status show ${type}`;
 
+  clearTimeout(window.statusTimer);
+
+  window.statusTimer =
     setTimeout(
-        ()=>{
-            el.classList.remove("show");
+      () => box.classList.remove("show"),
+      3000
+    );
+}
+
+
+/* =========================================================
+   FILE PREVIEW
+========================================================= */
+
+function previewFile(input,id){
+
+  const file =
+    input.files?.[0];
+
+  const image =
+    document.getElementById(id);
+
+  if(!file){
+
+    image.style.display = "none";
+
+    return;
+  }
+
+  image.src =
+    URL.createObjectURL(file);
+
+  image.style.display =
+    "block";
+}
+
+
+/* =========================================================
+   UPLOAD IMAGE
+========================================================= */
+
+async function uploadImage(file){
+
+  if(!file){
+
+    return null;
+  }
+
+  const extension =
+    file.name.split(".").pop()
+      .toLowerCase();
+
+  const fileName =
+    `${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2)}.${extension}`;
+
+  const path =
+    `uploads/${fileName}`;
+
+  const response =
+    await fetch(
+      `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`,
+      {
+        method:"POST",
+
+        headers:{
+          apikey:SUPABASE_KEY,
+          Authorization:
+            `Bearer ${session.access_token}`,
+          "Content-Type":
+            file.type || "application/octet-stream"
         },
-        2200
+
+        body:file
+      }
     );
-}
 
 
-/* =========================================================
-   UPLOAD
-   ========================================================= */
+  /*
+    Storage upload тоже может получить
+    протухший JWT.
+  */
 
-async function uploadFile(
-    input,
-    folder="site"
-){
+  if(
+    response.status === 401 ||
+    response.status === 403
+  ){
 
-    if(
-        !input ||
-        !input.files ||
-        !input.files[0]
-    ){
-        return null;
+    const refreshed =
+      await refreshSession();
+
+    if(refreshed){
+
+      return uploadImage(file);
     }
 
-    const file=
-        input.files[0];
-
-    const extension=
-        file.name
-        .split(".")
-        .pop()
-        .toLowerCase();
-
-    const filename=
-        `${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2,9)}.${extension}`;
-
-    const path=
-        `${folder}/${filename}`;
-
-    const response=
-        await fetch(
-            `${SUPABASE_URL}/storage/v1/object/site-media/${path}`,
-            {
-                method:"POST",
-
-                headers:{
-                    "apikey":SUPABASE_KEY,
-
-                    "Authorization":
-                        `Bearer ${accessToken}`,
-
-                    "Content-Type":
-                        file.type ||
-                        "application/octet-stream"
-                },
-
-                body:file
-            }
-        );
-
-    if(!response.ok){
-
-        throw new Error(
-            await response.text()
-        );
-    }
-
-    return `${SUPABASE_URL}/storage/v1/object/public/site-media/${path}`;
-}
-
-
-async function uploadImage(input){
-
-    return uploadFile(
-        input,
-        "site"
+    throw new Error(
+      "Сессия закончилась при загрузке файла."
     );
-}
+  }
 
 
-async function uploadFont(input){
+  if(!response.ok){
 
-    return uploadFile(
-        input,
-        "fonts"
+    const text =
+      await response.text();
+
+    throw new Error(
+      text || "Ошибка загрузки файла"
     );
+  }
+
+
+  return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
 }
 
 
 /* =========================================================
-   PREVIEW
-   ========================================================= */
+   LOAD EVERYTHING
+========================================================= */
 
-function previewFile(
-    input,
-    previewId
-){
+async function loadEverything(){
 
-    const file=
-        input.files?.[0];
+  try{
 
-    if(!file)return;
+    await Promise.allSettled([
 
-    const preview=
-        document.getElementById(
-            previewId
-        );
+      loadPlayers(),
 
-    preview.src=
-        URL.createObjectURL(file);
+      loadPlayerStatsAdmin(),
 
-    preview.style.display="block";
-}
+      loadNews(),
 
+      loadAlbums(),
 
-/* =========================================================
-   FONT PREVIEW
-   ========================================================= */
+      loadAchievements(),
 
-function previewFont(
-    input,
-    previewId
-){
+      loadBirthdays(),
 
-    const file=
-        input.files?.[0];
+      loadMatches(),
 
-    if(!file)return;
+      loadStandings(),
 
-    const preview=
-        document.getElementById(
-            previewId
-        );
+      loadProducts(),
 
-    const fontName=
-        "PreviewFont"+
-        Date.now();
+      loadDesign(),
 
-    const url=
-        URL.createObjectURL(file);
+      loadHomeSettings()
 
-    const style=
-        document.createElement("style");
+    ]);
 
-    style.textContent=`
-        @font-face{
-            font-family:"${fontName}";
-            src:url("${url}");
-        }
+  }catch(e){
 
-        #${previewId}{
-            font-family:"${fontName}",sans-serif;
-        }
-    `;
-
-    document.head.appendChild(style);
-
-    preview.style.fontFamily=
-        `"${fontName}",sans-serif`;
-
-    preview.textContent=
-        file.name;
-}
-
-
-/* =========================================================
-   HOME
-   ========================================================= */
-
-async function loadHomeData(){
-
-    try{
-
-        const news=
-            await request(
-                "news",
-                "GET",
-                null,
-                "?select=*&order=created_at.desc"
-            );
-
-        const albums=
-            await request(
-                "albums",
-                "GET",
-                null,
-                "?select=*&order=created_at.desc"
-            );
-
-        fillSelect(
-            "homeAnnouncement",
-            news.filter(
-                n=>
-                    String(n.tag||"")
-                    .toLowerCase()==="анонс"
-            ),
-            "Выбрать анонс"
-        );
-
-        fillSelect(
-            "homeNews1",
-            news,
-            "Автоматически"
-        );
-
-        fillSelect(
-            "homeNews2",
-            news,
-            "Автоматически"
-        );
-
-        fillSelect(
-            "homeNews3",
-            news,
-            "Автоматически"
-        );
-
-        fillSelect(
-            "homeAlbum",
-            albums,
-            "Автоматически"
-        );
-
-        const settings=
-            await request(
-                "settings",
-                "GET",
-                null,
-                "?select=*&limit=1"
-            );
-
-        const s=settings[0];
-
-        if(!s)return;
-
-        setSelect(
-            "homeAnnouncement",
-            s.home_announcement_id
-        );
-
-        setSelect(
-            "homeNews1",
-            s.home_news_1_id
-        );
-
-        setSelect(
-            "homeNews2",
-            s.home_news_2_id
-        );
-
-        setSelect(
-            "homeNews3",
-            s.home_news_3_id
-        );
-
-        setSelect(
-            "homeAlbum",
-            s.home_media_album_id
-        );
-
-        document.getElementById(
-            "showPress"
-        ).checked=
-            s.home_show_press !== false;
-
-        document.getElementById(
-            "showMedia"
-        ).checked=
-            s.home_show_media !== false;
-
-        document.getElementById(
-            "showAchievements"
-        ).checked=
-            s.home_show_achievements !== false;
-
-        document.getElementById(
-            "showBirthdays"
-        ).checked=
-            s.home_show_birthdays !== false;
-
-    }catch(error){
-
-        console.error(error);
-    }
-}
-
-
-function fillSelect(
-    id,
-    items,
-    first
-){
-
-    const select=
-        document.getElementById(id);
-
-    select.innerHTML=
-        `<option value="">
-            ${first}
-        </option>`;
-
-    items.forEach(item=>{
-
-        const option=
-            document.createElement("option");
-
-        option.value=item.id;
-
-        option.textContent=
-            item.title ||
-            item.name;
-
-        select.appendChild(option);
-    });
-}
-
-
-function setSelect(id,value){
-
-    if(
-        value===null ||
-        value===undefined
-    )return;
-
-    const select=
-        document.getElementById(id);
-
-    if(
-        [...select.options]
-        .some(
-            o=>
-                String(o.value)===
-                String(value)
-        )
-    ){
-        select.value=value;
-    }
-}
-
-
-async function saveHome(){
-
-    try{
-
-        const rows=
-            await request(
-                "settings",
-                "GET",
-                null,
-                "?select=id&limit=1"
-            );
-
-        if(!rows.length){
-
-            notify(
-                "Нет строки settings"
-            );
-
-            return;
-        }
-
-        const id=rows[0].id;
-
-        await request(
-            "settings",
-            "PATCH",
-            {
-                home_announcement_id:
-                    valueOrNull("homeAnnouncement"),
-
-                home_news_1_id:
-                    valueOrNull("homeNews1"),
-
-                home_news_2_id:
-                    valueOrNull("homeNews2"),
-
-                home_news_3_id:
-                    valueOrNull("homeNews3"),
-
-                home_media_album_id:
-                    valueOrNull("homeAlbum"),
-
-                home_show_press:
-                    document.getElementById(
-                        "showPress"
-                    ).checked,
-
-                home_show_media:
-                    document.getElementById(
-                        "showMedia"
-                    ).checked,
-
-                home_show_achievements:
-                    document.getElementById(
-                        "showAchievements"
-                    ).checked,
-
-                home_show_birthdays:
-                    document.getElementById(
-                        "showBirthdays"
-                    ).checked
-            },
-            `?id=eq.${id}`
-        );
-
-        notify(
-            "Главная сохранена"
-        );
-
-    }catch(error){
-
-        alert(error.message);
-    }
-}
-
-
-function valueOrNull(id){
-
-    const value=
-        document.getElementById(id).value;
-
-    return value
-        ? Number(value)
-        : null;
-}
-
-
-/* =========================================================
-   NEWS
-   ========================================================= */
-
-async function saveNews(){
-
-    try{
-
-        const input=
-            document.getElementById("newsImage");
-
-        let image=null;
-
-        if(input.files.length){
-            image=
-                await uploadImage(input);
-        }
-
-        await request(
-            "news",
-            "POST",
-            {
-                title:
-                    document.getElementById(
-                        "newsTitle"
-                    ).value,
-
-                tag:
-                    document.getElementById(
-                        "newsTag"
-                    ).value,
-
-                description:
-                    document.getElementById(
-                        "newsDescription"
-                    ).value,
-
-                content:
-                    document.getElementById(
-                        "newsContent"
-                    ).value,
-
-                image_url:image,
-
-                created_at:
-                    document.getElementById(
-                        "newsDate"
-                    ).value
-                    ?
-                    `${document.getElementById(
-                        "newsDate"
-                    ).value
-                    }T12:00:00`
-                    :
-                    new Date().toISOString()
-            }
-        );
-
-        clearNewsForm();
-
-        await loadNews();
-
-        notify("Новость добавлена");
-
-    }catch(error){
-
-        alert(error.message);
-    }
-}
-
-
-function clearNewsForm(){
-
-    [
-        "newsTitle",
-        "newsDescription",
-        "newsContent"
-    ].forEach(id=>{
-        document.getElementById(id).value="";
-    });
-
-    document.getElementById(
-        "newsTag"
-    ).value="";
-
-    document.getElementById(
-        "newsImage"
-    ).value="";
-
-    document.getElementById(
-        "newsPreview"
-    ).style.display="none";
-}
-
-
-async function loadNews(){
-
-    const rows=
-        await request(
-            "news",
-            "GET",
-            null,
-            "?select=*&order=created_at.desc"
-        );
-
-    const container=
-        document.getElementById("newsList");
-
-    container.innerHTML="";
-
-    rows.forEach(item=>{
-
-        const div=
-            document.createElement("div");
-
-        div.className="item";
-
-        div.innerHTML=`
-
-            ${
-                item.image_url
-                ?
-                `<img
-                    class="item-image"
-                    src="${item.image_url}"
-                >`
-                :
-                `<div class="item-image"></div>`
-            }
-
-            <div class="item-info">
-
-                <div class="item-title">
-                    ${escapeHTML(item.title)}
-                </div>
-
-                <div class="item-meta">
-                    ${escapeHTML(
-                        item.tag ||
-                        "Без тега"
-                    )}
-                </div>
-
-            </div>
-
-            <div class="item-actions">
-
-                <button
-                    class="small-btn"
-                    onclick="deleteItem(
-                        'news',
-                        ${item.id},
-                        loadNews
-                    )"
-                >
-                    Удалить
-                </button>
-
-            </div>
-        `;
-
-        container.appendChild(div);
-    });
-}
-
-
-/* =========================================================
-   ALBUMS
-   ========================================================= */
-
-async function createAlbum(){
-
-    try{
-
-        let cover=null;
-
-        const input=
-            document.getElementById(
-                "albumCover"
-            );
-
-        if(input.files.length){
-            cover=
-                await uploadImage(input);
-        }
-
-        await request(
-            "albums",
-            "POST",
-            {
-                title:
-                    document.getElementById(
-                        "albumTitle"
-                    ).value,
-
-                description:
-                    document.getElementById(
-                        "albumDescription"
-                    ).value,
-
-                cover_url:cover
-            }
-        );
-
-        document.getElementById(
-            "albumTitle"
-        ).value="";
-
-        document.getElementById(
-            "albumDescription"
-        ).value="";
-
-        input.value="";
-
-        await loadAlbums();
-
-        notify("Альбом создан");
-
-    }catch(error){
-
-        alert(error.message);
-    }
-}
-
-
-async function loadAlbums(){
-
-    const rows=
-        await request(
-            "albums",
-            "GET",
-            null,
-            "?select=*&order=created_at.desc"
-        );
-
-    const container=
-        document.getElementById("albumList");
-
-    container.innerHTML="";
-
-    rows.forEach(item=>{
-
-        const div=
-            document.createElement("div");
-
-        div.className="item";
-
-        div.innerHTML=`
-
-            ${
-                item.cover_url
-                ?
-                `<img
-                    class="item-image"
-                    src="${item.cover_url}"
-                >`
-                :
-                `<div class="item-image"></div>`
-            }
-
-            <div class="item-info">
-
-                <div class="item-title">
-                    ${escapeHTML(item.title)}
-                </div>
-
-                <div class="item-meta">
-                    ${escapeHTML(
-                        item.description ||
-                        ""
-                    )}
-                </div>
-
-            </div>
-
-            <div class="item-actions">
-
-                <a
-                    class="small-btn"
-                    href="album.html?id=${item.id}"
-                    target="_blank"
-                >
-                    Открыть
-                </a>
-
-                <button
-                    class="small-btn"
-                    onclick="deleteItem(
-                        'albums',
-                        ${item.id},
-                        loadAlbums
-                    )"
-                >
-                    Удалить
-                </button>
-
-            </div>
-        `;
-
-        container.appendChild(div);
-    });
-}
-
-
-/* =========================================================
-   ACHIEVEMENTS
-   ========================================================= */
-
-async function createAchievement(){
-
-    try{
-
-        let image=null;
-
-        const input=
-            document.getElementById(
-                "achievementImage"
-            );
-
-        if(input.files.length){
-            image=
-                await uploadImage(input);
-        }
-
-        await request(
-            "achievements",
-            "POST",
-            {
-                title:
-                    document.getElementById(
-                        "achievementTitle"
-                    ).value,
-
-                year:
-                    Number(
-                        document.getElementById(
-                            "achievementYear"
-                        ).value
-                    ) || null,
-
-                description:
-                    document.getElementById(
-                        "achievementDescription"
-                    ).value,
-
-                trophy_url:image
-            }
-        );
-
-        await loadAchievements();
-
-        notify(
-            "Достижение добавлено"
-        );
-
-    }catch(error){
-
-        alert(error.message);
-    }
-}
-
-
-async function loadAchievements(){
-
-    const rows=
-        await request(
-            "achievements",
-            "GET",
-            null,
-            "?select=*&order=year.desc"
-        );
-
-    const container=
-        document.getElementById(
-            "achievementList"
-        );
-
-    container.innerHTML="";
-
-    rows.forEach(item=>{
-
-        const div=
-            document.createElement("div");
-
-        div.className="item";
-
-        div.innerHTML=`
-
-            ${
-                item.trophy_url
-                ?
-                `<img
-                    class="item-image"
-                    src="${item.trophy_url}"
-                >`
-                :
-                `<div class="item-image"></div>`
-            }
-
-            <div class="item-info">
-
-                <div class="item-title">
-                    ${escapeHTML(item.title)}
-                </div>
-
-                <div class="item-meta">
-                    ${item.year || ""}
-                </div>
-
-            </div>
-
-            <button
-                class="small-btn"
-                onclick="deleteItem(
-                    'achievements',
-                    ${item.id},
-                    loadAchievements
-                )"
-            >
-                Удалить
-            </button>
-
-        `;
-
-        container.appendChild(div);
-    });
-}
-
-
-/* =========================================================
-   BIRTHDAYS
-   ========================================================= */
-
-async function createBirthday(){
-
-    try{
-
-        let image=null;
-
-        const input=
-            document.getElementById(
-                "birthdayImage"
-            );
-
-        if(input.files.length){
-            image=
-                await uploadImage(input);
-        }
-
-        await request(
-            "birthdays",
-            "POST",
-            {
-                name:
-                    document.getElementById(
-                        "birthdayName"
-                    ).value,
-
-                birthday:
-                    document.getElementById(
-                        "birthdayDate"
-                    ).value ||
-                    null,
-
-                image_url:image
-            }
-        );
-
-        await loadBirthdays();
-
-        notify(
-            "Именинник добавлен"
-        );
-
-    }catch(error){
-
-        alert(error.message);
-    }
-}
-
-
-async function loadBirthdays(){
-
-    const rows=
-        await request(
-            "birthdays",
-            "GET",
-            null,
-            "?select=*&order=birthday.asc"
-        );
-
-    const container=
-        document.getElementById(
-            "birthdayList"
-        );
-
-    container.innerHTML="";
-
-    rows.forEach(item=>{
-
-        const div=
-            document.createElement("div");
-
-        div.className="item";
-
-        div.innerHTML=`
-
-            ${
-                item.image_url
-                ?
-                `<img
-                    class="item-image"
-                    src="${item.image_url}"
-                >`
-                :
-                `<div class="item-image"></div>`
-            }
-
-            <div class="item-info">
-
-                <div class="item-title">
-                    ${escapeHTML(item.name)}
-                </div>
-
-                <div class="item-meta">
-                    ${item.birthday || ""}
-                </div>
-
-            </div>
-
-            <button
-                class="small-btn"
-                onclick="deleteItem(
-                    'birthdays',
-                    ${item.id},
-                    loadBirthdays
-                )"
-            >
-                Удалить
-            </button>
-
-        `;
-
-        container.appendChild(div);
-    });
+    console.error(e);
+  }
 }
 
 
 /* =========================================================
    PLAYERS
-   ========================================================= */
-
-async function createPlayer(){
-
-    try{
-
-        await request(
-            "players",
-            "POST",
-            {
-                number:
-                    Number(
-                        document.getElementById(
-                            "playerNumber"
-                        ).value
-                    ),
-
-                name:
-                    document.getElementById(
-                        "playerName"
-                    ).value,
-
-                position:
-                    document.getElementById(
-                        "playerPosition"
-                    ).value
-            }
-        );
-
-        await loadPlayers();
-
-        notify(
-            "Игрок добавлен"
-        );
-
-    }catch(error){
-
-        alert(error.message);
-    }
-}
-
+========================================================= */
 
 async function loadPlayers(){
 
-    const rows=
-        await request(
-            "players",
-            "GET",
-            null,
-            "?select=*&order=number.asc"
-        );
+  playersCache =
+    await request(
+      "/rest/v1/players?select=*&order=number.asc"
+    );
 
-    const container=
-        document.getElementById(
-            "playerList"
-        );
+  renderPlayers();
 
-    container.innerHTML="";
+  fillPlayerSelects();
+}
 
-    rows.forEach(item=>{
 
-        const div=
-            document.createElement("div");
+function renderPlayers(){
 
-        div.className="item";
+  const box =
+    document.getElementById(
+      "playersList"
+    );
 
-        div.innerHTML=`
+  if(!playersCache.length){
 
-            <div
-                class="item-image"
-                style="
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    font-size:20px;
-                    font-weight:900;
-                    color:#ffcd00;
-                "
-            >
-                #${item.number}
+    box.innerHTML =
+      `<div class="small">Игроков пока нет.</div>`;
+
+    return;
+  }
+
+  box.innerHTML =
+    playersCache.map(
+      player => `
+
+        <div class="list-item">
+
+          <div class="item-info">
+
+            <div class="item-title">
+              #${escapeHtml(player.number ?? "")}
+              ${escapeHtml(player.name ?? "")}
             </div>
 
-            <div class="item-info">
-
-                <div class="item-title">
-                    ${escapeHTML(item.name)}
-                </div>
-
-                <div class="item-meta">
-                    ${escapeHTML(item.position)}
-                </div>
-
+            <div class="item-sub">
+              ${escapeHtml(player.position ?? "")}
             </div>
 
-            <button
-                class="small-btn"
-                onclick="deleteItem(
-                    'players',
-                    ${item.id},
-                    loadPlayers
-                )"
-            >
-                Удалить
-            </button>
-        `;
+          </div>
 
-        container.appendChild(div);
-    });
+          <button
+            class="btn danger"
+            onclick="deletePlayer(${player.id})">
+            Удалить
+          </button>
+
+        </div>
+      `
+    ).join("");
+}
+
+
+async function addPlayer(){
+
+  try{
+
+    const number =
+      document.getElementById(
+        "playerNumber"
+      ).value;
+
+    const name =
+      document.getElementById(
+        "playerName"
+      ).value.trim();
+
+    const position =
+      document.getElementById(
+        "playerPosition"
+      ).value;
+
+    const file =
+      document.getElementById(
+        "playerImage"
+      ).files?.[0];
+
+
+    if(!name){
+
+      status(
+        "Введите имя игрока.",
+        "bad"
+      );
+
+      return;
+    }
+
+
+    let photo_url = null;
+
+    if(file){
+
+      photo_url =
+        await uploadImage(file);
+    }
+
+
+    await request(
+      "/rest/v1/players",
+      {
+        method:"POST",
+
+        headers:{
+          Prefer:"return=minimal"
+        },
+
+        body:JSON.stringify({
+          number:
+            number ? Number(number) : null,
+
+          name,
+
+          position,
+
+          photo_url
+        })
+      }
+    );
+
+
+    status(
+      "Игрок добавлен."
+    );
+
+    document.getElementById(
+      "playerNumber"
+    ).value = "";
+
+    document.getElementById(
+      "playerName"
+    ).value = "";
+
+    document.getElementById(
+      "playerImage"
+    ).value = "";
+
+    document.getElementById(
+      "playerPreview"
+    ).style.display = "none";
+
+
+    await loadPlayers();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+async function deletePlayer(id){
+
+  if(!confirm("Удалить игрока?")){
+
+    return;
+  }
+
+  try{
+
+    await request(
+      `/rest/v1/players?id=eq.${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    status("Игрок удалён.");
+
+    await loadPlayers();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
 }
 
 
 /* =========================================================
    PLAYER STATS
-   ========================================================= */
+========================================================= */
 
-const playerStatCategories=[
-    {
-        key:"scorers",
-        container:"scorersRows"
-    },
-    {
-        key:"snipers",
-        container:"snipersRows"
-    },
-    {
-        key:"plus_minus",
-        container:"plusMinusRows"
-    },
-    {
-        key:"defense_scorers",
-        container:"defenseScorersRows"
-    }
-];
+const PLAYER_CATEGORIES = {
 
+  scorers:{
+    title:"Бомбардиры"
+  },
 
-let cachedPlayers=[];
+  snipers:{
+    title:"Снайперы"
+  },
+
+  plus_minus:{
+    title:"Плюс / минус"
+  },
+
+  defense_scorers:{
+    title:"Бомбардиры-защитники"
+  }
+
+};
 
 
-async function getPlayersForStats(){
-
-    cachedPlayers=
-        await request(
-            "players",
-            "GET",
-            null,
-            "?select=id,name,number,position&order=number.asc"
-        );
-
-    return cachedPlayers;
-}
-
-
-function playerOptions(
-    selected=""
+function playerStatRow(
+  category,
+  rank,
+  current=null
 ){
 
-    let html=
-        `<option value="">
-            Выберите игрока
-        </option>`;
+  const selected =
+    current?.player_id || "";
 
-    cachedPlayers.forEach(player=>{
+  const stat =
+    current?.stat_value || "";
 
-        const selectedText=
-            String(player.id)===
-            String(selected)
-            ?
-            " selected"
-            :
-            "";
+  const photo =
+    current?.photo_url || "";
 
-        html+=`
-            <option
+
+  return `
+
+    <div class="stat-row">
+
+      <div class="stat-head">
+
+        <div class="rank">
+          ${rank}
+        </div>
+
+        <div class="stat-number">
+          ${rank}-е место
+        </div>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>Игрок</label>
+
+        <select
+          id="${category}_${rank}_player">
+
+          <option value="">
+            — Не выбран —
+          </option>
+
+          ${playersCache.map(
+            player => `
+
+              <option
                 value="${player.id}"
-                ${selectedText}
-            >
-                #${player.number}
-                —
-                ${escapeHTML(player.name)}
-            </option>
-        `;
-    });
+                ${String(player.id) === String(selected)
+                  ? "selected"
+                  : ""}>
 
-    return html;
-}
+                #${escapeHtml(player.number ?? "")}
+                ${escapeHtml(player.name ?? "")}
+
+              </option>
+            `
+          ).join("")}
+
+        </select>
+
+      </div>
 
 
-function createStatRow(
-    category,
-    rank,
-    data={}
-){
+      <div class="field">
 
-    const playerId=
-        data.player_id || "";
+        <label>Статистика</label>
 
-    const statValue=
-        data.stat_value || "";
+        <input
+          id="${category}_${rank}_stat"
+          value="${escapeAttr(stat)}"
+          placeholder="Например: 35 очков">
 
-    const photoUrl=
-        data.photo_url || "";
+      </div>
 
-    const wrapper=
-        document.createElement("div");
 
-    wrapper.className="stat-row";
+      <div class="field">
 
-    wrapper.dataset.category=
-        category;
+        <label>Фото для блока ТОП</label>
 
-    wrapper.dataset.rank=
-        rank;
+        <input
+          id="${category}_${rank}_file"
+          class="file"
+          type="file"
+          accept="image/*"
+          onchange="previewFile(
+            this,
+            '${category}_${rank}_preview'
+          )">
 
-    wrapper.innerHTML=`
+        <img
+          id="${category}_${rank}_preview"
+          class="stat-preview"
+          ${photo
+            ? `src="${escapeAttr(photo)}" style="display:block"`
+            : ""}>
 
-        <div class="stat-rank">
-            ${rank}
-        </div>
+      </div>
 
-        <div class="stat-field">
+      <input
+        type="hidden"
+        id="${category}_${rank}_old_photo"
+        value="${escapeAttr(photo)}">
 
-            <select
-                class="stat-player"
-            >
-                ${playerOptions(playerId)}
-            </select>
+    </div>
 
-        </div>
-
-        <div class="stat-field">
-
-            <input
-                class="stat-value"
-                type="text"
-                value="${escapeHTML(statValue)}"
-                placeholder="Статистика"
-            >
-
-        </div>
-
-        <div class="stat-photo">
-
-            <input
-                class="stat-photo-file"
-                type="file"
-                accept="image/*"
-            >
-
-            ${
-                photoUrl
-                ?
-                `
-                <small>
-                    Фото уже загружено
-                </small>
-                `
-                :
-                `
-                <small>
-                    Фото игрока
-                </small>
-                `
-            }
-
-            <input
-                class="stat-photo-url"
-                type="hidden"
-                value="${escapeHTML(photoUrl)}"
-            >
-
-        </div>
-    `;
-
-    return wrapper;
+  `;
 }
 
 
 async function loadPlayerStatsAdmin(){
 
-    try{
+  try{
 
-        await getPlayersForStats();
+    if(!playersCache.length){
 
-        const rows=
-            await request(
-                "player_stats",
-                "GET",
-                null,
-                "?select=*&order=category.asc,rank.asc"
-            );
-
-
-        playerStatCategories.forEach(category=>{
-
-            const container=
-                document.getElementById(
-                    category.container
-                );
-
-            container.innerHTML="";
-
-            for(
-                let rank=1;
-                rank<=3;
-                rank++
-            ){
-
-                const existing=
-                    rows.find(
-                        row=>
-                            row.category===
-                            category.key &&
-                            Number(row.rank)===
-                            rank
-                    );
-
-                container.appendChild(
-                    createStatRow(
-                        category.key,
-                        rank,
-                        existing || {}
-                    )
-                );
-            }
-        });
-
-    }catch(error){
-
-        console.error(error);
-
-        alert(
-            "Не удалось загрузить статистику:\n\n"+
-            error.message
-        );
+      await loadPlayers();
     }
+
+
+    const data =
+      await request(
+        "/rest/v1/player_stats?select=*&order=category.asc,rank.asc"
+      );
+
+
+    playerStatsCache = {};
+
+    data.forEach(
+      item => {
+
+        if(!playerStatsCache[item.category]){
+
+          playerStatsCache[item.category] = {};
+        }
+
+        playerStatsCache[item.category][
+          item.rank
+        ] = item;
+
+      }
+    );
+
+
+    Object.keys(
+      PLAYER_CATEGORIES
+    ).forEach(
+      category => {
+
+        const box =
+          document.getElementById(
+            `${category}Rows`
+          );
+
+        if(!box) return;
+
+        box.innerHTML =
+          [1,2,3].map(
+            rank =>
+              playerStatRow(
+                category,
+                rank,
+                playerStatsCache?.[category]?.[rank]
+              )
+          ).join("");
+      }
+    );
+
+  }catch(e){
+
+    console.error(e);
+
+    const message =
+      String(e.message || "");
+
+    if(
+      message.includes("player_stats") ||
+      message.includes("relation")
+    ){
+
+      status(
+        "Проверьте, создана ли таблица player_stats в Supabase.",
+        "bad"
+      );
+
+    }else{
+
+      status(
+        message,
+        "bad"
+      );
+    }
+  }
 }
 
 
 async function savePlayerStatsCategory(
-    category
+  category
 ){
 
-    const categoryInfo=
-        playerStatCategories.find(
-            x=>x.key===category
-        );
+  try{
 
-    const container=
+    const rows = [];
+
+    for(
+      let rank=1;
+      rank<=3;
+      rank++
+    ){
+
+      const player =
         document.getElementById(
-            categoryInfo.container
-        );
+          `${category}_${rank}_player`
+        ).value;
 
-    const rows=
-        [...container.querySelectorAll(".stat-row")];
+      const stat =
+        document.getElementById(
+          `${category}_${rank}_stat`
+        ).value.trim();
+
+      const file =
+        document.getElementById(
+          `${category}_${rank}_file`
+        ).files?.[0];
+
+      const oldPhoto =
+        document.getElementById(
+          `${category}_${rank}_old_photo`
+        ).value;
+
+
+      if(!player){
+
+        continue;
+      }
+
+
+      let photo_url =
+        oldPhoto || null;
+
+
+      if(file){
+
+        photo_url =
+          await uploadImage(file);
+      }
+
+
+      rows.push({
+
+        category,
+
+        rank,
+
+        player_id:
+          Number(player),
+
+        stat_value:
+          stat,
+
+        photo_url
+
+      });
+    }
 
 
     /*
-       Сначала удаляем старые записи этой категории.
-       Затем создаём заново актуальный ТОП-3.
+      Сначала удаляем старую категорию.
     */
 
     await request(
-        "player_stats",
-        "DELETE",
-        null,
-        `?category=eq.${category}`
+      `/rest/v1/player_stats?category=eq.${encodeURIComponent(category)}`,
+      {
+        method:"DELETE"
+      }
     );
 
 
-    for(
-        const row of rows
-    ){
+    /*
+      Затем вставляем новые строки.
+    */
 
-        const playerId=
-            row.querySelector(
-                ".stat-player"
-            ).value;
+    if(rows.length){
 
-        const statValue=
-            row.querySelector(
-                ".stat-value"
-            ).value
-            .trim();
+      await request(
+        "/rest/v1/player_stats",
+        {
+          method:"POST",
 
-        const photoInput=
-            row.querySelector(
-                ".stat-photo-file"
-            );
+          headers:{
+            Prefer:"return=minimal"
+          },
 
-        let photoUrl=
-            row.querySelector(
-                ".stat-photo-url"
-            ).value
-            ||
-            null;
-
-
-        /*
-           Если выбрали новое фото —
-           загружаем его.
-        */
-
-        if(
-            photoInput &&
-            photoInput.files.length
-        ){
-
-            photoUrl=
-                await uploadImage(
-                    photoInput
-                );
+          body:JSON.stringify(rows)
         }
-
-
-        /*
-           Пустые строки не сохраняем.
-        */
-
-        if(
-            !playerId ||
-            !statValue
-        ){
-            continue;
-        }
-
-
-        await request(
-            "player_stats",
-            "POST",
-            {
-                category:category,
-
-                rank:Number(
-                    row.dataset.rank
-                ),
-
-                player_id:Number(
-                    playerId
-                ),
-
-                stat_value:statValue,
-
-                photo_url:photoUrl
-            }
-        );
+      );
     }
+
+
+    status(
+      "Статистика сохранена."
+    );
+
+
+    await loadPlayerStatsAdmin();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
 }
 
 
-async function saveAllPlayerStats(){
+/* =========================================================
+   NEWS
+========================================================= */
 
-    try{
+async function loadNews(){
 
-        for(
-            const category
-            of playerStatCategories
-        ){
+  try{
 
-            await savePlayerStatsCategory(
-                category.key
-            );
-        }
+    newsCache =
+      await request(
+        "/rest/v1/news?select=*&order=created_at.desc"
+      );
 
-        await loadPlayerStatsAdmin();
+    renderNews();
 
-        notify(
-            "Статистика игроков сохранена"
-        );
+  }catch(e){
 
-    }catch(error){
+    console.error(e);
 
-        console.error(error);
+    document.getElementById(
+      "newsList"
+    ).innerHTML =
+      `<div class="small">${escapeHtml(e.message)}</div>`;
+  }
+}
 
-        alert(
-            "Ошибка сохранения:\n\n"+
-            error.message
-        );
+
+function renderNews(){
+
+  const box =
+    document.getElementById(
+      "newsList"
+    );
+
+  box.innerHTML =
+    newsCache.map(
+      item => `
+
+        <div class="list-item">
+
+          <div class="item-info">
+
+            <div class="item-title">
+              ${escapeHtml(item.title || "Без названия")}
+            </div>
+
+            <div class="item-sub">
+              ${escapeHtml(item.tag || "Новость")}
+              ·
+              ${escapeHtml(item.date || "")}
+            </div>
+
+          </div>
+
+          <button
+            class="btn danger"
+            onclick="deleteNews(${item.id})">
+            Удалить
+          </button>
+
+        </div>
+
+      `
+    ).join("") ||
+    `<div class="small">Новостей пока нет.</div>`;
+}
+
+
+async function addNews(){
+
+  try{
+
+    const title =
+      document.getElementById(
+        "newsTitle"
+      ).value.trim();
+
+    const tag =
+      document.getElementById(
+        "newsTag"
+      ).value.trim();
+
+    const date =
+      document.getElementById(
+        "newsDate"
+      ).value;
+
+    const description =
+      document.getElementById(
+        "newsDescription"
+      ).value.trim();
+
+    const content =
+      document.getElementById(
+        "newsContent"
+      ).value.trim();
+
+    const file =
+      document.getElementById(
+        "newsImage"
+      ).files?.[0];
+
+
+    if(!title){
+
+      status(
+        "Введите заголовок.",
+        "bad"
+      );
+
+      return;
     }
+
+
+    let image_url = null;
+
+    if(file){
+
+      image_url =
+        await uploadImage(file);
+    }
+
+
+    await request(
+      "/rest/v1/news",
+      {
+        method:"POST",
+
+        headers:{
+          Prefer:"return=minimal"
+        },
+
+        body:JSON.stringify({
+
+          title,
+
+          tag:
+            tag || "Новость",
+
+          date:
+            date || null,
+
+          description,
+
+          content,
+
+          image_url
+
+        })
+      }
+    );
+
+
+    status("Новость опубликована.");
+
+    document.getElementById(
+      "newsTitle"
+    ).value = "";
+
+    document.getElementById(
+      "newsTag"
+    ).value = "";
+
+    document.getElementById(
+      "newsDescription"
+    ).value = "";
+
+    document.getElementById(
+      "newsContent"
+    ).value = "";
+
+    document.getElementById(
+      "newsImage"
+    ).value = "";
+
+    document.getElementById(
+      "newsPreview"
+    ).style.display = "none";
+
+
+    await loadNews();
+
+    fillNewsSelects();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+async function deleteNews(id){
+
+  if(!confirm("Удалить новость?")) return;
+
+  try{
+
+    await request(
+      `/rest/v1/news?id=eq.${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    status("Новость удалена.");
+
+    await loadNews();
+
+    fillNewsSelects();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+/* =========================================================
+   ALBUMS
+========================================================= */
+
+async function loadAlbums(){
+
+  try{
+
+    albumsCache =
+      await request(
+        "/rest/v1/albums?select=*&order=created_at.desc"
+      );
+
+    renderAlbums();
+
+  }catch(e){
+
+    console.error(e);
+
+    document.getElementById(
+      "albumsList"
+    ).innerHTML =
+      `<div class="small">
+        Таблица albums пока недоступна.
+      </div>`;
+  }
+}
+
+
+function renderAlbums(){
+
+  const box =
+    document.getElementById(
+      "albumsList"
+    );
+
+  box.innerHTML =
+    albumsCache.map(
+      item => `
+
+        <div class="list-item">
+
+          <div class="item-info">
+
+            <div class="item-title">
+              ${escapeHtml(item.title || "")}
+            </div>
+
+            <div class="item-sub">
+              ${escapeHtml(item.description || "")}
+            </div>
+
+          </div>
+
+          <button
+            class="btn danger"
+            onclick="deleteAlbum(${item.id})">
+            Удалить
+          </button>
+
+        </div>
+
+      `
+    ).join("") ||
+    `<div class="small">Альбомов пока нет.</div>`;
+}
+
+
+async function addAlbum(){
+
+  try{
+
+    const title =
+      document.getElementById(
+        "albumTitle"
+      ).value.trim();
+
+    const description =
+      document.getElementById(
+        "albumDescription"
+      ).value.trim();
+
+    const file =
+      document.getElementById(
+        "albumCover"
+      ).files?.[0];
+
+
+    if(!title){
+
+      status(
+        "Введите название альбома.",
+        "bad"
+      );
+
+      return;
+    }
+
+
+    let cover_url = null;
+
+    if(file){
+
+      cover_url =
+        await uploadImage(file);
+    }
+
+
+    await request(
+      "/rest/v1/albums",
+      {
+        method:"POST",
+
+        headers:{
+          Prefer:"return=minimal"
+        },
+
+        body:JSON.stringify({
+
+          title,
+
+          description,
+
+          cover_url
+
+        })
+      }
+    );
+
+
+    status("Альбом создан.");
+
+    document.getElementById(
+      "albumTitle"
+    ).value = "";
+
+    document.getElementById(
+      "albumDescription"
+    ).value = "";
+
+    document.getElementById(
+      "albumCover"
+    ).value = "";
+
+    document.getElementById(
+      "albumPreview"
+    ).style.display = "none";
+
+
+    await loadAlbums();
+
+    fillAlbumSelect();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+async function deleteAlbum(id){
+
+  if(!confirm("Удалить альбом?")) return;
+
+  try{
+
+    await request(
+      `/rest/v1/albums?id=eq.${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    status("Альбом удалён.");
+
+    await loadAlbums();
+
+    fillAlbumSelect();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+/* =========================================================
+   ACHIEVEMENTS
+========================================================= */
+
+async function loadAchievements(){
+
+  try{
+
+    achievementsCache =
+      await request(
+        "/rest/v1/achievements?select=*&order=created_at.desc"
+      );
+
+    renderAchievements();
+
+  }catch(e){
+
+    document.getElementById(
+      "achievementsList"
+    ).innerHTML =
+      `<div class="small">
+        Достижения пока недоступны.
+      </div>`;
+  }
+}
+
+
+function renderAchievements(){
+
+  const box =
+    document.getElementById(
+      "achievementsList"
+    );
+
+  box.innerHTML =
+    achievementsCache.map(
+      item => `
+
+        <div class="list-item">
+
+          <div class="item-info">
+
+            <div class="item-title">
+              ${escapeHtml(item.title || "")}
+            </div>
+
+            <div class="item-sub">
+              ${escapeHtml(item.description || "")}
+            </div>
+
+          </div>
+
+          <button
+            class="btn danger"
+            onclick="deleteAchievement(${item.id})">
+            Удалить
+          </button>
+
+        </div>
+
+      `
+    ).join("") ||
+    `<div class="small">
+      Достижений пока нет.
+    </div>`;
+}
+
+
+async function addAchievement(){
+
+  try{
+
+    const title =
+      document.getElementById(
+        "achievementTitle"
+      ).value.trim();
+
+    const description =
+      document.getElementById(
+        "achievementDescription"
+      ).value.trim();
+
+    const file =
+      document.getElementById(
+        "achievementImage"
+      ).files?.[0];
+
+
+    if(!title){
+
+      status(
+        "Введите название.",
+        "bad"
+      );
+
+      return;
+    }
+
+
+    let image_url = null;
+
+    if(file){
+
+      image_url =
+        await uploadImage(file);
+    }
+
+
+    await request(
+      "/rest/v1/achievements",
+      {
+        method:"POST",
+
+        headers:{
+          Prefer:"return=minimal"
+        },
+
+        body:JSON.stringify({
+
+          title,
+
+          description,
+
+          image_url
+
+        })
+      }
+    );
+
+
+    status("Достижение добавлено.");
+
+    await loadAchievements();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+async function deleteAchievement(id){
+
+  if(!confirm("Удалить достижение?")) return;
+
+  try{
+
+    await request(
+      `/rest/v1/achievements?id=eq.${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    status("Достижение удалено.");
+
+    await loadAchievements();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+/* =========================================================
+   BIRTHDAYS
+========================================================= */
+
+async function loadBirthdays(){
+
+  try{
+
+    birthdaysCache =
+      await request(
+        "/rest/v1/birthdays?select=*&order=birthday.asc"
+      );
+
+    renderBirthdays();
+
+  }catch(e){
+
+    document.getElementById(
+      "birthdaysList"
+    ).innerHTML =
+      `<div class="small">
+        Именинники пока недоступны.
+      </div>`;
+  }
+}
+
+
+function renderBirthdays(){
+
+  const box =
+    document.getElementById(
+      "birthdaysList"
+    );
+
+  box.innerHTML =
+    birthdaysCache.map(
+      item => `
+
+        <div class="list-item">
+
+          <div class="item-info">
+
+            <div class="item-title">
+              ${escapeHtml(item.name || "")}
+            </div>
+
+            <div class="item-sub">
+              ${escapeHtml(item.birthday || "")}
+            </div>
+
+          </div>
+
+          <button
+            class="btn danger"
+            onclick="deleteBirthday(${item.id})">
+            Удалить
+          </button>
+
+        </div>
+
+      `
+    ).join("") ||
+    `<div class="small">
+      Именинников пока нет.
+    </div>`;
+}
+
+
+async function addBirthday(){
+
+  try{
+
+    const name =
+      document.getElementById(
+        "birthdayName"
+      ).value.trim();
+
+    const birthday =
+      document.getElementById(
+        "birthdayDate"
+      ).value;
+
+    const file =
+      document.getElementById(
+        "birthdayImage"
+      ).files?.[0];
+
+
+    if(!name || !birthday){
+
+      status(
+        "Заполните имя и дату.",
+        "bad"
+      );
+
+      return;
+    }
+
+
+    let image_url = null;
+
+    if(file){
+
+      image_url =
+        await uploadImage(file);
+    }
+
+
+    await request(
+      "/rest/v1/birthdays",
+      {
+        method:"POST",
+
+        headers:{
+          Prefer:"return=minimal"
+        },
+
+        body:JSON.stringify({
+
+          name,
+
+          birthday,
+
+          image_url
+
+        })
+      }
+    );
+
+
+    status("Именинник добавлен.");
+
+    await loadBirthdays();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+async function deleteBirthday(id){
+
+  if(!confirm("Удалить именинника?")) return;
+
+  try{
+
+    await request(
+      `/rest/v1/birthdays?id=eq.${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    status("Удалено.");
+
+    await loadBirthdays();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
 }
 
 
 /* =========================================================
    MATCHES
-   ========================================================= */
-
-async function createMatch(){
-
-    try{
-
-        await request(
-            "matches",
-            "POST",
-            {
-                date:
-                    document.getElementById(
-                        "matchDate"
-                    ).value,
-
-                time:
-                    document.getElementById(
-                        "matchTime"
-                    ).value,
-
-                opponent:
-                    document.getElementById(
-                        "matchOpponent"
-                    ).value,
-
-                home_away:
-                    document.getElementById(
-                        "matchHomeAway"
-                    ).value,
-
-                score:
-                    document.getElementById(
-                        "matchScore"
-                    ).value,
-
-                status:
-                    document.getElementById(
-                        "matchStatus"
-                    ).value
-            }
-        );
-
-        await loadMatches();
-
-        notify(
-            "Матч добавлен"
-        );
-
-    }catch(error){
-
-        alert(error.message);
-    }
-}
-
+========================================================= */
 
 async function loadMatches(){
 
-    const rows=
-        await request(
-            "matches",
-            "GET",
-            null,
-            "?select=*&order=date.asc,time.asc"
-        );
+  try{
 
-    const container=
-        document.getElementById(
-            "matchList"
-        );
+    matchesCache =
+      await request(
+        "/rest/v1/matches?select=*&order=date.asc"
+      );
 
-    container.innerHTML="";
+    renderMatches();
 
-    rows.forEach(item=>{
+    fillMatchSelects();
 
-        const div=
-            document.createElement("div");
+  }catch(e){
 
-        div.className="item";
+    document.getElementById(
+      "matchesList"
+    ).innerHTML =
+      `<div class="small">${escapeHtml(e.message)}</div>`;
+  }
+}
 
-        div.innerHTML=`
 
-            <div
-                class="item-image"
-                style="
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    font-size:20px;
-                "
-            >
-                🏒
+function renderMatches(){
+
+  const box =
+    document.getElementById(
+      "matchesList"
+    );
+
+  box.innerHTML =
+    matchesCache.map(
+      item => `
+
+        <div class="list-item">
+
+          <div class="item-info">
+
+            <div class="item-title">
+              ХК Челны — ${escapeHtml(item.opponent || "")}
             </div>
 
-            <div class="item-info">
-
-                <div class="item-title">
-                    ${escapeHTML(
-                        item.opponent
-                    )}
-                </div>
-
-                <div class="item-meta">
-                    ${item.date || ""}
-                    ${item.time || ""}
-                    ${item.score || ""}
-                </div>
-
+            <div class="item-sub">
+              ${escapeHtml(item.date || "")}
+              ·
+              ${escapeHtml(item.time || "")}
+              ·
+              ${item.home_score != null
+                ? item.home_score + " : " + item.away_score
+                : "— : —"}
             </div>
 
-            <button
-                class="small-btn"
-                onclick="deleteItem(
-                    'matches',
-                    ${item.id},
-                    loadMatches
-                )"
-            >
-                Удалить
-            </button>
-        `;
+          </div>
 
-        container.appendChild(div);
-    });
+          <button
+            class="btn danger"
+            onclick="deleteMatch(${item.id})">
+            Удалить
+          </button>
+
+        </div>
+
+      `
+    ).join("") ||
+    `<div class="small">Матчей пока нет.</div>`;
+}
+
+
+async function addMatch(){
+
+  try{
+
+    const date =
+      document.getElementById(
+        "matchDate"
+      ).value;
+
+    const time =
+      document.getElementById(
+        "matchTime"
+      ).value;
+
+    const opponent =
+      document.getElementById(
+        "matchOpponent"
+      ).value.trim();
+
+    const tournament =
+      document.getElementById(
+        "matchTournament"
+      ).value.trim();
+
+    const homeScore =
+      document.getElementById(
+        "matchHomeScore"
+      ).value;
+
+    const awayScore =
+      document.getElementById(
+        "matchAwayScore"
+      ).value;
+
+    const venue =
+      document.getElementById(
+        "matchVenue"
+      ).value.trim();
+
+
+    if(!date || !opponent){
+
+      status(
+        "Введите дату и соперника.",
+        "bad"
+      );
+
+      return;
+    }
+
+
+    await request(
+      "/rest/v1/matches",
+      {
+        method:"POST",
+
+        headers:{
+          Prefer:"return=minimal"
+        },
+
+        body:JSON.stringify({
+
+          date,
+
+          time,
+
+          opponent,
+
+          tournament,
+
+          home_score:
+            homeScore === ""
+              ? null
+              : Number(homeScore),
+
+          away_score:
+            awayScore === ""
+              ? null
+              : Number(awayScore),
+
+          venue
+
+        })
+      }
+    );
+
+
+    status("Матч добавлен.");
+
+    await loadMatches();
+
+    await loadHomeSettings();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+async function deleteMatch(id){
+
+  if(!confirm("Удалить матч?")) return;
+
+  try{
+
+    await request(
+      `/rest/v1/matches?id=eq.${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    status("Матч удалён.");
+
+    await loadMatches();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
 }
 
 
 /* =========================================================
    STANDINGS
-   ========================================================= */
-
-async function createStanding(){
-
-    try{
-
-        await request(
-            "standings",
-            "POST",
-            {
-                position:
-                    Number(
-                        document.getElementById(
-                            "tablePosition"
-                        ).value
-                    ),
-
-                team:
-                    document.getElementById(
-                        "tableTeam"
-                    ).value,
-
-                games:
-                    Number(
-                        document.getElementById(
-                            "tableGames"
-                        ).value
-                    ) || 0,
-
-                wins:
-                    Number(
-                        document.getElementById(
-                            "tableWins"
-                        ).value
-                    ) || 0,
-
-                overtime_wins:
-                    Number(
-                        document.getElementById(
-                            "tableOvertimeWins"
-                        ).value
-                    ) || 0,
-
-                losses:
-                    Number(
-                        document.getElementById(
-                            "tableLosses"
-                        ).value
-                    ) || 0,
-
-                overtime_losses:
-                    Number(
-                        document.getElementById(
-                            "tableOvertimeLosses"
-                        ).value
-                    ) || 0,
-
-                points:
-                    Number(
-                        document.getElementById(
-                            "tablePoints"
-                        ).value
-                    ) || 0
-            }
-        );
-
-        await loadStandings();
-
-        notify(
-            "Команда добавлена"
-        );
-
-    }catch(error){
-
-        alert(error.message);
-    }
-}
-
+========================================================= */
 
 async function loadStandings(){
 
-    const rows=
-        await request(
-            "standings",
-            "GET",
-            null,
-            "?select=*&order=position.asc"
-        );
+  try{
 
-    const container=
-        document.getElementById(
-            "standingList"
-        );
+    standingsCache =
+      await request(
+        "/rest/v1/standings?select=*&order=position.asc"
+      );
 
-    container.innerHTML="";
+    renderStandings();
 
-    rows.forEach(item=>{
+  }catch(e){
 
-        const div=
-            document.createElement("div");
+    document.getElementById(
+      "standingsList"
+    ).innerHTML =
+      `<div class="small">${escapeHtml(e.message)}</div>`;
+  }
+}
 
-        div.className="item";
 
-        div.innerHTML=`
+function renderStandings(){
 
-            <div
-                class="item-image"
-                style="
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    font-weight:900;
-                    color:#ffcd00;
-                "
-            >
-                ${item.position}
+  const box =
+    document.getElementById(
+      "standingsList"
+    );
+
+  box.innerHTML =
+    standingsCache.map(
+      item => `
+
+        <div class="list-item">
+
+          <div class="item-info">
+
+            <div class="item-title">
+              ${escapeHtml(item.position ?? "")}.
+              ${escapeHtml(item.team || "")}
             </div>
 
-            <div class="item-info">
-
-                <div class="item-title">
-                    ${escapeHTML(item.team)}
-                </div>
-
-                <div class="item-meta">
-                    Игр:
-                    ${item.games || 0}
-                    · Очков:
-                    ${item.points || 0}
-                </div>
-
+            <div class="item-sub">
+              Игр: ${escapeHtml(item.games ?? 0)}
+              · Очков:
+              ${escapeHtml(item.points ?? 0)}
             </div>
 
-            <button
-                class="small-btn"
-                onclick="deleteItem(
-                    'standings',
-                    ${item.id},
-                    loadStandings
-                )"
-            >
-                Удалить
-            </button>
-        `;
+          </div>
 
-        container.appendChild(div);
-    });
+          <button
+            class="btn danger"
+            onclick="deleteStanding(${item.id})">
+            Удалить
+          </button>
+
+        </div>
+
+      `
+    ).join("") ||
+    `<div class="small">
+      Таблица пока пустая.
+    </div>`;
+}
+
+
+async function addStanding(){
+
+  try{
+
+    const team =
+      document.getElementById(
+        "standingTeam"
+      ).value.trim();
+
+    const games =
+      document.getElementById(
+        "standingGames"
+      ).value;
+
+    const points =
+      document.getElementById(
+        "standingPoints"
+      ).value;
+
+    const position =
+      document.getElementById(
+        "standingPosition"
+      ).value;
+
+
+    if(!team){
+
+      status(
+        "Введите команду.",
+        "bad"
+      );
+
+      return;
+    }
+
+
+    await request(
+      "/rest/v1/standings",
+      {
+        method:"POST",
+
+        headers:{
+          Prefer:"return=minimal"
+        },
+
+        body:JSON.stringify({
+
+          team,
+
+          games:
+            Number(games || 0),
+
+          points:
+            Number(points || 0),
+
+          position:
+            Number(position || 0)
+
+        })
+      }
+    );
+
+
+    status("Команда добавлена.");
+
+    await loadStandings();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+async function deleteStanding(id){
+
+  if(!confirm("Удалить строку?")) return;
+
+  try{
+
+    await request(
+      `/rest/v1/standings?id=eq.${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    status("Удалено.");
+
+    await loadStandings();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+/* =========================================================
+   SHOP
+========================================================= */
+
+async function loadProducts(){
+
+  try{
+
+    productsCache =
+      await request(
+        "/rest/v1/products?select=*&order=created_at.desc"
+      );
+
+    renderProducts();
+
+  }catch(e){
+
+    document.getElementById(
+      "productsList"
+    ).innerHTML =
+      `<div class="small">
+        Таблица товаров пока недоступна.
+      </div>`;
+  }
+}
+
+
+function renderProducts(){
+
+  const box =
+    document.getElementById(
+      "productsList"
+    );
+
+  box.innerHTML =
+    productsCache.map(
+      item => `
+
+        <div class="list-item">
+
+          <div class="item-info">
+
+            <div class="item-title">
+              ${escapeHtml(item.name || "")}
+            </div>
+
+            <div class="item-sub">
+              ${escapeHtml(item.price ?? 0)} ₽
+              ·
+              ${escapeHtml(item.category || "")}
+            </div>
+
+          </div>
+
+          <button
+            class="btn danger"
+            onclick="deleteProduct(${item.id})">
+            Удалить
+          </button>
+
+        </div>
+
+      `
+    ).join("") ||
+    `<div class="small">
+      Товаров пока нет.
+    </div>`;
+}
+
+
+async function addProduct(){
+
+  try{
+
+    const name =
+      document.getElementById(
+        "productName"
+      ).value.trim();
+
+    const description =
+      document.getElementById(
+        "productDescription"
+      ).value.trim();
+
+    const price =
+      document.getElementById(
+        "productPrice"
+      ).value;
+
+    const category =
+      document.getElementById(
+        "productCategory"
+      ).value.trim();
+
+    const contact =
+      document.getElementById(
+        "productContact"
+      ).value.trim();
+
+    const file =
+      document.getElementById(
+        "productImage"
+      ).files?.[0];
+
+
+    if(!name){
+
+      status(
+        "Введите название товара.",
+        "bad"
+      );
+
+      return;
+    }
+
+
+    let image_url = null;
+
+    if(file){
+
+      image_url =
+        await uploadImage(file);
+    }
+
+
+    await request(
+      "/rest/v1/products",
+      {
+        method:"POST",
+
+        headers:{
+          Prefer:"return=minimal"
+        },
+
+        body:JSON.stringify({
+
+          name,
+
+          description,
+
+          price:
+            Number(price || 0),
+
+          category,
+
+          image_url,
+
+          contact
+
+        })
+      }
+    );
+
+
+    status("Товар добавлен.");
+
+    await loadProducts();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+async function deleteProduct(id){
+
+  if(!confirm("Удалить товар?")) return;
+
+  try{
+
+    await request(
+      `/rest/v1/products?id=eq.${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    status("Товар удалён.");
+
+    await loadProducts();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
 }
 
 
 /* =========================================================
    DESIGN
-   ========================================================= */
+========================================================= */
 
 async function loadDesign(){
 
-    try{
+  try{
 
-        const rows=
-            await request(
-                "settings",
-                "GET",
-                null,
-                "?select=*&limit=1"
-            );
+    const data =
+      await request(
+        "/rest/v1/settings?select=*&limit=1"
+      );
 
-        if(!rows.length)return;
+    const s =
+      data?.[0];
 
-        const s=rows[0];
+    if(!s) return;
 
+
+    setValue(
+      "designSiteName",
+      s.site_name
+    );
+
+    setValue(
+      "primaryColor",
+      s.primary_color
+    );
+
+    setValue(
+      "secondaryColor",
+      s.secondary_color
+    );
+
+    setValue(
+      "backgroundColor",
+      s.background_color
+    );
+
+    setValue(
+      "cardColor",
+      s.card_color
+    );
+
+    setValue(
+      "textColor",
+      s.text_color
+    );
+
+    setValue(
+      "mutedTextColor",
+      s.muted_text_color
+    );
+
+    setValue(
+      "buttonColor",
+      s.button_color
+    );
+
+    setValue(
+      "borderColor",
+      s.border_color
+    );
+
+    setValue(
+      "borderRadius",
+      s.border_radius
+    );
+
+    setValue(
+      "homeIcon",
+      s.home_icon
+    );
+
+    setValue(
+      "matchesIcon",
+      s.matches_icon
+    );
+
+    setValue(
+      "rosterIcon",
+      s.roster_icon
+    );
+
+    setValue(
+      "tableIcon",
+      s.table_icon
+    );
+
+    setValue(
+      "newsIcon",
+      s.news_icon
+    );
+
+
+    if(s.logo_url){
+
+      const preview =
         document.getElementById(
-            "designSiteName"
-        ).value=
-            s.site_name ||
-            "ХК Челны 2011";
-
-        setColor(
-            "designPrimary",
-            s.primary_color,
-            "#000056"
+          "designLogoPreview"
         );
 
-        setColor(
-            "designSecondary",
-            s.secondary_color,
-            "#ffcd00"
-        );
+      preview.src =
+        s.logo_url;
 
-        setColor(
-            "designBackground",
-            s.background_color,
-            "#050b22"
-        );
-
-        setColor(
-            "designCard",
-            s.card_color,
-            "#0d1738"
-        );
-
-        setColor(
-            "designText",
-            s.text_color,
-            "#ffffff"
-        );
-
-        setColor(
-            "designMuted",
-            s.muted_text_color,
-            "#aab5d5"
-        );
-
-        setColor(
-            "designBorder",
-            s.border_color,
-            "#26345f"
-        );
-
-        document.getElementById(
-            "designRadius"
-        ).value=
-            s.border_radius || 18;
-
-        document.getElementById(
-            "iconHome"
-        ).value=
-            s.home_icon || "⌂";
-
-        document.getElementById(
-            "iconMatches"
-        ).value=
-            s.matches_icon || "🏒";
-
-        document.getElementById(
-            "iconRoster"
-        ).value=
-            s.roster_icon || "👥";
-
-        document.getElementById(
-            "iconTable"
-        ).value=
-            s.table_icon || "📊";
-
-        document.getElementById(
-            "iconNews"
-        ).value=
-            s.news_icon || "📰";
-
-
-        document.getElementById(
-            "currentMainFont"
-        ).textContent=
-            s.font_main
-            ?
-            `Текущий: ${s.font_main}`
-            :
-            "Текущий: Stapel";
-
-
-        document.getElementById(
-            "currentHeadingFont"
-        ).textContent=
-            s.font_heading
-            ?
-            `Текущий: ${s.font_heading}`
-            :
-            "Текущий: Stapel";
-
-
-        document.getElementById(
-            "currentSecondaryFont"
-        ).textContent=
-            s.font_secondary
-            ?
-            `Текущий: ${s.font_secondary}`
-            :
-            "Текущий: Stengazeta";
-
-    }catch(error){
-
-        console.error(error);
+      preview.style.display =
+        "block";
     }
+
+  }catch(e){
+
+    console.error(e);
+  }
 }
 
-
-function setColor(
-    id,
-    value,
-    fallback
-){
-
-    document.getElementById(id).value=
-        value || fallback;
-}
-
-
-/* =========================================================
-   SAVE DESIGN
-   ========================================================= */
 
 async function saveDesign(){
 
-    try{
+  try{
 
-        const rows=
-            await request(
-                "settings",
-                "GET",
-                null,
-                "?select=id&limit=1"
-            );
+    const existing =
+      await request(
+        "/rest/v1/settings?select=*&limit=1"
+      );
 
-        if(!rows.length){
-
-            alert(
-                "В settings нет строки"
-            );
-
-            return;
-        }
+    const current =
+      existing?.[0];
 
 
-        let logo=null;
-
-        const logoInput=
-            document.getElementById(
-                "logoFile"
-            );
-
-        if(logoInput.files.length){
-
-            logo=
-                await uploadImage(
-                    logoInput
-                );
-        }
+    let logo_url =
+      current?.logo_url || null;
 
 
-        let fontMain=null;
-        let fontHeading=null;
-        let fontSecondary=null;
+    const logoFile =
+      document.getElementById(
+        "designLogo"
+      ).files?.[0];
 
 
-        const fontMainInput=
-            document.getElementById(
-                "fontMainFile"
-            );
+    if(logoFile){
 
-        const fontHeadingInput=
-            document.getElementById(
-                "fontHeadingFile"
-            );
-
-        const fontSecondaryInput=
-            document.getElementById(
-                "fontSecondaryFile"
-            );
-
-
-        if(fontMainInput.files.length){
-
-            fontMain=
-                await uploadFont(
-                    fontMainInput
-                );
-        }
-
-        if(fontHeadingInput.files.length){
-
-            fontHeading=
-                await uploadFont(
-                    fontHeadingInput
-                );
-        }
-
-        if(fontSecondaryInput.files.length){
-
-            fontSecondary=
-                await uploadFont(
-                    fontSecondaryInput
-                );
-        }
-
-
-        const data={
-
-            site_name:
-                document.getElementById(
-                    "designSiteName"
-                ).value,
-
-            primary_color:
-                document.getElementById(
-                    "designPrimary"
-                ).value,
-
-            secondary_color:
-                document.getElementById(
-                    "designSecondary"
-                ).value,
-
-            background_color:
-                document.getElementById(
-                    "designBackground"
-                ).value,
-
-            card_color:
-                document.getElementById(
-                    "designCard"
-                ).value,
-
-            text_color:
-                document.getElementById(
-                    "designText"
-                ).value,
-
-            muted_text_color:
-                document.getElementById(
-                    "designMuted"
-                ).value,
-
-            border_color:
-                document.getElementById(
-                    "designBorder"
-                ).value,
-
-            border_radius:
-                Number(
-                    document.getElementById(
-                        "designRadius"
-                    ).value
-                ),
-
-            home_icon:
-                document.getElementById(
-                    "iconHome"
-                ).value,
-
-            matches_icon:
-                document.getElementById(
-                    "iconMatches"
-                ).value,
-
-            roster_icon:
-                document.getElementById(
-                    "iconRoster"
-                ).value,
-
-            table_icon:
-                document.getElementById(
-                    "iconTable"
-                ).value,
-
-            news_icon:
-                document.getElementById(
-                    "iconNews"
-                ).value
-        };
-
-
-        if(logo){
-            data.logo_url=logo;
-        }
-
-        if(fontMain){
-            data.font_main=fontMain;
-        }
-
-        if(fontHeading){
-            data.font_heading=fontHeading;
-        }
-
-        if(fontSecondary){
-            data.font_secondary=fontSecondary;
-        }
-
-
-        await request(
-            "settings",
-            "PATCH",
-            data,
-            `?id=eq.${rows[0].id}`
-        );
-
-
-        logoInput.value="";
-        fontMainInput.value="";
-        fontHeadingInput.value="";
-        fontSecondaryInput.value="";
-
-
-        await loadDesign();
-
-        notify(
-            "Дизайн сохранён"
-        );
-
-    }catch(error){
-
-        alert(
-            "Ошибка сохранения:\n\n"+
-            error.message
-        );
+      logo_url =
+        await uploadImage(logoFile);
     }
-}
 
 
-/* =========================================================
-   CLEAR FONT FILES
-   ========================================================= */
+    let font_main =
+      current?.font_main || null;
 
-function clearFontFiles(){
+    let font_heading =
+      current?.font_heading || null;
 
-    document.getElementById(
-        "fontMainFile"
-    ).value="";
+    let font_secondary =
+      current?.font_secondary || null;
 
-    document.getElementById(
-        "fontHeadingFile"
-    ).value="";
 
-    document.getElementById(
-        "fontSecondaryFile"
-    ).value="";
+    const fontMainFile =
+      document.getElementById(
+        "fontMain"
+      ).files?.[0];
 
-    notify(
-        "Выбранные файлы очищены"
+    const fontHeadingFile =
+      document.getElementById(
+        "fontHeading"
+      ).files?.[0];
+
+    const fontSecondaryFile =
+      document.getElementById(
+        "fontSecondary"
+      ).files?.[0];
+
+
+    if(fontMainFile){
+
+      font_main =
+        await uploadFont(fontMainFile);
+    }
+
+    if(fontHeadingFile){
+
+      font_heading =
+        await uploadFont(fontHeadingFile);
+    }
+
+    if(fontSecondaryFile){
+
+      font_secondary =
+        await uploadFont(fontSecondaryFile);
+    }
+
+
+    const body = {
+
+      site_name:
+        getValue("designSiteName"),
+
+      logo_url,
+
+      primary_color:
+        getValue("primaryColor"),
+
+      secondary_color:
+        getValue("secondaryColor"),
+
+      background_color:
+        getValue("backgroundColor"),
+
+      card_color:
+        getValue("cardColor"),
+
+      text_color:
+        getValue("textColor"),
+
+      muted_text_color:
+        getValue("mutedTextColor"),
+
+      button_color:
+        getValue("buttonColor"),
+
+      border_color:
+        getValue("borderColor"),
+
+      border_radius:
+        Number(
+          getValue("borderRadius") || 14
+        ),
+
+      home_icon:
+        getValue("homeIcon"),
+
+      matches_icon:
+        getValue("matchesIcon"),
+
+      roster_icon:
+        getValue("rosterIcon"),
+
+      table_icon:
+        getValue("tableIcon"),
+
+      news_icon:
+        getValue("newsIcon"),
+
+      font_main,
+
+      font_heading,
+
+      font_secondary
+
+    };
+
+
+    if(current?.id){
+
+      await request(
+        `/rest/v1/settings?id=eq.${current.id}`,
+        {
+          method:"PATCH",
+
+          headers:{
+            Prefer:"return=minimal"
+          },
+
+          body:JSON.stringify(body)
+        }
+      );
+
+    }else{
+
+      await request(
+        "/rest/v1/settings",
+        {
+          method:"POST",
+
+          headers:{
+            Prefer:"return=minimal"
+          },
+
+          body:JSON.stringify(body)
+        }
+      );
+    }
+
+
+    status(
+      "Дизайн сохранён."
     );
+
+
+    await loadDesign();
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+async function uploadFont(file){
+
+  const extension =
+    file.name.split(".").pop()
+      .toLowerCase();
+
+  const name =
+    `fonts/${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2)}.${extension}`;
+
+
+  const response =
+    await fetch(
+      `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${name}`,
+      {
+        method:"POST",
+
+        headers:{
+          apikey:SUPABASE_KEY,
+
+          Authorization:
+            `Bearer ${session.access_token}`,
+
+          "Content-Type":
+            file.type ||
+            "application/octet-stream"
+        },
+
+        body:file
+      }
+    );
+
+
+  if(
+    response.status === 401 ||
+    response.status === 403
+  ){
+
+    const refreshed =
+      await refreshSession();
+
+    if(refreshed){
+
+      return uploadFont(file);
+    }
+
+    throw new Error(
+      "Сессия закончилась."
+    );
+  }
+
+
+  if(!response.ok){
+
+    const text =
+      await response.text();
+
+    throw new Error(
+      text || "Ошибка загрузки шрифта"
+    );
+  }
+
+
+  return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${name}`;
+}
+
+
+function previewFont(input,id){
+
+  const file =
+    input.files?.[0];
+
+  if(!file) return;
+
+  const reader =
+    new FileReader();
+
+  reader.onload =
+    function(e){
+
+      const fontName =
+        "PreviewFont_" +
+        Math.random()
+          .toString(36)
+          .substring(2);
+
+      const style =
+        document.createElement("style");
+
+      style.textContent = `
+        @font-face{
+          font-family:'${fontName}';
+          src:url('${e.target.result}');
+        }
+        #${id}{
+          font-family:'${fontName}',sans-serif;
+        }
+      `;
+
+      document.head.appendChild(
+        style
+      );
+
+      document.getElementById(id)
+        .textContent =
+        "Пример выбранного шрифта";
+    };
+
+  reader.readAsDataURL(file);
 }
 
 
 /* =========================================================
-   DELETE
-   ========================================================= */
+   HOME SETTINGS
+========================================================= */
 
-async function deleteItem(
-    table,
-    id,
-    callback
-){
+async function loadHomeSettings(){
+
+  try{
+
+    await Promise.allSettled([
+
+      loadMatches(),
+
+      loadNews(),
+
+      loadAlbums()
+
+    ]);
+
+
+    const data =
+      await request(
+        "/rest/v1/settings?select=*&limit=1"
+      );
+
+    const s =
+      data?.[0];
+
+    if(!s) return;
+
+
+    fillMatchSelects();
+
+    fillNewsSelects();
+
+    fillAlbumSelect();
+
+
+    setSelected(
+      "homeUpcoming",
+      s.home_upcoming
+    );
+
+    setSelected(
+      "homeLastMatch",
+      s.home_last_match
+    );
+
+    setSelected(
+      "homeAnnouncement",
+      s.home_announcement
+    );
+
+    setSelected(
+      "homePress1",
+      s.home_press_1
+    );
+
+    setSelected(
+      "homePress2",
+      s.home_press_2
+    );
+
+    setSelected(
+      "homePress3",
+      s.home_press_3
+    );
+
+    setSelected(
+      "homeAlbum",
+      s.home_album
+    );
+
+
+    document.getElementById(
+      "showPress"
+    ).checked =
+      s.show_press !== false;
+
+    document.getElementById(
+      "showMedia"
+    ).checked =
+      s.show_media !== false;
+
+    document.getElementById(
+      "showAchievements"
+    ).checked =
+      s.show_achievements !== false;
+
+    document.getElementById(
+      "showBirthdays"
+    ).checked =
+      s.show_birthdays !== false;
+
+  }catch(e){
+
+    console.error(e);
+  }
+}
+
+
+async function saveHomeSettings(){
+
+  try{
+
+    const data =
+      await request(
+        "/rest/v1/settings?select=*&limit=1"
+      );
+
+    const current =
+      data?.[0];
+
+    if(!current){
+
+      status(
+        "Сначала сохраните дизайн.",
+        "bad"
+      );
+
+      return;
+    }
+
+
+    const body = {
+
+      home_upcoming:
+        getValue("homeUpcoming") || null,
+
+      home_last_match:
+        getValue("homeLastMatch") || null,
+
+      home_announcement:
+        getValue("homeAnnouncement") || null,
+
+      home_press_1:
+        getValue("homePress1") || null,
+
+      home_press_2:
+        getValue("homePress2") || null,
+
+      home_press_3:
+        getValue("homePress3") || null,
+
+      home_album:
+        getValue("homeAlbum") || null,
+
+      show_press:
+        document.getElementById(
+          "showPress"
+        ).checked,
+
+      show_media:
+        document.getElementById(
+          "showMedia"
+        ).checked,
+
+      show_achievements:
+        document.getElementById(
+          "showAchievements"
+        ).checked,
+
+      show_birthdays:
+        document.getElementById(
+          "showBirthdays"
+        ).checked
+
+    };
+
+
+    await request(
+      `/rest/v1/settings?id=eq.${current.id}`,
+      {
+        method:"PATCH",
+
+        headers:{
+          Prefer:"return=minimal"
+        },
+
+        body:JSON.stringify(body)
+      }
+    );
+
+
+    status(
+      "Настройки главной сохранены."
+    );
+
+  }catch(e){
+
+    status(
+      e.message,
+      "bad"
+    );
+  }
+}
+
+
+/* =========================================================
+   SELECTS
+========================================================= */
+
+function fillMatchSelects(){
+
+  const ids = [
+    "homeUpcoming",
+    "homeLastMatch"
+  ];
+
+
+  ids.forEach(
+    id => {
+
+      const select =
+        document.getElementById(id);
+
+      if(!select) return;
+
+      const current =
+        select.value;
+
+      select.innerHTML =
+        `<option value="">
+          Автоматически
+        </option>`;
+
+
+      matchesCache.forEach(
+        match => {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            match.id;
+
+          option.textContent =
+            `${match.date || ""}
+             · ХК Челны — ${match.opponent || ""}`;
+
+          select.appendChild(
+            option
+          );
+        }
+      );
+
+
+      if(current){
+
+        select.value =
+          current;
+      }
+    }
+  );
+}
+
+
+function fillNewsSelects(){
+
+  const ids = [
+    "homeAnnouncement",
+    "homePress1",
+    "homePress2",
+    "homePress3"
+  ];
+
+
+  ids.forEach(
+    id => {
+
+      const select =
+        document.getElementById(id);
+
+      if(!select) return;
+
+      const current =
+        select.value;
+
+      select.innerHTML =
+        `<option value="">
+          Автоматически
+        </option>`;
+
+
+      newsCache.forEach(
+        news => {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            news.id;
+
+          option.textContent =
+            `${news.title || ""}
+             · ${news.tag || ""}`;
+
+          select.appendChild(
+            option
+          );
+        }
+      );
+
+
+      if(current){
+
+        select.value =
+          current;
+      }
+    }
+  );
+}
+
+
+function fillAlbumSelect(){
+
+  const select =
+    document.getElementById(
+      "homeAlbum"
+    );
+
+  if(!select) return;
+
+  const current =
+    select.value;
+
+  select.innerHTML =
+    `<option value="">
+      Автоматически
+    </option>`;
+
+
+  albumsCache.forEach(
+    album => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        album.id;
+
+      option.textContent =
+        album.title || "Альбом";
+
+      select.appendChild(
+        option
+      );
+    }
+  );
+
+
+  if(current){
+
+    select.value =
+      current;
+  }
+}
+
+
+function fillPlayerSelects(){
+
+  if(
+    document.getElementById(
+      "playerStats"
+    ).classList.contains("active")
+  ){
+
+    loadPlayerStatsAdmin();
+  }
+}
+
+
+/* =========================================================
+   COLOR PICKERS
+========================================================= */
+
+[
+  "primary",
+  "secondary",
+  "background",
+  "card",
+  "text",
+  "mutedText",
+  "button",
+  "border"
+].forEach(
+  name => {
+
+    const text =
+      document.getElementById(
+        name === "mutedText"
+          ? "mutedTextColor"
+          : name + "Color"
+      );
+
+    const picker =
+      document.getElementById(
+        name === "mutedText"
+          ? "mutedTextColorPicker"
+          : name + "ColorPicker"
+      );
+
+    if(!text || !picker) return;
+
+    picker.addEventListener(
+      "input",
+      () => {
+
+        text.value =
+          picker.value;
+      }
+    );
+
+    text.addEventListener(
+      "input",
+      () => {
+
+        if(
+          /^#[0-9a-fA-F]{6}$/
+            .test(text.value)
+        ){
+
+          picker.value =
+            text.value;
+        }
+      }
+    );
+  }
+);
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function getValue(id){
+
+  return document.getElementById(id)
+    ?.value ?? "";
+}
+
+
+function setValue(id,value){
+
+  const el =
+    document.getElementById(id);
+
+  if(el){
+
+    el.value =
+      value ?? "";
+  }
+}
+
+
+function setSelected(id,value){
+
+  const el =
+    document.getElementById(id);
+
+  if(!el) return;
+
+  if(value !== null &&
+     value !== undefined){
+
+    el.value =
+      String(value);
+  }
+}
+
+
+function escapeHtml(value){
+
+  return String(
+    value ?? ""
+  )
+  .replaceAll("&","&amp;")
+  .replaceAll("<","&lt;")
+  .replaceAll(">","&gt;")
+  .replaceAll('"',"&quot;")
+  .replaceAll("'","&#039;");
+}
+
+
+function escapeAttr(value){
+
+  return escapeHtml(value);
+}
+
+
+/* =========================================================
+   ENTER TO LOGIN
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  function(e){
 
     if(
-        !confirm(
-            "Удалить этот элемент?"
-        )
+      e.key === "Enter" &&
+      document.getElementById(
+        "loginScreen"
+      ).style.display !== "none"
     ){
-        return;
+
+      login();
     }
-
-    try{
-
-        await request(
-            table,
-            "DELETE",
-            null,
-            `?id=eq.${id}`
-        );
-
-        await callback();
-
-        notify(
-            "Удалено"
-        );
-
-    }catch(error){
-
-        alert(
-            error.message
-        );
-    }
-}
-
-
-/* =========================================================
-   ESCAPE
-   ========================================================= */
-
-function escapeHTML(value){
-
-    if(
-        value===null ||
-        value===undefined
-    ){
-        return "";
-    }
-
-    return String(value)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-}
-
-
-/* =========================================================
-   INIT
-   ========================================================= */
-
-async function initAdmin(){
-
-    try{
-
-        await loadHomeData();
-
-        /*
-           Загружаем игроков заранее,
-           чтобы вкладка ТОП игроков
-           открывалась сразу правильно.
-        */
-
-        await getPlayersForStats();
-
-    }catch(error){
-
-        console.error(error);
-    }
-}
-
-
-if(accessToken){
-
-    showAdmin();
-
-}
+  }
+);
 
 </script>
 
