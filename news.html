@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000056">
+  <title>Новости — ХК Челны 2011</title>
+  <meta name="description" content="Новости хоккейной команды ХК Челны 2011">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .article-page {
+      width: min(900px, calc(100% - 32px));
+      margin: 34px auto 60px;
+    }
+
+    .article-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      color: var(--primary, #000056);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .article-back:hover {
+      opacity: .7;
+    }
+
+    .article-tag {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border-radius: 4px;
+      background: var(--gold, #ffcd00);
+      color: var(--primary, #000056);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .article-title {
+      margin: 0 0 14px;
+      color: var(--primary, #000056);
+      font-family: "Stapel", Arial, sans-serif;
+      font-size: clamp(27px, 5vw, 44px);
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+    }
+
+    .article-date {
+      margin-bottom: 24px;
+      color: #7a8192;
+      font-size: 14px;
+    }
+
+    .article-image {
+      display: block;
+      width: 100%;
+      max-height: 560px;
+      margin-bottom: 28px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #edf0f5;
+    }
+
+    .article-text {
+      color: #252a36;
+      font-size: 17px;
+      line-height: 1.8;
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+
+    .article-state {
+      padding: 50px 10px;
+      text-align: center;
+      color: #737b8d;
+    }
+
+    .article-state a {
+      color: var(--primary, #000056);
+    }
+
+    @media (max-width: 600px) {
+      .article-page {
+        margin-top: 24px;
+      }
+
+      .article-image {
+        border-radius: 7px;
+      }
+
+      .article-text {
+        font-size: 16px;
+        line-height: 1.7;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="header-logo-link" href="index.html" aria-label="На главную">
+        <img id="teamLogo" class="header-logo" src="" alt="Логотип команды">
+      </a>
+
+      <a class="header-center" href="index.html">
+        <span id="teamName" class="header-team-name">Челны 2011</span>
+        <span id="teamSubtitle" class="header-subtitle">хоккейный клуб</span>
+      </a>
+
+      <button id="menuButton" class="header-menu" type="button"
+        aria-label="Открыть меню" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <nav id="mobileMenu" class="mobile-menu" aria-hidden="true">
+    <div class="mobile-menu-panel">
+      <button id="menuClose" class="menu-close" type="button"
+        aria-label="Закрыть меню">×</button>
+      <a href="index.html#news">Новости</a>
+      <a href="index.html#matchday">Матчи</a>
+      <a href="index.html#competition">Турнирная таблица</a>
+      <a href="index.html#stats">Статистика</a>
+      <a href="index.html#leaders">Лидеры команды</a>
+      <a href="index.html#albums">Фотоальбомы</a>
+    </div>
+  </nav>
+
+  <main class="article-page">
+    <a class="article-back" href="index.html#news">← Все новости</a>
+
+    <article id="articleContent">
+      <div class="article-state">Загрузка новости…</div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <img id="footerLogo" class="footer-logo" src="" alt="">
+      <div>
+        <div id="footerTeamName" class="footer-team-name">Челны 2011</div>
+        <div id="footerCity" class="footer-city">Набережные Челны</div>
+      </div>
+      <div class="footer-copy">© <span id="footerYear"></span></div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("footerYear").textContent = new Date().getFullYear();
+
+    const menuButton = document.getElementById("menuButton");
+    const mobileMenu = document.getElementById("mobileMenu");
+    const menuClose = document.getElementById("menuClose");
+
+    function closeMenu() {
+      mobileMenu?.classList.remove("open");
+      mobileMenu?.setAttribute("aria-hidden", "true");
+      menuButton?.setAttribute("aria-expanded", "false");
+    }
+
+    menuButton?.addEventListener("click", () => {
+      const opened = mobileMenu.classList.toggle("open");
+      mobileMenu.setAttribute("aria-hidden", String(!opened));
+      menuButton.setAttribute("aria-expanded", String(opened));
+    });
+
+    menuClose?.addEventListener("click", closeMenu);
+    mobileMenu?.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", closeMenu);
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/news.js"></script>
+</body>
+</html>
