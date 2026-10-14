@@ -3,7 +3,7 @@ window.SUPABASE_URL =
   "https://jxlbojosxaaqnyuzohnw.supabase.co";
 
 window.SUPABASE_ANON_KEY =
-  "ВСТАВЬ_СВОЙ_PUBLISHABLE_KEY";
+  "sb_publishable_wNNvPktjjKpz3csoDMo3JA_4duyLAzL";
 
 window.STORAGE_BUCKET = "site-media";
 
