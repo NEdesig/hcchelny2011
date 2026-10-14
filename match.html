@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000056">
+  <title>Матч — ХК Челны 2011</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .match-page {
+      width: min(1000px, calc(100% - 32px));
+      margin: 32px auto 60px;
+    }
+
+    .match-back {
+      display: inline-block;
+      margin-bottom: 24px;
+      color: var(--primary, #000056);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .match-hero {
+      padding: 28px;
+      border-radius: 12px;
+      background: var(--primary, #000056);
+      color: white;
+    }
+
+    .match-competition {
+      text-align: center;
+      color: #e1e5f4;
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    .match-scoreboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: 18px;
+    }
+
+    .match-club {
+      min-width: 0;
+      text-align: center;
+    }
+
+    .match-club img {
+      display: block;
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      margin: 0 auto 12px;
+    }
+
+    .match-club-name {
+      font-weight: 800;
+      font-size: 17px;
+      overflow-wrap: anywhere;
+    }
+
+    .match-score {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: clamp(32px, 7vw, 56px);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .match-score-separator {
+      opacity: .6;
+    }
+
+    .match-status {
+      margin-top: 20px;
+      text-align: center;
+      color: var(--gold, #ffcd00);
+      font-weight: 800;
+    }
+
+    .match-meta {
+      margin-top: 14px;
+      text-align: center;
+      color: #e1e5f4;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .match-details {
+      margin-top: 34px;
+    }
+
+    .match-details h2 {
+      margin: 0 0 16px;
+      color: var(--primary, #000056);
+      font-size: 23px;
+    }
+
+    .match-detail-card {
+      margin-bottom: 28px;
+      padding: 20px;
+      border: 1px solid #e5e8ef;
+      border-radius: 10px;
+      background: white;
+    }
+
+    .match-event {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #edf0f5;
+    }
+
+    .match-event:last-child {
+      border-bottom: 0;
+    }
+
+    .match-event-time {
+      color: var(--primary, #000056);
+      font-weight: 900;
+    }
+
+    .match-event-description {
+      overflow-wrap: anywhere;
+    }
+
+    .match-event-team {
+      color: #747d90;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .match-roster-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+    }
+
+    .match-roster-title {
+      margin: 0 0 12px;
+      color: var(--primary, #000056);
+      font-weight: 800;
+    }
+
+    .match-player {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #edf0f5;
+    }
+
+    .match-player-number {
+      color: var(--primary, #000056);
+      font-weight: 900;
+    }
+
+    .match-player-position {
+      color: #7a8192;
+      font-size: 12px;
+    }
+
+    .match-page-state {
+      padding: 45px 10px;
+      text-align: center;
+      color: #737b8d;
+    }
+
+    @media (max-width: 600px) {
+      .match-hero {
+        padding: 22px 12px;
+      }
+
+      .match-scoreboard {
+        gap: 8px;
+      }
+
+      .match-club img {
+        width: 58px;
+        height: 58px;
+      }
+
+      .match-club-name {
+        font-size: 13px;
+      }
+
+      .match-score {
+        gap: 6px;
+        font-size: 32px;
+      }
+
+      .match-detail-card {
+        padding: 14px;
+      }
+
+      .match-roster-grid {
+        grid-template-columns: 1fr;
+        gap: 22px;
+      }
+
+      .match-event {
+        grid-template-columns: 44px minmax(0, 1fr);
+      }
+
+      .match-event-team {
+        grid-column: 2;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="header-logo-link" href="index.html" aria-label="На главную">
+        <img id="teamLogo" class="header-logo" src="" alt="Логотип команды">
+      </a>
+      <a class="header-center" href="index.html">
+        <span id="teamName" class="header-team-name">Челны 2011</span>
+        <span id="teamSubtitle" class="header-subtitle">хоккейный клуб</span>
+      </a>
+      <button id="menuButton" class="header-menu" type="button"
+        aria-label="Открыть меню" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <nav id="mobileMenu" class="mobile-menu" aria-hidden="true">
+    <div class="mobile-menu-panel">
+      <button id="menuClose" class="menu-close" type="button"
+        aria-label="Закрыть меню">×</button>
+      <a href="index.html#news">Новости</a>
+      <a href="index.html#matchday">Матчи</a>
+      <a href="index.html#competition">Турнирная таблица</a>
+      <a href="index.html#stats">Статистика</a>
+      <a href="index.html#leaders">Лидеры команды</a>
+      <a href="index.html#albums">Фотоальбомы</a>
+    </div>
+  </nav>
+
+  <main class="match-page">
+    <a class="match-back" href="index.html#matches">← Все матчи</a>
+    <div id="matchContent">
+      <div class="match-page-state">Загрузка матча…</div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <img id="footerLogo" class="footer-logo" src="" alt="">
+      <div>
+        <div id="footerTeamName" class="footer-team-name">Челны 2011</div>
+        <div id="footerCity" class="footer-city">Набережные Челны</div>
+      </div>
+      <div class="footer-copy">© <span id="footerYear"></span></div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("footerYear").textContent = new Date().getFullYear();
+
+    const menuButton = document.getElementById("menuButton");
+    const mobileMenu = document.getElementById("mobileMenu");
+    const menuClose = document.getElementById("menuClose");
+
+    function closeMenu() {
+      mobileMenu?.classList.remove("open");
+      mobileMenu?.setAttribute("aria-hidden", "true");
+      menuButton?.setAttribute("aria-expanded", "false");
+    }
+
+    menuButton?.addEventListener("click", () => {
+      const opened = mobileMenu.classList.toggle("open");
+      mobileMenu.setAttribute("aria-hidden", String(!opened));
+      menuButton.setAttribute("aria-expanded", String(opened));
+    });
+
+    menuClose?.addEventListener("click", closeMenu);
+    mobileMenu?.querySelectorAll("a").forEach(link =>
+      link.addEventListener("click", closeMenu)
+    );
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/match.js"></script>
+</body>
+</html>
