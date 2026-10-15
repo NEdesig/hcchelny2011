@@ -1,23 +1,21 @@
-
 /* =========================================
    ХК ЧЕЛНЫ 2011 — PUBLIC WEBSITE
    File: css/style.css
 ========================================= */
 
 /* =========================================
-   ХК ЧЕЛНЫ 2011 — PUBLIC WEBSITE
-   File: css/style.css
+   FONT: STAPEL BOLD
+   Файл Stapel-Bold.woff находится в корне репозитория
 ========================================= */
-
-/* STAPEL BOLD */
 
 @font-face {
   font-family: "StapelBold";
   src: url("../Stapel-Bold.woff") format("woff");
-  font-weight: 700 900;
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
+
 /* =========================================
    VARIABLES
 ========================================= */
@@ -56,13 +54,14 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 90px;
+  font-family: "StapelBold", Arial, sans-serif;
 }
 
 body {
   margin: 0;
   background: var(--white);
   color: var(--ink);
-  font-family: "Stapel", Arial, sans-serif;
+  font-family: "StapelBold", Arial, sans-serif;
   font-size: 15px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -553,7 +552,7 @@ h3 {
 .matchday-date {
   margin-bottom: 23px;
   color: var(--gold);
-  font-family: "Stengazeta", "Stapel", sans-serif;
+  font-family: "StapelBold", Arial, sans-serif;
   font-size: clamp(42px, 11vw, 76px);
   line-height: 1;
   text-transform: uppercase;
@@ -744,7 +743,7 @@ h3 {
 .competition-heading h3 {
   margin: 0;
   color: var(--gold);
-  font-family: "Stengazeta", "Stapel", sans-serif;
+  font-family: "StapelBold", Arial, sans-serif;
   font-size: 31px;
   font-weight: 400;
   letter-spacing: 0;
@@ -969,7 +968,7 @@ h3 {
   right: 10px;
   z-index: -1;
   color: rgba(255, 255, 255, 0.12);
-  font-family: "Stengazeta", "Stapel", sans-serif;
+  font-family: "StapelBold", Arial, sans-serif;
   font-size: clamp(150px, 35vw, 230px);
   line-height: 0.95;
   pointer-events: none;
@@ -1406,7 +1405,7 @@ h3 {
 }
 
 /* =========================================
-   STAPEL BOLD — ВСЕ ЭЛЕМЕНТЫ САЙТА
+   FORCE STAPEL BOLD ON ALL TEXT
 ========================================= */
 
 html,
