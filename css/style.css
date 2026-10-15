@@ -9,70 +9,14 @@
    File: css/style.css
 ========================================= */
 
-/* =========================================
-   FONT: STAPEL
-========================================= */
+/* STAPEL BOLD */
 
 @font-face {
   font-family: "StapelBold";
   src: url("../Stapel-Bold.woff") format("woff");
-  font-weight: 700;
+  font-weight: 700 900;
   font-style: normal;
   font-display: swap;
-}
-
-@font-face {
-  font-family: "StapelBold";
-  src: url("../fonts/Stapel-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "StapelBold";
-  src: url("../fonts/Stapel-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "StapelBold";
-  src: url("../fonts/Stapel-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "StapelBold";
-  src: url("../fonts/Stapel-Black.woff2") format("woff2");
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* =========================================
-   ЕДИНЫЙ ШРИФТ ДЛЯ ВСЕГО САЙТА
-========================================= */
-
-html,
-body {
-  font-family: "StapelBold", Arial, sans-serif;
-}
-
-body *,
-body *::before,
-body *::after {
-  font-family: "StapelBold", Arial, sans-serif !important;
-}
-
-button,
-input,
-textarea,
-select {
-  font-family: inherit;
 }
 /* =========================================
    VARIABLES
