@@ -976,10 +976,10 @@ h3 {
 
 .leader-image {
   position: absolute;
-  right: -8%;
+  right: -12%;
   bottom: 0;
-  width: 112%;
-  height: 100%;
+  width: 125%;
+  height: 108%;
   object-fit: contain;
   object-position: bottom center;
   pointer-events: none;
