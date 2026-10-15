@@ -14,6 +14,14 @@
 ========================================= */
 
 @font-face {
+  font-family: "StapelBold";
+  src: url("../Stapel-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "Stapel";
   src: url("../fonts/Stapel-Regular.woff2") format("woff2");
   font-weight: 400;
