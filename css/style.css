@@ -471,13 +471,9 @@ h3 {
    STORIES
 ========================================= */
 
-.stories-section {
-  padding-top: 10px;
-}
-
-.stories-section .section-heading {
-  margin-bottom: 17px;
-}
+/* =========================================
+   STORIES — VERTICAL CARDS
+========================================= */
 
 .stories-list {
   display: flex;
@@ -493,38 +489,41 @@ h3 {
 }
 
 .story-item {
-  flex: 0 0 76px;
-  width: 76px;
+  flex: 0 0 125px;
+  width: 125px;
   padding: 0;
   border: 0;
   color: var(--ink);
   background: transparent;
-  text-align: center;
+  text-align: left;
   scroll-snap-align: start;
 }
 
 .story-image-wrap {
-  width: 76px;
-  height: 76px;
-  padding: 3px;
-  margin-bottom: 7px;
+  width: 125px;
+  height: 167px;
+  padding: 0;
+  margin-bottom: 8px;
   overflow: hidden;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), var(--accent), var(--primary));
+  border-radius: 14px;
+  background: var(--soft);
 }
 
 .story-image {
+  display: block;
   width: 100%;
   height: 100%;
-  border: 2px solid var(--white);
-  border-radius: 50%;
+  border: 0;
+  border-radius: 14px;
   object-fit: cover;
+  object-position: center;
 }
 
 .story-title {
   display: block;
+  width: 100%;
   overflow: hidden;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1.35;
   text-overflow: ellipsis;
