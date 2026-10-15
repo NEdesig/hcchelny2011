@@ -4,10 +4,20 @@
    File: css/style.css
 ========================================= */
 
+/* =========================================
+   ХК ЧЕЛНЫ 2011 — PUBLIC WEBSITE
+   File: css/style.css
+========================================= */
+
+/* =========================================
+   FONT: STAPEL
+========================================= */
+
 @font-face {
   font-family: "Stapel";
   src: url("../fonts/Stapel-Regular.woff2") format("woff2");
   font-weight: 400;
+  font-style: normal;
   font-display: swap;
 }
 
@@ -15,6 +25,7 @@
   font-family: "Stapel";
   src: url("../fonts/Stapel-Medium.woff2") format("woff2");
   font-weight: 500;
+  font-style: normal;
   font-display: swap;
 }
 
@@ -22,6 +33,7 @@
   font-family: "Stapel";
   src: url("../fonts/Stapel-Bold.woff2") format("woff2");
   font-weight: 700;
+  font-style: normal;
   font-display: swap;
 }
 
@@ -29,23 +41,31 @@
   font-family: "Stapel";
   src: url("../fonts/Stapel-Black.woff2") format("woff2");
   font-weight: 900;
+  font-style: normal;
   font-display: swap;
 }
 
-@font-face {
-  font-family: "Stengazeta";
-  src: url("../fonts/Stengazeta.woff2") format("woff2");
-  font-weight: 400;
-  font-display: swap;
+/* =========================================
+   ЕДИНЫЙ ШРИФТ ДЛЯ ВСЕГО САЙТА
+========================================= */
+
+html,
+body {
+  font-family: "Stapel", Arial, sans-serif;
 }
 
-@font-face {
-  font-family: "Christopher";
-  src: url("../fonts/Christopher.woff2") format("woff2");
-  font-weight: 400;
-  font-display: swap;
+body *,
+body *::before,
+body *::after {
+  font-family: "Stapel", Arial, sans-serif !important;
 }
 
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
 /* =========================================
    VARIABLES
 ========================================= */
