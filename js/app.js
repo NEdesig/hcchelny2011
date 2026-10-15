@@ -437,7 +437,10 @@
         return aFuture ? aDate - bDate : bDate - aDate;
       });
 
-      container.innerHTML = matches.map(renderMatchRow).join("");
+      
+const homepageMatches = matches.slice(0, 3);
+container.innerHTML = homepageMatches.map(renderMatchRow).join("");
+
 
       loadLastMatches(matches);
       loadMatchday(matches);
