@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000056">
+  <meta name="description" content="Все матчи ХК Челны 2011 — расписание и результаты.">
+  <title>Все матчи — ХК Челны 2011</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .all-matches-page {
+      width: min(1000px, calc(100% - 32px));
+      margin: 32px auto 60px;
+    }
+
+    .all-matches-back {
+      display: inline-block;
+      margin-bottom: 24px;
+      color: var(--primary, #000056);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .all-matches-title {
+      margin: 0 0 8px;
+      color: var(--primary, #000056);
+    }
+
+    .all-matches-description {
+      margin: 0 0 24px;
+      color: #747d90;
+    }
+
+    .all-matches-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .all-matches-state {
+      padding: 35px 10px;
+      text-align: center;
+      color: #747d90;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="header-logo-link" href="index.html" aria-label="На главную">
+        <img id="teamLogo" class="header-logo" src="assets/logo.png" alt="Логотип команды">
+      </a>
+      <a class="header-center" href="index.html">
+        <span id="teamName" class="header-team-name">Челны 2011</span>
+        <span id="teamSubtitle" class="header-subtitle">хоккейный клуб</span>
+      </a>
+      <button id="menuButton" class="header-menu" type="button"
+        aria-label="Открыть меню" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <nav id="mobileMenu" class="mobile-menu" aria-hidden="true">
+    <div class="mobile-menu-panel">
+      <button id="menuClose" class="menu-close" type="button"
+        aria-label="Закрыть меню">×</button>
+      <a href="index.html#news">Новости</a>
+      <a href="index.html#matchday">День матча</a>
+      <a href="matches.html">Все матчи</a>
+      <a href="index.html#competition">Турнирная таблица</a>
+      <a href="index.html#stats">Статистика</a>
+      <a href="index.html#leaders">Лидеры команды</a>
+      <a href="index.html#albums">Фотоальбомы</a>
+    </div>
+  </nav>
+
+  <main class="all-matches-page">
+    <a class="all-matches-back" href="index.html">← На главную</a>
+    <h1 class="all-matches-title">Все матчи</h1>
+    <p class="all-matches-description">Расписание и результаты игр команды</p>
+
+    <div id="allMatchesList" class="all-matches-list">
+      <p class="all-matches-state">Загружаем матчи...</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <img id="footerLogo" class="footer-logo" src="assets/logo.png" alt="">
+      <div>
+        <strong id="footerTeamName">Челны 2011</strong>
+        <p id="footerCity">Набережные Челны</p>
+        <p>© <span id="footerYear"></span></p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("footerYear").textContent = new Date().getFullYear();
+
+    const menuButton = document.getElementById("menuButton");
+    const mobileMenu = document.getElementById("mobileMenu");
+    const menuClose = document.getElementById("menuClose");
+
+    function closeMenu() {
+      mobileMenu?.classList.remove("open");
+      mobileMenu?.setAttribute("aria-hidden", "true");
+      menuButton?.setAttribute("aria-expanded", "false");
+    }
+
+    menuButton?.addEventListener("click", () => {
+      const opened = mobileMenu.classList.toggle("open");
+      mobileMenu.setAttribute("aria-hidden", String(!opened));
+      menuButton.setAttribute("aria-expanded", String(opened));
+    });
+
+    menuClose?.addEventListener("click", closeMenu);
+
+    mobileMenu?.querySelectorAll("a").forEach(link =>
+      link.addEventListener("click", closeMenu)
+    );
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script>
+    (() => {
+      const db = window.supabaseClient;
+      const container = document.getElementById("allMatchesList");
+
+      if (!db) {
+        container.innerHTML =
+          '<p class="all-matches-state">Не удалось подключить базу данных.</p>';
+        return;
+      }
+
+      const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+
+      const formatDate = value => {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "";
+        return new Intl.DateTimeFormat("ru-RU", {
+          day: "numeric",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit"
+        }).format(date);
+      };
+
+      async function loadMatches() {
+        const { data: matches, error } = await db
+          .from("matches")
+          .select(`
+            id, match_date, venue, competition, status,
+            home_score, away_score,
+            home:clubs!matches_home_club_id_fkey(id,name),
+            away:clubs!matches_away_club_id_fkey(id,name)
+          `)
+          .order("match_date", { ascending: false })
+          .limit(200);
+
+        if (error) {
+          console.error("Ошибка загрузки матчей:", error);
+          container.innerHTML =
+            '<p class="all-matches-state">Не удалось загрузить матчи. Проверь настройки Supabase и связи клубов.</p>';
+          return;
+        }
+
+        if (!matches?.length) {
+          container.innerHTML =
+            '<p class="all-matches-state">Матчи пока не добавлены.</p>';
+          return;
+        }
+
+        const now = Date.now();
+
+        matches.sort((a, b) => {
+          const aDate = new Date(a.match_date).getTime();
+          const bDate = new Date(b.match_date).getTime();
+          const aFuture = a.status !== "finished" && aDate >= now;
+          const bFuture = b.status !== "finished" && bDate >= now;
+
+          if (aFuture && !bFuture) return -1;
+          if (!aFuture && bFuture) return 1;
+          return aFuture ? aDate - bDate : bDate - aDate;
+        });
+
+        container.innerHTML = matches.map(match => {
+          const finished = match.status === "finished";
+          const live = match.status === "live";
+          const home = match.home?.name || "Хозяева";
+          const away = match.away?.name || "Гости";
+          const score = finished || live
+            ? `${Number(match.home_score || 0)} : ${Number(match.away_score || 0)}`
+            : "—";
+          const status = finished ? "Завершён" : live ? "Идёт матч" : "Запланирован";
+
+          return `
+            <a class="match-row" href="match.html?id=${encodeURIComponent(match.id)}">
+              <div class="match-row-date">
+                ${escapeHTML(formatDate(match.match_date))}
+              </div>
+              <div class="match-row-teams">
+                ${escapeHTML(home)}<br>
+                ${escapeHTML(away)}
+                <span class="match-status ${live ? "live" : ""}">
+                  ${status}
+                </span>
+              </div>
+              <div class="match-row-score">${escapeHTML(score)}</div>
+            </a>
+          `;
+        }).join("");
+
+        const settings = await db
+          .from("site_settings")
+          .select("*")
+          .order("updated_at", { ascending: false })
+          .limit(1);
+
+        const item = settings.data?.[0];
+        if (item) {
+          document.getElementById("teamName").textContent = item.team_name || "Челны 2011";
+          document.getElementById("teamSubtitle").textContent = item.subtitle || "хоккейный клуб";
+          document.getElementById("footerTeamName").textContent = item.team_name || "Челны 2011";
+          document.getElementById("footerCity").textContent = item.city || "Набережные Челны";
+
+          if (item.logo_path) {
+            const logo = /^https?:\/\//i.test(item.logo_path)
+              ? item.logo_path
+              : db.storage.from(window.STORAGE_BUCKET || "site-media")
+                  .getPublicUrl(item.logo_path).data.publicUrl;
+
+            document.getElementById("teamLogo").src = logo;
+            document.getElementById("footerLogo").src = logo;
+          }
+        }
+      }
+
+      loadMatches();
+    })();
+  </script>
+</body>
+</html>
