@@ -1,4 +1,5 @@
 
+
 /* =========================================
    ХК ЧЕЛНЫ 2011 — PUBLIC APP
    File: js/app.js
@@ -20,9 +21,8 @@
 
   const BUCKET = window.STORAGE_BUCKET || "site-media";
 
-  let activeStoryTimer = null;
-  let activeStoryProgress = null;
   let storyItems = [];
+  let activeStoryTimer = null;
   let activeStatType = "scorers";
 
   // ========================================
@@ -43,7 +43,6 @@
     if (!value) return "";
 
     const date = new Date(value);
-
     if (Number.isNaN(date.getTime())) return "";
 
     return new Intl.DateTimeFormat("ru-RU", {
@@ -57,7 +56,6 @@
     if (!value) return "";
 
     const date = new Date(value);
-
     if (Number.isNaN(date.getTime())) return "";
 
     return new Intl.DateTimeFormat("ru-RU", {
@@ -68,9 +66,23 @@
     }).format(date);
   }
 
+  function formatTime(value) {
+    if (!value) return "";
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    return date.toLocaleTimeString("ru-RU", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
   function getLocalDayDifference(value) {
     const date = new Date(value);
     const now = new Date();
+
+    if (Number.isNaN(date.getTime())) return null;
 
     const targetDay = new Date(
       date.getFullYear(),
@@ -101,7 +113,14 @@
 
     if (/^https?:\/\//i.test(path)) return path;
 
-    const { data } = db.storage.from(BUCKET).getPublicUrl(path);
+    const { data, error } = db.storage
+      .from(BUCKET)
+      .getPublicUrl(path);
+
+    if (error) {
+      console.error("Ошибка получения изображения:", error);
+      return "";
+    }
 
     return data?.publicUrl || "";
   }
@@ -169,8 +188,27 @@
     return data || [];
   }
 
-  function showToastMessage(message) {
-    console.info(message);
+  function getMatchScore(match) {
+    return `${Number(match.home_score || 0)} : ${Number(match.away_score || 0)}`;
+  }
+
+  function isFinished(match) {
+    return match.status === "finished";
+  }
+
+  function isLive(match) {
+    return match.status === "live";
+  }
+
+  function isPostponed(match) {
+    return match.status === "postponed";
+  }
+
+  function isUpcoming(match) {
+    return !isFinished(match) &&
+      !isLive(match) &&
+      !isPostponed(match) &&
+      new Date(match.match_date).getTime() >= Date.now();
   }
 
   // ========================================
@@ -185,7 +223,6 @@
       });
 
       const settings = rows[0];
-
       if (!settings) return;
 
       const root = document.documentElement;
@@ -215,10 +252,21 @@
       const footerName = $("#footerTeamName");
       const footerCity = $("#footerCity");
 
-      if (teamName) teamName.textContent = settings.team_name || "Челны 2011";
-      if (subtitle) subtitle.textContent = settings.subtitle || "хоккейный клуб";
-      if (footerName) footerName.textContent = settings.team_name || "Челны 2011";
-      if (footerCity) footerCity.textContent = settings.city || "Набережные Челны";
+      if (teamName) {
+        teamName.textContent = settings.team_name || "Челны 2011";
+      }
+
+      if (subtitle) {
+        subtitle.textContent = settings.subtitle || "хоккейный клуб";
+      }
+
+      if (footerName) {
+        footerName.textContent = settings.team_name || "Челны 2011";
+      }
+
+      if (footerCity) {
+        footerCity.textContent = settings.city || "Набережные Челны";
+      }
 
       if (settings.logo_path) {
         const logoURL = getImageURL(settings.logo_path);
@@ -226,7 +274,7 @@
         ["#teamLogo", "#footerLogo"].forEach(selector => {
           const image = $(selector);
 
-          if (image) image.src = logoURL;
+          if (image && logoURL) image.src = logoURL;
         });
       }
     } catch (error) {
@@ -292,12 +340,14 @@
     if (!container) return;
 
     try {
-      const now = new Date().toISOString();
-
       const stories = await fetchRows("stories", {
         order: { column: "created_at", ascending: false },
         filters: [
-          { column: "expires_at", operator: "gt", value: now }
+          {
+            column: "expires_at",
+            operator: "gt",
+            value: new Date().toISOString()
+          }
         ]
       });
 
@@ -316,8 +366,13 @@
           aria-label="Открыть историю ${index + 1}"
         >
           <span class="story-image-wrap">
-            ${imageHTML(story.image_path, "История команды", "story-image")}
+            ${imageHTML(
+              story.image_path,
+              "История команды",
+              "story-image"
+            )}
           </span>
+
           <span class="story-title">
             ${escapeHTML(formatDate(story.created_at))}
           </span>
@@ -326,8 +381,7 @@
 
       $$(".story-item", container).forEach(button => {
         button.addEventListener("click", () => {
-          const index = Number(button.dataset.storyIndex);
-          openStory(index);
+          openStory(Number(button.dataset.storyIndex));
         });
       });
     } catch (error) {
@@ -346,12 +400,13 @@
     if (!viewer || !image || !progress) return;
 
     clearTimeout(activeStoryTimer);
-    cancelAnimationFrame(activeStoryProgress);
 
     image.src = getImageURL(story.image_path);
+    image.alt = story.caption || "История команды";
 
     viewer.classList.add("open");
     viewer.setAttribute("aria-hidden", "false");
+
     document.body.classList.add("viewer-open");
 
     progress.style.transition = "none";
@@ -369,7 +424,6 @@
 
   function closeStory() {
     clearTimeout(activeStoryTimer);
-    cancelAnimationFrame(activeStoryProgress);
 
     const viewer = $("#storyViewer");
     const image = $("#storyViewerImage");
@@ -380,7 +434,11 @@
       viewer.setAttribute("aria-hidden", "true");
     }
 
-    if (image) image.src = "";
+    if (image) {
+      image.src = "";
+      image.alt = "";
+    }
+
     if (progress) {
       progress.style.transition = "none";
       progress.style.width = "0%";
@@ -406,47 +464,90 @@
     if (!container) return;
 
     try {
-      const matches = await fetchRows("matches", {
-        select: `
-          id, match_date, venue, competition, status,
-          home_score, away_score, home_club_id, away_club_id,
-          home:clubs!matches_home_club_id_fkey(id,name,logo_path),
-          away:clubs!matches_away_club_id_fkey(id,name,logo_path)
-        `,
-        order: { column: "match_date", ascending: false },
-        limit: 50
+      // Загружаем клубы отдельно:
+      // это не зависит от названий внешних ключей Supabase.
+
+      const [matches, clubs] = await Promise.all([
+        fetchRows("matches", {
+          select: `
+            id,
+            match_date,
+            venue,
+            competition,
+            status,
+            home_score,
+            away_score,
+            home_club_id,
+            away_club_id
+          `,
+          order: {
+            column: "match_date",
+            ascending: false
+          }
+        }),
+
+        fetchRows("clubs", {
+          select: "id, name, city, logo_path"
+        })
+      ]);
+
+      const clubsById = new Map(
+        clubs.map(club => [String(club.id), club])
+      );
+
+      matches.forEach(match => {
+        match.home = clubsById.get(String(match.home_club_id)) || null;
+        match.away = clubsById.get(String(match.away_club_id)) || null;
       });
 
       if (!matches.length) {
         setEmpty(container, "Матчи пока не добавлены");
+
+        const lastContainer = $("#lastMatches");
+        if (lastContainer) {
+          setEmpty(lastContainer, "Завершённых матчей пока нет");
+        }
+
+        const nextContainer = $("#nextMatch");
+        if (nextContainer) {
+          setEmpty(nextContainer, "Ближайший матч ещё не опубликован");
+        }
+
         return;
       }
 
-      const now = Date.now();
+      // Сначала будущие и текущие матчи,
+      // затем завершённые — от новых к старым.
 
-      matches.sort((a, b) => {
-        const aDate = new Date(a.match_date).getTime();
-        const bDate = new Date(b.match_date).getTime();
+      const sortedMatches = [...matches].sort((a, b) => {
+        const aTime = new Date(a.match_date).getTime();
+        const bTime = new Date(b.match_date).getTime();
 
-        const aFuture = a.status !== "finished" && aDate >= now;
-        const bFuture = b.status !== "finished" && bDate >= now;
+        const aActive = isUpcoming(a) || isLive(a);
+        const bActive = isUpcoming(b) || isLive(b);
 
-        if (aFuture && !bFuture) return -1;
-        if (!aFuture && bFuture) return 1;
+        if (aActive && !bActive) return -1;
+        if (!aActive && bActive) return 1;
 
-        return aFuture ? aDate - bDate : bDate - aDate;
+        return aActive
+          ? aTime - bTime
+          : bTime - aTime;
       });
 
-      
-const homepageMatches = matches.slice(0, 3);
-container.innerHTML = homepageMatches.map(renderMatchRow).join("");
-
+      container.innerHTML = sortedMatches
+        .slice(0, 3)
+        .map(renderMatchRow)
+        .join("");
 
       loadLastMatches(matches);
       loadMatchday(matches);
     } catch (error) {
-      setError(container, "Не удалось загрузить матчи. Проверь связи таблиц clubs и matches.");
-      console.error(error);
+      setError(
+        container,
+        "Не удалось загрузить матчи"
+      );
+
+      console.error("Ошибка загрузки матчей:", error);
     }
   }
 
@@ -454,44 +555,51 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
     const home = match.home?.name || "Хозяева";
     const away = match.away?.name || "Гости";
 
-    const finished = match.status === "finished";
-    const live = match.status === "live";
-
-    const score = `${Number(match.home_score || 0)} : ${Number(match.away_score || 0)}`;
+    const finished = isFinished(match);
+    const live = isLive(match);
+    const postponed = isPostponed(match);
 
     const statusText = finished
       ? "Завершён"
       : live
         ? "Идёт матч"
-        : "Запланирован";
+        : postponed
+          ? "Перенесён"
+          : "Запланирован";
 
     return `
-      <a class="match-row" href="match.html?id=${encodeURIComponent(match.id)}">
+      <a
+        class="match-row"
+        href="match.html?id=${encodeURIComponent(match.id)}"
+      >
         <div class="match-row-date">
-          ${escapeHTML(formatDate(match.match_date, { day: "numeric", month: "short" }))}
-          <br>
-          ${escapeHTML(new Date(match.match_date).toLocaleTimeString("ru-RU", {
-            hour: "2-digit",
-            minute: "2-digit"
+          ${escapeHTML(formatDate(match.match_date, {
+            day: "numeric",
+            month: "short"
           }))}
+          <br>
+          ${escapeHTML(formatTime(match.match_date))}
         </div>
 
         <div class="match-row-teams">
           ${escapeHTML(home)}<br>
           ${escapeHTML(away)}
+
           <span class="match-status ${live ? "live" : ""}">
             ${statusText}
           </span>
         </div>
 
         <div class="match-row-score">
-          ${finished || live ? escapeHTML(score) : "—"}
+          ${finished || live
+            ? escapeHTML(getMatchScore(match))
+            : "—"}
         </div>
       </a>
     `;
   }
 
-  async function loadMatchday(matches) {
+  function loadMatchday(matches) {
     const container = $("#nextMatch");
     const dateElement = $("#matchdayDate");
 
@@ -499,19 +607,30 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
 
     const now = Date.now();
 
-    const next = matches
-      .filter(match => {
-        if (match.status === "finished") return false;
+    // Текущий матч имеет приоритет.
+    const liveMatch = matches
+      .filter(isLive)
+      .sort((a, b) =>
+        new Date(a.match_date) - new Date(b.match_date)
+      )[0];
 
-        const date = new Date(match.match_date).getTime();
+    // Если матчей в прямом эфире нет,
+    // ищем ближайший запланированный.
+    const nextMatch = matches
+      .filter(match => isUpcoming(match))
+      .sort((a, b) =>
+        new Date(a.match_date) - new Date(b.match_date)
+      )[0];
 
-        return date >= now || match.status === "live";
-      })
-      .sort((a, b) => new Date(a.match_date) - new Date(b.match_date))[0];
-
-    // Показываем последний завершённый матч до конца местного дня,
-    // если на сегодня больше нет предстоящих игр.
+    // Если сегодня уже сыграли и больше нет игр,
+    // показываем последний результат дня.
     const today = new Date();
+
+    const todayStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    ).getTime();
 
     const todayEnd = new Date(
       today.getFullYear(),
@@ -520,53 +639,78 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
     ).getTime();
 
     const finishedToday = matches
-      .filter(match =>
-        match.status === "finished" &&
-        new Date(match.match_date).getTime() < todayEnd &&
-        new Date(match.match_date).getTime() >=
-          new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
-      )
-      .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))[0];
+      .filter(match => {
+        const time = new Date(match.match_date).getTime();
 
-    const match = next || finishedToday;
+        return isFinished(match) &&
+          time >= todayStart &&
+          time < todayEnd;
+      })
+      .sort((a, b) =>
+        new Date(b.match_date) - new Date(a.match_date)
+      )[0];
+
+    const match = liveMatch || nextMatch || finishedToday;
 
     if (!match) {
       if (dateElement) dateElement.textContent = "СКОРО";
-      setEmpty(container, "Ближайший матч ещё не опубликован");
+
+      setEmpty(
+        container,
+        "Ближайший матч ещё не опубликован"
+      );
+
       return;
     }
 
+    const finished = isFinished(match);
+    const live = isLive(match);
+
     if (dateElement) {
-      dateElement.textContent = match.status === "finished"
+      dateElement.textContent = finished
         ? "ИТОГ МАТЧА"
-        : getMatchDayLabel(match.match_date);
+        : live
+          ? "МАТЧ СЕЙЧАС"
+          : getMatchDayLabel(match.match_date);
     }
 
-    const finished = match.status === "finished";
-    const live = match.status === "live";
+    const home = match.home;
+    const away = match.away;
 
     container.innerHTML = `
       <div class="match-card">
         <div class="match-teams">
+
           <div class="match-team">
-            ${imageHTML(match.home?.logo_path, match.home?.name || "Хозяева", "match-team-logo")}
+            ${imageHTML(
+              home?.logo_path,
+              home?.name || "Хозяева",
+              "match-team-logo"
+            )}
+
             <span class="match-team-name">
-              ${escapeHTML(match.home?.name || "Хозяева")}
+              ${escapeHTML(home?.name || "Хозяева")}
             </span>
           </div>
 
           <div class="${finished || live ? "match-result" : "match-vs"}">
             ${finished || live
-              ? `${Number(match.home_score || 0)} : ${Number(match.away_score || 0)}`
+              ? escapeHTML(getMatchScore(match))
               : "VS"}
           </div>
 
           <div class="match-team">
-            ${imageHTML(match.away?.logo_path, match.away?.name || "Гости", "match-team-logo")}
+            ${imageHTML(
+              away?.logo_path,
+              away?.name || "Гости",
+              "match-team-logo"
+            )}
+
             <span class="match-team-name">
-              ${escapeHTML(match.away?.name || "Гости")}
+              ${escapeHTML(away?.name || "Гости")}
             </span>
           </div>
+
         </div>
 
         <p class="match-time">
@@ -575,38 +719,56 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
         </p>
 
         <p class="match-venue">
-          ${escapeHTML(match.venue || "Место проведения уточняется")}
+          ${escapeHTML(
+            match.venue || "Место проведения уточняется"
+          )}
         </p>
 
-        <a class="match-review" href="match.html?id=${encodeURIComponent(match.id)}">
-          ${finished ? "Обзор матча" : live ? "Следить за матчем" : "О матче"}
+        <a
+          class="match-review"
+          href="match.html?id=${encodeURIComponent(match.id)}"
+        >
+          ${finished
+            ? "Обзор матча"
+            : live
+              ? "Следить за матчем"
+              : "О матче"}
         </a>
       </div>
     `;
   }
 
-  async function loadLastMatches(matches) {
+  function loadLastMatches(matches) {
     const container = $("#lastMatches");
     if (!container) return;
 
     const last = matches
-      .filter(match => match.status === "finished")
-      .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))
+      .filter(isFinished)
+      .sort((a, b) =>
+        new Date(b.match_date) - new Date(a.match_date)
+      )
       .slice(0, 3);
 
     if (!last.length) {
-      setEmpty(container, "Завершённых матчей пока нет");
+      setEmpty(
+        container,
+        "Завершённых матчей пока нет"
+      );
+
       return;
     }
 
     container.innerHTML = last.map(match => `
-      <a class="last-match-row" href="match.html?id=${encodeURIComponent(match.id)}">
+      <a
+        class="last-match-row"
+        href="match.html?id=${encodeURIComponent(match.id)}"
+      >
         <span class="last-match-team">
           ${escapeHTML(match.home?.name || "Хозяева")}
         </span>
 
         <span class="last-match-score">
-          ${Number(match.home_score || 0)} : ${Number(match.away_score || 0)}
+          ${escapeHTML(getMatchScore(match))}
         </span>
 
         <span class="last-match-team">
@@ -626,13 +788,19 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
 
     try {
       const rows = await fetchRows("standings", {
-        order: { column: "place", ascending: true }
+        order: {
+          column: "place",
+          ascending: true
+        }
       });
 
       if (!rows.length) {
         body.innerHTML = `
-          <tr><td colspan="10">Таблица пока не заполнена</td></tr>
+          <tr>
+            <td colspan="10">Таблица пока не заполнена</td>
+          </tr>
         `;
+
         return;
       }
 
@@ -647,12 +815,16 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
           <td>${Number(row.losses || 0)}</td>
           <td>${Number(row.overtime_losses || 0)}</td>
           <td>${Number(row.shootout_losses || 0)}</td>
-          <td><strong>${Number(row.points || 0)}</strong></td>
+          <td>
+            <strong>${Number(row.points || 0)}</strong>
+          </td>
         </tr>
       `).join("");
     } catch (error) {
       body.innerHTML = `
-        <tr><td colspan="10">Не удалось загрузить таблицу</td></tr>
+        <tr>
+          <td colspan="10">Не удалось загрузить таблицу</td>
+        </tr>
       `;
     }
   }
@@ -667,7 +839,7 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
     const container = $("#statsList");
     if (!container) return;
 
-    $$(".stats-tab").forEach(button => {
+    $$("#statsTabs [data-stat-type]").forEach(button => {
       const active = button.dataset.statType === type;
 
       button.classList.toggle("active", active);
@@ -675,26 +847,52 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
     });
 
     try {
-      const rows = await fetchRows("player_stats", {
+      let rows = await fetchRows("player_stats", {
         order: {
           column: "value",
-          ascending: type === "plus_minus"
+          ascending: false
         },
         filters: [
-          { column: "stat_type", operator: "eq", value: type }
+          {
+            column: "stat_type",
+            operator: "eq",
+            value: type
+          }
         ],
         limit: 30
       });
 
+      // Если данные не найдены по stat_type,
+      // проверяем category.
       if (!rows.length) {
-        setEmpty(container, "Статистика пока не заполнена");
+        rows = await fetchRows("player_stats", {
+          order: {
+            column: "value",
+            ascending: false
+          },
+          filters: [
+            {
+              column: "category",
+              operator: "eq",
+              value: type
+            }
+          ],
+          limit: 30
+        });
+      }
+
+      if (!rows.length) {
+        setEmpty(
+          container,
+          "Статистика пока не заполнена"
+        );
+
         return;
       }
 
-      // Для плюс/минус положительные значения выше отрицательных.
-      if (type === "plus_minus") {
-        rows.sort((a, b) => Number(b.value) - Number(a.value));
-      }
+      rows.sort((a, b) =>
+        Number(b.value || 0) - Number(a.value || 0)
+      );
 
       container.innerHTML = rows.map((player, index) => `
         <div class="stat-row">
@@ -709,18 +907,26 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
 
             <span class="stat-player-meta">
               № ${Number(player.player_number || 0)}
-              ${player.position ? ` · ${escapeHTML(player.position)}` : ""}
+              ${player.position
+                ? ` · ${escapeHTML(player.position)}`
+                : ""}
             </span>
           </div>
 
           <span class="stat-value">
-            ${type === "plus_minus" && Number(player.value) > 0 ? "+" : ""}
-            ${escapeHTML(player.value)}
+            ${type === "plus_minus" &&
+              Number(player.value) > 0 ? "+" : ""}
+            ${escapeHTML(player.value ?? 0)}
           </span>
         </div>
       `).join("");
     } catch (error) {
-      setError(container, "Не удалось загрузить статистику");
+      setError(
+        container,
+        "Не удалось загрузить статистику"
+      );
+
+      console.error("Ошибка статистики:", error);
     }
   }
 
@@ -750,15 +956,28 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
       const rows = await fetchRows("team_leaders");
 
       if (!rows.length) {
-        setEmpty(container, "Лидеры команды пока не добавлены");
+        setEmpty(
+          container,
+          "Лидеры команды пока не добавлены"
+        );
+
         return;
       }
 
-      const order = ["scorer", "sniper", "defender", "plus_minus"];
+      const order = [
+        "scorer",
+        "sniper",
+        "defender",
+        "plus_minus"
+      ];
 
-      rows.sort((a, b) =>
-        order.indexOf(a.leader_type) - order.indexOf(b.leader_type)
-      );
+      rows.sort((a, b) => {
+        const aIndex = order.indexOf(a.leader_type);
+        const bIndex = order.indexOf(b.leader_type);
+
+        return (aIndex === -1 ? 999 : aIndex) -
+          (bIndex === -1 ? 999 : bIndex);
+      });
 
       container.innerHTML = rows.map(leader => `
         <article class="leader-card">
@@ -774,11 +993,16 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
 
           <div class="leader-info">
             <span class="leader-type">
-              ${escapeHTML(leaderLabels[leader.leader_type] || "Лидер команды")}
+              ${escapeHTML(
+                leaderLabels[leader.leader_type] ||
+                "Лидер команды"
+              )}
             </span>
 
             <h3 class="leader-name">
-              ${escapeHTML(leader.player_name || "Игрок не выбран")}
+              ${escapeHTML(
+                leader.player_name || "Игрок не выбран"
+              )}
             </h3>
 
             <p class="leader-position">
@@ -792,7 +1016,10 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
         </article>
       `).join("");
     } catch (error) {
-      setError(container, "Не удалось загрузить лидеров");
+      setError(
+        container,
+        "Не удалось загрузить лидеров"
+      );
     }
   }
 
@@ -806,19 +1033,33 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
 
     try {
       const albums = await fetchRows("albums", {
-        order: { column: "album_date", ascending: false },
+        order: {
+          column: "album_date",
+          ascending: false
+        },
         limit: 30
       });
 
       if (!albums.length) {
-        setEmpty(container, "Фотоальбомы пока не опубликованы");
+        setEmpty(
+          container,
+          "Фотоальбомы пока не опубликованы"
+        );
+
         return;
       }
 
       container.innerHTML = albums.map(album => `
-        <a class="album-card" href="album.html?id=${encodeURIComponent(album.id)}">
+        <a
+          class="album-card"
+          href="album.html?id=${encodeURIComponent(album.id)}"
+        >
           <div class="album-cover-wrap">
-            ${imageHTML(album.cover_path, album.title, "album-cover")}
+            ${imageHTML(
+              album.cover_path,
+              album.title,
+              "album-cover"
+            )}
           </div>
 
           <p class="album-date">
@@ -831,12 +1072,15 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
         </a>
       `).join("");
     } catch (error) {
-      setError(container, "Не удалось загрузить фотоальбомы");
+      setError(
+        container,
+        "Не удалось загрузить фотоальбомы"
+      );
     }
   }
 
   // ========================================
-  // MENU
+  // MOBILE MENU
   // ========================================
 
   const menuButton = $("#menuButton");
@@ -848,7 +1092,9 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
 
     mobileMenu.classList.add("open");
     mobileMenu.setAttribute("aria-hidden", "false");
+
     menuButton?.setAttribute("aria-expanded", "true");
+
     document.body.classList.add("menu-open");
   }
 
@@ -857,12 +1103,18 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
 
     mobileMenu.classList.remove("open");
     mobileMenu.setAttribute("aria-hidden", "true");
+
     menuButton?.setAttribute("aria-expanded", "false");
+
     document.body.classList.remove("menu-open");
   }
 
   menuButton?.addEventListener("click", () => {
-    mobileMenu?.classList.contains("open") ? closeMenu() : openMenu();
+    if (mobileMenu?.classList.contains("open")) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
   });
 
   menuClose?.addEventListener("click", closeMenu);
@@ -874,6 +1126,33 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
   $$(".mobile-menu-panel a").forEach(link => {
     link.addEventListener("click", closeMenu);
   });
+
+  // ========================================
+  // CONTENT VIEWER
+  // ========================================
+
+  function closeContentViewer() {
+    const viewer = $("#contentViewer");
+    const body = $("#contentViewerBody");
+
+    if (viewer) {
+      viewer.classList.remove("open");
+      viewer.setAttribute("aria-hidden", "true");
+    }
+
+    if (body) body.innerHTML = "";
+
+    document.body.classList.remove("viewer-open");
+  }
+
+  $("#contentViewerClose")?.addEventListener(
+    "click",
+    closeContentViewer
+  );
+
+  // ========================================
+  // KEYBOARD
+  // ========================================
 
   document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
@@ -894,26 +1173,6 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
   }
 
   // ========================================
-  // CONTENT VIEWER
-  // ========================================
-
-  function closeContentViewer() {
-    const viewer = $("#contentViewer");
-    const body = $("#contentViewerBody");
-
-    if (viewer) {
-      viewer.classList.remove("open");
-      viewer.setAttribute("aria-hidden", "true");
-    }
-
-    if (body) body.innerHTML = "";
-
-    document.body.classList.remove("viewer-open");
-  }
-
-  $("#contentViewerClose")?.addEventListener("click", closeContentViewer);
-
-  // ========================================
   // STARTUP
   // ========================================
 
@@ -929,7 +1188,9 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
       loadMatches()
     ]);
 
-    console.info("Публичная страница ХК Челны 2011 загружена");
+    console.info(
+      "Публичная страница ХК Челны 2011 загружена"
+    );
   }
 
   startApp();
