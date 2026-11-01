@@ -1,60 +1,45 @@
+
 /* =========================================================
    ХК ЧЕЛНЫ 2011 — ADMIN.JS
-   Supabase + матчи + события + составы
+   Supabase + полная административная панель
 ========================================================= */
 
 (() => {
   "use strict";
 
   const $ = (id) => document.getElementById(id);
+  const db = window.supabaseClient;
+  const BUCKET = window.STORAGE_BUCKET || "site-media";
 
-  const CONFIG = window.SITE_CONFIG;
-  const SUPABASE = window.supabase;
-
-  if (!CONFIG || !SUPABASE) {
-    console.error("Не загружены config.js или Supabase.");
+  if (!db) {
+    console.error("Supabase client не найден. Проверь js/config.js");
     return;
   }
 
-  const db = SUPABASE.createClient(
-    CONFIG.SUPABASE_URL,
-    CONFIG.SUPABASE_KEY
-  );
-
   const state = {
     user: null,
-    section: "dashboard",
+    clubs: [],
     matches: [],
     players: [],
-    teams: [],
-    events: [],
-    periods: [],
-    editingMatch: null
+    news: [],
+    stories: [],
+    standings: [],
+    stats: [],
+    leaders: [],
+    albums: [],
+    settings: null,
+    editingStanding: null,
+    editingStat: null,
+    editingLeader: null,
+    editingClub: null
   };
 
-  const TITLES = {
-    dashboard: ["Обзор", "Общая информация о команде"],
-    homepage: ["Главная страница", "Управление блоками сайта"],
-    matches: ["Матчи", "Календарь и результаты"],
-    players: ["Игроки", "Состав команды"],
-    stats: ["Статистика", "Игровые показатели"],
-    news: ["Новости", "Публикации команды"],
-    media: ["Медиа", "Фотографии и альбомы"],
-    products: ["Магазин", "Товары команды"],
-    standings: ["Таблица", "Турнирное положение"],
-    birthdays: ["Дни рождения", "Календарь именинников"],
-    achievements: ["Достижения", "Награды команды"],
-    registry: ["Справочники", "Команды и площадки"],
-    design: ["Дизайн", "Оформление сайта"],
-    settings: ["Настройки", "Основные параметры"]
-  };
-
-  /* =======================================================
+  /* =========================================================
      ОБЩИЕ ФУНКЦИИ
-  ======================================================= */
+  ========================================================= */
 
-  function escapeHTML(value = "") {
-    return String(value).replace(/[&<>"']/g, (char) => ({
+  function esc(value = "") {
+    return String(value).replace(/[&<>"']/g, char => ({
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
@@ -63,95 +48,133 @@
     })[char]);
   }
 
-  function toast(message, type = "success") {
-    const el = $("adminToast");
-    if (!el) {
-      console.log(message);
-      return;
-    }
+  function toast(message, error = false) {
+    const el = $("toast");
+    if (!el) return;
 
     el.textContent = message;
-    el.className = `admin-toast ${type}`;
-    el.classList.remove("hidden");
+    el.classList.add("on");
+
+    el.style.background = error ? "#9f293b" : "#17234c";
 
     clearTimeout(toast.timer);
     toast.timer = setTimeout(() => {
-      el.classList.add("hidden");
+      el.classList.remove("on");
     }, 3500);
   }
 
-  function setLoading(loading) {
-    $("adminLoader")?.classList.toggle("hidden", !loading);
+  function showError(error, prefix = "Ошибка") {
+    console.error(prefix, error);
+    toast(`${prefix}: ${error?.message || error}`, true);
   }
 
-  function formatDate(value) {
+  function dateText(value) {
     if (!value) return "Дата не указана";
 
-    return new Date(value + "T00:00:00").toLocaleDateString("ru-RU", {
-      day: "numeric",
-      month: "long",
-      year: "numeric"
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return String(value);
+
+    return date.toLocaleString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
     });
   }
 
-  function formatTime(value) {
-    return value ? String(value).slice(0, 5) : "";
+  function dateOnly(value) {
+    if (!value) return "";
+
+    return String(value).slice(0, 10);
   }
 
-  function getTeamName(id) {
-    const team = state.teams.find(
-      (item) => String(item.id) === String(id)
+  function localDateTime(value) {
+    if (!value) return "";
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset)
+      .toISOString()
+      .slice(0, 16);
+  }
+
+  function numberValue(id, fallback = 0) {
+    const value = Number($(id)?.value);
+    return Number.isFinite(value) ? value : fallback;
+  }
+
+  function value(id) {
+    return $(id)?.value?.trim() || "";
+  }
+
+  function fileValue(id) {
+    return $(id)?.files?.[0] || null;
+  }
+
+  function imageUrl(path) {
+    if (!path) return "";
+
+    if (/^https?:\/\//i.test(path)) return path;
+
+    const { data } = db.storage
+      .from(BUCKET)
+      .getPublicUrl(path);
+
+    return data.publicUrl;
+  }
+
+  function imageHTML(path, alt = "") {
+    const url = imageUrl(path);
+
+    if (!url) return "";
+
+    return `
+      <img
+        src="${esc(url)}"
+        alt="${esc(alt)}"
+        style="
+          width:58px;
+          height:58px;
+          object-fit:cover;
+          border-radius:8px;
+          flex-shrink:0;
+        "
+      >
+    `;
+  }
+
+  function empty(text) {
+    return `<p class="hint">${esc(text)}</p>`;
+  }
+
+  function itemActions(id, type, edit = true) {
+    return `
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${edit ? `
+          <button class="btn alt"
+            data-action="edit"
+            data-type="${type}"
+            data-id="${esc(id)}">Изменить</button>
+        ` : ""}
+        <button class="btn red"
+          data-action="delete"
+          data-type="${type}"
+          data-id="${esc(id)}">Удалить</button>
+      </div>
+    `;
+  }
+
+  async function selectRows(table, configure = q => q) {
+    const { data, error } = await configure(
+      db.from(table).select("*")
     );
 
-    return team?.name || "Команда";
-  }
-
-  function getPlayerName(id) {
-    const player = state.players.find(
-      (item) => String(item.id) === String(id)
-    );
-
-    return player?.full_name || "Игрок";
-  }
-
-  function getMatchName(match) {
-    return `${getTeamName(match.home_team_id)} — ${getTeamName(match.away_team_id)}`;
-  }
-
-  function showModal(title, html) {
-    $("adminModalTitle").textContent = title;
-    $("adminModalContent").innerHTML = html;
-    $("adminModal")?.classList.remove("hidden");
-    document.body.classList.add("modal-open");
-  }
-
-  function closeModal() {
-    $("adminModal")?.classList.add("hidden");
-    document.body.classList.remove("modal-open");
-    state.editingMatch = null;
-  }
-
-  function closeModalOnBackdrop(event) {
-    if (
-      event.target?.id === "adminModalBackdrop" ||
-      event.target?.id === "adminModalClose"
-    ) {
-      closeModal();
-    }
-  }
-
-  $("adminModalBackdrop")?.addEventListener("click", closeModalOnBackdrop);
-  $("adminModalClose")?.addEventListener("click", closeModal);
-
-  /* =======================================================
-     SUPABASE
-  ======================================================= */
-
-  async function selectRows(table, query = (q) => q) {
-    const result = await query(db.from(table).select("*"));
-
-    if (result.error) throw result.error;
-    return result.data || [];
+    if (error) throw error;
+    return data || [];
   }
 
   async function insertRow(table, values) {
@@ -161,7 +184,7 @@
       .select();
 
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   }
 
   async function updateRow(table, id, values) {
@@ -172,7 +195,7 @@
       .select();
 
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   }
 
   async function deleteRow(table, id) {
@@ -184,83 +207,90 @@
     if (error) throw error;
   }
 
-  async function uploadImage(file, folder = "uploads") {
+  async function uploadFile(file, folder) {
     if (!file) return null;
 
-    const extension = file.name.split(".").pop();
-    const fileName =
+    const extension = (
+      file.name.split(".").pop() || "jpg"
+    ).toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    const filename =
       `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
 
     const { error } = await db.storage
-      .from(CONFIG.STORAGE_BUCKET)
-      .upload(fileName, file, {
+      .from(BUCKET)
+      .upload(filename, file, {
         cacheControl: "3600",
-        upsert: false
+        upsert: false,
+        contentType: file.type || undefined
       });
 
     if (error) throw error;
 
-    const { data } = db.storage
-      .from(CONFIG.STORAGE_BUCKET)
-      .getPublicUrl(fileName);
-
-    return data.publicUrl;
+    return filename;
   }
 
-  /* =======================================================
-     АВТОРИЗАЦИЯ
-  ======================================================= */
+  function resetFile(id) {
+    if ($(id)) $(id).value = "";
+  }
 
-  async function checkAuth() {
-    setLoading(true);
+  function resetFields(ids) {
+    ids.forEach(id => {
+      const el = $(id);
+      if (!el) return;
 
-    try {
-      const { data, error } = await db.auth.getSession();
-      if (error) throw error;
-
-      state.user = data.session?.user || null;
-
-      if (state.user) {
-        showAdmin();
+      if (el.type === "file") {
+        el.value = "";
+      } else if (el.type === "checkbox") {
+        el.checked = false;
       } else {
-        showLogin();
+        el.value = "";
       }
-    } catch (error) {
-      console.error(error);
-      showLogin();
-    } finally {
-      setLoading(false);
-    }
+    });
   }
+
+  function bindAction(container, callback) {
+    $(container)?.addEventListener("click", async event => {
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+
+      const { action, type, id } = button.dataset;
+
+      try {
+        await callback(action, type, id);
+      } catch (error) {
+        showError(error);
+      }
+    });
+  }
+
+  /* =========================================================
+     АВТОРИЗАЦИЯ
+  ========================================================= */
 
   function showLogin() {
-    $("loginScreen")?.classList.remove("hidden");
-    $("adminApp")?.classList.add("hidden");
+    $("login")?.classList.remove("hide");
+    $("app")?.classList.add("hide");
   }
 
-  function showAdmin() {
-    $("loginScreen")?.classList.add("hidden");
-    $("adminApp")?.classList.remove("hidden");
-
-    if ($("adminUserEmail")) {
-      $("adminUserEmail").textContent = state.user?.email || "";
-    }
-
+  function showApp() {
+    $("login")?.classList.add("hide");
+    $("app")?.classList.remove("hide");
     loadAll();
   }
 
   async function login(event) {
-    event?.preventDefault();
+    event.preventDefault();
 
-    const email = $("loginEmail")?.value.trim();
-    const password = $("loginPassword")?.value;
+    $("loginErr").textContent = "";
+
+    const email = value("email");
+    const password = $("password")?.value || "";
 
     if (!email || !password) {
-      $("loginError").textContent = "Введите email и пароль.";
+      $("loginErr").textContent = "Заполни все поля.";
       return;
     }
-
-    $("loginError").textContent = "";
 
     try {
       const { data, error } = await db.auth.signInWithPassword({
@@ -271,9 +301,9 @@
       if (error) throw error;
 
       state.user = data.user;
-      showAdmin();
+      showApp();
     } catch (error) {
-      $("loginError").textContent = error.message;
+      $("loginErr").textContent = error.message;
     }
   }
 
@@ -281,7 +311,7 @@
     const { error } = await db.auth.signOut();
 
     if (error) {
-      toast(error.message, "error");
+      showError(error);
       return;
     }
 
@@ -290,1199 +320,1511 @@
   }
 
   $("loginForm")?.addEventListener("submit", login);
-  $("logoutButton")?.addEventListener("click", logout);
+  $("logout")?.addEventListener("click", logout);
+
+  async function checkAuth() {
+    try {
+      const { data, error } = await db.auth.getSession();
+      if (error) throw error;
+
+      state.user = data.session?.user || null;
+
+      if (state.user) showApp();
+      else showLogin();
+
+    } catch (error) {
+      showError(error, "Ошибка авторизации");
+      showLogin();
+    }
+  }
 
   db.auth.onAuthStateChange((_event, session) => {
     state.user = session?.user || null;
   });
 
-  /* =======================================================
+  /* =========================================================
      НАВИГАЦИЯ
-  ======================================================= */
+  ========================================================= */
 
-  function openSection(section) {
-    if (!TITLES[section]) return;
+  $("tabs")?.addEventListener("click", event => {
+    const button = event.target.closest("[data-tab]");
+    if (!button) return;
 
-    state.section = section;
+    const tab = button.dataset.tab;
 
-    document.querySelectorAll(".admin-section").forEach((element) => {
-      element.classList.add("hidden");
+    document.querySelectorAll("#tabs button").forEach(item => {
+      item.classList.toggle("active", item === button);
     });
 
-    const target = $(`section-${section}`);
-    target?.classList.remove("hidden");
-
-    document.querySelectorAll(".sidebar-item").forEach((button) => {
-      button.classList.toggle(
-        "active",
-        button.dataset.section === section
-      );
-    });
-
-    if ($("currentSectionTitle")) {
-      $("currentSectionTitle").textContent = TITLES[section][0];
-    }
-
-    if ($("currentSectionSubtitle")) {
-      $("currentSectionSubtitle").textContent = TITLES[section][1];
-    }
-
-    $("adminSidebar")?.classList.remove("open");
-  }
-
-  document.querySelectorAll("[data-section]").forEach((button) => {
-    button.addEventListener("click", () => {
-      openSection(button.dataset.section);
+    document.querySelectorAll(".panel").forEach(panel => {
+      panel.classList.toggle("active", panel.id === tab);
     });
   });
 
-  $("mobileMenuButton")?.addEventListener("click", () => {
-    $("adminSidebar")?.classList.toggle("open");
-  });
-
-  $("refreshButton")?.addEventListener("click", loadAll);
-
-  /* =======================================================
-     ЗАГРУЗКА ДАННЫХ
-  ======================================================= */
+  /* =========================================================
+     ЗАГРУЗКА ВСЕХ ДАННЫХ
+  ========================================================= */
 
   async function loadAll() {
-    setLoading(true);
-
     try {
-      const [
-        teams,
-        matches,
-        players
-      ] = await Promise.all([
-        selectRows("teams", (q) => q.order("name")),
-        selectRows("matches", (q) => q.order("match_date", { ascending: false })),
-        selectRows("players", (q) => q.order("number", { ascending: true }))
+      const results = await Promise.all([
+        selectRows("clubs", q => q.order("name")),
+        selectRows("matches", q => q.order("match_date", { ascending: false })),
+        selectRows("players", q => q.order("number")),
+        selectRows("news", q => q.order("published_at", { ascending: false })),
+        selectRows("stories", q => q.order("created_at", { ascending: false })),
+        selectRows("standings", q => q.order("place")),
+        selectRows("player_stats", q => q.order("value", { ascending: false })),
+        selectRows("team_leaders", q => q.order("created_at", { ascending: false })),
+        selectRows("albums", q => q.order("created_at", { ascending: false }))
       ]);
 
-      state.teams = teams;
-      state.matches = matches;
-      state.players = players;
+      [
+        state.clubs,
+        state.matches,
+        state.players,
+        state.news,
+        state.stories,
+        state.standings,
+        state.stats,
+        state.leaders,
+        state.albums
+      ] = results;
 
-      await Promise.allSettled([
-        renderDashboard(),
+      await Promise.all([
+        renderNews(),
+        renderStories(),
         renderMatches(),
+        renderClubs(),
+        renderStandings(),
         renderPlayers(),
         renderStats(),
-        renderNews(),
+        renderLeaders(),
         renderAlbums(),
-        renderProducts(),
-        renderStandings(),
-        renderBirthdays(),
-        renderAchievements(),
-        renderRegistry()
+        loadSettings()
       ]);
 
-      fillHomepageControls();
-      fillDesignControls();
-
     } catch (error) {
-      console.error(error);
-      toast(`Ошибка загрузки: ${error.message}`, "error");
-    } finally {
-      setLoading(false);
+      showError(error, "Не удалось загрузить данные");
     }
   }
 
-  /* =======================================================
-     ГЛАВНАЯ / DASHBOARD
-  ======================================================= */
-
-  async function renderDashboard() {
-    const [
-      news,
-      albums
-    ] = await Promise.all([
-      selectRows("news").catch(() => []),
-      selectRows("albums").catch(() => [])
-    ]);
-
-    const stats = [
-      ["Матчи", state.matches.length],
-      ["Игроки", state.players.length],
-      ["Новости", news.length],
-      ["Альбомы", albums.length]
-    ];
-
-    if ($("dashboardStats")) {
-      $("dashboardStats").innerHTML = stats.map(([name, value]) => `
-        <div class="stat-card">
-          <div class="stat-value">${value}</div>
-          <div class="stat-label">${name}</div>
-        </div>
-      `).join("");
-    }
-
-    const nextMatch = [...state.matches]
-      .filter((m) => m.status === "scheduled")
-      .sort((a, b) => {
-        return new Date(a.match_date) - new Date(b.match_date);
-      })[0];
-
-    if ($("dashboardNextMatch")) {
-      $("dashboardNextMatch").innerHTML = nextMatch
-        ? `<b>${escapeHTML(getMatchName(nextMatch))}</b>
-           <p>${formatDate(nextMatch.match_date)} · ${formatTime(nextMatch.match_time)}</p>`
-        : "Предстоящих матчей нет.";
-    }
-
-    if ($("dashboardPlayers")) {
-      $("dashboardPlayers").textContent = state.players.length;
-    }
-
-    if ($("dashboardNews")) {
-      $("dashboardNews").textContent = news.length;
-    }
-
-    if ($("dashboardAlbums")) {
-      $("dashboardAlbums").textContent = albums.length;
-    }
-  }
-
-  /* =======================================================
-     МАТЧИ
-  ======================================================= */
-
-  async function renderMatches() {
-    const box = $("matchesAdminList");
-    if (!box) return;
-
-    if (!state.matches.length) {
-      box.innerHTML = `<div class="empty-state">Матчей пока нет.</div>`;
-      return;
-    }
-
-    box.innerHTML = state.matches.map((match) => `
-      <div class="admin-item">
-        <div class="admin-item-main">
-          <b>${escapeHTML(getMatchName(match))}</b>
-          <span>${formatDate(match.match_date)} · ${formatTime(match.match_time)}</span>
-          <span>${escapeHTML(match.tournament || "")}</span>
-          <span>${escapeHTML(match.venue || "")}</span>
-        </div>
-
-        <div class="admin-item-actions">
-          <button class="btn btn-small" data-match-action="events" data-id="${match.id}">
-            События
-          </button>
-
-          <button class="btn btn-small" data-match-action="lineup" data-id="${match.id}">
-            Состав
-          </button>
-
-          <button class="btn btn-small" data-match-action="edit" data-id="${match.id}">
-            Изменить
-          </button>
-
-          <button class="btn btn-danger btn-small" data-match-action="delete" data-id="${match.id}">
-            Удалить
-          </button>
-        </div>
-      </div>
-    `).join("");
-
-    box.querySelectorAll("[data-match-action]").forEach((button) => {
-      button.addEventListener("click", async () => {
-        const id = Number(button.dataset.id);
-        const action = button.dataset.matchAction;
-
-        if (action === "events") await openEventsEditor(id);
-        if (action === "lineup") await openLineupEditor(id);
-        if (action === "edit") openMatchForm(id);
-        if (action === "delete") await deleteMatch(id);
-      });
-    });
-  }
-
-  function openMatchForm(id = null) {
-    const match = state.matches.find((m) => String(m.id) === String(id)) || {};
-
-    showModal(id ? "Изменить матч" : "Добавить матч", `
-      <form id="matchForm" class="admin-form">
-        <label>Дата</label>
-        <input name="match_date" type="date" value="${escapeHTML(match.match_date || "")}" required>
-
-        <label>Время</label>
-        <input name="match_time" type="time" value="${formatTime(match.match_time)}">
-
-        <label>Хозяева</label>
-        <select name="home_team_id" required>
-          ${teamOptions(match.home_team_id)}
-        </select>
-
-        <label>Гости</label>
-        <select name="away_team_id" required>
-          ${teamOptions(match.away_team_id)}
-        </select>
-
-        <label>Турнир</label>
-        <input name="tournament" value="${escapeHTML(match.tournament || "")}">
-
-        <label>Место проведения</label>
-        <input name="venue" value="${escapeHTML(match.venue || "")}">
-
-        <label>Статус</label>
-        <select name="status">
-          <option value="scheduled" ${match.status === "scheduled" ? "selected" : ""}>Предстоящий</option>
-          <option value="live" ${match.status === "live" ? "selected" : ""}>LIVE</option>
-          <option value="finished" ${match.status === "finished" ? "selected" : ""}>Завершён</option>
-          <option value="cancelled" ${match.status === "cancelled" ? "selected" : ""}>Отменён</option>
-        </select>
-
-        <label>Трансляция</label>
-        <input name="stream_url" type="url" value="${escapeHTML(match.stream_url || "")}">
-
-        <label>Главный судья</label>
-        <input name="chief_referee" value="${escapeHTML(match.chief_referee || "")}">
-
-        <label>Первый линейный</label>
-        <input name="linesman1" value="${escapeHTML(match.linesman1 || "")}">
-
-        <label>Второй линейный</label>
-        <input name="linesman2" value="${escapeHTML(match.linesman2 || "")}">
-
-        <button class="btn btn-primary" type="submit">Сохранить матч</button>
-      </form>
-    `);
-
-    $("matchForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      const form = new FormData(event.currentTarget);
-
-      const values = {
-        match_date: form.get("match_date"),
-        match_time: form.get("match_time") || null,
-        home_team_id: Number(form.get("home_team_id")),
-        away_team_id: Number(form.get("away_team_id")),
-        tournament: form.get("tournament") || null,
-        venue: form.get("venue") || null,
-        status: form.get("status"),
-        stream_url: form.get("stream_url") || null,
-        chief_referee: form.get("chief_referee") || null,
-        linesman1: form.get("linesman1") || null,
-        linesman2: form.get("linesman2") || null
-      };
-
-      try {
-        if (id) {
-          await updateRow("matches", id, values);
-        } else {
-          await insertRow("matches", values);
-        }
-
-        closeModal();
-        toast("Матч сохранён.");
-        await loadAll();
-      } catch (error) {
-        toast(error.message, "error");
-      }
-    });
-  }
-
-  function teamOptions(selected = "") {
-    return `
-      <option value="">Выберите команду</option>
-      ${state.teams.map((team) => `
-        <option value="${team.id}" ${String(selected) === String(team.id) ? "selected" : ""}>
-          ${escapeHTML(team.name)}
-        </option>
-      `).join("")}
-    `;
-  }
-
-  async function deleteMatch(id) {
-    if (!confirm("Удалить матч? События и периоды этого матча также будут удалены.")) {
-      return;
-    }
-
-    try {
-      await deleteRow("matches", id);
-      toast("Матч удалён.");
-      await loadAll();
-    } catch (error) {
-      toast(error.message, "error");
-    }
-  }
-
-  $("addMatchButton")?.addEventListener("click", () => openMatchForm());
-
-  /* =======================================================
-     СОБЫТИЯ МАТЧА
-  ======================================================= */
-
-  async function openEventsEditor(matchId) {
-    const match = state.matches.find(
-      (item) => String(item.id) === String(matchId)
-    );
-
-    if (!match) {
-      toast("Матч не найден.", "error");
-      return;
-    }
-
-    state.editingMatch = match;
-
-    try {
-      const [events, periods] = await Promise.all([
-        selectRows("match_events", (q) =>
-          q.eq("match_id", matchId).order("period").order("event_time")
-        ),
-        selectRows("match_periods", (q) =>
-          q.eq("match_id", matchId).order("period")
-        )
-      ]);
-
-      state.events = events;
-      state.periods = periods;
-
-      showModal("События матча", `
-        <div class="match-editor">
-          <h3>${escapeHTML(getMatchName(match))}</h3>
-          <p>${formatDate(match.match_date)} · ${formatTime(match.match_time)}</p>
-
-          <div class="editor-tabs">
-            <button type="button" class="btn active" id="showEventsTab">События</button>
-            <button type="button" class="btn" id="showPeriodsTab">Периоды</button>
-          </div>
-
-          <div id="eventsTab">
-            <div id="eventsRows"></div>
-
-            <button type="button" class="btn" id="addEventRow">
-              + Добавить событие
-            </button>
-          </div>
-
-          <div id="periodsTab" class="hidden">
-            <p class="muted">Укажи счёт каждого периода. Если период не проводился, оставь нули.</p>
-            ${[1, 2, 3, 4].map((period) => {
-              const row = periods.find((p) => Number(p.period) === period) || {};
-
-              return `
-                <div class="period-row">
-                  <b>${period === 4 ? "Овертайм" : `${period}-й период`}</b>
-
-                  <label>Хозяева</label>
-                  <input type="number" min="0" class="period-home" data-period="${period}"
-                    value="${row.home_score ?? 0}">
-
-                  <label>Гости</label>
-                  <input type="number" min="0" class="period-away" data-period="${period}"
-                    value="${row.away_score ?? 0}">
-
-                  <label>Штрафные минуты</label>
-                  <input type="number" min="0" class="period-pim" data-period="${period}"
-                    value="${row.penalty_minutes ?? 0}">
-                </div>
-              `;
-            }).join("")}
-          </div>
-
-          <button type="button" class="btn btn-primary" id="saveMatchEvents">
-            Сохранить события и периоды
-          </button>
-        </div>
-      `);
-
-      renderEventRows(events);
-
-      $("showEventsTab").addEventListener("click", () => {
-        $("eventsTab").classList.remove("hidden");
-        $("periodsTab").classList.add("hidden");
-      });
-
-      $("showPeriodsTab").addEventListener("click", () => {
-        $("periodsTab").classList.remove("hidden");
-        $("eventsTab").classList.add("hidden");
-      });
-
-      $("addEventRow").addEventListener("click", () => {
-        addEventRow();
-      });
-
-      $("saveMatchEvents").addEventListener("click", () => {
-        saveMatchEvents(matchId);
-      });
-
-    } catch (error) {
-      toast(`Не удалось открыть события: ${error.message}`, "error");
-    }
-  }
-
-  function playerOptions(selected = "") {
-    return `
-      <option value="">Не выбран</option>
-      ${state.players.filter((p) => p.active !== false).map((player) => `
-        <option value="${player.id}" ${String(selected) === String(player.id) ? "selected" : ""}>
-          ${player.number != null ? `#${player.number} ` : ""}
-          ${escapeHTML(player.full_name)}
-        </option>
-      `).join("")}
-    `;
-  }
-
-  function eventRowHTML(event = {}) {
-    return `
-      <div class="event-editor-row">
-        <div class="event-editor-grid">
-
-          <label>Событие
-            <select class="event-type">
-              <option value="goal" ${event.event_type === "goal" ? "selected" : ""}>Гол</option>
-              <option value="penalty" ${event.event_type === "penalty" ? "selected" : ""}>Удаление</option>
-            </select>
-          </label>
-
-          <label>Команда
-            <select class="event-team">
-              <option value="${state.editingMatch.home_team_id}">
-                ${escapeHTML(getTeamName(state.editingMatch.home_team_id))}
-              </option>
-              <option value="${state.editingMatch.away_team_id}">
-                ${escapeHTML(getTeamName(state.editingMatch.away_team_id))}
-              </option>
-            </select>
-          </label>
-
-          <label>Период
-            <select class="event-period">
-              <option value="1" ${Number(event.period) === 1 ? "selected" : ""}>1</option>
-              <option value="2" ${Number(event.period) === 2 ? "selected" : ""}>2</option>
-              <option value="3" ${Number(event.period) === 3 ? "selected" : ""}>3</option>
-              <option value="4" ${Number(event.period) === 4 ? "selected" : ""}>ОТ</option>
-            </select>
-          </label>
-
-          <label>Время
-            <input class="event-time" type="text" placeholder="12:34"
-              value="${escapeHTML(event.event_time || "")}">
-          </label>
-
-          <label>Игрок
-            <select class="event-player">${playerOptions(event.player_id)}</select>
-          </label>
-
-          <label>Передача 1
-            <select class="event-assist1">${playerOptions(event.assist1_player_id)}</select>
-          </label>
-
-          <label>Передача 2
-            <select class="event-assist2">${playerOptions(event.assist2_player_id)}</select>
-          </label>
-
-          <label>Штраф, минут
-            <input class="event-pim" type="number" min="0"
-              value="${event.penalty_minutes ?? ""}">
-          </label>
-
-          <label class="event-note-label">Примечание
-            <input class="event-note" value="${escapeHTML(event.note || "")}">
-          </label>
-        </div>
-
-        <button type="button" class="btn btn-danger btn-small remove-event">
-          Удалить событие
-        </button>
-      </div>
-    `;
-  }
-
-  function renderEventRows(events = []) {
-    const box = $("eventsRows");
-    if (!box) return;
-
-    box.innerHTML = events.length
-      ? events.map(eventRowHTML).join("")
-      : `<div class="empty-state">Событий пока нет. Добавь первое событие.</div>`;
-
-    box.querySelectorAll(".remove-event").forEach((button) => {
-      button.addEventListener("click", () => {
-        button.closest(".event-editor-row").remove();
-      });
-    });
-  }
-
-  function addEventRow() {
-    const box = $("eventsRows");
-    if (!box) return;
-
-    const empty = box.querySelector(".empty-state");
-    empty?.remove();
-
-    box.insertAdjacentHTML("beforeend", eventRowHTML());
-
-    box.querySelectorAll(".remove-event").forEach((button) => {
-      if (button.dataset.bound) return;
-      button.dataset.bound = "1";
-
-      button.addEventListener("click", () => {
-        button.closest(".event-editor-row").remove();
-      });
-    });
-  }
-
-  function collectEventRows(matchId) {
-    const rows = [...document.querySelectorAll(".event-editor-row")];
-
-    return rows.map((row) => {
-      const type = row.querySelector(".event-type").value;
-      const teamId = Number(row.querySelector(".event-team").value);
-      const period = Number(row.querySelector(".event-period").value);
-      const time = row.querySelector(".event-time").value.trim();
-      const playerId = row.querySelector(".event-player").value;
-      const assist1 = row.querySelector(".event-assist1").value;
-      const assist2 = row.querySelector(".event-assist2").value;
-      const pim = row.querySelector(".event-pim").value;
-      const note = row.querySelector(".event-note").value.trim();
-
-      const player = playerId ? getPlayerName(playerId) : "";
-      const assist1Name = assist1 ? getPlayerName(assist1) : "";
-      const assist2Name = assist2 ? getPlayerName(assist2) : "";
-
-      let publicNote = note;
-
-      if (type === "goal") {
-        publicNote = [
-          "Гол",
-          player ? `Автор: ${player}` : "",
-          assist1Name ? `Передача: ${assist1Name}` : "",
-          assist2Name ? `Передача: ${assist2Name}` : "",
-          note
-        ].filter(Boolean).join(" · ");
-      }
-
-      if (type === "penalty") {
-        publicNote = [
-          "Удаление",
-          player ? `Игрок: ${player}` : "",
-          pim ? `${pim} мин.` : "",
-          note
-        ].filter(Boolean).join(" · ");
-      }
-
-      return {
-        match_id: matchId,
-        event_type: type,
-        period,
-        event_time: time || null,
-        team_id: teamId,
-        player_id: playerId ? Number(playerId) : null,
-        assist1_player_id: assist1 ? Number(assist1) : null,
-        assist2_player_id: assist2 ? Number(assist2) : null,
-        penalty_minutes: pim ? Number(pim) : null,
-        note: publicNote || null
-      };
-    }).filter((event) => {
-      return event.player_id || event.note;
-    });
-  }
-
-  async function saveMatchEvents(matchId) {
-    try {
-      const events = collectEventRows(matchId);
-
-      const periods = [1, 2, 3, 4].map((period) => {
-        const home = document.querySelector(
-          `.period-home[data-period="${period}"]`
-        )?.value;
-
-        const away = document.querySelector(
-          `.period-away[data-period="${period}"]`
-        )?.value;
-
-        const pim = document.querySelector(
-          `.period-pim[data-period="${period}"]`
-        )?.value;
-
-        return {
-          match_id: matchId,
-          period,
-          home_score: Number(home || 0),
-          away_score: Number(away || 0),
-          penalty_minutes: Number(pim || 0)
-        };
-      });
-
-      const { error: deleteEventsError } = await db
-        .from("match_events")
-        .delete()
-        .eq("match_id", matchId);
-
-      if (deleteEventsError) throw deleteEventsError;
-
-      if (events.length) {
-        const { error } = await db
-          .from("match_events")
-          .insert(events);
-
-        if (error) throw error;
-      }
-
-      const { error: periodsError } = await db
-        .from("match_periods")
-        .upsert(periods, {
-          onConflict: "match_id,period"
-        });
-
-      if (periodsError) throw periodsError;
-
-      closeModal();
-      toast("События и периоды сохранены.");
-
-    } catch (error) {
-      console.error(error);
-      toast(`Ошибка сохранения: ${error.message}`, "error");
-    }
-  }
-
-  /* =======================================================
-     СОСТАВ МАТЧА
-  ======================================================= */
-
-  async function openLineupEditor(matchId) {
-    const match = state.matches.find(
-      (item) => String(item.id) === String(matchId)
-    );
-
-    if (!match) {
-      toast("Матч не найден.", "error");
-      return;
-    }
-
-    const currentLineup = Array.isArray(match.lineup)
-      ? match.lineup
-      : [];
-
-    const selectedNames = new Set(currentLineup);
-
-    showModal("Состав на матч", `
-      <div class="lineup-editor">
-        <h3>${escapeHTML(getMatchName(match))}</h3>
-        <p>${formatDate(match.match_date)}</p>
-
-        <p class="muted">
-          Отметь игроков, которые участвуют в матче. Выбери их позицию в составе.
-          Сохранённый состав появится в карточке матча на сайте.
-        </p>
-
-        <div class="lineup-list">
-          ${state.players.filter((p) => p.active !== false).map((player) => {
-            const displayName = [
-              player.number != null ? `#${player.number}` : "",
-              player.full_name,
-              player.position === "goalie" ? "— Вратарь" :
-                player.position === "defense" ? "— Защитник" :
-                  "— Нападающий"
-            ].filter(Boolean).join(" ");
-
-            return `
-              <label class="lineup-player">
-                <input type="checkbox" class="lineup-check"
-                  value="${player.id}"
-                  data-display="${escapeHTML(displayName)}"
-                  ${selectedNames.has(displayName) ||
-                    [...selectedNames].some((name) => name.includes(player.full_name))
-                    ? "checked" : ""}>
-
-                <span>
-                  ${escapeHTML(displayName)}
-                </span>
-              </label>
-            `;
-          }).join("")}
-        </div>
-
-        <label>Дополнительная информация о составе</label>
-        <textarea id="lineupExtra" rows="3"
-          placeholder="Например: капитан — Иванов, ассистенты — Петров и Сидоров."></textarea>
-
-        <button class="btn btn-primary" id="saveLineupButton">
-          Сохранить состав
-        </button>
-      </div>
-    `);
-
-    $("saveLineupButton").addEventListener("click", async () => {
-      const selected = [
-        ...document.querySelectorAll(".lineup-check:checked")
-      ];
-
-      const lineup = selected.map((checkbox) => checkbox.dataset.display);
-
-      const extra = $("lineupExtra").value.trim();
-      if (extra) lineup.push(extra);
-
-      try {
-        const { error } = await db
-          .from("matches")
-          .update({ lineup })
-          .eq("id", matchId);
-
-        if (error) throw error;
-
-        match.lineup = lineup;
-
-        closeModal();
-        toast("Состав матча сохранён.");
-        await renderMatches();
-
-      } catch (error) {
-        toast(`Ошибка сохранения состава: ${error.message}`, "error");
-      }
-    });
-  }
-
-  /* =======================================================
-     ИГРОКИ
-  ======================================================= */
-
-  async function renderPlayers() {
-    const box = $("playersAdminList");
-    if (!box) return;
-
-    const filter = document.querySelector(
-      ".admin-filter.active"
-    )?.dataset.playerFilter || "all";
-
-    let players = state.players;
-
-    if (filter !== "all") {
-      players = players.filter((p) => p.position === filter);
-    }
-
-    if (!players.length) {
-      box.innerHTML = `<div class="empty-state">Игроков пока нет.</div>`;
-      return;
-    }
-
-    box.innerHTML = players.map((player) => `
-      <div class="admin-item">
-        <div class="admin-item-main">
-          <b>
-            ${player.number != null ? `#${player.number} ` : ""}
-            ${escapeHTML(player.full_name)}
-          </b>
-          <span>${escapeHTML(player.position || "")}</span>
-          <span>${player.active === false ? "Неактивен" : "В составе"}</span>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  document.querySelectorAll(".admin-filter[data-player-filter]").forEach((button) => {
-    button.addEventListener("click", () => {
-      document.querySelectorAll(".admin-filter").forEach((b) => {
-        b.classList.remove("active");
-      });
-
-      button.classList.add("active");
-      renderPlayers();
-    });
-  });
-
-  /* =======================================================
-     СТАТИСТИКА
-  ======================================================= */
-
-  async function renderStats() {
-    const box = $("statsAdminList");
-    if (!box) return;
-
-    const rows = await selectRows("player_season_stats").catch(() => []);
-
-    if (!rows.length) {
-      box.innerHTML = `<div class="empty-state">Статистика пока не заполнена.</div>`;
-      return;
-    }
-
-    box.innerHTML = rows.map((row) => `
-      <div class="admin-item">
-        <b>${escapeHTML(getPlayerName(row.player_id))}</b>
-        <span>Игр: ${row.games || 0}</span>
-        <span>Голы: ${row.goals || 0}</span>
-        <span>Передачи: ${row.assists || 0}</span>
-        <span>Очки: ${row.points || 0}</span>
-        <span>Штраф: ${row.pim || 0}</span>
-      </div>
-    `).join("");
-  }
-
-  /* =======================================================
+  /* =========================================================
      НОВОСТИ
-  ======================================================= */
+  ========================================================= */
+
+  function resetNewsForm() {
+    resetFields(["nid", "ntitle", "ntext", "nfile"]);
+    $("ntag").value = "Новость";
+    $("ndate").value = "";
+
+    $("nh").textContent = "Добавить новость";
+    $("nsave").textContent = "СОХРАНИТЬ НОВОСТЬ";
+    $("nreset").classList.add("hide");
+  }
 
   async function renderNews() {
-    const box = $("newsAdminList");
+    const box = $("nlist");
     if (!box) return;
 
-    const rows = await selectRows("news", (q) =>
-      q.order("published_at", { ascending: false })
-    ).catch(() => []);
-
-    box.innerHTML = rows.length
-      ? rows.map((item) => `
-        <div class="admin-item">
-          <b>${escapeHTML(item.title)}</b>
-          <span>${formatDate(item.published_at?.slice(0, 10))}</span>
+    box.innerHTML = state.news.length
+      ? state.news.map(item => `
+        <div class="item">
+          ${imageHTML(item.image_path, item.title)}
+          <div class="main">
+            <b>${esc(item.title)}</b>
+            <div class="sub">${esc(item.tag || "Новость")}</div>
+            <div class="sub">${dateText(item.published_at)}</div>
+          </div>
+          ${itemActions(item.id, "news")}
         </div>
       `).join("")
-      : `<div class="empty-state">Новостей пока нет.</div>`;
+      : empty("Новостей пока нет.");
   }
 
-  /* =======================================================
-     МЕДИА
-  ======================================================= */
+  async function saveNews() {
+    const id = value("nid");
+    const title = value("ntitle");
+    const text = value("ntext");
 
-  async function renderAlbums() {
-    const box = $("albumsAdminList");
-    if (!box) return;
-
-    const rows = await selectRows("albums", (q) =>
-      q.order("created_at", { ascending: false })
-    ).catch(() => []);
-
-    box.innerHTML = rows.length
-      ? rows.map((item) => `
-        <div class="admin-item">
-          <b>${escapeHTML(item.title)}</b>
-          <span>Фотографий: ${Array.isArray(item.photos) ? item.photos.length : 0}</span>
-        </div>
-      `).join("")
-      : `<div class="empty-state">Альбомов пока нет.</div>`;
-  }
-
-  /* =======================================================
-     ТОВАРЫ
-  ======================================================= */
-
-  async function renderProducts() {
-    const box = $("productsAdminList");
-    if (!box) return;
-
-    const rows = await selectRows("products").catch(() => []);
-
-    box.innerHTML = rows.length
-      ? rows.map((item) => `
-        <div class="admin-item">
-          <b>${escapeHTML(item.name)}</b>
-          <span>${item.price ?? 0} ₽</span>
-        </div>
-      `).join("")
-      : `<div class="empty-state">Товаров пока нет.</div>`;
-  }
-
-  /* =======================================================
-     ТУРНИРНАЯ ТАБЛИЦА
-  ======================================================= */
-
-  async function renderStandings() {
-    const box = $("standingsAdminList");
-    if (!box) return;
-
-    const rows = await selectRows("standings").catch(() => []);
-
-    box.innerHTML = rows.length
-      ? rows.map((item) => `
-        <div class="admin-item">
-          <b>${item.place ?? "—"} место</b>
-          <span>${item.games} игр · ${item.points} очков</span>
-        </div>
-      `).join("")
-      : `<div class="empty-state">Таблица пока не заполнена.</div>`;
-  }
-
-  /* =======================================================
-     ДНИ РОЖДЕНИЯ
-  ======================================================= */
-
-  async function renderBirthdays() {
-    const box = $("birthdaysAdminList");
-    if (!box) return;
-
-    const rows = await selectRows("birthdays").catch(() => []);
-
-    box.innerHTML = rows.length
-      ? rows.map((item) => `
-        <div class="admin-item">
-          <b>${escapeHTML(getPlayerName(item.player_id))}</b>
-          <span>${escapeHTML(item.birthday || "")}</span>
-        </div>
-      `).join("")
-      : `<div class="empty-state">Дни рождения пока не добавлены.</div>`;
-  }
-
-  /* =======================================================
-     ДОСТИЖЕНИЯ
-  ======================================================= */
-
-  async function renderAchievements() {
-    const box = $("achievementsAdminList");
-    if (!box) return;
-
-    const rows = await selectRows("achievements").catch(() => []);
-
-    box.innerHTML = rows.length
-      ? rows.map((item) => `
-        <div class="admin-item">
-          <b>${escapeHTML(item.title)}</b>
-          <span>${escapeHTML(item.description || "")}</span>
-        </div>
-      `).join("")
-      : `<div class="empty-state">Достижений пока нет.</div>`;
-  }
-
-  /* =======================================================
-     СПРАВОЧНИКИ
-  ======================================================= */
-
-  async function renderRegistry() {
-    const teamsBox = $("registryTeamsList");
-    const venuesBox = $("registryVenuesList");
-
-    if (teamsBox) {
-      teamsBox.innerHTML = state.teams.map((team) => `
-        <div class="admin-item">
-          <b>${escapeHTML(team.name)}</b>
-        </div>
-      `).join("") || `<div class="empty-state">Команд пока нет.</div>`;
+    if (!title || !text) {
+      toast("Заполни заголовок и текст.", true);
+      return;
     }
 
-    if (venuesBox) {
-      venuesBox.innerHTML = `
-        <div class="empty-state">
-          Площадки указываются в карточках матчей.
-        </div>
-      `;
-    }
-  }
-
-  /* =======================================================
-     НАСТРОЙКИ ГЛАВНОЙ СТРАНИЦЫ
-  ======================================================= */
-
-  async function getSettings() {
-    const rows = await selectRows("settings", (q) =>
-      q.eq("id", 1).limit(1)
-    );
-
-    return rows[0] || null;
-  }
-
-  async function fillHomepageControls() {
     try {
-      const settings = await getSettings();
-      if (!settings) return;
+      const old = state.news.find(item => String(item.id) === id);
 
-      const homepage = settings.homepage || {};
+      let imagePath = old?.image_path || null;
+      const file = fileValue("nfile");
 
-      const controls = {
-        homepageShowLastMatch: homepage.showLastMatch,
-        homepageShowNews: homepage.showNews,
-        homepageShowLeaders: homepage.showStats,
-        homepageShowAchievements: homepage.showAchievements,
-        homepageShowBirthdays: homepage.showBirthdays
-      };
-
-      Object.entries(controls).forEach(([id, value]) => {
-        if ($(id) && value !== undefined) {
-          $(id).checked = Boolean(value);
-        }
-      });
-
-      const select = $("homepageHeroMatch");
-
-      if (select) {
-        select.innerHTML = `
-          <option value="">Автоматически</option>
-          ${state.matches.map((match) => `
-            <option value="${match.id}"
-              ${String(homepage.featuredMatchId) === String(match.id) ? "selected" : ""}>
-              ${escapeHTML(getMatchName(match))} · ${formatDate(match.match_date)}
-            </option>
-          `).join("")}
-        `;
+      if (file) {
+        imagePath = await uploadFile(file, "news");
       }
 
-    } catch (error) {
-      console.warn("Настройки главной страницы:", error);
-    }
-  }
-
-  $("saveHomepageButton")?.addEventListener("click", async () => {
-    try {
-      const old = await getSettings();
-      const homepage = old?.homepage || {};
-
-      const updated = {
-        ...homepage,
-        showLastMatch: $("homepageShowLastMatch")?.checked ?? true,
-        showNews: $("homepageShowNews")?.checked ?? true,
-        showStats: $("homepageShowLeaders")?.checked ?? true,
-        showAchievements: $("homepageShowAchievements")?.checked ?? true,
-        showBirthdays: $("homepageShowBirthdays")?.checked ?? true,
-        featuredMatchId: $("homepageHeroMatch")?.value
-          ? Number($("homepageHeroMatch").value)
-          : null
-      };
-
-      const { error } = await db
-        .from("settings")
-        .update({ homepage: updated })
-        .eq("id", 1);
-
-      if (error) throw error;
-
-      toast("Главная страница сохранена.");
-
-    } catch (error) {
-      toast(error.message, "error");
-    }
-  });
-
-  /* =======================================================
-     ДИЗАЙН
-  ======================================================= */
-
-  async function fillDesignControls() {
-    try {
-      const settings = await getSettings();
-      if (!settings) return;
-
-      const colors = {
-        colorPrimary: settings.primary_color,
-        colorAccent: settings.gold_color || settings.accent_color,
-        colorBackground: settings.background_color,
-        colorText: settings.text_color
-      };
-
-      Object.entries(colors).forEach(([id, value]) => {
-        if ($(id) && value) $(id).value = value;
-      });
-
-      if ($("designTeamName")) {
-        $("designTeamName").value = settings.team_name || "";
-      }
-
-      if ($("logoPreview") && settings.logo_url) {
-        $("logoPreview").src = settings.logo_url;
-      }
-
-    } catch (error) {
-      console.warn(error);
-    }
-  }
-
-  $("saveDesignButton")?.addEventListener("click", async () => {
-    try {
-      const settings = await getSettings();
+      const published = value("ndate");
 
       const values = {
-        team_name: $("designTeamName")?.value || CONFIG.DEFAULT_TEAM_NAME,
-        primary_color: $("colorPrimary")?.value || "#000056",
-        gold_color: $("colorAccent")?.value || "#ffcd00",
-        background_color: $("colorBackground")?.value || "#050b22",
-        text_color: $("colorText")?.value || "#ffffff"
+        title,
+        tag: value("ntag") || "Новость",
+        text,
+        image_path: imagePath,
+        published_at: published
+          ? new Date(published).toISOString()
+          : new Date().toISOString()
       };
 
-      const logo = $("logoUpload")?.files?.[0];
-
-      if (logo) {
-        values.logo_url = await uploadImage(logo, "logo");
-      } else if (settings?.logo_url) {
-        values.logo_url = settings.logo_url;
+      if (id) {
+        await updateRow("news", id, values);
+      } else {
+        await insertRow("news", values);
       }
 
-      const { error } = await db
-        .from("settings")
-        .update(values)
-        .eq("id", 1);
-
-      if (error) throw error;
-
-      toast("Дизайн сохранён.");
+      resetNewsForm();
+      await loadAll();
+      toast("Новость сохранена.");
 
     } catch (error) {
-      toast(error.message, "error");
+      showError(error, "Ошибка сохранения новости");
     }
-  });
+  }
 
-  /* =======================================================
-     КНОПКИ ДОБАВЛЕНИЯ
-  ======================================================= */
+  async function editNews(id) {
+    const item = state.news.find(row => String(row.id) === String(id));
+    if (!item) return;
 
-  $("addPlayerButton")?.addEventListener("click", () => {
-    toast("Редактор игроков подключим к форме игроков.", "error");
-  });
+    $("nid").value = item.id;
+    $("ntitle").value = item.title || "";
+    $("ntag").value = item.tag || "Новость";
+    $("ndate").value = localDateTime(item.published_at);
+    $("ntext").value = item.text || "";
 
-  $("addGoalButton")?.addEventListener("click", () => {
-    const match = state.matches[0];
-    if (match) openEventsEditor(match.id);
-    else toast("Сначала добавь матч.", "error");
-  });
+    $("nh").textContent = "Редактировать новость";
+    $("nsave").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
+    $("nreset").classList.remove("hide");
 
-  $("addAssistButton")?.addEventListener("click", () => {
-    const match = state.matches[0];
-    if (match) openEventsEditor(match.id);
-    else toast("Сначала добавь матч.", "error");
-  });
+    document.querySelector('[data-tab="news"]')?.click();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
-  $("addPenaltyButton")?.addEventListener("click", () => {
-    const match = state.matches[0];
-    if (match) openEventsEditor(match.id);
-    else toast("Сначала добавь матч.", "error");
-  });
+  $("nsave")?.addEventListener("click", saveNews);
+  $("nreset")?.addEventListener("click", resetNewsForm);
 
-  $("addNewsButton")?.addEventListener("click", () => {
-    toast("Раздел новостей загружен. Форму публикации можно подключить отдельно.");
-  });
+  /* =========================================================
+     ИСТОРИИ
+  ========================================================= */
 
-  $("addAlbumButton")?.addEventListener("click", () => {
-    toast("Раздел альбомов загружен. Форму альбома можно подключить отдельно.");
-  });
+  async function renderStories() {
+    const box = $("slist");
+    if (!box) return;
 
-  $("addProductButton")?.addEventListener("click", () => {
-    toast("Раздел товаров загружен. Форму товара можно подключить отдельно.");
-  });
+    box.innerHTML = state.stories.length
+      ? state.stories.map(item => `
+        <div class="item">
+          ${imageHTML(item.image_path, "История")}
+          <div class="main">
+            <b>${esc(item.caption || "История")}</b>
+            <div class="sub">До: ${dateText(item.expires_at)}</div>
+          </div>
+          ${itemActions(item.id, "story", false)}
+        </div>
+      `).join("")
+      : empty("Историй пока нет.");
+  }
 
-  $("addStandingButton")?.addEventListener("click", () => {
-    toast("Раздел турнирной таблицы загружен.");
-  });
+  async function addStory() {
+    const file = fileValue("sfile");
 
-  $("addBirthdayButton")?.addEventListener("click", () => {
-    toast("Раздел дней рождения загружен.");
-  });
+    if (!file) {
+      toast("Выбери изображение.", true);
+      return;
+    }
 
-  $("addAchievementButton")?.addEventListener("click", () => {
-    toast("Раздел достижений загружен.");
-  });
+    try {
+      const path = await uploadFile(file, "stories");
+      const hours = Number(value("shours")) || 24;
 
-  $("addRegistryTeamButton")?.addEventListener("click", () => {
-    toast("Команды добавляются в справочник через Supabase.");
-  });
+      const expires = new Date(
+        Date.now() + hours * 60 * 60 * 1000
+      ).toISOString();
 
-  $("addRegistryVenueButton")?.addEventListener("click", () => {
-    toast("Площадки указываются в карточке матча.");
-  });
+      await insertRow("stories", {
+        image_path: path,
+        caption: value("scaption") || null,
+        expires_at: expires
+      });
 
-  /* =======================================================
-     БЫСТРЫЕ ДЕЙСТВИЯ
-  ======================================================= */
+      resetFields(["sfile", "scaption"]);
+      await loadAll();
 
-  document.querySelectorAll(".quick-action[data-section]").forEach((button) => {
-    button.addEventListener("click", () => {
-      openSection(button.dataset.section);
+      toast("История опубликована.");
+
+    } catch (error) {
+      showError(error, "Ошибка публикации");
+    }
+  }
+
+  $("sadd")?.addEventListener("click", addStory);
+
+  /* =========================================================
+     КОМАНДЫ И МАТЧИ
+  ========================================================= */
+
+  function clubName(id) {
+    return state.clubs.find(
+      club => String(club.id) === String(id)
+    )?.name || "Команда";
+  }
+
+  function matchName(match) {
+    return `${clubName(match.home_club_id)} — ${clubName(match.away_club_id)}`;
+  }
+
+  function fillClubSelects() {
+    ["home", "away"].forEach(id => {
+      const select = $(id);
+      if (!select) return;
+
+      const previous = select.value;
+
+      select.innerHTML = `
+        <option value="">Выбери команду</option>
+        ${state.clubs.map(club => `
+          <option value="${esc(club.id)}">${esc(club.name)}</option>
+        `).join("")}
+      `;
+
+      if (previous) select.value = previous;
     });
-  });
+  }
 
-  /* =======================================================
+  async function renderClubs() {
+    fillClubSelects();
+
+    const box = $("clist");
+    if (!box) return;
+
+    box.innerHTML = state.clubs.length
+      ? state.clubs.map(club => `
+        <div class="item">
+          ${imageHTML(club.logo_path, club.name)}
+          <div class="main">
+            <b>${esc(club.name)}</b>
+            <div class="sub">${esc(club.city || "")}</div>
+          </div>
+          ${itemActions(club.id, "club", false)}
+        </div>
+      `).join("")
+      : empty("Добавь первую команду.");
+  }
+
+  async function addClub() {
+    const name = value("cname");
+
+    if (!name) {
+      toast("Введи название команды.", true);
+      return;
+    }
+
+    try {
+      const logo = fileValue("clogo");
+      const logoPath = logo
+        ? await uploadFile(logo, "clubs")
+        : null;
+
+      await insertRow("clubs", {
+        name,
+        city: value("ccity") || null,
+        logo_path: logoPath
+      });
+
+      resetFields(["cname", "ccity", "clogo"]);
+      await loadAll();
+
+      toast("Команда добавлена.");
+
+    } catch (error) {
+      showError(error, "Ошибка добавления команды");
+    }
+  }
+
+  $("cadd")?.addEventListener("click", addClub);
+
+  function resetMatchForm() {
+    resetFields([
+      "mid", "home", "away", "mdate",
+      "hs", "as", "comp", "venue"
+    ]);
+
+    $("mstatus").value = "scheduled";
+    $("hs").value = 0;
+    $("as").value = 0;
+
+    $("mh").textContent = "Создать матч";
+    $("msave").textContent = "СОХРАНИТЬ МАТЧ";
+    $("mreset").classList.add("hide");
+  }
+
+  async function renderMatches() {
+    const box = $("mlist");
+    if (!box) return;
+
+    fillClubSelects();
+
+    box.innerHTML = state.matches.length
+      ? state.matches.map(match => `
+        <div class="item">
+          <div class="main">
+            <b>${esc(matchName(match))}</b>
+            <div class="sub">${dateText(match.match_date)}</div>
+            <div class="sub">
+              ${esc(match.competition || "")}
+              ${match.venue ? " · " + esc(match.venue) : ""}
+            </div>
+            <div class="sub">
+              ${Number(match.home_score || 0)} : ${Number(match.away_score || 0)}
+              · ${esc(match.status)}
+            </div>
+          </div>
+
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <button class="btn alt" data-match="events" data-id="${esc(match.id)}">События</button>
+            <button class="btn alt" data-match="roster" data-id="${esc(match.id)}">Состав</button>
+            <button class="btn alt" data-match="edit" data-id="${esc(match.id)}">Изменить</button>
+            <button class="btn red" data-match="delete" data-id="${esc(match.id)}">Удалить</button>
+          </div>
+        </div>
+      `).join("")
+      : empty("Матчей пока нет.");
+
+    box.querySelectorAll("[data-match]").forEach(button => {
+      button.addEventListener("click", async () => {
+        const id = button.dataset.id;
+        const action = button.dataset.match;
+
+        try {
+          if (action === "edit") editMatch(id);
+          if (action === "events") await openEvents(id);
+          if (action === "roster") await openRoster(id);
+          if (action === "delete") await removeMatch(id);
+        } catch (error) {
+          showError(error);
+        }
+      });
+    });
+  }
+
+  function editMatch(id) {
+    const match = state.matches.find(
+      item => String(item.id) === String(id)
+    );
+
+    if (!match) return;
+
+    $("mid").value = match.id;
+    $("home").value = match.home_club_id;
+    $("away").value = match.away_club_id;
+    $("mdate").value = localDateTime(match.match_date);
+    $("mstatus").value = match.status || "scheduled";
+    $("hs").value = match.home_score ?? 0;
+    $("as").value = match.away_score ?? 0;
+    $("comp").value = match.competition || "";
+    $("venue").value = match.venue || "";
+
+    $("mh").textContent = "Редактировать матч";
+    $("msave").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
+    $("mreset").classList.remove("hide");
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function saveMatch() {
+    const id = value("mid");
+    const home = value("home");
+    const away = value("away");
+    const date = value("mdate");
+
+    if (!home || !away || !date) {
+      toast("Выбери обе команды и дату матча.", true);
+      return;
+    }
+
+    if (home === away) {
+      toast("Команды должны отличаться.", true);
+      return;
+    }
+
+    try {
+      const values = {
+        home_club_id: home,
+        away_club_id: away,
+        match_date: new Date(date).toISOString(),
+        competition: value("comp") || null,
+        venue: value("venue") || null,
+        status: value("mstatus"),
+        home_score: numberValue("hs"),
+        away_score: numberValue("as")
+      };
+
+      if (id) {
+        await updateRow("matches", id, values);
+      } else {
+        await insertRow("matches", values);
+      }
+
+      resetMatchForm();
+      await loadAll();
+
+      toast("Матч сохранён.");
+
+    } catch (error) {
+      showError(error, "Ошибка сохранения матча");
+    }
+  }
+
+  async function removeMatch(id) {
+    if (!confirm("Удалить матч? Связанные голы, удаления и составы также будут удалены при настроенном CASCADE.")) {
+      return;
+    }
+
+    await deleteRow("matches", id);
+    await loadAll();
+
+    $("eventbox")?.classList.add("hide");
+    $("rosterbox")?.classList.add("hide");
+
+    toast("Матч удалён.");
+  }
+
+  $("msave")?.addEventListener("click", saveMatch);
+  $("mreset")?.addEventListener("click", resetMatchForm);
+
+  /* =========================================================
+     СОБЫТИЯ МАТЧА — ГОЛЫ И УДАЛЕНИЯ
+  ========================================================= */
+
+  async function openEvents(matchId) {
+    const match = state.matches.find(
+      item => String(item.id) === String(matchId)
+    );
+
+    if (!match) throw new Error("Матч не найден.");
+
+    $("eventid").value = match.id;
+    $("eventtitle").textContent = `События: ${matchName(match)}`;
+
+    $("eventbox").classList.remove("hide");
+    $("rosterbox").classList.add("hide");
+
+    await renderEvents();
+
+    $("eventbox").scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+
+  async function renderEvents() {
+    const matchId = value("eventid");
+    const box = $("elist");
+
+    const [goals, penalties] = await Promise.all([
+      selectRows("match_goals", q =>
+        q.eq("match_id", matchId).order("created_at")
+      ),
+      selectRows("match_penalties", q =>
+        q.eq("match_id", matchId).order("created_at")
+      )
+    ]);
+
+    const rows = [
+      ...goals.map(item => ({
+        ...item,
+        kind: "goal",
+        time: item.goal_time,
+        title: `Гол · ${item.player_name}`,
+        side: item.team_side,
+        description: `${item.player_number ? "#" + item.player_number + " · " : ""}${item.strength || ""}`
+      })),
+      ...penalties.map(item => ({
+        ...item,
+        kind: "penalty",
+        time: item.penalty_time,
+        title: `Удаление · ${item.player_name}`,
+        side: item.team_side,
+        description: `${item.minutes} мин. · ${item.reason || ""}`
+      }))
+    ];
+
+    rows.sort((a, b) =>
+      String(a.time).localeCompare(String(b.time))
+    );
+
+    box.innerHTML = rows.length
+      ? rows.map(item => `
+        <div class="item">
+          <div class="main">
+            <b>${esc(item.time)} · ${esc(item.title)}</b>
+            <div class="sub">
+              ${item.side === "home" ? "Хозяева" : "Гости"}
+              · ${esc(item.description)}
+            </div>
+          </div>
+          <button class="btn red"
+            data-event-delete="${esc(item.id)}"
+            data-event-kind="${item.kind}">Удалить</button>
+        </div>
+      `).join("")
+      : empty("Событий пока нет.");
+
+    box.querySelectorAll("[data-event-delete]").forEach(button => {
+      button.addEventListener("click", async () => {
+        if (!confirm("Удалить событие?")) return;
+
+        const table = button.dataset.eventKind === "goal"
+          ? "match_goals"
+          : "match_penalties";
+
+        try {
+          await deleteRow(table, button.dataset.eventDelete);
+          await renderEvents();
+          toast("Событие удалено.");
+        } catch (error) {
+          showError(error);
+        }
+      });
+    });
+  }
+
+  async function addGoal() {
+    const matchId = value("eventid");
+    const time = value("gminute");
+    const player = value("gplayer");
+
+    if (!matchId || !time || !player) {
+      toast("Укажи время и автора гола.", true);
+      return;
+    }
+
+    try {
+      await insertRow("match_goals", {
+        match_id: matchId,
+        team_side: value("gteam"),
+        goal_time: time,
+        player_number: value("gnum")
+          ? numberValue("gnum")
+          : null,
+        player_name: player,
+        strength: value("gstrength")
+      });
+
+      const match = state.matches.find(
+        item => String(item.id) === matchId
+      );
+
+      if (match) {
+        const field = value("gteam") === "home"
+          ? "home_score"
+          : "away_score";
+
+        await updateRow("matches", matchId, {
+          [field]: Number(match[field] || 0) + 1
+        });
+      }
+
+      resetFields(["gminute", "gnum", "gplayer"]);
+
+      await loadAll();
+      await renderEvents();
+
+      toast("Гол добавлен.");
+
+    } catch (error) {
+      showError(error, "Ошибка добавления гола");
+    }
+  }
+
+  async function addPenalty() {
+    const matchId = value("eventid");
+    const time = value("ptime");
+    const player = value("pplayer");
+
+    if (!matchId || !time || !player) {
+      toast("Укажи время и игрока.", true);
+      return;
+    }
+
+    try {
+      await insertRow("match_penalties", {
+        match_id: matchId,
+        team_side: value("pteam"),
+        penalty_time: time,
+        player_number: value("pnum")
+          ? numberValue("pnum")
+          : null,
+        player_name: player,
+        reason: value("preason") || null,
+        minutes: numberValue("pminutes", 2)
+      });
+
+      resetFields(["ptime", "pnum", "pplayer", "preason"]);
+
+      await renderEvents();
+      toast("Удаление добавлено.");
+
+    } catch (error) {
+      showError(error, "Ошибка добавления удаления");
+    }
+  }
+
+  $("gadd")?.addEventListener("click", addGoal);
+  $("padd")?.addEventListener("click", addPenalty);
+
+  /* =========================================================
+     СОСТАВЫ МАТЧА
+  ========================================================= */
+
+  function fillRosterSelect(id) {
+    const select = $(id);
+    if (!select) return;
+
+    select.innerHTML = `
+      <option value="">Выбери игрока</option>
+      ${state.players.map(player => `
+        <option value="${player.id}">
+          #${player.number} · ${esc(player.name)}
+        </option>
+      `).join("")}
+    `;
+  }
+
+  async function openRoster(matchId) {
+    const match = state.matches.find(
+      item => String(item.id) === String(matchId)
+    );
+
+    if (!match) throw new Error("Матч не найден.");
+
+    $("rosterMatchId").value = match.id;
+
+    $("rosterbox").classList.remove("hide");
+    $("eventbox").classList.add("hide");
+
+    fillRosterSelect("rosterHomePlayer");
+    fillRosterSelect("rosterAwayPlayer");
+
+    await renderRoster();
+
+    $("rosterbox").scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+
+  async function renderRoster() {
+    const matchId = value("rosterMatchId");
+
+    const rows = await selectRows("match_roster", q =>
+      q.eq("match_id", matchId).order("player_number")
+    );
+
+    ["home", "away"].forEach(side => {
+      const box = side === "home"
+        ? $("rosterHomeList")
+        : $("rosterAwayList");
+
+      const items = rows.filter(row => row.team_side === side);
+
+      box.innerHTML = items.length
+        ? items.map(row => `
+          <div class="item">
+            <div class="main">
+              <b>#${row.player_number ?? "—"} · ${esc(row.player_name)}</b>
+              <div class="sub">${esc(row.position || "")}</div>
+            </div>
+            <button class="btn red"
+              data-roster-delete="${esc(row.id)}">Удалить</button>
+          </div>
+        `).join("")
+        : empty("Игроки не добавлены.");
+    });
+
+    document.querySelectorAll("[data-roster-delete]").forEach(button => {
+      button.addEventListener("click", async () => {
+        try {
+          await deleteRow("match_roster", button.dataset.rosterDelete);
+          await renderRoster();
+          toast("Игрок удалён из состава.");
+        } catch (error) {
+          showError(error);
+        }
+      });
+    });
+  }
+
+  async function addRosterPlayer(side) {
+    const prefix = side === "home" ? "rosterHome" : "rosterAway";
+    const playerId = $(`${prefix}Player`).value;
+
+    if (!playerId) {
+      toast("Выбери игрока.", true);
+      return;
+    }
+
+    const player = state.players.find(
+      item => String(item.id) === String(playerId)
+    );
+
+    if (!player) {
+      toast("Игрок не найден.", true);
+      return;
+    }
+
+    const matchId = value("rosterMatchId");
+
+    try {
+      const existing = await selectRows("match_roster", q =>
+        q.eq("match_id", matchId)
+          .eq("team_side", side)
+          .eq("player_name", player.name)
+      );
+
+      if (existing.length) {
+        toast("Игрок уже есть в составе.", true);
+        return;
+      }
+
+      await insertRow("match_roster", {
+        match_id: matchId,
+        team_side: side,
+        player_number: $(`${prefix}Number`).value
+          ? numberValue(`${prefix}Number`)
+          : player.number,
+        player_name: player.name,
+        position: value(`${prefix}Role`)
+      });
+
+      resetFields([`${prefix}Number`]);
+
+      await renderRoster();
+      toast("Игрок добавлен в состав.");
+
+    } catch (error) {
+      showError(error, "Ошибка добавления игрока");
+    }
+  }
+
+  $("rosterHomeAdd")?.addEventListener("click", () => addRosterPlayer("home"));
+  $("rosterAwayAdd")?.addEventListener("click", () => addRosterPlayer("away"));
+
+  /* =========================================================
+     ТУРНИРНАЯ ТАБЛИЦА
+  ========================================================= */
+
+  function resetStandingForm() {
+    state.editingStanding = null;
+
+    [
+      "tname", "tgames", "twins", "twins_ot",
+      "twins_so", "tlosses", "tlosses_ot",
+      "tlosses_so", "tpoints"
+    ].forEach(id => {
+      if ($(id)) $(id).value = 0;
+    });
+
+    $("tplace").value = 1;
+    $("tname").value = "";
+
+    $("tadd").textContent = "ДОБАВИТЬ";
+  }
+
+  async function renderStandings() {
+    const box = $("tlist");
+    if (!box) return;
+
+    box.innerHTML = state.standings.length
+      ? state.standings.map(item => `
+        <div class="item">
+          <div class="main">
+            <b>${item.place ?? "—"}. ${esc(item.team_name)}</b>
+            <div class="sub">
+              И: ${item.games ?? 0} ·
+              В: ${item.wins ?? 0} ·
+              ВО: ${item.overtime_wins ?? item.wins_ot ?? 0} ·
+              ВБ: ${item.shootout_wins ?? item.wins_so ?? 0}
+            </div>
+            <div class="sub">
+              П: ${item.losses ?? 0} ·
+              ПО: ${item.overtime_losses ?? item.losses_ot ?? 0} ·
+              ПБ: ${item.shootout_losses ?? item.losses_so ?? 0} ·
+              Очки: ${item.points ?? 0}
+            </div>
+          </div>
+          ${itemActions(item.id, "standing")}
+        </div>
+      `).join("")
+      : empty("Таблица пока пуста.");
+  }
+
+  function editStanding(id) {
+    const item = state.standings.find(
+      row => String(row.id) === String(id)
+    );
+
+    if (!item) return;
+
+    state.editingStanding = item.id;
+
+    $("tplace").value = item.place ?? item.position ?? 1;
+    $("tname").value = item.team_name || item.team || "";
+    $("tgames").value = item.games ?? 0;
+    $("twins").value = item.wins ?? 0;
+    $("twins_ot").value = item.overtime_wins ?? item.wins_ot ?? 0;
+    $("twins_so").value = item.shootout_wins ?? item.wins_so ?? 0;
+    $("tlosses").value = item.losses ?? 0;
+    $("tlosses_ot").value = item.overtime_losses ?? item.losses_ot ?? 0;
+    $("tlosses_so").value = item.shootout_losses ?? item.losses_so ?? 0;
+    $("tpoints").value = item.points ?? 0;
+
+    $("tadd").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function saveStanding() {
+    const name = value("tname");
+
+    if (!name) {
+      toast("Введи название команды.", true);
+      return;
+    }
+
+    const winsOT = numberValue("twins_ot");
+    const winsSO = numberValue("twins_so");
+    const lossesOT = numberValue("tlosses_ot");
+    const lossesSO = numberValue("tlosses_so");
+
+    const values = {
+      place: numberValue("tplace"),
+      position: numberValue("tplace"),
+      team_name: name,
+      team: name,
+      games: numberValue("tgames"),
+      wins: numberValue("twins"),
+      overtime_wins: winsOT,
+      shootout_wins: winsSO,
+      losses: numberValue("tlosses"),
+      overtime_losses: lossesOT,
+      shootout_losses: lossesSO,
+      wins_ot: winsOT,
+      wins_so: winsSO,
+      losses_ot: lossesOT,
+      losses_so: lossesSO,
+      points: numberValue("tpoints")
+    };
+
+    try {
+      if (state.editingStanding) {
+        await updateRow("standings", state.editingStanding, values);
+      } else {
+        await insertRow("standings", values);
+      }
+
+      resetStandingForm();
+      await loadAll();
+      toast("Турнирная таблица сохранена.");
+
+    } catch (error) {
+      showError(error, "Ошибка сохранения таблицы");
+    }
+  }
+
+  $("tadd")?.addEventListener("click", saveStanding);
+
+  /* =========================================================
+     ИГРОКИ
+  ========================================================= */
+
+  function resetPlayerForm() {
+    resetFields([
+      "pid", "pname", "pnumber", "pfile"
+    ]);
+
+    $("pposition").value = "Нападающий";
+    $("pgames").value = 0;
+    $("pgoals").value = 0;
+    $("passists").value = 0;
+    $("ppoints").value = 0;
+
+    $("ph").textContent = "Добавить игрока";
+    $("psave").textContent = "СОХРАНИТЬ ИГРОКА";
+    $("preset").classList.add("hide");
+  }
+
+  async function renderPlayers() {
+    const box = $("plist");
+    if (!box) return;
+
+    box.innerHTML = state.players.length
+      ? state.players.map(player => `
+        <div class="item">
+          ${imageHTML(player.photo_url, player.name)}
+          <div class="main">
+            <b>#${player.number} · ${esc(player.name)}</b>
+            <div class="sub">${esc(player.position)}</div>
+          </div>
+          ${itemActions(player.id, "player")}
+        </div>
+      `).join("")
+      : empty("Игроков пока нет.");
+  }
+
+  async function editPlayer(id) {
+    const player = state.players.find(
+      item => String(item.id) === String(id)
+    );
+
+    if (!player) return;
+
+    $("pid").value = player.id;
+    $("pname").value = player.name || "";
+    $("pnumber").value = player.number ?? "";
+    $("pposition").value = player.position || "Нападающий";
+
+    const stats = await selectRows("player_season_stats", q =>
+      q.eq("player_id", player.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+    );
+
+    const row = stats[0] || {};
+
+    $("pgames").value = row.games ?? 0;
+    $("pgoals").value = row.goals ?? 0;
+    $("passists").value = row.assists ?? 0;
+    $("ppoints").value = row.points ?? 0;
+
+    $("ph").textContent = "Редактировать игрока";
+    $("psave").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
+    $("preset").classList.remove("hide");
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function savePlayer() {
+    const id = value("pid");
+    const name = value("pname");
+    const number = value("pnumber");
+
+    if (!name || number === "") {
+      toast("Заполни имя и игровой номер.", true);
+      return;
+    }
+
+    try {
+      const old = state.players.find(
+        item => String(item.id) === id
+      );
+
+      let photo = old?.photo_url || null;
+
+      const file = fileValue("pfile");
+      if (file) photo = imageUrl(
+        await uploadFile(file, "players")
+      );
+
+      const values = {
+        name,
+        number: Number(number),
+        position: value("pposition"),
+        photo_url: photo
+      };
+
+      let playerId;
+
+      if (id) {
+        await updateRow("players", id, values);
+        playerId = Number(id);
+      } else {
+        const created = await insertRow("players", values);
+        playerId = created.id;
+      }
+
+      const season = "2026/2027";
+
+      const existingStats = await selectRows(
+        "player_season_stats",
+        q => q.eq("player_id", playerId).eq("season", season)
+      );
+
+      const statsValues = {
+        player_id: playerId,
+        season,
+        games: numberValue("pgames"),
+        goals: numberValue("pgoals"),
+        assists: numberValue("passists"),
+        points: numberValue("ppoints")
+      };
+
+      if (existingStats.length) {
+        await updateRow(
+          "player_season_stats",
+          existingStats[0].id,
+          statsValues
+        );
+      } else {
+        await insertRow("player_season_stats", statsValues);
+      }
+
+      resetPlayerForm();
+      await loadAll();
+
+      toast("Игрок сохранён.");
+
+    } catch (error) {
+      showError(error, "Ошибка сохранения игрока");
+    }
+  }
+
+  $("psave")?.addEventListener("click", savePlayer);
+  $("preset")?.addEventListener("click", resetPlayerForm);
+
+  /* =========================================================
+     СТАТИСТИКА ИГРОКОВ
+  ========================================================= */
+
+  function resetStatForm() {
+    state.editingStat = null;
+
+    resetFields(["snum", "sname", "spos"]);
+    $("svalue").value = 0;
+    $("stype").value = "scorers";
+    $("statadd").textContent = "ДОБАВИТЬ";
+  }
+
+  async function renderStats() {
+    const box = $("statlist");
+    if (!box) return;
+
+    box.innerHTML = state.stats.length
+      ? state.stats.map(item => `
+        <div class="item">
+          <div class="main">
+            <b>${esc(item.player_name)}</b>
+            <div class="sub">
+              ${esc(item.stat_type)}
+              · ${esc(item.position || "")}
+              · ${item.value ?? 0}
+            </div>
+          </div>
+          ${itemActions(item.id, "stat")}
+        </div>
+      `).join("")
+      : empty("Статистика пока не заполнена.");
+  }
+
+  function editStat(id) {
+    const item = state.stats.find(
+      row => String(row.id) === String(id)
+    );
+
+    if (!item) return;
+
+    state.editingStat = item.id;
+
+    $("stype").value = item.stat_type || "scorers";
+    $("snum").value = item.player_number ?? "";
+    $("sname").value = item.player_name || "";
+    $("spos").value = item.position || "";
+    $("svalue").value = item.value ?? 0;
+
+    $("statadd").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
+  }
+
+  async function saveStat() {
+    const name = value("sname");
+
+    if (!name) {
+      toast("Введи имя игрока.", true);
+      return;
+    }
+
+    const values = {
+      stat_type: value("stype"),
+      category: value("stype"),
+      player_name: name,
+      player_number: value("snum")
+        ? numberValue("snum")
+        : null,
+      position: value("spos") || null,
+      value: numberValue("svalue")
+    };
+
+    try {
+      if (state.editingStat) {
+        await updateRow("player_stats", state.editingStat, values);
+      } else {
+        await insertRow("player_stats", values);
+      }
+
+      resetStatForm();
+      await loadAll();
+
+      toast("Статистика сохранена.");
+
+    } catch (error) {
+      showError(error, "Ошибка статистики");
+    }
+  }
+
+  $("statadd")?.addEventListener("click", saveStat);
+
+  /* =========================================================
+     КАРТОЧКИ ЛИДЕРОВ
+  ========================================================= */
+
+  function resetLeaderForm() {
+    state.editingLeader = null;
+
+    resetFields(["lnum", "lname", "lpos", "lstat", "lfile"]);
+    $("ltype").value = "scorer";
+    $("ladd").textContent = "СОХРАНИТЬ КАРТОЧКУ";
+  }
+
+  async function renderLeaders() {
+    const box = $("llist");
+    if (!box) return;
+
+    box.innerHTML = state.leaders.length
+      ? state.leaders.map(item => `
+        <div class="item">
+          ${imageHTML(item.image_path, item.player_name)}
+          <div class="main">
+            <b>${esc(item.player_name)}</b>
+            <div class="sub">
+              ${esc(item.leader_type)}
+              · ${esc(item.statistic || "")}
+            </div>
+          </div>
+          ${itemActions(item.id, "leader")}
+        </div>
+      `).join("")
+      : empty("Карточек лидеров пока нет.");
+  }
+
+  function editLeader(id) {
+    const item = state.leaders.find(
+      row => String(row.id) === String(id)
+    );
+
+    if (!item) return;
+
+    state.editingLeader = item.id;
+
+    $("ltype").value = item.leader_type || "scorer";
+    $("lnum").value = item.player_number ?? "";
+    $("lname").value = item.player_name || "";
+    $("lpos").value = item.position || "";
+    $("lstat").value = item.statistic || "";
+
+    $("ladd").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
+  }
+
+  async function saveLeader() {
+    const name = value("lname");
+
+    if (!name) {
+      toast("Введи имя игрока.", true);
+      return;
+    }
+
+    try {
+      const old = state.leaders.find(
+        item => String(item.id) === String(state.editingLeader)
+      );
+
+      let imagePath = old?.image_path || null;
+
+      const file = fileValue("lfile");
+      if (file) imagePath = await uploadFile(file, "leaders");
+
+      const values = {
+        leader_type: value("ltype"),
+        player_name: name,
+        player_number: value("lnum")
+          ? numberValue("lnum")
+          : 0,
+        position: value("lpos"),
+        statistic: value("lstat"),
+        image_path: imagePath
+      };
+
+      if (state.editingLeader) {
+        await updateRow("team_leaders", state.editingLeader, values);
+      } else {
+        await insertRow("team_leaders", values);
+      }
+
+      resetLeaderForm();
+      await loadAll();
+
+      toast("Карточка лидера сохранена.");
+
+    } catch (error) {
+      showError(error, "Ошибка сохранения карточки");
+    }
+  }
+
+  $("ladd")?.addEventListener("click", saveLeader);
+
+  /* =========================================================
+     АЛЬБОМЫ И ФОТОГРАФИИ
+  ========================================================= */
+
+  async function renderAlbums() {
+    const box = $("alist");
+    if (!box) return;
+
+    const photoRows = await selectRows("album_photos");
+
+    box.innerHTML = state.albums.length
+      ? state.albums.map(album => {
+        const count = photoRows.filter(
+          photo => photo.album_id === album.id
+        ).length;
+
+        return `
+          <div class="item">
+            ${imageHTML(album.cover_path, album.title)}
+            <div class="main">
+              <b>${esc(album.title)}</b>
+              <div class="sub">${dateOnly(album.album_date)}</div>
+              <div class="sub">Фотографий: ${count}</div>
+            </div>
+            ${itemActions(album.id, "album", false)}
+          </div>
+        `;
+      }).join("")
+      : empty("Альбомов пока нет.");
+  }
+
+  async function addAlbum() {
+    const title = value("atitle");
+
+    if (!title) {
+      toast("Введи название альбома.", true);
+      return;
+    }
+
+    const photos = [...($("aphotos")?.files || [])];
+    const cover = fileValue("acover");
+
+    if (!cover && !photos.length) {
+      toast("Добавь обложку или фотографии.", true);
+      return;
+    }
+
+    try {
+      const coverPath = cover
+        ? await uploadFile(cover, "albums/covers")
+        : await uploadFile(photos[0], "albums/covers");
+
+      const album = await insertRow("albums", {
+        title,
+        album_date: value("adate") || null,
+        cover_path: coverPath
+      });
+
+      const files = photos.length ? photos : (cover ? [cover] : []);
+
+      for (let i = 0; i < files.length; i++) {
+        const path = await uploadFile(files[i], "albums/photos");
+
+        await insertRow("album_photos", {
+          album_id: album.id,
+          image_path: path,
+          sort_order: i
+        });
+      }
+
+      resetFields(["atitle", "adate", "acover", "aphotos"]);
+
+      await loadAll();
+      toast("Фотоальбом создан.");
+
+    } catch (error) {
+      showError(error, "Ошибка создания альбома");
+    }
+  }
+
+  $("aadd")?.addEventListener("click", addAlbum);
+
+  /* =========================================================
+     НАСТРОЙКИ САЙТА
+  ========================================================= */
+
+  async function loadSettings() {
+    const rows = await selectRows("site_settings", q =>
+      q.order("created_at", { ascending: true }).limit(1)
+    );
+
+    state.settings = rows[0] || null;
+
+    const settings = state.settings;
+
+    if (!settings) return;
+
+    $("setname").value = settings.team_name || "ХК Челны 2011";
+    $("setsubtitle").value = settings.subtitle || "";
+    $("setcity").value = settings.city || "";
+
+    $("setprimary").value = settings.primary_color || "#000056";
+    $("setaccent").value = settings.accent_color || "#0875dc";
+    $("setgold").value = settings.gold_color || "#ffcd00";
+  }
+
+  async function saveSettings() {
+    try {
+      const old = state.settings;
+
+      let logoPath = old?.logo_path || null;
+
+      const file = fileValue("setlogo");
+      if (file) {
+        logoPath = await uploadFile(file, "site");
+      }
+
+      const values = {
+        team_name: value("setname"),
+        subtitle: value("setsubtitle"),
+        city: value("setcity"),
+        logo_path: logoPath,
+        primary_color: value("setprimary"),
+        accent_color: value("setaccent"),
+        gold_color: value("setgold"),
+        white_color: "#ffffff",
+        updated_at: new Date().toISOString()
+      };
+
+      if (old?.id) {
+        await updateRow("site_settings", old.id, values);
+      } else {
+        const created = await insertRow("site_settings", values);
+        state.settings = created;
+      }
+
+      await loadSettings();
+      toast("Настройки сохранены.");
+
+    } catch (error) {
+      showError(error, "Ошибка сохранения настроек");
+    }
+  }
+
+  $("setsave")?.addEventListener("click", saveSettings);
+
+  /* =========================================================
+     УДАЛЕНИЕ И РЕДАКТИРОВАНИЕ
+  ========================================================= */
+
+  async function handleAction(action, type, id) {
+    if (action === "edit") {
+      if (type === "news") return editNews(id);
+      if (type === "player") return editPlayer(id);
+      if (type === "standing") return editStanding(id);
+      if (type === "stat") return editStat(id);
+      if (type === "leader") return editLeader(id);
+      return;
+    }
+
+    if (action !== "delete") return;
+
+    if (!confirm("Точно удалить эту запись?")) return;
+
+    if (type === "news") {
+      await deleteRow("news", id);
+    }
+
+    if (type === "story") {
+      await deleteRow("stories", id);
+    }
+
+    if (type === "club") {
+      const used = state.matches.some(match =>
+        String(match.home_club_id) === String(id) ||
+        String(match.away_club_id) === String(id)
+      );
+
+      if (used) {
+        toast("Нельзя удалить команду, участвующую в матчах.", true);
+        return;
+      }
+
+      await deleteRow("clubs", id);
+    }
+
+    if (type === "standing") {
+      await deleteRow("standings", id);
+      if (String(state.editingStanding) === String(id)) {
+        resetStandingForm();
+      }
+    }
+
+    if (type === "player") {
+      const linked = await selectRows("player_season_stats", q =>
+        q.eq("player_id", id)
+      );
+
+      if (linked.length) {
+        for (const row of linked) {
+          await deleteRow("player_season_stats", row.id);
+        }
+      }
+
+      await deleteRow("players", id);
+    }
+
+    if (type === "stat") {
+      await deleteRow("player_stats", id);
+    }
+
+    if (type === "leader") {
+      await deleteRow("team_leaders", id);
+    }
+
+    if (type === "album") {
+      const photos = await selectRows("album_photos", q =>
+        q.eq("album_id", id)
+      );
+
+      for (const photo of photos) {
+        await deleteRow("album_photos", photo.id);
+      }
+
+      await deleteRow("albums", id);
+    }
+
+    await loadAll();
+    toast("Запись удалена.");
+  }
+
+  [
+    "nlist",
+    "slist",
+    "clist",
+    "tlist",
+    "plist",
+    "statlist",
+    "llist",
+    "alist"
+  ].forEach(id => bindAction(id, handleAction));
+
+  /* =========================================================
      ЗАПУСК
-  ======================================================= */
+  ========================================================= */
+
+  $("eventbox")?.classList.add("hide");
+  $("rosterbox")?.classList.add("hide");
 
   checkAuth();
 
