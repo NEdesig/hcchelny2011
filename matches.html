@@ -1,250 +1,1196 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#000056">
-  <meta name="description" content="Все матчи ХК Челны 2011 — расписание и результаты.">
-  <title>Все матчи — ХК Челны 2011</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .all-matches-page {
-      width: min(1000px, calc(100% - 32px));
-      margin: 32px auto 60px;
-    }
 
-    .all-matches-back {
-      display: inline-block;
-      margin-bottom: 24px;
-      color: var(--primary, #000056);
-      text-decoration: none;
-      font-weight: 700;
-    }
+/* =========================================
+   ХК ЧЕЛНЫ 2011 — PUBLIC APP
+   File: js/app.js
+========================================= */
 
-    .all-matches-title {
-      margin: 0 0 8px;
-      color: var(--primary, #000056);
-    }
+(() => {
+  "use strict";
 
-    .all-matches-description {
-      margin: 0 0 24px;
-      color: #747d90;
-    }
+  const db = window.supabaseClient;
 
-    .all-matches-list {
-      display: grid;
-      gap: 12px;
-    }
+  if (!db) {
+    console.error("Supabase не подключён. Проверь js/config.js");
+    return;
+  }
 
-    .all-matches-state {
-      padding: 35px 10px;
-      text-align: center;
-      color: #747d90;
-    }
-  </style>
-</head>
-<body>
-  <header class="site-header">
-    <div class="header-inner">
-      <a class="header-logo-link" href="index.html" aria-label="На главную">
-        <img id="teamLogo" class="header-logo" src="assets/logo.png" alt="Логотип команды">
-      </a>
-      <a class="header-center" href="index.html">
-        <span id="teamName" class="header-team-name">Челны 2011</span>
-        <span id="teamSubtitle" class="header-subtitle">хоккейный клуб</span>
-      </a>
-      <button id="menuButton" class="header-menu" type="button"
-        aria-label="Открыть меню" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) =>
+    [...root.querySelectorAll(selector)];
 
-  <nav id="mobileMenu" class="mobile-menu" aria-hidden="true">
-    <div class="mobile-menu-panel">
-      <button id="menuClose" class="menu-close" type="button"
-        aria-label="Закрыть меню">×</button>
-      <a href="index.html#news">Новости</a>
-      <a href="index.html#matchday">День матча</a>
-      <a href="matches.html">Все матчи</a>
-      <a href="index.html#competition">Турнирная таблица</a>
-      <a href="index.html#stats">Статистика</a>
-      <a href="index.html#leaders">Лидеры команды</a>
-      <a href="index.html#albums">Фотоальбомы</a>
-    </div>
-  </nav>
+  const BUCKET = window.STORAGE_BUCKET || "site-media";
 
-  <main class="all-matches-page">
-    <a class="all-matches-back" href="index.html">← На главную</a>
-    <h1 class="all-matches-title">Все матчи</h1>
-    <p class="all-matches-description">Расписание и результаты игр команды</p>
+  let storyItems = [];
+  let activeStoryTimer = null;
+  let activeStatType = "scorers";
 
-    <div id="allMatchesList" class="all-matches-list">
-      <p class="all-matches-state">Загружаем матчи...</p>
-    </div>
-  </main>
+  // ========================================
+  // HELPERS
+  // ========================================
 
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <img id="footerLogo" class="footer-logo" src="assets/logo.png" alt="">
-      <div>
-        <strong id="footerTeamName">Челны 2011</strong>
-        <p id="footerCity">Набережные Челны</p>
-        <p>© <span id="footerYear"></span></p>
-      </div>
-    </div>
-  </footer>
+  function escapeHTML(value = "") {
+    return String(value).replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]);
+  }
 
-  <script>
-    document.getElementById("footerYear").textContent = new Date().getFullYear();
+  function formatDate(value, options = {}) {
+    if (!value) return "";
 
-    const menuButton = document.getElementById("menuButton");
-    const mobileMenu = document.getElementById("mobileMenu");
-    const menuClose = document.getElementById("menuClose");
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
 
-    function closeMenu() {
-      mobileMenu?.classList.remove("open");
-      mobileMenu?.setAttribute("aria-hidden", "true");
-      menuButton?.setAttribute("aria-expanded", "false");
-    }
+    return new Intl.DateTimeFormat("ru-RU", {
+      day: "numeric",
+      month: "long",
+      ...options
+    }).format(date);
+  }
 
-    menuButton?.addEventListener("click", () => {
-      const opened = mobileMenu.classList.toggle("open");
-      mobileMenu.setAttribute("aria-hidden", String(!opened));
-      menuButton.setAttribute("aria-expanded", String(opened));
+  function formatDateTime(value) {
+    if (!value) return "";
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    return new Intl.DateTimeFormat("ru-RU", {
+      day: "numeric",
+      month: "long",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(date);
+  }
+
+  function formatTime(value) {
+    if (!value) return "";
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    return date.toLocaleTimeString("ru-RU", {
+      hour: "2-digit",
+      minute: "2-digit"
     });
+  }
 
-    menuClose?.addEventListener("click", closeMenu);
+  function getLocalDayDifference(value) {
+    const date = new Date(value);
+    const now = new Date();
 
-    mobileMenu?.querySelectorAll("a").forEach(link =>
-      link.addEventListener("click", closeMenu)
+    if (Number.isNaN(date.getTime())) return null;
+
+    const targetDay = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
     );
-  </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js"></script>
-  <script>
-    (() => {
-      const db = window.supabaseClient;
-      const container = document.getElementById("allMatchesList");
+    const today = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
 
-      if (!db) {
-        container.innerHTML =
-          '<p class="all-matches-state">Не удалось подключить базу данных.</p>';
+    return Math.round((targetDay - today) / 86400000);
+  }
+
+  function getMatchDayLabel(value) {
+    const difference = getLocalDayDifference(value);
+
+    if (difference === 0) return "Сегодня";
+    if (difference === 1) return "Завтра";
+
+    return formatDate(value, { weekday: "long" });
+  }
+
+  function getImageURL(path) {
+    if (!path) return "";
+
+    if (/^https?:\/\//i.test(path)) return path;
+
+    const { data, error } = db.storage
+      .from(BUCKET)
+      .getPublicUrl(path);
+
+    if (error) {
+      console.error("Ошибка получения изображения:", error);
+      return "";
+    }
+
+    return data?.publicUrl || "";
+  }
+
+  function imageHTML(path, alt, className = "") {
+    const url = getImageURL(path);
+
+    if (!url) return "";
+
+    return `
+      <img
+        class="${escapeHTML(className)}"
+        src="${escapeHTML(url)}"
+        alt="${escapeHTML(alt)}"
+        loading="lazy"
+      >
+    `;
+  }
+
+  function setError(element, message) {
+    if (!element) return;
+
+    element.innerHTML = `
+      <p class="error-state">${escapeHTML(message)}</p>
+    `;
+  }
+
+  function setEmpty(element, message) {
+    if (!element) return;
+
+    element.innerHTML = `
+      <p class="empty-state">${escapeHTML(message)}</p>
+    `;
+  }
+
+  async function fetchRows(table, options = {}) {
+    let query = db.from(table).select(options.select || "*");
+
+    if (options.order) {
+      query = query.order(options.order.column, {
+        ascending: options.order.ascending ?? false
+      });
+    }
+
+    if (options.limit) {
+      query = query.limit(options.limit);
+    }
+
+    if (options.filters) {
+      for (const filter of options.filters) {
+        query = query[filter.operator](
+          filter.column,
+          filter.value
+        );
+      }
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error(`Ошибка загрузки ${table}:`, error);
+      throw error;
+    }
+
+    return data || [];
+  }
+
+  function getMatchScore(match) {
+    return `${Number(match.home_score || 0)} : ${Number(match.away_score || 0)}`;
+  }
+
+  function isFinished(match) {
+    return match.status === "finished";
+  }
+
+  function isLive(match) {
+    return match.status === "live";
+  }
+
+  function isPostponed(match) {
+    return match.status === "postponed";
+  }
+
+  function isUpcoming(match) {
+    return !isFinished(match) &&
+      !isLive(match) &&
+      !isPostponed(match) &&
+      new Date(match.match_date).getTime() >= Date.now();
+  }
+
+  // ========================================
+  // SETTINGS
+  // ========================================
+
+  async function loadSettings() {
+    try {
+      const rows = await fetchRows("site_settings", {
+        order: { column: "updated_at", ascending: false },
+        limit: 1
+      });
+
+      const settings = rows[0];
+      if (!settings) return;
+
+      const root = document.documentElement;
+
+      root.style.setProperty(
+        "--primary",
+        settings.primary_color || "#000056"
+      );
+
+      root.style.setProperty(
+        "--accent",
+        settings.accent_color || "#0875dc"
+      );
+
+      root.style.setProperty(
+        "--gold",
+        settings.gold_color || "#ffcd00"
+      );
+
+      root.style.setProperty(
+        "--white",
+        settings.white_color || "#ffffff"
+      );
+
+      const teamName = $("#teamName");
+      const subtitle = $("#teamSubtitle");
+      const footerName = $("#footerTeamName");
+      const footerCity = $("#footerCity");
+
+      if (teamName) {
+        teamName.textContent = settings.team_name || "Челны 2011";
+      }
+
+      if (subtitle) {
+        subtitle.textContent = settings.subtitle || "хоккейный клуб";
+      }
+
+      if (footerName) {
+        footerName.textContent = settings.team_name || "Челны 2011";
+      }
+
+      if (footerCity) {
+        footerCity.textContent = settings.city || "Набережные Челны";
+      }
+
+      if (settings.logo_path) {
+        const logoURL = getImageURL(settings.logo_path);
+
+        ["#teamLogo", "#footerLogo"].forEach(selector => {
+          const image = $(selector);
+
+          if (image && logoURL) image.src = logoURL;
+        });
+      }
+    } catch (error) {
+      console.error("Не удалось загрузить настройки:", error);
+    }
+  }
+
+  // ========================================
+  // NEWS
+  // ========================================
+
+  async function loadNews() {
+    const container = $("#newsList");
+    if (!container) return;
+
+    try {
+      const news = await fetchRows("news", {
+        order: { column: "published_at", ascending: false },
+        limit: 20
+      });
+
+      if (!news.length) {
+        setEmpty(container, "Новости скоро появятся");
         return;
       }
 
-      const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-      })[char]);
+      container.innerHTML = news.map(item => `
+        <article class="news-card">
+          ${imageHTML(item.image_path, item.title, "news-card-image")}
 
-      const formatDate = value => {
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return "";
-        return new Intl.DateTimeFormat("ru-RU", {
-          day: "numeric",
-          month: "short",
-          hour: "2-digit",
-          minute: "2-digit"
-        }).format(date);
-      };
+          <div class="news-card-content">
+            <span class="news-card-tag">
+              ${escapeHTML(item.tag || "Новости")}
+            </span>
 
-      async function loadMatches() {
-        const { data: matches, error } = await db
-          .from("matches")
-          .select(`
-            id, match_date, venue, competition, status,
-            home_score, away_score,
-            home:clubs!matches_home_club_id_fkey(id,name),
-            away:clubs!matches_away_club_id_fkey(id,name)
-          `)
-          .order("match_date", { ascending: false })
-          .limit(200);
+            <h3 class="news-card-title">
+              ${escapeHTML(item.title)}
+            </h3>
 
-        if (error) {
-          console.error("Ошибка загрузки матчей:", error);
-          container.innerHTML =
-            '<p class="all-matches-state">Не удалось загрузить матчи. Проверь настройки Supabase и связи клубов.</p>';
-          return;
-        }
+            <time class="news-card-date">
+              ${escapeHTML(formatDateTime(item.published_at))}
+            </time>
+          </div>
 
-        if (!matches?.length) {
-          container.innerHTML =
-            '<p class="all-matches-state">Матчи пока не добавлены.</p>';
-          return;
-        }
+          <a
+            class="news-card-link"
+            href="news.html?id=${encodeURIComponent(item.id)}"
+            aria-label="Читать: ${escapeHTML(item.title)}"
+          ></a>
+        </article>
+      `).join("");
+    } catch (error) {
+      setError(container, "Не удалось загрузить новости");
+    }
+  }
 
-        const now = Date.now();
+  // ========================================
+  // STORIES
+  // ========================================
 
-        matches.sort((a, b) => {
-          const aDate = new Date(a.match_date).getTime();
-          const bDate = new Date(b.match_date).getTime();
-          const aFuture = a.status !== "finished" && aDate >= now;
-          const bFuture = b.status !== "finished" && bDate >= now;
+  async function loadStories() {
+    const container = $("#storiesList");
+    if (!container) return;
 
-          if (aFuture && !bFuture) return -1;
-          if (!aFuture && bFuture) return 1;
-          return aFuture ? aDate - bDate : bDate - aDate;
-        });
-
-        container.innerHTML = matches.map(match => {
-          const finished = match.status === "finished";
-          const live = match.status === "live";
-          const home = match.home?.name || "Хозяева";
-          const away = match.away?.name || "Гости";
-          const score = finished || live
-            ? `${Number(match.home_score || 0)} : ${Number(match.away_score || 0)}`
-            : "—";
-          const status = finished ? "Завершён" : live ? "Идёт матч" : "Запланирован";
-
-          return `
-            <a class="match-row" href="match.html?id=${encodeURIComponent(match.id)}">
-              <div class="match-row-date">
-                ${escapeHTML(formatDate(match.match_date))}
-              </div>
-              <div class="match-row-teams">
-                ${escapeHTML(home)}<br>
-                ${escapeHTML(away)}
-                <span class="match-status ${live ? "live" : ""}">
-                  ${status}
-                </span>
-              </div>
-              <div class="match-row-score">${escapeHTML(score)}</div>
-            </a>
-          `;
-        }).join("");
-
-        const settings = await db
-          .from("site_settings")
-          .select("*")
-          .order("updated_at", { ascending: false })
-          .limit(1);
-
-        const item = settings.data?.[0];
-        if (item) {
-          document.getElementById("teamName").textContent = item.team_name || "Челны 2011";
-          document.getElementById("teamSubtitle").textContent = item.subtitle || "хоккейный клуб";
-          document.getElementById("footerTeamName").textContent = item.team_name || "Челны 2011";
-          document.getElementById("footerCity").textContent = item.city || "Набережные Челны";
-
-          if (item.logo_path) {
-            const logo = /^https?:\/\//i.test(item.logo_path)
-              ? item.logo_path
-              : db.storage.from(window.STORAGE_BUCKET || "site-media")
-                  .getPublicUrl(item.logo_path).data.publicUrl;
-
-            document.getElementById("teamLogo").src = logo;
-            document.getElementById("footerLogo").src = logo;
+    try {
+      const stories = await fetchRows("stories", {
+        order: { column: "created_at", ascending: false },
+        filters: [
+          {
+            column: "expires_at",
+            operator: "gt",
+            value: new Date().toISOString()
           }
-        }
+        ]
+      });
+
+      storyItems = stories;
+
+      if (!stories.length) {
+        setEmpty(container, "Новых историй пока нет");
+        return;
       }
 
-      loadMatches();
-    })();
-  </script>
-</body>
-</html>
+      container.innerHTML = stories.map((story, index) => `
+        <button
+          class="story-item"
+          type="button"
+          data-story-index="${index}"
+          aria-label="Открыть историю ${index + 1}"
+        >
+          <span class="story-image-wrap">
+            ${imageHTML(
+              story.image_path,
+              "История команды",
+              "story-image"
+            )}
+          </span>
+
+          <span class="story-title">
+            ${escapeHTML(formatDate(story.created_at))}
+          </span>
+        </button>
+      `).join("");
+
+      $$(".story-item", container).forEach(button => {
+        button.addEventListener("click", () => {
+          openStory(Number(button.dataset.storyIndex));
+        });
+      });
+    } catch (error) {
+      setError(container, "Не удалось загрузить истории");
+    }
+  }
+
+  function openStory(index) {
+    const story = storyItems[index];
+    if (!story) return;
+
+    const viewer = $("#storyViewer");
+    const image = $("#storyViewerImage");
+    const progress = $("#storyProgressBar");
+
+    if (!viewer || !image || !progress) return;
+
+    clearTimeout(activeStoryTimer);
+
+    image.src = getImageURL(story.image_path);
+    image.alt = story.caption || "История команды";
+
+    viewer.classList.add("open");
+    viewer.setAttribute("aria-hidden", "false");
+
+    document.body.classList.add("viewer-open");
+
+    progress.style.transition = "none";
+    progress.style.width = "0%";
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        progress.style.transition = "width 15s linear";
+        progress.style.width = "100%";
+      });
+    });
+
+    activeStoryTimer = setTimeout(closeStory, 15000);
+  }
+
+  function closeStory() {
+    clearTimeout(activeStoryTimer);
+
+    const viewer = $("#storyViewer");
+    const image = $("#storyViewerImage");
+    const progress = $("#storyProgressBar");
+
+    if (viewer) {
+      viewer.classList.remove("open");
+      viewer.setAttribute("aria-hidden", "true");
+    }
+
+    if (image) {
+      image.src = "";
+      image.alt = "";
+    }
+
+    if (progress) {
+      progress.style.transition = "none";
+      progress.style.width = "0%";
+    }
+
+    document.body.classList.remove("viewer-open");
+  }
+
+  $("#storyViewerClose")?.addEventListener("click", closeStory);
+
+  $("#storyViewer")?.addEventListener("click", event => {
+    if (event.target.id === "storyViewer") closeStory();
+  });
+
+  $("#storyViewerImage")?.addEventListener("click", closeStory);
+
+  // ========================================
+  // MATCHES
+  // ========================================
+
+  async function loadMatches() {
+    const container = $("#matchesList");
+    if (!container) return;
+
+    try {
+      // Загружаем клубы отдельно:
+      // это не зависит от названий внешних ключей Supabase.
+
+      const [matches, clubs] = await Promise.all([
+        fetchRows("matches", {
+          select: `
+            id,
+            match_date,
+            venue,
+            competition,
+            status,
+            home_score,
+            away_score,
+            home_club_id,
+            away_club_id
+          `,
+          order: {
+            column: "match_date",
+            ascending: false
+          }
+        }),
+
+        fetchRows("clubs", {
+          select: "id, name, city, logo_path"
+        })
+      ]);
+
+      const clubsById = new Map(
+        clubs.map(club => [String(club.id), club])
+      );
+
+      matches.forEach(match => {
+        match.home = clubsById.get(String(match.home_club_id)) || null;
+        match.away = clubsById.get(String(match.away_club_id)) || null;
+      });
+
+      if (!matches.length) {
+        setEmpty(container, "Матчи пока не добавлены");
+
+        const lastContainer = $("#lastMatches");
+        if (lastContainer) {
+          setEmpty(lastContainer, "Завершённых матчей пока нет");
+        }
+
+        const nextContainer = $("#nextMatch");
+        if (nextContainer) {
+          setEmpty(nextContainer, "Ближайший матч ещё не опубликован");
+        }
+
+        return;
+      }
+
+      // Сначала будущие и текущие матчи,
+      // затем завершённые — от новых к старым.
+
+      const sortedMatches = [...matches].sort((a, b) => {
+        const aTime = new Date(a.match_date).getTime();
+        const bTime = new Date(b.match_date).getTime();
+
+        const aActive = isUpcoming(a) || isLive(a);
+        const bActive = isUpcoming(b) || isLive(b);
+
+        if (aActive && !bActive) return -1;
+        if (!aActive && bActive) return 1;
+
+        return aActive
+          ? aTime - bTime
+          : bTime - aTime;
+      });
+
+      container.innerHTML = sortedMatches
+        .slice(0, 3)
+        .map(renderMatchRow)
+        .join("");
+
+      loadLastMatches(matches);
+      loadMatchday(matches);
+    } catch (error) {
+      setError(
+        container,
+        "Не удалось загрузить матчи"
+      );
+
+      console.error("Ошибка загрузки матчей:", error);
+    }
+  }
+
+  function renderMatchRow(match) {
+    const home = match.home?.name || "Хозяева";
+    const away = match.away?.name || "Гости";
+
+    const finished = isFinished(match);
+    const live = isLive(match);
+    const postponed = isPostponed(match);
+
+    const statusText = finished
+      ? "Завершён"
+      : live
+        ? "Идёт матч"
+        : postponed
+          ? "Перенесён"
+          : "Запланирован";
+
+    return `
+      <a
+        class="match-row"
+        href="match.html?id=${encodeURIComponent(match.id)}"
+      >
+        <div class="match-row-date">
+          ${escapeHTML(formatDate(match.match_date, {
+            day: "numeric",
+            month: "short"
+          }))}
+          <br>
+          ${escapeHTML(formatTime(match.match_date))}
+        </div>
+
+        <div class="match-row-teams">
+          ${escapeHTML(home)}<br>
+          ${escapeHTML(away)}
+
+          <span class="match-status ${live ? "live" : ""}">
+            ${statusText}
+          </span>
+        </div>
+
+        <div class="match-row-score">
+          ${finished || live
+            ? escapeHTML(getMatchScore(match))
+            : "—"}
+        </div>
+      </a>
+    `;
+  }
+
+  function loadMatchday(matches) {
+    const container = $("#nextMatch");
+    const dateElement = $("#matchdayDate");
+
+    if (!container) return;
+
+    const now = Date.now();
+
+    // Текущий матч имеет приоритет.
+    const liveMatch = matches
+      .filter(isLive)
+      .sort((a, b) =>
+        new Date(a.match_date) - new Date(b.match_date)
+      )[0];
+
+    // Если матчей в прямом эфире нет,
+    // ищем ближайший запланированный.
+    const nextMatch = matches
+      .filter(match => isUpcoming(match))
+      .sort((a, b) =>
+        new Date(a.match_date) - new Date(b.match_date)
+      )[0];
+
+    // Если сегодня уже сыграли и больше нет игр,
+    // показываем последний результат дня.
+    const today = new Date();
+
+    const todayStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    ).getTime();
+
+    const todayEnd = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1
+    ).getTime();
+
+    const finishedToday = matches
+      .filter(match => {
+        const time = new Date(match.match_date).getTime();
+
+        return isFinished(match) &&
+          time >= todayStart &&
+          time < todayEnd;
+      })
+      .sort((a, b) =>
+        new Date(b.match_date) - new Date(a.match_date)
+      )[0];
+
+    const match = liveMatch || nextMatch || finishedToday;
+
+    if (!match) {
+      if (dateElement) dateElement.textContent = "СКОРО";
+
+      setEmpty(
+        container,
+        "Ближайший матч ещё не опубликован"
+      );
+
+      return;
+    }
+
+    const finished = isFinished(match);
+    const live = isLive(match);
+
+    if (dateElement) {
+      dateElement.textContent = finished
+        ? "ИТОГ МАТЧА"
+        : live
+          ? "МАТЧ СЕЙЧАС"
+          : getMatchDayLabel(match.match_date);
+    }
+
+    const home = match.home;
+    const away = match.away;
+
+    container.innerHTML = `
+      <div class="match-card">
+        <div class="match-teams">
+
+          <div class="match-team">
+            ${imageHTML(
+              home?.logo_path,
+              home?.name || "Хозяева",
+              "match-team-logo"
+            )}
+
+            <span class="match-team-name">
+              ${escapeHTML(home?.name || "Хозяева")}
+            </span>
+          </div>
+
+          <div class="${finished || live ? "match-result" : "match-vs"}">
+            ${finished || live
+              ? escapeHTML(getMatchScore(match))
+              : "VS"}
+          </div>
+
+          <div class="match-team">
+            ${imageHTML(
+              away?.logo_path,
+              away?.name || "Гости",
+              "match-team-logo"
+            )}
+
+            <span class="match-team-name">
+              ${escapeHTML(away?.name || "Гости")}
+            </span>
+          </div>
+
+        </div>
+
+        <p class="match-time">
+          ${escapeHTML(formatDateTime(match.match_date))}
+          ${live ? " · ИДЁТ МАТЧ" : ""}
+        </p>
+
+        <p class="match-venue">
+          ${escapeHTML(
+            match.venue || "Место проведения уточняется"
+          )}
+        </p>
+
+        <a
+          class="match-review"
+          href="match.html?id=${encodeURIComponent(match.id)}"
+        >
+          ${finished
+            ? "Обзор матча"
+            : live
+              ? "Следить за матчем"
+              : "О матче"}
+        </a>
+      </div>
+    `;
+  }
+
+  function loadLastMatches(matches) {
+    const container = $("#lastMatches");
+    if (!container) return;
+
+    const last = matches
+      .filter(isFinished)
+      .sort((a, b) =>
+        new Date(b.match_date) - new Date(a.match_date)
+      )
+      .slice(0, 3);
+
+    if (!last.length) {
+      setEmpty(
+        container,
+        "Завершённых матчей пока нет"
+      );
+
+      return;
+    }
+
+    container.innerHTML = last.map(match => `
+      <a
+        class="last-match-row"
+        href="match.html?id=${encodeURIComponent(match.id)}"
+      >
+        <span class="last-match-team">
+          ${escapeHTML(match.home?.name || "Хозяева")}
+        </span>
+
+        <span class="last-match-score">
+          ${escapeHTML(getMatchScore(match))}
+        </span>
+
+        <span class="last-match-team">
+          ${escapeHTML(match.away?.name || "Гости")}
+        </span>
+      </a>
+    `).join("");
+  }
+
+  // ========================================
+  // STANDINGS
+  // ========================================
+
+  async function loadStandings() {
+    const body = $("#standingsBody");
+    if (!body) return;
+
+    try {
+      const rows = await fetchRows("standings", {
+        order: {
+          column: "place",
+          ascending: true
+        }
+      });
+
+      if (!rows.length) {
+        body.innerHTML = `
+          <tr>
+            <td colspan="10">Таблица пока не заполнена</td>
+          </tr>
+        `;
+
+        return;
+      }
+
+      body.innerHTML = rows.map(row => `
+        <tr>
+          <td>${Number(row.place || 0)}</td>
+          <td>${escapeHTML(row.team_name)}</td>
+          <td>${Number(row.games || 0)}</td>
+          <td>${Number(row.wins || 0)}</td>
+          <td>${Number(row.overtime_wins || 0)}</td>
+          <td>${Number(row.shootout_wins || 0)}</td>
+          <td>${Number(row.losses || 0)}</td>
+          <td>${Number(row.overtime_losses || 0)}</td>
+          <td>${Number(row.shootout_losses || 0)}</td>
+          <td>
+            <strong>${Number(row.points || 0)}</strong>
+          </td>
+        </tr>
+      `).join("");
+    } catch (error) {
+      body.innerHTML = `
+        <tr>
+          <td colspan="10">Не удалось загрузить таблицу</td>
+        </tr>
+      `;
+    }
+  }
+
+  // ========================================
+  // PLAYER STATS
+  // ========================================
+
+  async function loadStats(type = activeStatType) {
+    activeStatType = type;
+
+    const container = $("#statsList");
+    if (!container) return;
+
+    $$("#statsTabs [data-stat-type]").forEach(button => {
+      const active = button.dataset.statType === type;
+
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", String(active));
+    });
+
+    try {
+      let rows = await fetchRows("player_stats", {
+        order: {
+          column: "value",
+          ascending: false
+        },
+        filters: [
+          {
+            column: "stat_type",
+            operator: "eq",
+            value: type
+          }
+        ],
+        limit: 30
+      });
+
+      // Если данные не найдены по stat_type,
+      // проверяем category.
+      if (!rows.length) {
+        rows = await fetchRows("player_stats", {
+          order: {
+            column: "value",
+            ascending: false
+          },
+          filters: [
+            {
+              column: "category",
+              operator: "eq",
+              value: type
+            }
+          ],
+          limit: 30
+        });
+      }
+
+      if (!rows.length) {
+        setEmpty(
+          container,
+          "Статистика пока не заполнена"
+        );
+
+        return;
+      }
+
+      rows.sort((a, b) =>
+        Number(b.value || 0) - Number(a.value || 0)
+      );
+
+      container.innerHTML = rows.map((player, index) => `
+        <div class="stat-row">
+          <span class="stat-rank">
+            ${String(index + 1).padStart(2, "0")}
+          </span>
+
+          <div>
+            <div class="stat-player-name">
+              ${escapeHTML(player.player_name)}
+            </div>
+
+            <span class="stat-player-meta">
+              № ${Number(player.player_number || 0)}
+              ${player.position
+                ? ` · ${escapeHTML(player.position)}`
+                : ""}
+            </span>
+          </div>
+
+          <span class="stat-value">
+            ${type === "plus_minus" &&
+              Number(player.value) > 0 ? "+" : ""}
+            ${escapeHTML(player.value ?? 0)}
+          </span>
+        </div>
+      `).join("");
+    } catch (error) {
+      setError(
+        container,
+        "Не удалось загрузить статистику"
+      );
+
+      console.error("Ошибка статистики:", error);
+    }
+  }
+
+  $("#statsTabs")?.addEventListener("click", event => {
+    const button = event.target.closest("[data-stat-type]");
+    if (!button) return;
+
+    loadStats(button.dataset.statType);
+  });
+
+  // ========================================
+  // TEAM LEADERS
+  // ========================================
+
+  const leaderLabels = {
+    scorer: "Лучший бомбардир",
+    sniper: "Лучший снайпер",
+    defender: "Лучший защитник-бомбардир",
+    plus_minus: "Плюс/минус"
+  };
+
+  async function loadLeaders() {
+    const container = $("#leadersList");
+    if (!container) return;
+
+    try {
+      const rows = await fetchRows("team_leaders");
+
+      if (!rows.length) {
+        setEmpty(
+          container,
+          "Лидеры команды пока не добавлены"
+        );
+
+        return;
+      }
+
+      const order = [
+        "scorer",
+        "sniper",
+        "defender",
+        "plus_minus"
+      ];
+
+      rows.sort((a, b) => {
+        const aIndex = order.indexOf(a.leader_type);
+        const bIndex = order.indexOf(b.leader_type);
+
+        return (aIndex === -1 ? 999 : aIndex) -
+          (bIndex === -1 ? 999 : bIndex);
+      });
+
+      container.innerHTML = rows.map(leader => `
+        <article class="leader-card">
+          <span class="leader-number">
+            ${Number(leader.player_number || 0)}
+          </span>
+
+          ${imageHTML(
+            leader.image_path,
+            leader.player_name || "Игрок команды",
+            "leader-image"
+          )}
+
+          <div class="leader-info">
+            <span class="leader-type">
+              ${escapeHTML(
+                leaderLabels[leader.leader_type] ||
+                "Лидер команды"
+              )}
+            </span>
+
+            <h3 class="leader-name">
+              ${escapeHTML(
+                leader.player_name || "Игрок не выбран"
+              )}
+            </h3>
+
+            <p class="leader-position">
+              ${escapeHTML(leader.position || "")}
+            </p>
+
+            <div class="leader-stat">
+              ${escapeHTML(leader.statistic || "—")}
+            </div>
+          </div>
+        </article>
+      `).join("");
+    } catch (error) {
+      setError(
+        container,
+        "Не удалось загрузить лидеров"
+      );
+    }
+  }
+
+  // ========================================
+  // ALBUMS
+  // ========================================
+
+  async function loadAlbums() {
+    const container = $("#albumsList");
+    if (!container) return;
+
+    try {
+      const albums = await fetchRows("albums", {
+        order: {
+          column: "album_date",
+          ascending: false
+        },
+        limit: 30
+      });
+
+      if (!albums.length) {
+        setEmpty(
+          container,
+          "Фотоальбомы пока не опубликованы"
+        );
+
+        return;
+      }
+
+      container.innerHTML = albums.map(album => `
+        <a
+          class="album-card"
+          href="album.html?id=${encodeURIComponent(album.id)}"
+        >
+          <div class="album-cover-wrap">
+            ${imageHTML(
+              album.cover_path,
+              album.title,
+              "album-cover"
+            )}
+          </div>
+
+          <p class="album-date">
+            ${escapeHTML(formatDate(album.album_date))}
+          </p>
+
+          <h3 class="album-title">
+            ${escapeHTML(album.title)}
+          </h3>
+        </a>
+      `).join("");
+    } catch (error) {
+      setError(
+        container,
+        "Не удалось загрузить фотоальбомы"
+      );
+    }
+  }
+
+  // ========================================
+  // MOBILE MENU
+  // ========================================
+
+  const menuButton = $("#menuButton");
+  const mobileMenu = $("#mobileMenu");
+  const menuClose = $("#menuClose");
+
+  function openMenu() {
+    if (!mobileMenu) return;
+
+    mobileMenu.classList.add("open");
+    mobileMenu.setAttribute("aria-hidden", "false");
+
+    menuButton?.setAttribute("aria-expanded", "true");
+
+    document.body.classList.add("menu-open");
+  }
+
+  function closeMenu() {
+    if (!mobileMenu) return;
+
+    mobileMenu.classList.remove("open");
+    mobileMenu.setAttribute("aria-hidden", "true");
+
+    menuButton?.setAttribute("aria-expanded", "false");
+
+    document.body.classList.remove("menu-open");
+  }
+
+  menuButton?.addEventListener("click", () => {
+    if (mobileMenu?.classList.contains("open")) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+
+  menuClose?.addEventListener("click", closeMenu);
+
+  mobileMenu?.addEventListener("click", event => {
+    if (event.target === mobileMenu) closeMenu();
+  });
+
+  $$(".mobile-menu-panel a").forEach(link => {
+    link.addEventListener("click", closeMenu);
+  });
+
+  // ========================================
+  // CONTENT VIEWER
+  // ========================================
+
+  function closeContentViewer() {
+    const viewer = $("#contentViewer");
+    const body = $("#contentViewerBody");
+
+    if (viewer) {
+      viewer.classList.remove("open");
+      viewer.setAttribute("aria-hidden", "true");
+    }
+
+    if (body) body.innerHTML = "";
+
+    document.body.classList.remove("viewer-open");
+  }
+
+  $("#contentViewerClose")?.addEventListener(
+    "click",
+    closeContentViewer
+  );
+
+  // ========================================
+  // KEYBOARD
+  // ========================================
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeMenu();
+      closeStory();
+      closeContentViewer();
+    }
+  });
+
+  // ========================================
+  // FOOTER
+  // ========================================
+
+  const footerYear = $("#footerYear");
+
+  if (footerYear) {
+    footerYear.textContent = new Date().getFullYear();
+  }
+
+  // ========================================
+  // STARTUP
+  // ========================================
+
+  async function startApp() {
+    await Promise.all([
+      loadSettings(),
+      loadNews(),
+      loadStories(),
+      loadStandings(),
+      loadStats("scorers"),
+      loadLeaders(),
+      loadAlbums(),
+      loadMatches()
+    ]);
+
+    console.info(
+      "Публичная страница ХК Челны 2011 загружена"
+    );
+  }
+
+  startApp();
+})();
