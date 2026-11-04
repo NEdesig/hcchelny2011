@@ -19,11 +19,13 @@
     [...root.querySelectorAll(selector)];
 
   const BUCKET = window.STORAGE_BUCKET || "site-media";
+  const CURRENT_SEASON = "2026/2027";
 
   let activeStoryTimer = null;
   let activeStoryProgress = null;
   let storyItems = [];
   let activeStatType = "scorers";
+  let playerItems = [];
 
   // ========================================
   // HELPERS
@@ -171,6 +173,22 @@
 
   function showToastMessage(message) {
     console.info(message);
+  }
+
+  function safeExternalURL(value) {
+    if (!value) return "";
+
+    try {
+      const url = new URL(value);
+
+      if (!["http:", "https:"].includes(url.protocol)) {
+        return "";
+      }
+
+      return url.href;
+    } catch {
+      return "";
+    }
   }
 
   // ========================================
@@ -410,6 +428,7 @@
         select: `
           id, match_date, venue, competition, status,
           home_score, away_score, home_club_id, away_club_id,
+          stream_url,
           home:clubs!matches_home_club_id_fkey(id,name,logo_path),
           away:clubs!matches_away_club_id_fkey(id,name,logo_path)
         `,
@@ -437,10 +456,8 @@
         return aFuture ? aDate - bDate : bDate - aDate;
       });
 
-      
-const homepageMatches = matches.slice(0, 3);
-container.innerHTML = homepageMatches.map(renderMatchRow).join("");
-
+      const homepageMatches = matches.slice(0, 3);
+      container.innerHTML = homepageMatches.map(renderMatchRow).join("");
 
       loadLastMatches(matches);
       loadMatchday(matches);
@@ -465,29 +482,44 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
         ? "Идёт матч"
         : "Запланирован";
 
+    const streamURL = safeExternalURL(match.stream_url);
+
     return `
-      <a class="match-row" href="match.html?id=${encodeURIComponent(match.id)}">
-        <div class="match-row-date">
-          ${escapeHTML(formatDate(match.match_date, { day: "numeric", month: "short" }))}
-          <br>
-          ${escapeHTML(new Date(match.match_date).toLocaleTimeString("ru-RU", {
-            hour: "2-digit",
-            minute: "2-digit"
-          }))}
-        </div>
+      <div class="match-row-wrap">
+        <a class="match-row" href="match.html?id=${encodeURIComponent(match.id)}">
+          <div class="match-row-date">
+            ${escapeHTML(formatDate(match.match_date, { day: "numeric", month: "short" }))}
+            <br>
+            ${escapeHTML(new Date(match.match_date).toLocaleTimeString("ru-RU", {
+              hour: "2-digit",
+              minute: "2-digit"
+            }))}
+          </div>
 
-        <div class="match-row-teams">
-          ${escapeHTML(home)}<br>
-          ${escapeHTML(away)}
-          <span class="match-status ${live ? "live" : ""}">
-            ${statusText}
-          </span>
-        </div>
+          <div class="match-row-teams">
+            ${escapeHTML(home)}<br>
+            ${escapeHTML(away)}
+            <span class="match-status ${live ? "live" : ""}">
+              ${statusText}
+            </span>
+          </div>
 
-        <div class="match-row-score">
-          ${finished || live ? escapeHTML(score) : "—"}
-        </div>
-      </a>
+          <div class="match-row-score">
+            ${finished || live ? escapeHTML(score) : "—"}
+          </div>
+        </a>
+
+        ${streamURL ? `
+          <a
+            class="match-stream-link"
+            href="${escapeHTML(streamURL)}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Смотреть трансляцию матча"
+            title="Смотреть трансляцию"
+          >📹</a>
+        ` : ""}
+      </div>
     `;
   }
 
@@ -509,8 +541,6 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
       })
       .sort((a, b) => new Date(a.match_date) - new Date(b.match_date))[0];
 
-    // Показываем последний завершённый матч до конца местного дня,
-    // если на сегодня больше нет предстоящих игр.
     const today = new Date();
 
     const todayEnd = new Date(
@@ -544,6 +574,7 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
 
     const finished = match.status === "finished";
     const live = match.status === "live";
+    const streamURL = safeExternalURL(match.stream_url);
 
     container.innerHTML = `
       <div class="match-card">
@@ -581,6 +612,15 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
         <a class="match-review" href="match.html?id=${encodeURIComponent(match.id)}">
           ${finished ? "Обзор матча" : live ? "Следить за матчем" : "О матче"}
         </a>
+
+        ${streamURL ? `
+          <a
+            class="match-stream-link"
+            href="${escapeHTML(streamURL)}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >📹 Смотреть трансляцию</a>
+        ` : ""}
       </div>
     `;
   }
@@ -691,7 +731,6 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
         return;
       }
 
-      // Для плюс/минус положительные значения выше отрицательных.
       if (type === "plus_minus") {
         rows.sort((a, b) => Number(b.value) - Number(a.value));
       }
@@ -729,6 +768,298 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
     if (!button) return;
 
     loadStats(button.dataset.statType);
+  });
+
+  // ========================================
+  // PLAYERS
+  // ========================================
+
+  function getPlayerCategory(position) {
+    const value = String(position || "").toLowerCase();
+
+    if (
+      value.includes("врат") ||
+      value.includes("goalie") ||
+      value.includes("goaltender")
+    ) {
+      return "goalies";
+    }
+
+    if (
+      value.includes("защит") ||
+      value.includes("defen") ||
+      value === "d"
+    ) {
+      return "defenders";
+    }
+
+    if (
+      value.includes("напада") ||
+      value.includes("форвар") ||
+      value.includes("forward") ||
+      value === "f"
+    ) {
+      return "forwards";
+    }
+
+    return "other";
+  }
+
+  function getPlayerCategoryTitle(category) {
+    const titles = {
+      goalies: "Вратари",
+      defenders: "Защитники",
+      forwards: "Нападающие",
+      other: "Другие игроки"
+    };
+
+    return titles[category] || "Игроки";
+  }
+
+  function renderPlayerCard(player, index) {
+    const photo = getImageURL(player.photo_url);
+
+    return `
+      <button
+        class="player-card"
+        type="button"
+        data-player-index="${index}"
+        aria-label="Открыть профиль ${escapeHTML(player.name)}"
+      >
+        <div class="player-card-photo">
+          ${photo
+            ? `<img src="${escapeHTML(photo)}" alt="${escapeHTML(player.name)}" loading="lazy">`
+            : `<span class="player-card-placeholder">${Number(player.number || 0)}</span>`
+          }
+        </div>
+
+        <div class="player-card-info">
+          <span class="player-card-number">
+            № ${Number(player.number || 0)}
+          </span>
+
+          <h3 class="player-card-name">
+            ${escapeHTML(player.name)}
+          </h3>
+
+          <span class="player-card-position">
+            ${escapeHTML(player.position || "")}
+          </span>
+        </div>
+      </button>
+    `;
+  }
+
+  async function loadPlayers() {
+    const container = $("#playersList");
+    if (!container) return;
+
+    try {
+      const [players, seasonStats] = await Promise.all([
+        fetchRows("players", {
+          order: { column: "number", ascending: true }
+        }),
+        fetchRows("player_season_stats", {
+          filters: [
+            { column: "season", operator: "eq", value: CURRENT_SEASON }
+          ]
+        })
+      ]);
+
+      if (!players.length) {
+        playerItems = [];
+        setEmpty(container, "Игроки пока не добавлены");
+        return;
+      }
+
+      const statsByPlayer = new Map(
+        seasonStats.map(stat => [String(stat.player_id), stat])
+      );
+
+      playerItems = players.map(player => ({
+        ...player,
+        seasonStats: statsByPlayer.get(String(player.id)) || null
+      }));
+
+      const categories = ["goalies", "defenders", "forwards", "other"];
+
+      container.innerHTML = categories.map(category => {
+        const categoryPlayers = playerItems
+          .map((player, index) => ({ player, index }))
+          .filter(item => getPlayerCategory(item.player.position) === category);
+
+        if (!categoryPlayers.length) return "";
+
+        return `
+          <section class="players-group players-group-${category}">
+            <div class="players-group-heading">
+              <h3>${getPlayerCategoryTitle(category)}</h3>
+              <span>${categoryPlayers.length}</span>
+            </div>
+
+            <div class="players-grid">
+              ${categoryPlayers.map(item =>
+                renderPlayerCard(item.player, item.index)
+              ).join("")}
+            </div>
+          </section>
+        `;
+      }).join("");
+
+      $$(".player-card", container).forEach(button => {
+        button.addEventListener("click", () => {
+          const index = Number(button.dataset.playerIndex);
+          openPlayer(index);
+        });
+      });
+    } catch (error) {
+      console.error("Ошибка загрузки игроков:", error);
+      setError(container, "Не удалось загрузить игроков");
+    }
+  }
+
+  function renderPlayerStat(label, value) {
+    if (value === null || value === undefined || value === "") {
+      value = "—";
+    }
+
+    return `
+      <div class="player-profile-stat">
+        <span>${escapeHTML(label)}</span>
+        <strong>${escapeHTML(value)}</strong>
+      </div>
+    `;
+  }
+
+  function openPlayer(index) {
+    const player = playerItems[index];
+    if (!player) return;
+
+    const viewer = $("#playerViewer");
+    const body = $("#playerViewerBody");
+
+    if (!viewer || !body) return;
+
+    const stats = player.seasonStats || {};
+    const isGoalie = getPlayerCategory(player.position) === "goalies";
+    const photo = getImageURL(player.photo_url);
+
+    const birthDate = player.birth_date
+      ? formatDate(player.birth_date, {
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        })
+      : "—";
+
+    const physicalInfo = [
+      player.height_cm ? `${Number(player.height_cm)} см` : "",
+      player.weight_kg ? `${Number(player.weight_kg)} кг` : ""
+    ].filter(Boolean).join(" · ");
+
+    const statsHTML = isGoalie
+      ? [
+          renderPlayerStat("Матчи", stats.goalie_games ?? stats.games),
+          renderPlayerStat("Пропущено шайб", stats.goals_against),
+          renderPlayerStat("Штрафное время", stats.pim),
+          renderPlayerStat("КН", stats.gaa)
+        ].join("")
+      : [
+          renderPlayerStat("Матчи", stats.games),
+          renderPlayerStat("Голы", stats.goals),
+          renderPlayerStat("Передачи", stats.assists),
+          renderPlayerStat("Очки", stats.points),
+          renderPlayerStat(
+            "+/-",
+            stats.plus_minus > 0 ? `+${stats.plus_minus}` : stats.plus_minus
+          ),
+          renderPlayerStat("Штрафное время", stats.pim)
+        ].join("");
+
+    body.innerHTML = `
+      <div class="player-profile">
+        <div class="player-profile-header">
+          <div class="player-profile-photo">
+            ${photo
+              ? `<img src="${escapeHTML(photo)}" alt="${escapeHTML(player.name)}">`
+              : `<span>${Number(player.number || 0)}</span>`
+            }
+          </div>
+
+          <div class="player-profile-main">
+            <span class="player-profile-number">
+              № ${Number(player.number || 0)}
+            </span>
+
+            <h2>${escapeHTML(player.name)}</h2>
+
+            <p>${escapeHTML(player.position || "")}</p>
+          </div>
+        </div>
+
+        <div class="player-profile-details">
+          <div>
+            <span>Дата рождения</span>
+            <strong>${escapeHTML(birthDate)}</strong>
+          </div>
+
+          <div>
+            <span>Рост и вес</span>
+            <strong>${escapeHTML(physicalInfo || "—")}</strong>
+          </div>
+        </div>
+
+        <section class="player-profile-section">
+          <h3>Статистика сезона ${CURRENT_SEASON}</h3>
+
+          <div class="player-profile-stats">
+            ${statsHTML}
+          </div>
+        </section>
+
+        <section class="player-profile-section">
+          <h3>Интересно!</h3>
+
+          <div class="player-profile-details">
+            <div>
+              <span>Любимый хоккеист</span>
+              <strong>${escapeHTML(player.favorite_hockey_player || "Не указано")}</strong>
+            </div>
+
+            <div>
+              <span>Любимый клуб</span>
+              <strong>${escapeHTML(player.favorite_club || "Не указано")}</strong>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+
+    viewer.classList.add("open");
+    viewer.setAttribute("aria-hidden", "false");
+    document.body.classList.add("viewer-open");
+  }
+
+  function closePlayerViewer() {
+    const viewer = $("#playerViewer");
+    const body = $("#playerViewerBody");
+
+    if (viewer) {
+      viewer.classList.remove("open");
+      viewer.setAttribute("aria-hidden", "true");
+    }
+
+    if (body) body.innerHTML = "";
+
+    document.body.classList.remove("viewer-open");
+  }
+
+  $("#playerViewerClose")?.addEventListener("click", closePlayerViewer);
+
+  $("#playerViewer")?.addEventListener("click", event => {
+    if (event.target.id === "playerViewer") {
+      closePlayerViewer();
+    }
   });
 
   // ========================================
@@ -880,6 +1211,7 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
       closeMenu();
       closeStory();
       closeContentViewer();
+      closePlayerViewer();
     }
   });
 
@@ -924,6 +1256,7 @@ container.innerHTML = homepageMatches.map(renderMatchRow).join("");
       loadStories(),
       loadStandings(),
       loadStats("scorers"),
+      loadPlayers(),
       loadLeaders(),
       loadAlbums(),
       loadMatches()
