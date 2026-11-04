@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ru">
 <head>
@@ -14,13 +13,14 @@ body{margin:0;background:var(--bg);color:#fff;font:15px Arial}
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
 .hide{display:none!important}
-.wrap{max-width:950px;margin:auto;padding:12px}
+.wrap{max-width:1050px;margin:auto;padding:12px}
 .top{position:sticky;top:0;background:#070d27;padding:13px;display:flex;justify-content:space-between;border-bottom:1px solid var(--line);z-index:5}
 .card{background:var(--p);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
 .login{max-width:420px;margin:12vh auto}
 .field{margin:10px 0}
 .field label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
 input,textarea,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:#08102b;color:white}
+input[type=color]{height:42px;padding:4px}
 textarea{min-height:90px}
 .btn{padding:10px 13px;border:0;border-radius:9px;background:var(--gold);color:#050b22;font-weight:bold}
 .alt{background:#17234c;color:white;border:1px solid var(--line)}
@@ -31,6 +31,7 @@ textarea{min-height:90px}
 .panel{display:none}
 .panel.active{display:block}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .item{padding:10px;background:#08102b;border:1px solid var(--line);border-radius:10px;margin:7px 0;display:flex;gap:8px;align-items:center}
 .item .main{flex:1;min-width:0}
 .sub{font-size:12px;color:var(--muted);margin-top:4px}
@@ -39,10 +40,8 @@ textarea{min-height:90px}
 .msg.on{display:block}
 .hint{font-size:12px;color:var(--muted);line-height:1.5}
 .divider{height:1px;background:var(--line);margin:18px 0}
-@media(max-width:600px){
-.grid{grid-template-columns:1fr}
-.item{align-items:flex-start;flex-wrap:wrap}
-}
+.section-title{margin-top:22px}
+@media(max-width:600px){.grid,.grid3{grid-template-columns:1fr}.item{align-items:flex-start;flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -52,26 +51,16 @@ textarea{min-height:90px}
 <h1>ЧЕЛНЫ 2011</h1>
 <p class="hint">Вход в админ-панель</p>
 <div id="loginErr" class="hint"></div>
-<div class="field">
-<label>Email</label>
-<input id="email" type="email" required autocomplete="username">
-</div>
-<div class="field">
-<label>Пароль</label>
-<input id="password" type="password" required autocomplete="current-password">
-</div>
+<div class="field"><label>Email</label><input id="email" type="email" required autocomplete="username"></div>
+<div class="field"><label>Пароль</label><input id="password" type="password" required autocomplete="current-password"></div>
 <button class="btn" style="width:100%">ВОЙТИ</button>
 </form>
 </div>
 
 <div id="app" class="hide">
-<header class="top">
-<b>ХК Челны 2011 · Админка</b>
-<button id="logout" class="btn alt">Выйти</button>
-</header>
-
+<header class="top"><b>ХК Челны 2011 · Админка</b><button id="logout" class="btn alt">Выйти</button></header>
 <main class="wrap">
-<p class="hint">Публичный дизайн не изменяется. Данные сохраняются в существующий Supabase. Для загрузки фото нужен Storage bucket <b>site-media</b>.</p>
+<p class="hint">Данные сохраняются в Supabase. Для загрузки фотографий используется Storage bucket <b>site-media</b>.</p>
 
 <nav class="tabs" id="tabs">
 <button class="active" data-tab="news">Новости</button>
@@ -108,7 +97,7 @@ textarea{min-height:90px}
 <div class="field"><label>Изображение</label><input id="sfile" type="file" accept="image/*"></div>
 <div class="grid">
 <div class="field"><label>Срок</label><select id="shours"><option value="6">6 часов</option><option value="12">12 часов</option><option value="24" selected>24 часа</option><option value="48">48 часов</option></select></div>
-<div class="field"><label>Подпись (если поле есть в БД)</label><input id="scaption"></div>
+<div class="field"><label>Подпись</label><input id="scaption"></div>
 </div>
 <button id="sadd" class="btn">ОПУБЛИКОВАТЬ</button>
 </div>
@@ -135,6 +124,7 @@ textarea{min-height:90px}
 <div class="field"><label>Турнир</label><input id="comp"></div>
 <div class="field"><label>Арена</label><input id="venue"></div>
 </div>
+<div class="field"><label>Ссылка на трансляцию</label><input id="stream" type="url" placeholder="https://..."></div>
 <button id="msave" class="btn">СОХРАНИТЬ МАТЧ</button>
 <button id="mreset" class="btn alt hide">Отмена</button>
 </div>
@@ -149,7 +139,6 @@ textarea{min-height:90px}
 <button id="cadd" class="btn">ДОБАВИТЬ КОМАНДУ</button>
 <div id="clist"></div>
 </div>
-
 <div class="card"><h2>Матчи</h2><div id="mlist"></div></div>
 
 <div id="eventbox" class="card hide">
@@ -164,14 +153,7 @@ textarea{min-height:90px}
 <div class="field"><label>Номер игрока</label><input id="gnum" type="number"></div>
 </div>
 <div class="field"><label>Автор гола</label><input id="gplayer"></div>
-<div class="field">
-<label>Тип гола</label>
-<select id="gstrength">
-<option value="even">Равные составы</option>
-<option value="power">Большинство</option>
-<option value="short">Меньшинство</option>
-</select>
-</div>
+<div class="field"><label>Тип гола</label><select id="gstrength"><option value="even">Равные составы</option><option value="power">Большинство</option><option value="short">Меньшинство</option></select></div>
 <button id="gadd" class="btn">ДОБАВИТЬ ГОЛ</button>
 <button id="gcancel" class="btn alt hide">Отмена</button>
 
@@ -187,13 +169,20 @@ textarea{min-height:90px}
 <div class="field"><label>Игрок</label><input id="pplayer"></div>
 <div class="field"><label>Нарушение</label><input id="preason"></div>
 </div>
-<div class="field">
-<label>Минуты штрафа</label>
-<select id="pminutes"><option value="2">2</option><option value="4">4</option><option value="5">5</option><option value="10">10</option><option value="20">20</option></select>
-</div>
+<div class="field"><label>Минуты штрафа</label><select id="pminutes"><option value="2">2</option><option value="4">4</option><option value="5">5</option><option value="10">10</option><option value="20">20</option></select></div>
 <button id="padd" class="btn">ДОБАВИТЬ УДАЛЕНИЕ</button>
 <button id="pcancel" class="btn alt hide">Отмена</button>
 
+<div class="divider"></div>
+<h3>Голосование за игрока матча</h3>
+<p class="hint">Добавь игроков, за которых болельщики смогут голосовать. Один голос на устройство.</p>
+<div class="field"><label>Игрок</label><select id="candidatePlayer"></select></div>
+<div class="grid">
+<div class="field"><label>Статистика в матче</label><input id="candidateStats" placeholder="Например: 2 гола и 1 передача"></div>
+<div class="field"><label>Интересный факт</label><input id="candidateFact" placeholder="Например: первый гол за команду"></div>
+</div>
+<button id="candidateAdd" class="btn">ДОБАВИТЬ КАНДИДАТА</button>
+<div id="candidateList"></div>
 <div class="divider"></div>
 <div id="elist"></div>
 </div>
@@ -202,7 +191,7 @@ textarea{min-height:90px}
 <section id="rosters" class="panel">
 <div class="card">
 <h2>Управление составами</h2>
-<p class="hint">Выбери матч, команду и игрока из базы. Номер, имя и позицию можно скорректировать для конкретного матча.</p>
+<p class="hint">Выбери матч, команду и игрока из общей базы профилей.</p>
 <div class="field"><label>Матч</label><select id="rosterMatch"></select></div>
 <div class="field"><label>Команда</label><select id="rosterSide"><option value="home">Хозяева</option><option value="away">Гости</option></select></div>
 <input id="rosterEditId" type="hidden">
@@ -215,16 +204,13 @@ textarea{min-height:90px}
 <button id="rosterSave" class="btn">ДОБАВИТЬ В СОСТАВ</button>
 <button id="rosterCancel" class="btn alt hide">Отмена</button>
 </div>
-<div class="card">
-<h2>Состав выбранной команды</h2>
-<div id="rosterList">Выбери матч</div>
-</div>
+<div class="card"><h2>Состав выбранной команды</h2><div id="rosterList">Выбери матч</div></div>
 </section>
 
 <section id="standings" class="panel">
 <div class="card">
 <h2>Турнирная таблица</h2>
-<p class="hint">Заполняй отдельно победы в основное время, овертайме и по буллитам, а также поражения в основное время, овертайме и по буллитам.</p>
+<p class="hint">Заполняй отдельно победы и поражения в основное время, овертайме и по буллитам.</p>
 <div id="tlist"></div>
 <div class="divider"></div>
 <h2>Добавить строку</h2>
@@ -256,18 +242,51 @@ textarea{min-height:90px}
 </div>
 <div class="grid">
 <div class="field"><label>Позиция</label><select id="pposition"><option value="Нападающий">Нападающий</option><option value="Защитник">Защитник</option><option value="Вратарь">Вратарь</option></select></div>
-<div class="field"><label>Фотография игрока</label><input id="pfile" type="file" accept="image/*"></div>
+<div class="field"><label>Фотография</label><input id="pfile" type="file" accept="image/*"></div>
 </div>
+<div class="grid">
+<div class="field"><label>Дата рождения</label><input id="pbirth" type="date"></div>
+<div class="field"><label>Команда</label><input id="pteamname" value="ХК Челны 2011"></div>
+<div class="field"><label>Рост (см)</label><input id="pheight" type="number" min="0"></div>
+<div class="field"><label>Вес (кг)</label><input id="pweight" type="number" min="0" step="0.1"></div>
+</div>
+<div class="grid">
+<div class="field"><label>Любимый хоккеист</label><input id="pfavoriteplayer"></div>
+<div class="field"><label>Любимый клуб</label><input id="pfavoriteclub"></div>
+</div>
+<div class="field"><label>Интересная информация о игроке</label><textarea id="pinfo" placeholder="Факты о хоккеисте"></textarea></div>
+
+<div class="divider"></div>
+<h3>Сезонная статистика</h3>
+<div class="field"><label>Сезон</label><input id="pseason" value="2026/2027" placeholder="2026/2027"></div>
 <div class="grid">
 <div class="field"><label>Игры</label><input id="pgames" type="number" min="0" value="0"></div>
 <div class="field"><label>Голы</label><input id="pgoals" type="number" min="0" value="0"></div>
-<div class="field"><label>Пасы</label><input id="passists" type="number" min="0" value="0"></div>
+<div class="field"><label>Передачи</label><input id="passists" type="number" min="0" value="0"></div>
 <div class="field"><label>Очки</label><input id="ppoints" type="number" min="0" value="0"></div>
+<div class="field"><label>Плюс/минус</label><input id="pplusminus" type="number" value="0"></div>
+<div class="field"><label>Штрафные минуты</label><input id="ppim" type="number" min="0" value="0"></div>
+</div>
+<h3>Показатели вратаря</h3>
+<div class="grid">
+<div class="field"><label>Игры вратаря</label><input id="pgoaliegames" type="number" min="0" value="0"></div>
+<div class="field"><label>Пропущенные голы</label><input id="pgoalsagainst" type="number" min="0" value="0"></div>
+<div class="field"><label>Коэффициент надёжности (КН)</label><input id="pgaa" type="number" min="0" step="0.01" value="0"></div>
 </div>
 <button id="psave" class="btn">СОХРАНИТЬ ИГРОКА</button>
 <button id="preset" class="btn alt hide">Отмена</button>
 </div>
-<div class="card"><h2>Состав команды</h2><div id="plist">Загрузка…</div></div>
+
+<div class="card">
+<h2>Кандидаты на игрока месяца</h2>
+<div class="field"><label>Первый день месяца</label><input id="monthDate" type="date"></div>
+<div class="field"><label>Игрок</label><select id="monthPlayer"></select></div>
+<div class="field"><label>Описание / достижение</label><input id="monthDescription" placeholder="Почему игрок номинирован"></div>
+<button id="monthAdd" class="btn">ДОБАВИТЬ КАНДИДАТА</button>
+<div id="monthCandidates"></div>
+</div>
+
+<div class="card"><h2>База игроков</h2><div id="plist">Загрузка…</div></div>
 </section>
 
 <section id="stats" class="panel">
@@ -343,6 +362,7 @@ textarea{min-height:90px}
 const $=x=>document.getElementById(x);
 const B="site-media";
 let db,clubs=[],matches=[],players=[],newsImg=null;
+let currentSeason="2026/2027";
 
 const v=x=>$(x).value.trim();
 const n=x=>$(x).value===""?null:Number($(x).value);
@@ -354,18 +374,8 @@ $("toast").className="msg on"+(b?" bad":"");
 clearTimeout(say.t);
 say.t=setTimeout(()=>$("toast").className="msg",4500);
 }
-
-async function q(p){
-let{data,error}=await p;
-if(error)throw error;
-return data;
-}
-
-async function safe(f){
-try{await f()}
-catch(e){console.error(e);say(e.message||"Ошибка",true)}
-}
-
+async function q(p){let{data,error}=await p;if(error)throw error;return data}
+async function safe(f){try{await f()}catch(e){console.error(e);say(e.message||"Ошибка",true)}}
 async function up(f,folder){
 if(!f)return null;
 let ext=(f.name.split(".").pop()||"jpg").replace(/[^a-z0-9]/gi,"");
@@ -373,823 +383,453 @@ let path=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 await q(db.storage.from(B).upload(path,f,{contentType:f.type||"image/jpeg"}));
 return path;
 }
-
-function url(p){
-return !p?"":/^https?:/i.test(p)?p:db.storage.from(B).getPublicUrl(p).data.publicUrl;
-}
-
+function url(p){return !p?"":/^https?:/i.test(p)?p:db.storage.from(B).getPublicUrl(p).data.publicUrl}
 function item(title,sub="",path="",buttons=""){
-return `<div class="item">
-${path?`<img width="48" height="48" style="object-fit:cover;border-radius:7px" src="${esc(url(path))}">`:""}
-<div class="main"><b>${esc(title)}</b><div class="sub">${esc(sub)}</div></div>
-${buttons}
-</div>`;
+return `<div class="item">${path?`<img width="48" height="48" style="object-fit:cover;border-radius:7px" src="${esc(url(path))}">`:""}<div class="main"><b>${esc(title)}</b><div class="sub">${esc(sub)}</div></div>${buttons}</div>`;
 }
-
-function act(t,a,id,red=false){
-return `<button class="btn ${red?"red":"alt"}" data-a="${a}" data-id="${id}">${t}</button>`;
-}
-
-function dt(s){
-if(!s)return"";
-let d=new Date(s);
-return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
-}
-
+function act(t,a,id,red=false){return `<button class="btn ${red?"red":"alt"}" data-a="${a}" data-id="${id}">${t}</button>`}
+function dt(s){if(!s)return"";let d=new Date(s);return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}
+function localDateFirstDay(){let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`}
 async function all(){
-await Promise.allSettled([
-loadNews(),loadStories(),loadMatches(),loadTable(),
-loadPlayers(),loadStats(),loadLeaders(),loadAlbums(),loadSettings()
-]);
+await Promise.allSettled([loadNews(),loadStories(),loadMatches(),loadTable(),loadPlayers(),loadStats(),loadLeaders(),loadAlbums(),loadSettings()]);
+await Promise.allSettled([loadMonthCandidates()]);
 }
-
-function loginView(){
-$("login").classList.remove("hide");
-$("app").classList.add("hide");
-}
-
-function appView(){
-$("login").classList.add("hide");
-$("app").classList.remove("hide");
-all().catch(e=>say(e.message,true));
-}
-
+function loginView(){$("login").classList.remove("hide");$("app").classList.add("hide")}
+function appView(){$("login").classList.add("hide");$("app").classList.remove("hide");all()}
 $("loginForm").onsubmit=async e=>{
 e.preventDefault();
-try{
-let{data,error}=await db.auth.signInWithPassword({email:v("email"),password:$("password").value});
-if(error)throw error;
-appView(data.session);
-}catch(x){$("loginErr").textContent=x.message}
+try{let{error}=await db.auth.signInWithPassword({email:v("email"),password:$("password").value});if(error)throw error;appView()}
+catch(x){$("loginErr").textContent=x.message}
 };
-
-$("logout").onclick=async()=>{
-await db.auth.signOut();
-loginView();
-};
-
+$("logout").onclick=async()=>{await db.auth.signOut();loginView()};
 $("tabs").onclick=e=>{
-let b=e.target.closest("[data-tab]");
-if(!b)return;
+let b=e.target.closest("[data-tab]");if(!b)return;
 document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("active",x===b));
 document.querySelectorAll(".panel").forEach(x=>x.classList.toggle("active",x.id===b.dataset.tab));
 if(b.dataset.tab==="rosters")safe(loadRosterAdmin);
+if(b.dataset.tab==="players")safe(loadMonthCandidates);
 };
 
 /* НОВОСТИ */
-
 async function loadNews(){
 let a=await q(db.from("news").select("*").order("published_at",{ascending:false}));
-$("nlist").innerHTML=a.map(r=>item(
-r.title,`${r.tag||""} · ${r.published_at||""}`,r.image_path,
-act("Изменить","editnews",r.id)+act("Удалить","delnews",r.id,true)
-)).join("")||"Пока нет новостей";
+$("nlist").innerHTML=a.map(r=>item(r.title,`${r.tag||""} · ${r.published_at||""}`,r.image_path,act("Изменить","editnews",r.id)+act("Удалить","delnews",r.id,true))).join("")||"Пока нет новостей";
 }
-
 function resetN(){
 $("nid").value=$("ntitle").value=$("ntext").value="";
-$("ntag").value="Новость";
-$("ndate").value=dt(new Date());
-$("nfile").value="";
-newsImg=null;
-$("nh").textContent="Добавить новость";
-$("nsave").textContent="СОХРАНИТЬ НОВОСТЬ";
-$("nreset").classList.add("hide");
+$("ntag").value="Новость";$("ndate").value=dt(new Date());$("nfile").value="";newsImg=null;
+$("nh").textContent="Добавить новость";$("nsave").textContent="СОХРАНИТЬ НОВОСТЬ";$("nreset").classList.add("hide");
 }
-
 $("nreset").onclick=resetN;
-
 $("nsave").onclick=()=>safe(async()=>{
 if(!v("ntitle"))throw Error("Введи заголовок");
-let row={
-title:v("ntitle"),
-tag:v("ntag"),
-text:v("ntext"),
-published_at:v("ndate")?new Date(v("ndate")).toISOString():new Date().toISOString(),
-image_path:$("nfile").files[0]?await up($("nfile").files[0],"news"):newsImg
-};
-if(v("nid"))await q(db.from("news").update(row).eq("id",v("nid")));
-else await q(db.from("news").insert(row));
-resetN();
-await loadNews();
-say("Новость сохранена");
+let row={title:v("ntitle"),tag:v("ntag"),text:v("ntext"),published_at:v("ndate")?new Date(v("ndate")).toISOString():new Date().toISOString(),image_path:$("nfile").files[0]?await up($("nfile").files[0],"news"):newsImg};
+if(v("nid"))await q(db.from("news").update(row).eq("id",v("nid")));else await q(db.from("news").insert(row));
+resetN();await loadNews();say("Новость сохранена");
 });
 
 /* ИСТОРИИ */
-
 async function loadStories(){
 let a=await q(db.from("stories").select("*").order("created_at",{ascending:false}));
-$("slist").innerHTML=a.map(r=>item(
-r.caption||"История",r.expires_at||"",r.image_path,
-act("Удалить","delstory",r.id,true)
-)).join("")||"Историй нет";
+$("slist").innerHTML=a.map(r=>item(r.caption||"История",r.expires_at||"",r.image_path,act("Удалить","delstory",r.id,true))).join("")||"Историй нет";
 }
-
 $("sadd").onclick=()=>safe(async()=>{
 if(!$("sfile").files[0])throw Error("Выбери изображение");
-let row={
-image_path:await up($("sfile").files[0],"stories"),
-expires_at:new Date(Date.now()+Number(v("shours"))*3600000).toISOString()
-};
+let row={image_path:await up($("sfile").files[0],"stories"),expires_at:new Date(Date.now()+Number(v("shours"))*3600000).toISOString()};
 if(v("scaption"))row.caption=v("scaption");
-await q(db.from("stories").insert(row));
-await loadStories();
-say("История опубликована");
+await q(db.from("stories").insert(row));await loadStories();say("История опубликована");
 });
 
 /* МАТЧИ И КОМАНДЫ */
-
 async function loadMatches(){
 clubs=await q(db.from("clubs").select("*").order("name"));
 let opts=clubs.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
 $("home").innerHTML=$("away").innerHTML=opts;
-
-$("clist").innerHTML=clubs.map(c=>item(
-c.name,c.city||"",c.logo_path,act("Удалить","delclub",c.id,true)
-)).join("");
-
+$("clist").innerHTML=clubs.map(c=>item(c.name,c.city||"",c.logo_path,act("Удалить","delclub",c.id,true))).join("");
 matches=await q(db.from("matches").select("*").order("match_date",{ascending:false}));
-
-$("mlist").innerHTML=matches.map(m=>item(
-`${clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева"} — ${clubs.find(c=>c.id===m.away_club_id)?.name||"Гости"}`,
-`${m.match_date||""} · ${m.status||""} · ${m.home_score??"—"}:${m.away_score??"—"}`,
-"",
-act("События","events",m.id)+act("Изменить","editmatch",m.id)+act("Удалить","delmatch",m.id,true)
-)).join("")||"Матчей нет";
-
+$("mlist").innerHTML=matches.map(m=>{
+let h=clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева";
+let a=clubs.find(c=>c.id===m.away_club_id)?.name||"Гости";
+return item(`${h} — ${a}`,`${m.match_date||""} · ${m.status||""} · ${m.home_score??"—"}:${m.away_score??"—"}${m.stream_url?" · 📹 Есть трансляция":""}`,"",act("События","events",m.id)+act("Изменить","editmatch",m.id)+act("Удалить","delmatch",m.id,true));
+}).join("")||"Матчей нет";
 let old=$("rosterMatch").value;
 $("rosterMatch").innerHTML=matches.map(m=>{
-let home=clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева";
-let away=clubs.find(c=>c.id===m.away_club_id)?.name||"Гости";
-return `<option value="${m.id}">${esc(home)} — ${esc(away)} · ${new Date(m.match_date).toLocaleDateString("ru-RU")}</option>`;
+let h=clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева";
+let a=clubs.find(c=>c.id===m.away_club_id)?.name||"Гости";
+return `<option value="${m.id}">${esc(h)} — ${esc(a)} · ${new Date(m.match_date).toLocaleDateString("ru-RU")}</option>`;
 }).join("");
-
 if(matches.some(m=>m.id===old))$("rosterMatch").value=old;
 }
-
 function resetM(){
-$("mid").value="";
-$("mh").textContent="Создать матч";
-$("msave").textContent="СОХРАНИТЬ МАТЧ";
-$("mreset").classList.add("hide");
-["mdate","hs","as","comp","venue"].forEach(x=>$(x).value="");
-$("mstatus").value="scheduled";
+$("mid").value="";$("mh").textContent="Создать матч";$("msave").textContent="СОХРАНИТЬ МАТЧ";$("mreset").classList.add("hide");
+["mdate","hs","as","comp","venue","stream"].forEach(x=>$(x).value="");$("mstatus").value="scheduled";
 }
-
 $("mreset").onclick=resetM;
-
 $("msave").onclick=()=>safe(async()=>{
 if(!v("home")||!v("away"))throw Error("Сначала добавь команды");
 if(v("home")===v("away"))throw Error("Выбери разные команды");
 if(!v("mdate"))throw Error("Укажи дату");
-
-let r={
-home_club_id:v("home"),
-away_club_id:v("away"),
-match_date:new Date(v("mdate")).toISOString(),
-status:v("mstatus"),
-home_score:n("hs"),
-away_score:n("as"),
-competition:v("comp")||null,
-venue:v("venue")||null
-};
-
-if(v("mid"))await q(db.from("matches").update(r).eq("id",v("mid")));
-else await q(db.from("matches").insert(r));
-
-resetM();
-await loadMatches();
-say("Матч сохранён");
+let r={home_club_id:v("home"),away_club_id:v("away"),match_date:new Date(v("mdate")).toISOString(),status:v("mstatus"),home_score:n("hs"),away_score:n("as"),competition:v("comp")||null,venue:v("venue")||null,stream_url:v("stream")||null};
+if(v("mid"))await q(db.from("matches").update(r).eq("id",v("mid")));else await q(db.from("matches").insert(r));
+resetM();await loadMatches();say("Матч сохранён");
 });
-
 $("cadd").onclick=()=>safe(async()=>{
 if(!v("cname"))throw Error("Введи название команды");
 let logo=await up($("clogo").files[0],"clubs");
-await q(db.from("clubs").insert({
-name:v("cname"),city:v("ccity")||null,logo_path:logo
-}));
-$("cname").value=$("ccity").value="";
-await loadMatches();
-say("Команда добавлена");
+await q(db.from("clubs").insert({name:v("cname"),city:v("ccity")||null,logo_path:logo}));
+$("cname").value=$("ccity").value="";await loadMatches();say("Команда добавлена");
 });
 
 /* СОБЫТИЯ МАТЧА */
-
 function resetGoal(){
-$("goalEditId").value="";
-$("gminute").value=$("gnum").value=$("gplayer").value="";
-$("gteam").value="home";
-$("gstrength").value="even";
-$("gadd").textContent="ДОБАВИТЬ ГОЛ";
-$("gcancel").classList.add("hide");
+$("goalEditId").value="";$("gminute").value=$("gnum").value=$("gplayer").value="";
+$("gteam").value="home";$("gstrength").value="even";$("gadd").textContent="ДОБАВИТЬ ГОЛ";$("gcancel").classList.add("hide");
 }
-
 function resetPenalty(){
-$("penaltyEditId").value="";
-$("ptime").value=$("pnum").value=$("pplayer").value=$("preason").value="";
-$("pteam").value="home";
-$("pminutes").value="2";
-$("padd").textContent="ДОБАВИТЬ УДАЛЕНИЕ";
-$("pcancel").classList.add("hide");
+$("penaltyEditId").value="";$("ptime").value=$("pnum").value=$("pplayer").value=$("preason").value="";
+$("pteam").value="home";$("pminutes").value="2";$("padd").textContent="ДОБАВИТЬ УДАЛЕНИЕ";$("pcancel").classList.add("hide");
 }
-
-$("gcancel").onclick=resetGoal;
-$("pcancel").onclick=resetPenalty;
+$("gcancel").onclick=resetGoal;$("pcancel").onclick=resetPenalty;
 
 async function loadEvents(){
-let id=v("eventid");
-if(!id)return;
-
+let id=v("eventid");if(!id)return;
 let[g,p]=await Promise.all([
 q(db.from("match_goals").select("*").eq("match_id",id).order("created_at")),
 q(db.from("match_penalties").select("*").eq("match_id",id).order("created_at"))
 ]);
-
-let sideName=side=>side==="home"?"Хозяева":"Гости";
-
-let strengthName={
-even:"Равные составы",
-power:"Большинство",
-short:"Меньшинство"
-};
-
-let goals=g.map(x=>item(
-`Гол ${x.goal_time} · ${x.player_name}`,
-`${sideName(x.team_side)} · №${x.player_number??"—"} · ${strengthName[x.strength]||"Тип не указан"}`,
-"",
-act("Изменить","editgoal",x.id)+act("Удалить","delgoal",x.id,true)
-));
-
-let penalties=p.map(x=>item(
-`Удаление ${x.penalty_time} · ${x.player_name}`,
-`${sideName(x.team_side)} · №${x.player_number??"—"} · ${x.minutes} мин · ${x.reason||"Нарушение не указано"}`,
-"",
-act("Изменить","editpen",x.id)+act("Удалить","delpen",x.id,true)
-));
-
-$("elist").innerHTML=
-`<h3>Голы</h3>${goals.join("")||"Голов пока нет"}
-<div class="divider"></div><h3>Удаления</h3>${penalties.join("")||"Удалений пока нет"}`;
+let sideName=s=>s==="home"?"Хозяева":"Гости";
+let strengthName={even:"Равные составы",power:"Большинство",short:"Меньшинство"};
+let goals=g.map(x=>item(`Гол ${x.goal_time} · ${x.player_name}`,`${sideName(x.team_side)} · №${x.player_number??"—"} · ${strengthName[x.strength]||"Тип не указан"}`,"",act("Изменить","editgoal",x.id)+act("Удалить","delgoal",x.id,true)));
+let pens=p.map(x=>item(`Удаление ${x.penalty_time} · ${x.player_name}`,`${sideName(x.team_side)} · №${x.player_number??"—"} · ${x.minutes} мин · ${x.reason||"Нарушение не указано"}`,"",act("Изменить","editpen",x.id)+act("Удалить","delpen",x.id,true)));
+$("elist").innerHTML=`<h3>Голы</h3>${goals.join("")||"Голов пока нет"}<div class="divider"></div><h3>Удаления</h3>${pens.join("")||"Удалений пока нет"}`;
+await loadMatchCandidates();
 }
-
 $("gadd").onclick=()=>safe(async()=>{
 if(!v("eventid"))throw Error("Сначала выбери матч");
 if(!v("gminute"))throw Error("Укажи время гола");
 if(!v("gplayer"))throw Error("Укажи автора гола");
-
-const allowedStrength=["even","power","short"];
-const selectedStrength=v("gstrength");
-
-if(!allowedStrength.includes(selectedStrength)){
-throw Error("Выбран неизвестный тип гола");
-}
-
-let row={
-match_id:v("eventid"),
-team_side:v("gteam"),
-goal_time:v("gminute"),
-player_number:n("gnum"),
-player_name:v("gplayer"),
-strength:selectedStrength
-};
-
-if(v("goalEditId"))await q(db.from("match_goals").update(row).eq("id",v("goalEditId")));
-else await q(db.from("match_goals").insert(row));
-
-resetGoal();
-await loadEvents();
-say("Гол сохранён");
+let strength=v("gstrength");if(!["even","power","short"].includes(strength))throw Error("Неизвестный тип гола");
+let row={match_id:v("eventid"),team_side:v("gteam"),goal_time:v("gminute"),player_number:n("gnum"),player_name:v("gplayer"),strength};
+if(v("goalEditId"))await q(db.from("match_goals").update(row).eq("id",v("goalEditId")));else await q(db.from("match_goals").insert(row));
+resetGoal();await loadEvents();say("Гол сохранён");
 });
-
 $("padd").onclick=()=>safe(async()=>{
 if(!v("eventid"))throw Error("Сначала выбери матч");
 if(!v("ptime"))throw Error("Укажи время удаления");
 if(!v("pplayer"))throw Error("Укажи игрока");
+let row={match_id:v("eventid"),team_side:v("pteam"),penalty_time:v("ptime"),player_number:n("pnum"),player_name:v("pplayer"),reason:v("preason")||null,minutes:Number(v("pminutes"))};
+if(v("penaltyEditId"))await q(db.from("match_penalties").update(row).eq("id",v("penaltyEditId")));else await q(db.from("match_penalties").insert(row));
+resetPenalty();await loadEvents();say("Удаление сохранено");
+});
 
-let row={
-match_id:v("eventid"),
-team_side:v("pteam"),
-penalty_time:v("ptime"),
-player_number:n("pnum"),
-player_name:v("pplayer"),
-reason:v("preason")||null,
-minutes:Number(v("pminutes"))
-};
-
-if(v("penaltyEditId"))await q(db.from("match_penalties").update(row).eq("id",v("penaltyEditId")));
-else await q(db.from("match_penalties").insert(row));
-
-resetPenalty();
-await loadEvents();
-say("Удаление сохранено");
+/* КАНДИДАТЫ MVP МАТЧА */
+function playerOptions(){
+let html='<option value="">Выбери игрока</option>'+players.map(p=>`<option value="${p.id}">№${p.number??"—"} · ${esc(p.name)}</option>`).join("");
+$("rosterPlayer").innerHTML=html;
+$("candidatePlayer").innerHTML=html;
+$("monthPlayer").innerHTML=html;
+}
+async function loadMatchCandidates(){
+let id=v("eventid");if(!id)return;
+let rows=await q(db.from("match_player_candidates").select("*").eq("match_id",id).order("created_at"));
+$("candidateList").innerHTML=rows.map(r=>item(
+`№${r.player_number??"—"} · ${r.display_name||"Игрок"}`,
+[r.player_position,r.statistics_text,r.fact_text].filter(Boolean).join(" · "),
+"",
+act("Удалить","delcandidate",r.id,true)
+)).join("")||"Кандидатов пока нет";
+}
+$("candidateAdd").onclick=()=>safe(async()=>{
+if(!v("eventid"))throw Error("Не выбран матч");
+if(!v("candidatePlayer"))throw Error("Выбери игрока");
+let p=players.find(x=>String(x.id)===v("candidatePlayer"));
+if(!p)throw Error("Игрок не найден в базе");
+await q(db.from("match_player_candidates").insert({
+match_id:v("eventid"),player_id:p.id,display_name:p.name,player_number:p.number,
+player_position:p.position,statistics_text:v("candidateStats")||null,fact_text:v("candidateFact")||null
+}));
+$("candidateStats").value=$("candidateFact").value="";
+await loadMatchCandidates();say("Кандидат добавлен");
 });
 
 /* СОСТАВЫ */
-
-function rosterPlayerOptions(){
-$("rosterPlayer").innerHTML=
-`<option value="">Выбери игрока</option>`+
-players.map(p=>`<option value="${p.id}">${esc(p.player_name)} · №${p.player_number??"—"} · ${esc(p.position||"")}</option>`).join("");
-}
-
 function rosterMatchInfo(){
-let m=matches.find(x=>x.id===v("rosterMatch"));
-if(!m)return null;
-return{
-home:clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева",
-away:clubs.find(c=>c.id===m.away_club_id)?.name||"Гости"
-};
+let m=matches.find(x=>x.id===v("rosterMatch"));if(!m)return null;
+return{home:clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева",away:clubs.find(c=>c.id===m.away_club_id)?.name||"Гости"};
 }
-
 function resetRoster(){
-$("rosterEditId").value="";
-$("rosterPlayer").value="";
-$("rosterNumber").value="";
-$("rosterName").value="";
-$("rosterPosition").value="Нападающий";
-$("rosterSave").textContent="ДОБАВИТЬ В СОСТАВ";
-$("rosterCancel").classList.add("hide");
+$("rosterEditId").value="";$("rosterPlayer").value="";$("rosterNumber").value="";$("rosterName").value="";
+$("rosterPosition").value="Нападающий";$("rosterSave").textContent="ДОБАВИТЬ В СОСТАВ";$("rosterCancel").classList.add("hide");
 }
-
 $("rosterCancel").onclick=resetRoster;
-
 $("rosterPlayer").onchange=()=>{
-let p=players.find(x=>x.id===v("rosterPlayer"));
-if(!p)return;
-$("rosterNumber").value=p.player_number??"";
-$("rosterName").value=p.player_name||"";
-$("rosterPosition").value=p.position||"Нападающий";
+let p=players.find(x=>String(x.id)===v("rosterPlayer"));if(!p)return;
+$("rosterNumber").value=p.number??"";$("rosterName").value=p.name||"";$("rosterPosition").value=p.position||"Нападающий";
 };
-
 $("rosterMatch").onchange=()=>safe(loadRosterAdmin);
 $("rosterSide").onchange=()=>safe(loadRosterAdmin);
-
 async function loadRosterAdmin(){
-if(!v("rosterMatch")){
-$("rosterList").textContent="Сначала создай или выбери матч";
-return;
+if(!v("rosterMatch")){$("rosterList").textContent="Сначала создай или выбери матч";return}
+let info=rosterMatchInfo();if(!info)return;
+let side=v("rosterSide"),teamName=side==="home"?info.home:info.away;
+let rows=await q(db.from("match_roster").select("*").eq("match_id",v("rosterMatch")).eq("team_side",side).order("player_number",{ascending:true}));
+$("rosterList").innerHTML=`<p class="hint">${esc(teamName)} · ${rows.length} игроков</p>`+(rows.map(r=>item(`№${r.player_number??"—"} · ${r.player_name}`,r.position||"Позиция не указана","",act("Изменить","editroster",r.id)+act("Удалить","delroster",r.id,true))).join("")||"Состав пока не заполнен");
 }
-
-if(!players.length){
-players=await q(db.from("team_players").select("*").order("player_number",{ascending:true}));
-rosterPlayerOptions();
-}
-
-let info=rosterMatchInfo();
-if(!info)return;
-
-let side=v("rosterSide");
-let teamName=side==="home"?info.home:info.away;
-
-let rows=await q(
-db.from("match_roster")
-.select("*")
-.eq("match_id",v("rosterMatch"))
-.eq("team_side",side)
-.order("player_number",{ascending:true})
-);
-
-$("rosterList").innerHTML=
-`<p class="hint">${esc(teamName)} · ${rows.length} игроков</p>`+
-(rows.map(r=>item(
-`№${r.player_number??"—"} · ${r.player_name}`,
-r.position||"Позиция не указана",
-"",
-act("Изменить","editroster",r.id)+act("Удалить","delroster",r.id,true)
-)).join("")||"Состав пока не заполнен");
-}
-
 $("rosterSave").onclick=()=>safe(async()=>{
 if(!v("rosterMatch"))throw Error("Выбери матч");
 if(!v("rosterName"))throw Error("Выбери игрока из базы или введи имя");
-
-let row={
-match_id:v("rosterMatch"),
-team_side:v("rosterSide"),
-player_number:n("rosterNumber"),
-player_name:v("rosterName"),
-position:v("rosterPosition")||null
-};
-
-if(v("rosterEditId")){
-await q(db.from("match_roster").update(row).eq("id",v("rosterEditId")));
-}else{
-await q(db.from("match_roster").insert(row));
-}
-
-resetRoster();
-await loadRosterAdmin();
-say("Состав сохранён");
+let row={match_id:v("rosterMatch"),team_side:v("rosterSide"),player_number:n("rosterNumber"),player_name:v("rosterName"),position:v("rosterPosition")||null};
+if(v("rosterEditId"))await q(db.from("match_roster").update(row).eq("id",v("rosterEditId")));else await q(db.from("match_roster").insert(row));
+resetRoster();await loadRosterAdmin();say("Состав сохранён");
 });
 
 /* ТУРНИРНАЯ ТАБЛИЦА */
-
 async function loadTable(){
 let a=await q(db.from("standings").select("*").order("place"));
-let keys=[
-["games","И"],["wins","В"],["wins_ot","ВО"],["wins_so","ВБ"],
-["losses","П"],["losses_ot","ПО"],["losses_so","ПБ"],["points","О"]
-];
-
-$("tlist").innerHTML=a.map(r=>`
-<div class="item">
-<div class="main">
-<b>#${r.place} ${esc(r.team_name)}</b>
-<div class="grid">
-${keys.map(([k,label])=>`
-<label class="hint">${label}
-<input data-tid="${r.id}" data-k="${k}" type="number" min="0" value="${r[k]??0}">
-</label>`).join("")}
-</div>
-</div>
-${act("Сохранить","savetable",r.id)+act("Удалить","deltable",r.id,true)}
-</div>`).join("")||"Таблица пуста";
+let keys=[["games","И"],["wins","В"],["wins_ot","ВО"],["wins_so","ВБ"],["losses","П"],["losses_ot","ПО"],["losses_so","ПБ"],["points","О"]];
+$("tlist").innerHTML=a.map(r=>`<div class="item"><div class="main"><b>#${r.place} ${esc(r.team_name)}</b><div class="grid">${keys.map(([k,l])=>`<label class="hint">${l}<input data-tid="${r.id}" data-k="${k}" type="number" min="0" value="${r[k]??0}"></label>`).join("")}</div></div>${act("Сохранить","savetable",r.id)+act("Удалить","deltable",r.id,true)}</div>`).join("")||"Таблица пуста";
 }
-
 $("tadd").onclick=()=>safe(async()=>{
 if(!v("tname"))throw Error("Введи команду");
-await q(db.from("standings").insert({
-place:n("tplace"),
-team_name:v("tname"),
-games:n("tgames")||0,
-wins:n("twins")||0,
-wins_ot:n("twins_ot")||0,
-wins_so:n("twins_so")||0,
-losses:n("tlosses")||0,
-losses_ot:n("tlosses_ot")||0,
-losses_so:n("tlosses_so")||0,
-points:n("tpoints")||0
-}));
-await loadTable();
-say("Строка добавлена");
+await q(db.from("standings").insert({place:n("tplace"),team_name:v("tname"),games:n("tgames")||0,wins:n("twins")||0,wins_ot:n("twins_ot")||0,wins_so:n("twins_so")||0,losses:n("tlosses")||0,losses_ot:n("tlosses_ot")||0,losses_so:n("tlosses_so")||0,points:n("tpoints")||0}));
+await loadTable();say("Строка добавлена");
 });
 
-/* ИГРОКИ */
-
+/* ПРОФИЛИ ИГРОКОВ: ТАБЛИЦА players */
 async function loadPlayers(){
-players=await q(db.from("team_players").select("*").order("player_number",{ascending:true}));
-$("plist").innerHTML=players.map(r=>item(
-`#${r.player_number??"—"} ${r.player_name}`,
-`${r.position||"Позиция не указана"} · И ${r.games??0} · Г ${r.goals??0} · П ${r.assists??0} · О ${r.points??0}`,
-r.image_path,
-act("Изменить","editplayer",r.id)+act("Удалить","delplayer",r.id,true)
-)).join("")||"Игроков пока нет";
-rosterPlayerOptions();
+players=await q(db.from("players").select("*").order("number",{ascending:true}));
+playerOptions();
+let stats=await q(db.from("player_season_stats").select("*").eq("season",currentSeason));
+$("plist").innerHTML=players.map(p=>{
+let s=stats.find(x=>x.player_id===p.id);
+let sub=`${p.position||"Позиция не указана"} · ${s?`И ${s.games} · Г ${s.goals} · П ${s.assists} · О ${s.points}`:"Статистика не заполнена"}`;
+return item(`№${p.number??"—"} · ${p.name}`,sub,p.photo_url,act("Изменить","editplayer",p.id)+act("Удалить","delplayer",p.id,true));
+}).join("")||"Игроков пока нет";
 }
-
 function resetP(){
 $("pid").value="";
-["pname","pnumber","pgames","pgoals","passists","ppoints"].forEach(id=>$(id).value="");
-$("pposition").value="Нападающий";
-$("pfile").value="";
-$("pgames").value=$("pgoals").value=$("passists").value=$("ppoints").value="0";
-$("ph").textContent="Добавить игрока";
-$("psave").textContent="СОХРАНИТЬ ИГРОКА";
-$("preset").classList.add("hide");
+["pname","pnumber","pbirth","pheight","pweight","pfavoriteplayer","pfavoriteclub","pinfo"].forEach(id=>$(id).value="");
+$("pteamname").value="ХК Челны 2011";$("pposition").value="Нападающий";$("pfile").value="";
+$("pseason").value=currentSeason;
+["pgames","pgoals","passists","ppoints","ppim","pgoaliegames","pgoalsagainst","pgaa","pplusminus"].forEach(id=>$(id).value="0");
+$("ph").textContent="Добавить игрока";$("psave").textContent="СОХРАНИТЬ ИГРОКА";$("preset").classList.add("hide");
 }
-
 $("preset").onclick=resetP;
-
 $("psave").onclick=()=>safe(async()=>{
 if(!v("pname"))throw Error("Введи имя игрока");
+if(!v("pseason"))throw Error("Укажи сезон");
 let image=await up($("pfile").files[0],"players");
-let r={
-player_name:v("pname"),
-player_number:n("pnumber"),
-position:v("pposition"),
-games:n("pgames")||0,
-goals:n("pgoals")||0,
-assists:n("passists")||0,
-points:n("ppoints")||0
+let row={
+name:v("pname"),number:n("pnumber"),position:v("pposition"),
+birth_date:v("pbirth")||null,team:v("pteamname")||null,
+height_cm:n("pheight"),weight_kg:n("pweight"),
+favorite_hockey_player:v("pfavoriteplayer")||null,favorite_club:v("pfavoriteclub")||null,
+stats:v("pinfo")||null
 };
-if(image)r.image_path=image;
-
+if(image)row.photo_url=image;
+let playerId;
 if(v("pid")){
+playerId=Number(v("pid"));
 if(!image){
-let old=await q(db.from("team_players").select("image_path").eq("id",v("pid")).single());
-if(old.image_path)r.image_path=old.image_path;
+let old=await q(db.from("players").select("photo_url").eq("id",playerId).single());
+if(old.photo_url)row.photo_url=old.photo_url;
 }
-await q(db.from("team_players").update(r).eq("id",v("pid")));
+await q(db.from("players").update(row).eq("id",playerId));
 }else{
-await q(db.from("team_players").insert(r));
+let created=await q(db.from("players").insert(row).select("id").single());
+playerId=created.id;
 }
+let seasonRow={
+player_id:playerId,season:v("pseason"),
+games:n("pgames")||0,goals:n("pgoals")||0,assists:n("passists")||0,points:n("ppoints")||0,
+plus_minus:n("pplusminus")||0,pim:n("ppim")||0,
+goalie_games:n("pgoaliegames")||0,goals_against:n("pgoalsagainst")||0,gaa:n("pgaa")||0,
+updated_at:new Date().toISOString()
+};
+await q(db.from("player_season_stats").upsert(seasonRow,{onConflict:"player_id,season"}));
+resetP();await loadPlayers();say("Профиль и статистика сохранены");
+});
 
-resetP();
-await loadPlayers();
-say("Игрок сохранён");
+/* КАНДИДАТЫ ИГРОКА МЕСЯЦА */
+$("monthDate").value=localDateFirstDay();
+async function loadMonthCandidates(){
+if(!v("monthDate"))return;
+let month=v("monthDate").slice(0,7)+"-01";
+let rows=await q(db.from("player_month_candidates").select("*").eq("month_start",month).order("created_at"));
+$("monthCandidates").innerHTML=rows.map(r=>{
+let p=players.find(x=>x.id===r.player_id);
+return item(p?`№${p.number??"—"} · ${p.name}`:`Игрок ID ${r.player_id}`,r.description||"",p?.photo_url||"",act("Удалить","delmonthcandidate",r.id,true));
+}).join("")||"Кандидатов на этот месяц пока нет";
+}
+$("monthDate").onchange=()=>safe(loadMonthCandidates);
+$("monthAdd").onclick=()=>safe(async()=>{
+if(!v("monthDate"))throw Error("Выбери месяц");
+if(!v("monthPlayer"))throw Error("Выбери игрока");
+let month=v("monthDate").slice(0,7)+"-01";
+await q(db.from("player_month_candidates").insert({month_start:month,player_id:Number(v("monthPlayer")),description:v("monthDescription")||null}));
+$("monthDescription").value="";await loadMonthCandidates();say("Кандидат добавлен");
 });
 
 /* СТАТИСТИКА */
-
 async function loadStats(){
 let a=await q(db.from("player_stats").select("*").order("stat_type").order("value",{ascending:false}));
-$("statlist").innerHTML=a.map(r=>item(
-`${r.player_number??""} ${r.player_name}`,
-`${r.stat_type} · ${r.position||""} · ${r.value}`,
-"",
-act("Удалить","delstat",r.id,true)
-)).join("")||"Пока пусто";
+$("statlist").innerHTML=a.map(r=>item(`${r.player_number??""} ${r.player_name}`,`${r.stat_type} · ${r.position||""} · ${r.value}`,"",act("Удалить","delstat",r.id,true))).join("")||"Пока пусто";
 }
-
 $("statadd").onclick=()=>safe(async()=>{
 if(!v("sname"))throw Error("Введи имя игрока");
-await q(db.from("player_stats").insert({
-stat_type:v("stype"),
-player_name:v("sname"),
-player_number:n("snum"),
-position:v("spos")||null,
-value:n("svalue")||0
-}));
-await loadStats();
-say("Статистика сохранена");
+await q(db.from("player_stats").insert({stat_type:v("stype"),player_name:v("sname"),player_number:n("snum"),position:v("spos")||null,value:n("svalue")||0}));
+await loadStats();say("Статистика сохранена");
 });
 
 /* ЛИДЕРЫ */
-
 async function loadLeaders(){
 let a=await q(db.from("team_leaders").select("*").order("created_at",{ascending:false}));
-$("llist").innerHTML=a.map(r=>item(
-r.player_name,
-`${r.leader_type} · ${r.statistic||""}`,
-r.image_path,
-act("Удалить","delleader",r.id,true)
-)).join("")||"Карточек нет";
+$("llist").innerHTML=a.map(r=>item(r.player_name,`${r.leader_type} · ${r.statistic||""}`,r.image_path,act("Удалить","delleader",r.id,true))).join("")||"Карточек нет";
 }
-
 $("ladd").onclick=()=>safe(async()=>{
 if(!v("lname"))throw Error("Введи имя");
 let path=await up($("lfile").files[0],"leaders");
-await q(db.from("team_leaders").insert({
-leader_type:v("ltype"),
-player_name:v("lname"),
-player_number:n("lnum"),
-position:v("lpos")||null,
-statistic:v("lstat")||null,
-image_path:path
-}));
-await loadLeaders();
-say("Карточка сохранена");
+await q(db.from("team_leaders").insert({leader_type:v("ltype"),player_name:v("lname"),player_number:n("lnum"),position:v("lpos")||null,statistic:v("lstat")||null,image_path:path}));
+await loadLeaders();say("Карточка сохранена");
 });
 
 /* АЛЬБОМЫ */
-
 async function loadAlbums(){
 let a=await q(db.from("albums").select("*").order("album_date",{ascending:false}));
-$("alist").innerHTML=a.map(r=>item(
-r.title,r.album_date||"",r.cover_path,
-act("Добавить фото","addphotos",r.id)+act("Удалить","delalbum",r.id,true)
-)).join("")||"Альбомов нет";
+$("alist").innerHTML=a.map(r=>item(r.title,r.album_date||"",r.cover_path,act("Добавить фото","addphotos",r.id)+act("Удалить","delalbum",r.id,true))).join("")||"Альбомов нет";
 }
-
 $("aadd").onclick=()=>safe(async()=>{
 if(!v("atitle"))throw Error("Введи название");
 let cover=await up($("acover").files[0],"albums/covers");
-let a=await q(db.from("albums").insert({
-title:v("atitle"),
-album_date:v("adate")||null,
-cover_path:cover
-}).select().single());
-
+let a=await q(db.from("albums").insert({title:v("atitle"),album_date:v("adate")||null,cover_path:cover}).select().single());
 let fs=[...$("aphotos").files];
 for(let i=0;i<fs.length;i++){
 let path=await up(fs[i],"albums/photos");
-await q(db.from("album_photos").insert({
-album_id:a.id,image_path:path,sort_order:i
-}));
+await q(db.from("album_photos").insert({album_id:a.id,image_path:path,sort_order:i}));
 }
-await loadAlbums();
-say("Альбом создан");
+await loadAlbums();say("Альбом создан");
 });
 
 /* НАСТРОЙКИ */
-
 async function loadSettings(){
 let a=await q(db.from("site_settings").select("*").order("updated_at",{ascending:false}).limit(1));
-let s=a[0];
-if(!s)return;
-$("setname").value=s.team_name||"ХК Челны 2011";
-$("setsubtitle").value=s.subtitle||"Набережные Челны";
-$("setcity").value=s.city||"Набережные Челны";
-$("setprimary").value=s.primary_color||"#000056";
-$("setaccent").value=s.accent_color||"#0875dc";
-$("setgold").value=s.gold_color||"#ffcd00";
+let s=a[0];if(!s)return;
+$("setname").value=s.team_name||"ХК Челны 2011";$("setsubtitle").value=s.subtitle||"Набережные Челны";
+$("setcity").value=s.city||"Набережные Челны";$("setprimary").value=s.primary_color||"#000056";
+$("setaccent").value=s.accent_color||"#0875dc";$("setgold").value=s.gold_color||"#ffcd00";
 }
-
 $("setsave").onclick=()=>safe(async()=>{
 let a=await q(db.from("site_settings").select("id").order("updated_at",{ascending:false}).limit(1));
 let logo=await up($("setlogo").files[0],"branding");
-let r={
-team_name:v("setname"),
-subtitle:v("setsubtitle"),
-city:v("setcity"),
-primary_color:v("setprimary"),
-accent_color:v("setaccent"),
-gold_color:v("setgold"),
-updated_at:new Date().toISOString()
-};
+let r={team_name:v("setname"),subtitle:v("setsubtitle"),city:v("setcity"),primary_color:v("setprimary"),accent_color:v("setaccent"),gold_color:v("setgold"),updated_at:new Date().toISOString()};
 if(logo)r.logo_path=logo;
-if(a.length)await q(db.from("site_settings").update(r).eq("id",a[0].id));
-else await q(db.from("site_settings").insert(r));
+if(a.length)await q(db.from("site_settings").update(r).eq("id",a[0].id));else await q(db.from("site_settings").insert(r));
 say("Настройки сохранены");
 });
 
 /* ОБРАБОТЧИКИ КНОПОК */
-
 document.body.addEventListener("click",e=>{
-let b=e.target.closest("[data-a]");
-if(!b)return;
-
+let b=e.target.closest("[data-a]");if(!b)return;
 safe(async()=>{
-let a=b.dataset.a;
-let id=b.dataset.id;
+let a=b.dataset.a,id=b.dataset.id;
 
 if(a==="editnews"){
 let r=await q(db.from("news").select("*").eq("id",id).single());
-$("nid").value=id;
-$("ntitle").value=r.title||"";
-$("ntag").value=r.tag||"Новость";
-$("ntext").value=r.text||"";
-$("ndate").value=dt(r.published_at);
-newsImg=r.image_path;
-$("nh").textContent="Редактировать новость";
-$("nsave").textContent="СОХРАНИТЬ";
-$("nreset").classList.remove("hide");
-document.querySelector('[data-tab="news"]').click();
+$("nid").value=id;$("ntitle").value=r.title||"";$("ntag").value=r.tag||"Новость";$("ntext").value=r.text||"";
+$("ndate").value=dt(r.published_at);newsImg=r.image_path;$("nh").textContent="Редактировать новость";
+$("nsave").textContent="СОХРАНИТЬ";$("nreset").classList.remove("hide");document.querySelector('[data-tab="news"]').click();
 }
-
-if(a==="delnews"){
-await q(db.from("news").delete().eq("id",id));
-await loadNews();
-}
-
-if(a==="delstory"){
-await q(db.from("stories").delete().eq("id",id));
-await loadStories();
-}
+if(a==="delnews"){await q(db.from("news").delete().eq("id",id));await loadNews()}
+if(a==="delstory"){await q(db.from("stories").delete().eq("id",id));await loadStories()}
 
 if(a==="editmatch"){
-let r=matches.find(x=>x.id===id);
-if(!r)return;
-$("mid").value=id;
-$("home").value=r.home_club_id;
-$("away").value=r.away_club_id;
-$("mdate").value=dt(r.match_date);
-$("mstatus").value=r.status||"scheduled";
-$("hs").value=r.home_score??"";
-$("as").value=r.away_score??"";
-$("comp").value=r.competition||"";
-$("venue").value=r.venue||"";
-$("mh").textContent="Редактировать матч";
-$("mreset").classList.remove("hide");
-document.querySelector('[data-tab="matches"]').click();
+let r=matches.find(x=>x.id===id);if(!r)return;
+$("mid").value=id;$("home").value=r.home_club_id;$("away").value=r.away_club_id;$("mdate").value=dt(r.match_date);
+$("mstatus").value=r.status||"scheduled";$("hs").value=r.home_score??"";$("as").value=r.away_score??"";
+$("comp").value=r.competition||"";$("venue").value=r.venue||"";$("stream").value=r.stream_url||"";
+$("mh").textContent="Редактировать матч";$("mreset").classList.remove("hide");document.querySelector('[data-tab="matches"]').click();
 }
-
 if(a==="delmatch"){
 await q(db.from("match_goals").delete().eq("match_id",id));
 await q(db.from("match_penalties").delete().eq("match_id",id));
 await q(db.from("match_roster").delete().eq("match_id",id));
 await q(db.from("matches").delete().eq("id",id));
-await loadMatches();
-say("Матч удалён");
+await loadMatches();say("Матч удалён");
 }
-
 if(a==="events"){
-document.querySelector('[data-tab="matches"]').click();
-$("eventbox").classList.remove("hide");
-$("eventid").value=id;
+document.querySelector('[data-tab="matches"]').click();$("eventbox").classList.remove("hide");$("eventid").value=id;
 let m=matches.find(x=>x.id===id);
 if(m){
 let h=clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева";
 let aw=clubs.find(c=>c.id===m.away_club_id)?.name||"Гости";
 $("eventtitle").textContent=`События: ${h} — ${aw}`;
 }
-resetGoal();
-resetPenalty();
-await loadEvents();
+resetGoal();resetPenalty();await loadEvents();
 }
-
 if(a==="editgoal"){
 let r=await q(db.from("match_goals").select("*").eq("id",id).single());
-$("goalEditId").value=id;
-$("gteam").value=r.team_side;
-$("gminute").value=r.goal_time||"";
-$("gnum").value=r.player_number??"";
-$("gplayer").value=r.player_name||"";
+$("goalEditId").value=id;$("gteam").value=r.team_side;$("gminute").value=r.goal_time||"";
+$("gnum").value=r.player_number??"";$("gplayer").value=r.player_name||"";
 $("gstrength").value=["even","power","short"].includes(r.strength)?r.strength:"even";
-$("gadd").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";
-$("gcancel").classList.remove("hide");
+$("gadd").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";$("gcancel").classList.remove("hide");
 }
-
-if(a==="delgoal"){
-await q(db.from("match_goals").delete().eq("id",id));
-await loadEvents();
-say("Гол удалён");
-}
-
+if(a==="delgoal"){await q(db.from("match_goals").delete().eq("id",id));await loadEvents();say("Гол удалён")}
 if(a==="editpen"){
 let r=await q(db.from("match_penalties").select("*").eq("id",id).single());
-$("penaltyEditId").value=id;
-$("pteam").value=r.team_side;
-$("ptime").value=r.penalty_time||"";
-$("pnum").value=r.player_number??"";
-$("pplayer").value=r.player_name||"";
-$("preason").value=r.reason||"";
-$("pminutes").value=String(r.minutes);
-$("padd").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";
-$("pcancel").classList.remove("hide");
+$("penaltyEditId").value=id;$("pteam").value=r.team_side;$("ptime").value=r.penalty_time||"";
+$("pnum").value=r.player_number??"";$("pplayer").value=r.player_name||"";$("preason").value=r.reason||"";
+$("pminutes").value=String(r.minutes);$("padd").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";$("pcancel").classList.remove("hide");
 }
+if(a==="delpen"){await q(db.from("match_penalties").delete().eq("id",id));await loadEvents();say("Удаление удалено")}
+if(a==="delcandidate"){await q(db.from("match_player_candidates").delete().eq("id",id));await loadMatchCandidates();say("Кандидат удалён")}
+if(a==="delmonthcandidate"){await q(db.from("player_month_candidates").delete().eq("id",id));await loadMonthCandidates();say("Кандидат удалён")}
 
-if(a==="delpen"){
-await q(db.from("match_penalties").delete().eq("id",id));
-await loadEvents();
-say("Удаление удалено");
-}
-
-if(a==="delclub"){
-await q(db.from("clubs").delete().eq("id",id));
-await loadMatches();
-}
-
+if(a==="delclub"){await q(db.from("clubs").delete().eq("id",id));await loadMatches()}
 if(a==="savetable"){
-let r={};
-document.querySelectorAll(`[data-tid="${id}"]`).forEach(x=>r[x.dataset.k]=Number(x.value)||0);
-await q(db.from("standings").update(r).eq("id",id));
-await loadTable();
+let r={};document.querySelectorAll(`[data-tid="${id}"]`).forEach(x=>r[x.dataset.k]=Number(x.value)||0);
+await q(db.from("standings").update(r).eq("id",id));await loadTable();
 }
-
-if(a==="deltable"){
-await q(db.from("standings").delete().eq("id",id));
-await loadTable();
-}
+if(a==="deltable"){await q(db.from("standings").delete().eq("id",id));await loadTable()}
 
 if(a==="editplayer"){
-let r=await q(db.from("team_players").select("*").eq("id",id).single());
-$("pid").value=r.id;
-$("pname").value=r.player_name||"";
-$("pnumber").value=r.player_number??"";
-$("pposition").value=r.position||"Нападающий";
-$("pgames").value=r.games??0;
-$("pgoals").value=r.goals??0;
-$("passists").value=r.assists??0;
-$("ppoints").value=r.points??0;
-$("pfile").value="";
-$("ph").textContent="Редактировать игрока";
-$("psave").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";
-$("preset").classList.remove("hide");
+let r=await q(db.from("players").select("*").eq("id",id).single());
+$("pid").value=r.id;$("pname").value=r.name||"";$("pnumber").value=r.number??"";
+$("pposition").value=r.position||"Нападающий";$("pbirth").value=r.birth_date||"";
+$("pteamname").value=r.team||"";$("pheight").value=r.height_cm??"";$("pweight").value=r.weight_kg??"";
+$("pfavoriteplayer").value=r.favorite_hockey_player||"";$("pfavoriteclub").value=r.favorite_club||"";
+$("pinfo").value=r.stats||"";$("pfile").value="";
+let season=v("pseason")||currentSeason;
+let s=await q(db.from("player_season_stats").select("*").eq("player_id",id).eq("season",season).maybeSingle());
+$("pseason").value=season;
+$("pgames").value=s?.games??0;$("pgoals").value=s?.goals??0;$("passists").value=s?.assists??0;
+$("ppoints").value=s?.points??0;$("pplusminus").value=s?.plus_minus??0;$("ppim").value=s?.pim??0;
+$("pgoaliegames").value=s?.goalie_games??0;$("pgoalsagainst").value=s?.goals_against??0;$("pgaa").value=s?.gaa??0;
+$("ph").textContent="Редактировать профиль";$("psave").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";$("preset").classList.remove("hide");
 document.querySelector('[data-tab="players"]').click();
 }
-
 if(a==="delplayer"){
-await q(db.from("team_players").delete().eq("id",id));
-await loadPlayers();
+if(!confirm("Удалить профиль игрока? Его сезонная статистика удалится вместе с ним."))return;
+await q(db.from("players").delete().eq("id",id));await loadPlayers();say("Игрок удалён");
 }
-
 if(a==="editroster"){
 let r=await q(db.from("match_roster").select("*").eq("id",id).single());
-$("rosterEditId").value=r.id;
-$("rosterMatch").value=r.match_id;
-$("rosterSide").value=r.team_side;
-$("rosterPlayer").value="";
-$("rosterNumber").value=r.player_number??"";
-$("rosterName").value=r.player_name||"";
-$("rosterPosition").value=r.position||"Нападающий";
-$("rosterSave").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";
+$("rosterEditId").value=r.id;$("rosterMatch").value=r.match_id;$("rosterSide").value=r.team_side;
+$("rosterPlayer").value="";$("rosterNumber").value=r.player_number??"";$("rosterName").value=r.player_name||"";
+$("rosterPosition").value=r.position||"Нападающий";$("rosterSave").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";
 $("rosterCancel").classList.remove("hide");
 }
-
-if(a==="delroster"){
-await q(db.from("match_roster").delete().eq("id",id));
-await loadRosterAdmin();
-say("Игрок удалён из состава");
-}
-
-if(a==="delstat"){
-await q(db.from("player_stats").delete().eq("id",id));
-await loadStats();
-}
-
-if(a==="delleader"){
-await q(db.from("team_leaders").delete().eq("id",id));
-await loadLeaders();
-}
-
+if(a==="delroster"){await q(db.from("match_roster").delete().eq("id",id));await loadRosterAdmin();say("Игрок удалён из состава")}
+if(a==="delstat"){await q(db.from("player_stats").delete().eq("id",id));await loadStats()}
+if(a==="delleader"){await q(db.from("team_leaders").delete().eq("id",id));await loadLeaders()}
 if(a==="delalbum"){
-await q(db.from("album_photos").delete().eq("album_id",id));
-await q(db.from("albums").delete().eq("id",id));
-await loadAlbums();
+await q(db.from("album_photos").delete().eq("album_id",id));await q(db.from("albums").delete().eq("id",id));await loadAlbums();
 }
-
 if(a==="addphotos"){
-let f=document.createElement("input");
-f.type="file";
-f.multiple=true;
-f.accept="image/*";
+let f=document.createElement("input");f.type="file";f.multiple=true;f.accept="image/*";
 f.onchange=()=>safe(async()=>{
 for(let i=0;i<f.files.length;i++){
 let path=await up(f.files[i],"albums/photos");
-await q(db.from("album_photos").insert({
-album_id:id,image_path:path,sort_order:Date.now()+i
-}));
+await q(db.from("album_photos").insert({album_id:id,image_path:path,sort_order:Date.now()+i}));
 }
 say("Фотографии добавлены");
 });
@@ -1199,21 +839,14 @@ f.click();
 });
 
 /* ЗАПУСК */
-
 async function init(){
-if(!window.supabaseClient){
-$("loginErr").textContent="Не найден js/config.js или window.supabaseClient";
-return;
-}
+if(!window.supabaseClient){$("loginErr").textContent="Не найден js/config.js или window.supabaseClient";return}
 db=window.supabaseClient;
 let{data}=await db.auth.getSession();
-if(data.session)appView(data.session);
-else loginView();
-db.auth.onAuthStateChange((_,s)=>s?appView(s):loginView());
+if(data.session)appView();else loginView();
+db.auth.onAuthStateChange((_,s)=>s?appView():loginView());
 }
-
 init().catch(e=>say(e.message,true));
-
 })();
 </script>
 </body>
