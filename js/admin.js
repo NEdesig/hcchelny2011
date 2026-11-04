@@ -54,7 +54,6 @@
 
     el.textContent = message;
     el.classList.add("on");
-
     el.style.background = error ? "#9f293b" : "#17234c";
 
     clearTimeout(toast.timer);
@@ -86,7 +85,6 @@
 
   function dateOnly(value) {
     if (!value) return "";
-
     return String(value).slice(0, 10);
   }
 
@@ -97,14 +95,18 @@
     if (Number.isNaN(date.getTime())) return "";
 
     const offset = date.getTimezoneOffset() * 60000;
+
     return new Date(date.getTime() - offset)
       .toISOString()
       .slice(0, 16);
   }
 
   function numberValue(id, fallback = 0) {
-    const value = Number($(id)?.value);
-    return Number.isFinite(value) ? value : fallback;
+    const element = $(id);
+    if (!element || element.value === "") return fallback;
+
+    const number = Number(element.value);
+    return Number.isFinite(number) ? number : fallback;
   }
 
   function value(id) {
@@ -129,7 +131,6 @@
 
   function imageHTML(path, alt = "") {
     const url = imageUrl(path);
-
     if (!url) return "";
 
     return `
@@ -226,7 +227,6 @@
       });
 
     if (error) throw error;
-
     return filename;
   }
 
@@ -265,8 +265,10 @@
   }
 
   /* =========================================================
-     АВТОРИЗАЦИЯ
+     АВТОРИЗАЦИЯ — ИСПРАВЛЕННАЯ
   ========================================================= */
+
+  let loginInProgress = false;
 
   function showLogin() {
     $("login")?.classList.remove("hide");
@@ -280,16 +282,37 @@
   }
 
   async function login(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
 
-    $("loginErr").textContent = "";
+    if (loginInProgress) return;
 
+    const errorBox = $("loginErr");
     const email = value("email");
     const password = $("password")?.value || "";
 
+    if (errorBox) errorBox.textContent = "";
+
     if (!email || !password) {
-      $("loginErr").textContent = "Заполни все поля.";
+      if (errorBox) {
+        errorBox.textContent = "Заполни все поля.";
+      } else {
+        toast("Заполни все поля.", true);
+      }
       return;
+    }
+
+    loginInProgress = true;
+
+    const form = $("loginForm");
+    const loginButton = form?.querySelector(
+      'button[type="submit"], button[type="button"]'
+    );
+
+    const originalButtonText = loginButton?.textContent;
+
+    if (loginButton) {
+      loginButton.disabled = true;
+      loginButton.textContent = "ВХОД...";
     }
 
     try {
@@ -301,36 +324,76 @@
       if (error) throw error;
 
       state.user = data.user;
+
+      if (!state.user) {
+        throw new Error("Не удалось получить данные пользователя.");
+      }
+
       showApp();
+
     } catch (error) {
-      $("loginErr").textContent = error.message;
+      console.error("Ошибка входа:", error);
+
+      if (errorBox) {
+        errorBox.textContent =
+          error.message || "Не удалось войти.";
+      } else {
+        toast(error.message || "Не удалось войти.", true);
+      }
+
+    } finally {
+      loginInProgress = false;
+
+      if (loginButton) {
+        loginButton.disabled = false;
+        loginButton.textContent = originalButtonText || "ВОЙТИ";
+      }
     }
   }
 
   async function logout() {
-    const { error } = await db.auth.signOut();
+    try {
+      const { error } = await db.auth.signOut();
 
-    if (error) {
-      showError(error);
-      return;
+      if (error) throw error;
+
+      state.user = null;
+      showLogin();
+
+    } catch (error) {
+      showError(error, "Ошибка выхода");
     }
-
-    state.user = null;
-    showLogin();
   }
 
-  $("loginForm")?.addEventListener("submit", login);
+  const loginForm = $("loginForm");
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", login);
+
+    const loginButton = loginForm.querySelector(
+      'button[type="button"], button:not([type])'
+    );
+
+    if (loginButton) {
+      loginButton.addEventListener("click", login);
+    }
+  }
+
   $("logout")?.addEventListener("click", logout);
 
   async function checkAuth() {
     try {
       const { data, error } = await db.auth.getSession();
+
       if (error) throw error;
 
       state.user = data.session?.user || null;
 
-      if (state.user) showApp();
-      else showLogin();
+      if (state.user) {
+        showApp();
+      } else {
+        showLogin();
+      }
 
     } catch (error) {
       showError(error, "Ошибка авторизации");
@@ -369,14 +432,26 @@
     try {
       const results = await Promise.all([
         selectRows("clubs", q => q.order("name")),
-        selectRows("matches", q => q.order("match_date", { ascending: false })),
+        selectRows("matches", q =>
+          q.order("match_date", { ascending: false })
+        ),
         selectRows("players", q => q.order("number")),
-        selectRows("news", q => q.order("published_at", { ascending: false })),
-        selectRows("stories", q => q.order("created_at", { ascending: false })),
+        selectRows("news", q =>
+          q.order("published_at", { ascending: false })
+        ),
+        selectRows("stories", q =>
+          q.order("created_at", { ascending: false })
+        ),
         selectRows("standings", q => q.order("place")),
-        selectRows("player_stats", q => q.order("value", { ascending: false })),
-        selectRows("team_leaders", q => q.order("created_at", { ascending: false })),
-        selectRows("albums", q => q.order("created_at", { ascending: false }))
+        selectRows("player_stats", q =>
+          q.order("value", { ascending: false })
+        ),
+        selectRows("team_leaders", q =>
+          q.order("created_at", { ascending: false })
+        ),
+        selectRows("albums", q =>
+          q.order("created_at", { ascending: false })
+        )
       ]);
 
       [
@@ -415,12 +490,13 @@
 
   function resetNewsForm() {
     resetFields(["nid", "ntitle", "ntext", "nfile"]);
-    $("ntag").value = "Новость";
-    $("ndate").value = "";
 
-    $("nh").textContent = "Добавить новость";
-    $("nsave").textContent = "СОХРАНИТЬ НОВОСТЬ";
-    $("nreset").classList.add("hide");
+    if ($("ntag")) $("ntag").value = "Новость";
+    if ($("ndate")) $("ndate").value = "";
+
+    if ($("nh")) $("nh").textContent = "Добавить новость";
+    if ($("nsave")) $("nsave").textContent = "СОХРАНИТЬ НОВОСТЬ";
+    $("nreset")?.classList.add("hide");
   }
 
   async function renderNews() {
@@ -490,7 +566,10 @@
   }
 
   async function editNews(id) {
-    const item = state.news.find(row => String(row.id) === String(id));
+    const item = state.news.find(
+      row => String(row.id) === String(id)
+    );
+
     if (!item) return;
 
     $("nid").value = item.id;
@@ -656,13 +735,13 @@
       "hs", "as", "comp", "venue"
     ]);
 
-    $("mstatus").value = "scheduled";
-    $("hs").value = 0;
-    $("as").value = 0;
+    if ($("mstatus")) $("mstatus").value = "scheduled";
+    if ($("hs")) $("hs").value = 0;
+    if ($("as")) $("as").value = 0;
 
-    $("mh").textContent = "Создать матч";
-    $("msave").textContent = "СОХРАНИТЬ МАТЧ";
-    $("mreset").classList.add("hide");
+    if ($("mh")) $("mh").textContent = "Создать матч";
+    if ($("msave")) $("msave").textContent = "СОХРАНИТЬ МАТЧ";
+    $("mreset")?.classList.add("hide");
   }
 
   async function renderMatches() {
@@ -1033,6 +1112,8 @@
         ? $("rosterHomeList")
         : $("rosterAwayList");
 
+      if (!box) return;
+
       const items = rows.filter(row => row.team_side === side);
 
       box.innerHTML = items.length
@@ -1064,7 +1145,7 @@
 
   async function addRosterPlayer(side) {
     const prefix = side === "home" ? "rosterHome" : "rosterAway";
-    const playerId = $(`${prefix}Player`).value;
+    const playerId = $(`${prefix}Player`)?.value;
 
     if (!playerId) {
       toast("Выбери игрока.", true);
@@ -1097,7 +1178,7 @@
       await insertRow("match_roster", {
         match_id: matchId,
         team_side: side,
-        player_number: $(`${prefix}Number`).value
+        player_number: $(`${prefix}Number`)?.value
           ? numberValue(`${prefix}Number`)
           : player.number,
         player_name: player.name,
@@ -1132,10 +1213,10 @@
       if ($(id)) $(id).value = 0;
     });
 
-    $("tplace").value = 1;
-    $("tname").value = "";
+    if ($("tplace")) $("tplace").value = 1;
+    if ($("tname")) $("tname").value = "";
 
-    $("tadd").textContent = "ДОБАВИТЬ";
+    if ($("tadd")) $("tadd").textContent = "ДОБАВИТЬ";
   }
 
   async function renderStandings() {
@@ -1250,15 +1331,15 @@
       "pid", "pname", "pnumber", "pfile"
     ]);
 
-    $("pposition").value = "Нападающий";
-    $("pgames").value = 0;
-    $("pgoals").value = 0;
-    $("passists").value = 0;
-    $("ppoints").value = 0;
+    if ($("pposition")) $("pposition").value = "Нападающий";
+    if ($("pgames")) $("pgames").value = 0;
+    if ($("pgoals")) $("pgoals").value = 0;
+    if ($("passists")) $("passists").value = 0;
+    if ($("ppoints")) $("ppoints").value = 0;
 
-    $("ph").textContent = "Добавить игрока";
-    $("psave").textContent = "СОХРАНИТЬ ИГРОКА";
-    $("preset").classList.add("hide");
+    if ($("ph")) $("ph").textContent = "Добавить игрока";
+    if ($("psave")) $("psave").textContent = "СОХРАНИТЬ ИГРОКА";
+    $("preset")?.classList.add("hide");
   }
 
   async function renderPlayers() {
@@ -1329,9 +1410,12 @@
       let photo = old?.photo_url || null;
 
       const file = fileValue("pfile");
-      if (file) photo = imageUrl(
-        await uploadFile(file, "players")
-      );
+
+      if (file) {
+        photo = imageUrl(
+          await uploadFile(file, "players")
+        );
+      }
 
       const values = {
         name,
@@ -1397,9 +1481,10 @@
     state.editingStat = null;
 
     resetFields(["snum", "sname", "spos"]);
-    $("svalue").value = 0;
-    $("stype").value = "scorers";
-    $("statadd").textContent = "ДОБАВИТЬ";
+
+    if ($("svalue")) $("svalue").value = 0;
+    if ($("stype")) $("stype").value = "scorers";
+    if ($("statadd")) $("statadd").textContent = "ДОБАВИТЬ";
   }
 
   async function renderStats() {
@@ -1487,8 +1572,9 @@
     state.editingLeader = null;
 
     resetFields(["lnum", "lname", "lpos", "lstat", "lfile"]);
-    $("ltype").value = "scorer";
-    $("ladd").textContent = "СОХРАНИТЬ КАРТОЧКУ";
+
+    if ($("ltype")) $("ltype").value = "scorer";
+    if ($("ladd")) $("ladd").textContent = "СОХРАНИТЬ КАРТОЧКУ";
   }
 
   async function renderLeaders() {
@@ -1674,13 +1760,13 @@
 
     if (!settings) return;
 
-    $("setname").value = settings.team_name || "ХК Челны 2011";
-    $("setsubtitle").value = settings.subtitle || "";
-    $("setcity").value = settings.city || "";
+    if ($("setname")) $("setname").value = settings.team_name || "ХК Челны 2011";
+    if ($("setsubtitle")) $("setsubtitle").value = settings.subtitle || "";
+    if ($("setcity")) $("setcity").value = settings.city || "";
 
-    $("setprimary").value = settings.primary_color || "#000056";
-    $("setaccent").value = settings.accent_color || "#0875dc";
-    $("setgold").value = settings.gold_color || "#ffcd00";
+    if ($("setprimary")) $("setprimary").value = settings.primary_color || "#000056";
+    if ($("setaccent")) $("setaccent").value = settings.accent_color || "#0875dc";
+    if ($("setgold")) $("setgold").value = settings.gold_color || "#ffcd00";
   }
 
   async function saveSettings() {
@@ -1690,6 +1776,7 @@
       let logoPath = old?.logo_path || null;
 
       const file = fileValue("setlogo");
+
       if (file) {
         logoPath = await uploadFile(file, "site");
       }
@@ -1765,6 +1852,7 @@
 
     if (type === "standing") {
       await deleteRow("standings", id);
+
       if (String(state.editingStanding) === String(id)) {
         resetStandingForm();
       }
@@ -1775,10 +1863,8 @@
         q.eq("player_id", id)
       );
 
-      if (linked.length) {
-        for (const row of linked) {
-          await deleteRow("player_season_stats", row.id);
-        }
+      for (const row of linked) {
+        await deleteRow("player_season_stats", row.id);
       }
 
       await deleteRow("players", id);
