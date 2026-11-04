@@ -1,4 +1,3 @@
-
 /* =========================================
    ХК ЧЕЛНЫ 2011 — PUBLIC APP
    File: js/app.js
@@ -15,8 +14,7 @@
   }
 
   const $ = (selector, root = document) => root.querySelector(selector);
-  const $$ = (selector, root = document) =>
-    [...root.querySelectorAll(selector)];
+  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
   const BUCKET = window.STORAGE_BUCKET || "site-media";
   const CURRENT_SEASON = "2026/2027";
@@ -25,7 +23,9 @@
   let activeStoryProgress = null;
   let storyItems = [];
   let activeStatType = "scorers";
-  let playerItems = [];
+
+  let playersData = [];
+  let playerStatsData = [];
 
   // ========================================
   // HELPERS
@@ -123,6 +123,22 @@
     `;
   }
 
+  function safeExternalURL(value) {
+    if (!value) return "";
+
+    try {
+      const url = new URL(String(value).trim());
+
+      if (url.protocol !== "https:" && url.protocol !== "http:") {
+        return "";
+      }
+
+      return url.href;
+    } catch {
+      return "";
+    }
+  }
+
   function setError(element, message) {
     if (!element) return;
 
@@ -173,22 +189,6 @@
 
   function showToastMessage(message) {
     console.info(message);
-  }
-
-  function safeExternalURL(value) {
-    if (!value) return "";
-
-    try {
-      const url = new URL(value);
-
-      if (!["http:", "https:"].includes(url.protocol)) {
-        return "";
-      }
-
-      return url.href;
-    } catch {
-      return "";
-    }
   }
 
   // ========================================
@@ -399,6 +399,7 @@
     }
 
     if (image) image.src = "";
+
     if (progress) {
       progress.style.transition = "none";
       progress.style.width = "0%";
@@ -457,12 +458,16 @@
       });
 
       const homepageMatches = matches.slice(0, 3);
+
       container.innerHTML = homepageMatches.map(renderMatchRow).join("");
 
       loadLastMatches(matches);
       loadMatchday(matches);
     } catch (error) {
-      setError(container, "Не удалось загрузить матчи. Проверь связи таблиц clubs и matches.");
+      setError(
+        container,
+        "Не удалось загрузить матчи. Проверь связи таблиц clubs и matches."
+      );
       console.error(error);
     }
   }
@@ -485,8 +490,11 @@
     const streamURL = safeExternalURL(match.stream_url);
 
     return `
-      <div class="match-row-wrap">
-        <a class="match-row" href="match.html?id=${encodeURIComponent(match.id)}">
+      <article class="match-row">
+        <a
+          class="match-row-main"
+          href="match.html?id=${encodeURIComponent(match.id)}"
+        >
           <div class="match-row-date">
             ${escapeHTML(formatDate(match.match_date, { day: "numeric", month: "short" }))}
             <br>
@@ -515,11 +523,12 @@
             href="${escapeHTML(streamURL)}"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Смотреть трансляцию матча"
-            title="Смотреть трансляцию"
-          >📹</a>
+          >
+            <span aria-hidden="true">▶</span>
+            Смотреть трансляцию
+          </a>
         ` : ""}
-      </div>
+      </article>
     `;
   }
 
@@ -615,11 +624,14 @@
 
         ${streamURL ? `
           <a
-            class="match-stream-link"
+            class="match-stream-link match-stream-link-featured"
             href="${escapeHTML(streamURL)}"
             target="_blank"
             rel="noopener noreferrer"
-          >📹 Смотреть трансляцию</a>
+          >
+            <span aria-hidden="true">▶</span>
+            Смотреть трансляцию
+          </a>
         ` : ""}
       </div>
     `;
@@ -774,79 +786,113 @@
   // PLAYERS
   // ========================================
 
-  function getPlayerCategory(position) {
-    const value = String(position || "").toLowerCase();
+  function getPlayerGroup(position) {
+    const value = String(position || "").trim().toLowerCase();
 
     if (
       value.includes("врат") ||
-      value.includes("goalie") ||
-      value.includes("goaltender")
+      value === "в" ||
+      value === "g" ||
+      value.includes("goal")
     ) {
       return "goalies";
     }
 
     if (
       value.includes("защит") ||
-      value.includes("defen") ||
-      value === "d"
+      value === "з" ||
+      value === "d" ||
+      value.includes("def")
     ) {
       return "defenders";
     }
 
-    if (
-      value.includes("напада") ||
-      value.includes("форвар") ||
-      value.includes("forward") ||
-      value === "f"
-    ) {
-      return "forwards";
-    }
-
-    return "other";
+    return "forwards";
   }
 
-  function getPlayerCategoryTitle(category) {
-    const titles = {
-      goalies: "Вратари",
-      defenders: "Защитники",
-      forwards: "Нападающие",
-      other: "Другие игроки"
-    };
+  function getPlayerInitials(name) {
+    const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
 
-    return titles[category] || "Игроки";
+    if (!parts.length) return "ХК";
+
+    return parts
+      .slice(0, 2)
+      .map(part => part[0].toUpperCase())
+      .join("");
+  }
+
+  function getPlayerStat(playerId) {
+    return playerStatsData.find(
+      stat => String(stat.player_id) === String(playerId)
+    ) || null;
   }
 
   function renderPlayerCard(player, index) {
     const photo = getImageURL(player.photo_url);
+    const number = player.number ?? "—";
+    const position = player.position || "Игрок команды";
 
     return `
       <button
         class="player-card"
         type="button"
         data-player-index="${index}"
-        aria-label="Открыть профиль ${escapeHTML(player.name)}"
+        aria-label="Открыть профиль: ${escapeHTML(player.name)}"
       >
-        <div class="player-card-photo">
+        <div class="player-card-photo-wrap">
+          <span class="player-card-number">${escapeHTML(number)}</span>
+
           ${photo
-            ? `<img src="${escapeHTML(photo)}" alt="${escapeHTML(player.name)}" loading="lazy">`
-            : `<span class="player-card-placeholder">${Number(player.number || 0)}</span>`
+            ? `
+              <img
+                class="player-card-photo"
+                src="${escapeHTML(photo)}"
+                alt="${escapeHTML(player.name)}"
+                loading="lazy"
+              >
+            `
+            : `
+              <span class="player-card-placeholder">
+                ${escapeHTML(getPlayerInitials(player.name))}
+              </span>
+            `
           }
         </div>
 
         <div class="player-card-info">
-          <span class="player-card-number">
-            № ${Number(player.number || 0)}
+          <span class="player-card-position">
+            ${escapeHTML(position)}
           </span>
 
-          <h3 class="player-card-name">
-            ${escapeHTML(player.name)}
-          </h3>
+          <span class="player-card-name">
+            ${escapeHTML(player.name || "Игрок")}
+          </span>
 
-          <span class="player-card-position">
-            ${escapeHTML(player.position || "")}
+          <span class="player-card-more">
+            Профиль игрока <span aria-hidden="true">→</span>
           </span>
         </div>
       </button>
+    `;
+  }
+
+  function renderPlayerGroup(title, group, players) {
+    if (!players.length) return "";
+
+    return `
+      <section class="players-group players-group-${group}">
+        <div class="players-group-heading">
+          <h3>${title}</h3>
+          <span>${players.length}</span>
+        </div>
+
+        <div class="players-group-grid">
+          ${players.map(player => renderPlayerCard(
+            player,
+            playersData.indexOf(player)
+          )).join("")}
+        </div>
+      </section>
     `;
   }
 
@@ -855,56 +901,48 @@
     if (!container) return;
 
     try {
-      const [players, seasonStats] = await Promise.all([
-        fetchRows("players", {
-          order: { column: "number", ascending: true }
-        }),
-        fetchRows("player_season_stats", {
-          filters: [
-            { column: "season", operator: "eq", value: CURRENT_SEASON }
-          ]
-        })
-      ]);
+      const players = await fetchRows("players", {
+        order: { column: "number", ascending: true }
+      });
+
+      playersData = players;
 
       if (!players.length) {
-        playerItems = [];
-        setEmpty(container, "Игроки пока не добавлены");
+        setEmpty(container, "Состав команды пока не добавлен");
         return;
       }
 
-      const statsByPlayer = new Map(
-        seasonStats.map(stat => [String(stat.player_id), stat])
+      try {
+        playerStatsData = await fetchRows("player_season_stats", {
+          filters: [
+            { column: "season", operator: "eq", value: CURRENT_SEASON }
+          ]
+        });
+      } catch (statsError) {
+        console.warn(
+          "Не удалось загрузить сезонную статистику игроков:",
+          statsError
+        );
+        playerStatsData = [];
+      }
+
+      const goalies = players.filter(
+        player => getPlayerGroup(player.position) === "goalies"
       );
 
-      playerItems = players.map(player => ({
-        ...player,
-        seasonStats: statsByPlayer.get(String(player.id)) || null
-      }));
+      const defenders = players.filter(
+        player => getPlayerGroup(player.position) === "defenders"
+      );
 
-      const categories = ["goalies", "defenders", "forwards", "other"];
+      const forwards = players.filter(
+        player => getPlayerGroup(player.position) === "forwards"
+      );
 
-      container.innerHTML = categories.map(category => {
-        const categoryPlayers = playerItems
-          .map((player, index) => ({ player, index }))
-          .filter(item => getPlayerCategory(item.player.position) === category);
-
-        if (!categoryPlayers.length) return "";
-
-        return `
-          <section class="players-group players-group-${category}">
-            <div class="players-group-heading">
-              <h3>${getPlayerCategoryTitle(category)}</h3>
-              <span>${categoryPlayers.length}</span>
-            </div>
-
-            <div class="players-grid">
-              ${categoryPlayers.map(item =>
-                renderPlayerCard(item.player, item.index)
-              ).join("")}
-            </div>
-          </section>
-        `;
-      }).join("");
+      container.innerHTML = `
+        ${renderPlayerGroup("Вратари", "goalies", goalies)}
+        ${renderPlayerGroup("Защитники", "defenders", defenders)}
+        ${renderPlayerGroup("Нападающие", "forwards", forwards)}
+      `;
 
       $$(".player-card", container).forEach(button => {
         button.addEventListener("click", () => {
@@ -913,26 +951,22 @@
         });
       });
     } catch (error) {
-      console.error("Ошибка загрузки игроков:", error);
-      setError(container, "Не удалось загрузить игроков");
+      console.error("Не удалось загрузить игроков:", error);
+      setError(container, "Не удалось загрузить состав команды");
     }
   }
 
   function renderPlayerStat(label, value) {
-    if (value === null || value === undefined || value === "") {
-      value = "—";
-    }
-
     return `
       <div class="player-profile-stat">
-        <span>${escapeHTML(label)}</span>
-        <strong>${escapeHTML(value)}</strong>
+        <span class="player-profile-stat-value">${escapeHTML(value ?? "—")}</span>
+        <span class="player-profile-stat-label">${escapeHTML(label)}</span>
       </div>
     `;
   }
 
   function openPlayer(index) {
-    const player = playerItems[index];
+    const player = playersData[index];
     if (!player) return;
 
     const viewer = $("#playerViewer");
@@ -940,96 +974,141 @@
 
     if (!viewer || !body) return;
 
-    const stats = player.seasonStats || {};
-    const isGoalie = getPlayerCategory(player.position) === "goalies";
+    const stats = getPlayerStat(player.id);
+    const isGoalie = getPlayerGroup(player.position) === "goalies";
     const photo = getImageURL(player.photo_url);
+
+    const games = stats?.goalie_games ?? stats?.games ?? 0;
+    const goals = stats?.goals ?? 0;
+    const assists = stats?.assists ?? 0;
+    const points = stats?.points ?? (Number(goals) + Number(assists));
+    const pim = stats?.pim ?? 0;
+    const plusMinus = stats?.plus_minus;
+    const goalsAgainst = stats?.goals_against ?? 0;
+    const gaa = stats?.gaa;
+
+    const statsMarkup = isGoalie
+      ? `
+        <div class="player-profile-stats">
+          ${renderPlayerStat("Игр", games)}
+          ${renderPlayerStat("Пропущено", goalsAgainst)}
+          ${renderPlayerStat("КН", gaa ?? "—")}
+          ${renderPlayerStat("Штраф", pim)}
+        </div>
+      `
+      : `
+        <div class="player-profile-stats">
+          ${renderPlayerStat("Игр", games)}
+          ${renderPlayerStat("Голы", goals)}
+          ${renderPlayerStat("Передачи", assists)}
+          ${renderPlayerStat("Очки", points)}
+          ${renderPlayerStat(
+            "+ / −",
+            plusMinus === null || plusMinus === undefined
+              ? "—"
+              : Number(plusMinus) > 0
+                ? `+${plusMinus}`
+                : plusMinus
+          )}
+          ${renderPlayerStat("Штраф", pim)}
+        </div>
+      `;
 
     const birthDate = player.birth_date
       ? formatDate(player.birth_date, {
-          year: "numeric",
-          month: "long",
-          day: "numeric"
+          year: "numeric"
         })
-      : "—";
+      : "";
 
-    const physicalInfo = [
-      player.height_cm ? `${Number(player.height_cm)} см` : "",
-      player.weight_kg ? `${Number(player.weight_kg)} кг` : ""
-    ].filter(Boolean).join(" · ");
-
-    const statsHTML = isGoalie
-      ? [
-          renderPlayerStat("Матчи", stats.goalie_games ?? stats.games),
-          renderPlayerStat("Пропущено шайб", stats.goals_against),
-          renderPlayerStat("Штрафное время", stats.pim),
-          renderPlayerStat("КН", stats.gaa)
-        ].join("")
-      : [
-          renderPlayerStat("Матчи", stats.games),
-          renderPlayerStat("Голы", stats.goals),
-          renderPlayerStat("Передачи", stats.assists),
-          renderPlayerStat("Очки", stats.points),
-          renderPlayerStat(
-            "+/-",
-            stats.plus_minus > 0 ? `+${stats.plus_minus}` : stats.plus_minus
-          ),
-          renderPlayerStat("Штрафное время", stats.pim)
-        ].join("");
+    const personalInfo = [
+      player.height_cm ? `${player.height_cm} см` : "",
+      player.weight_kg ? `${player.weight_kg} кг` : "",
+      birthDate
+    ].filter(Boolean);
 
     body.innerHTML = `
       <div class="player-profile">
-        <div class="player-profile-header">
-          <div class="player-profile-photo">
+        <div class="player-profile-hero">
+          <div class="player-profile-photo-wrap">
+            <span class="player-profile-number">
+              ${escapeHTML(player.number ?? "—")}
+            </span>
+
             ${photo
-              ? `<img src="${escapeHTML(photo)}" alt="${escapeHTML(player.name)}">`
-              : `<span>${Number(player.number || 0)}</span>`
+              ? `
+                <img
+                  class="player-profile-photo"
+                  src="${escapeHTML(photo)}"
+                  alt="${escapeHTML(player.name)}"
+                >
+              `
+              : `
+                <span class="player-profile-placeholder">
+                  ${escapeHTML(getPlayerInitials(player.name))}
+                </span>
+              `
             }
           </div>
 
-          <div class="player-profile-main">
-            <span class="player-profile-number">
-              № ${Number(player.number || 0)}
+          <div class="player-profile-heading">
+            <span class="player-profile-position">
+              ${escapeHTML(player.position || "Игрок команды")}
             </span>
 
-            <h2>${escapeHTML(player.name)}</h2>
+            <h1>${escapeHTML(player.name || "Игрок")}</h1>
 
-            <p>${escapeHTML(player.position || "")}</p>
-          </div>
-        </div>
-
-        <div class="player-profile-details">
-          <div>
-            <span>Дата рождения</span>
-            <strong>${escapeHTML(birthDate)}</strong>
-          </div>
-
-          <div>
-            <span>Рост и вес</span>
-            <strong>${escapeHTML(physicalInfo || "—")}</strong>
+            <span class="player-profile-team">
+              ${escapeHTML(player.team || "Челны 2011")}
+            </span>
           </div>
         </div>
 
         <section class="player-profile-section">
-          <h3>Статистика сезона ${CURRENT_SEASON}</h3>
-
-          <div class="player-profile-stats">
-            ${statsHTML}
+          <div class="player-profile-section-heading">
+            <span class="section-kicker">СЕЗОН ${CURRENT_SEASON}</span>
+            <h2>Статистика</h2>
           </div>
+
+          ${statsMarkup}
         </section>
 
         <section class="player-profile-section">
-          <h3>Интересно!</h3>
+          <div class="player-profile-section-heading">
+            <span class="section-kicker">ИНФОРМАЦИЯ</span>
+            <h2>О игроке</h2>
+          </div>
 
           <div class="player-profile-details">
-            <div>
-              <span>Любимый хоккеист</span>
-              <strong>${escapeHTML(player.favorite_hockey_player || "Не указано")}</strong>
-            </div>
+            ${personalInfo.length
+              ? `
+                <div class="player-profile-detail">
+                  <span>Параметры</span>
+                  <strong>${escapeHTML(personalInfo.join(" · "))}</strong>
+                </div>
+              `
+              : ""
+            }
 
-            <div>
-              <span>Любимый клуб</span>
-              <strong>${escapeHTML(player.favorite_club || "Не указано")}</strong>
-            </div>
+            ${player.favorite_hockey_player ? `
+              <div class="player-profile-detail">
+                <span>Любимый хоккеист</span>
+                <strong>${escapeHTML(player.favorite_hockey_player)}</strong>
+              </div>
+            ` : ""}
+
+            ${player.favorite_club ? `
+              <div class="player-profile-detail">
+                <span>Любимый клуб</span>
+                <strong>${escapeHTML(player.favorite_club)}</strong>
+              </div>
+            ` : ""}
+
+            ${player.stats ? `
+              <div class="player-profile-detail">
+                <span>Дополнительно</span>
+                <strong>${escapeHTML(player.stats)}</strong>
+              </div>
+            ` : ""}
           </div>
         </section>
       </div>
