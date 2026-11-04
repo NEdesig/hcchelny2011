@@ -1,4 +1,3 @@
-
 (() => {
   "use strict";
 
@@ -19,11 +18,13 @@
   function imageURL(path) {
     if (!path) return "";
     if (/^https?:\/\//i.test(path)) return path;
+
     return db.storage.from(BUCKET).getPublicUrl(path).data?.publicUrl || "";
   }
 
   function formatDate(value) {
     if (!value) return "";
+
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "";
 
@@ -53,10 +54,21 @@
     const settings = data[0];
     const css = document.documentElement.style;
 
-    if (settings.primary_color) css.setProperty("--primary", settings.primary_color);
-    if (settings.accent_color) css.setProperty("--accent", settings.accent_color);
-    if (settings.gold_color) css.setProperty("--gold", settings.gold_color);
-    if (settings.white_color) css.setProperty("--white", settings.white_color);
+    if (settings.primary_color) {
+      css.setProperty("--primary", settings.primary_color);
+    }
+
+    if (settings.accent_color) {
+      css.setProperty("--accent", settings.accent_color);
+    }
+
+    if (settings.gold_color) {
+      css.setProperty("--gold", settings.gold_color);
+    }
+
+    if (settings.white_color) {
+      css.setProperty("--white", settings.white_color);
+    }
 
     setText("teamName", settings.team_name || "Челны 2011");
     setText("teamSubtitle", settings.subtitle || "хоккейный клуб");
@@ -64,9 +76,11 @@
     setText("footerCity", settings.city || "Набережные Челны");
 
     const logo = imageURL(settings.logo_path);
+
     ["teamLogo", "footerLogo"].forEach(id => {
       const img = document.getElementById(id);
       if (!img) return;
+
       if (logo) {
         img.src = logo;
         img.hidden = false;
@@ -81,8 +95,7 @@
   }
 
   function clubLogo(club) {
-    const url = imageURL(club?.logo_path);
-    return url || "";
+    return imageURL(club?.logo_path);
   }
 
   function clubMarkup(club) {
@@ -101,11 +114,18 @@
     return team || fallback || "Команда";
   }
 
+  function teamLabel(side, homeName, awayName) {
+    if (side === "home") return homeName;
+    if (side === "away") return awayName;
+    return side || "";
+  }
+
   async function loadMatch() {
     const id = new URLSearchParams(window.location.search).get("id");
 
     if (!id) {
-      root.innerHTML = '<div class="match-page-state">Не указан матч.</div>';
+      root.innerHTML =
+        '<div class="match-page-state">Не указан матч.</div>';
       return;
     }
 
@@ -121,17 +141,23 @@
 
     if (error) {
       console.error("Ошибка загрузки матча:", error);
-      root.innerHTML = '<div class="match-page-state">Не удалось загрузить матч.</div>';
+
+      root.innerHTML =
+        '<div class="match-page-state">Не удалось загрузить матч.</div>';
+
       return;
     }
 
     if (!match) {
-      root.innerHTML = '<div class="match-page-state">Матч не найден.</div>';
+      root.innerHTML =
+        '<div class="match-page-state">Матч не найден.</div>';
+
       return;
     }
 
     const home = match.home || {};
     const away = match.away || {};
+
     const statusNames = {
       scheduled: "Матч не начался",
       upcoming: "Матч не начался",
@@ -153,33 +179,55 @@
       match.away_score !== undefined;
 
     const score = scoreAvailable
-      ? `<div class="match-score">
-           <span>${esc(match.home_score)}</span>
-           <span class="match-score-separator">:</span>
-           <span>${esc(match.away_score)}</span>
-         </div>`
-      : `<div class="match-score"><span>—</span><span>:</span><span>—</span></div>`;
+      ? `
+        <div class="match-score">
+          <span>${esc(match.home_score)}</span>
+          <span class="match-score-separator">:</span>
+          <span>${esc(match.away_score)}</span>
+        </div>
+      `
+      : `
+        <div class="match-score">
+          <span>—</span>
+          <span>:</span>
+          <span>—</span>
+        </div>
+      `;
 
     root.innerHTML = `
       <section class="match-hero">
+
         ${match.competition
           ? `<div class="match-competition">${esc(match.competition)}</div>`
-          : ""}
+          : ""
+        }
+
         <div class="match-scoreboard">
           ${clubMarkup(home)}
           ${score}
           ${clubMarkup(away)}
         </div>
+
         <div class="match-status">
           ${esc(statusNames[match.status] || match.status || "Статус не указан")}
         </div>
+
         <div class="match-meta">
-          ${match.match_date ? `<div>${esc(formatDate(match.match_date))}</div>` : ""}
-          ${match.venue ? `<div>${esc(match.venue)}</div>` : ""}
+          ${match.match_date
+            ? `<div>${esc(formatDate(match.match_date))}</div>`
+            : ""
+          }
+
+          ${match.venue
+            ? `<div>${esc(match.venue)}</div>`
+            : ""
+          }
         </div>
+
       </section>
 
       <section class="match-details">
+
         <div class="match-detail-card">
           <h2>Голы</h2>
           <div id="matchGoals">
@@ -200,85 +248,130 @@
             <div class="match-page-state">Загрузка составов…</div>
           </div>
         </div>
+
       </section>
     `;
 
     await Promise.all([
-      loadGoals(match.id),
-      loadPenalties(match.id),
+      loadGoals(match.id, home, away),
+      loadPenalties(match.id, home, away),
       loadRoster(match.id, home, away)
     ]);
   }
 
-  async function loadGoals(matchId) {
+  async function loadGoals(matchId, home, away) {
     const container = document.getElementById("matchGoals");
 
     const { data, error } = await db
       .from("match_goals")
       .select("*")
       .eq("match_id", matchId)
-      .order("minute", { ascending: true });
+      .order("created_at", { ascending: true });
 
     if (error) {
       console.error("Ошибка загрузки голов:", error);
-      container.innerHTML = '<div class="match-page-state">Не удалось загрузить голы.</div>';
+
+      container.innerHTML =
+        '<div class="match-page-state">Не удалось загрузить голы.</div>';
+
       return;
     }
 
     if (!data?.length) {
-      container.innerHTML = '<div class="match-page-state">Информация о голах пока не добавлена.</div>';
+      container.innerHTML =
+        '<div class="match-page-state">Информация о голах пока не добавлена.</div>';
+
       return;
     }
 
+    const homeName = displayTeam(home.name, "Хозяева");
+    const awayName = displayTeam(away.name, "Гости");
+
     container.innerHTML = data.map(goal => `
       <div class="match-event">
-        <div class="match-event-time">${esc(goal.minute ?? "—")}'</div>
+
+        <div class="match-event-time">
+          ${esc(goal.goal_time || "—")}
+        </div>
+
         <div class="match-event-description">
           <strong>${esc(goal.player_name || "Автор не указан")}</strong>
+
           ${goal.player_number !== null && goal.player_number !== undefined
             ? `<span> · №${esc(goal.player_number)}</span>`
-            : ""}
-          ${goal.strength ? `<div>${esc(goal.strength)}</div>` : ""}
+            : ""
+          }
+
+          ${goal.strength
+            ? `<div>${esc(goal.strength)}</div>`
+            : ""
+          }
         </div>
-        <div class="match-event-team">${esc(goal.team || "")}</div>
+
+        <div class="match-event-team">
+          ${esc(teamLabel(goal.team_side, homeName, awayName))}
+        </div>
+
       </div>
     `).join("");
   }
 
-  async function loadPenalties(matchId) {
+  async function loadPenalties(matchId, home, away) {
     const container = document.getElementById("matchPenalties");
 
     const { data, error } = await db
       .from("match_penalties")
       .select("*")
       .eq("match_id", matchId)
-      .order("penalty_time", { ascending: true });
+      .order("created_at", { ascending: true });
 
     if (error) {
       console.error("Ошибка загрузки штрафов:", error);
-      container.innerHTML = '<div class="match-page-state">Не удалось загрузить штрафы.</div>';
+
+      container.innerHTML =
+        '<div class="match-page-state">Не удалось загрузить штрафы.</div>';
+
       return;
     }
 
     if (!data?.length) {
-      container.innerHTML = '<div class="match-page-state">Информация об удалениях пока не добавлена.</div>';
+      container.innerHTML =
+        '<div class="match-page-state">Информация об удалениях пока не добавлена.</div>';
+
       return;
     }
 
+    const homeName = displayTeam(home.name, "Хозяева");
+    const awayName = displayTeam(away.name, "Гости");
+
     container.innerHTML = data.map(penalty => `
       <div class="match-event">
-        <div class="match-event-time">${esc(penalty.penalty_time ?? "—")}'</div>
+
+        <div class="match-event-time">
+          ${esc(penalty.penalty_time || "—")}
+        </div>
+
         <div class="match-event-description">
           <strong>${esc(penalty.player_name || "Игрок не указан")}</strong>
+
           ${penalty.player_number !== null && penalty.player_number !== undefined
             ? `<span> · №${esc(penalty.player_number)}</span>`
-            : ""}
+            : ""
+          }
+
           <div>
             ${esc(penalty.reason || "Причина не указана")}
-            ${penalty.minutes ? ` · ${esc(penalty.minutes)} мин.` : ""}
+            ${penalty.minutes
+              ? ` · ${esc(penalty.minutes)} мин.`
+              : ""
+            }
           </div>
         </div>
-        <div class="match-event-team">${esc(penalty.team || "")}</div>
+
+        <div class="match-event-team">
+          ${esc(teamLabel(penalty.team_side, homeName, awayName))}
+        </div>
+
       </div>
     `).join("");
   }
@@ -294,12 +387,17 @@
 
     if (error) {
       console.error("Ошибка загрузки составов:", error);
-      container.innerHTML = '<div class="match-page-state">Не удалось загрузить составы.</div>';
+
+      container.innerHTML =
+        '<div class="match-page-state">Не удалось загрузить составы.</div>';
+
       return;
     }
 
     if (!data?.length) {
-      container.innerHTML = '<div class="match-page-state">Составы пока не опубликованы.</div>';
+      container.innerHTML =
+        '<div class="match-page-state">Составы пока не опубликованы.</div>';
+
       return;
     }
 
@@ -307,31 +405,46 @@
     const awayName = displayTeam(away.name, "Гости");
 
     const homePlayers = data.filter(player =>
-      ["home", homeName].includes(player.team)
+      player.team_side === "home"
     );
 
     const awayPlayers = data.filter(player =>
-      ["away", awayName].includes(player.team)
+      player.team_side === "away"
     );
 
     function rosterMarkup(title, players) {
       return `
         <div>
-          <div class="match-roster-title">${esc(title)}</div>
-          ${players.length ? players.map(player => `
-            <div class="match-player">
-              <div class="match-player-number">
-                ${player.player_number !== null && player.player_number !== undefined
-                  ? `#${esc(player.player_number)}`
-                  : "—"}
+
+          <div class="match-roster-title">
+            ${esc(title)}
+          </div>
+
+          ${players.length
+            ? players.map(player => `
+              <div class="match-player">
+
+                <div class="match-player-number">
+                  ${player.player_number !== null && player.player_number !== undefined
+                    ? `#${esc(player.player_number)}`
+                    : "—"
+                  }
+                </div>
+
+                <div>
+                  ${esc(player.player_name || "Игрок")}
+
+                  ${player.position
+                    ? `<div class="match-player-position">${esc(player.position)}</div>`
+                    : ""
+                  }
+                </div>
+
               </div>
-              <div>${esc(player.player_name || "Игрок")}
-                ${player.position
-                  ? `<div class="match-player-position">${esc(player.position)}</div>`
-                  : ""}
-              </div>
-            </div>
-          `).join("") : '<div class="match-page-state">Состав не опубликован.</div>'}
+            `).join("")
+            : '<div class="match-page-state">Состав не опубликован.</div>'
+          }
+
         </div>
       `;
     }
@@ -345,12 +458,22 @@
   }
 
   async function init() {
-    if (!db) {
-      root.innerHTML = '<div class="match-page-state">Нет подключения к базе данных. Проверь js/config.js.</div>';
+    if (!root) {
+      console.error("Не найден элемент #matchContent");
       return;
     }
 
-    await Promise.allSettled([loadSettings(), loadMatch()]);
+    if (!db) {
+      root.innerHTML =
+        '<div class="match-page-state">Нет подключения к базе данных. Проверь js/config.js.</div>';
+
+      return;
+    }
+
+    await Promise.allSettled([
+      loadSettings(),
+      loadMatch()
+    ]);
   }
 
   init();
