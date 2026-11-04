@@ -43,6 +43,7 @@
       <a href="#matches">Все матчи</a>
       <a href="#competition">Турнирная таблица</a>
       <a href="#stats">Статистика игроков</a>
+      <a href="#players">Игроки</a>
       <a href="#leaders">Лидеры команды</a>
       <a href="#albums">Последние фото</a>
     </nav>
@@ -172,6 +173,20 @@
       </div>
     </section>
 
+    <!-- ИГРОКИ -->
+    <section id="players" class="page-section players-section">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">НАША КОМАНДА</p>
+          <h2>Игроки</h2>
+        </div>
+      </div>
+
+      <div id="playersList" class="players-list">
+        <p class="loading-state">Загружаем игроков...</p>
+      </div>
+    </section>
+
     <!-- ЛИДЕРЫ -->
     <section id="leaders" class="page-section leaders-section">
       <div class="section-heading">
@@ -216,6 +231,13 @@
     <button id="contentViewerClose" class="content-viewer-close"
       type="button" aria-label="Закрыть">×</button>
     <article id="contentViewerBody" class="content-viewer-body"></article>
+  </div>
+
+  <!-- ПРОСМОТР ИГРОКА -->
+  <div id="playerViewer" class="content-viewer" aria-hidden="true">
+    <button id="playerViewerClose" class="content-viewer-close"
+      type="button" aria-label="Закрыть">×</button>
+    <article id="playerViewerBody" class="content-viewer-body"></article>
   </div>
 
   <!-- ПОДВАЛ -->
