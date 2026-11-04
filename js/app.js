@@ -344,8 +344,7 @@
 
       $$(".story-item", container).forEach(button => {
         button.addEventListener("click", () => {
-          const index = Number(button.dataset.storyIndex);
-          openStory(index);
+          openStory(Number(button.dataset.storyIndex));
         });
       });
     } catch (error) {
@@ -807,6 +806,16 @@
       return "defenders";
     }
 
+    if (
+      value.includes("напад") ||
+      value.includes("форвард") ||
+      value.includes("forward") ||
+      value === "н" ||
+      value === "f"
+    ) {
+      return "forwards";
+    }
+
     return "forwards";
   }
 
@@ -822,9 +831,50 @@
   }
 
   function getPlayerStat(playerId) {
-    return playerStatsData.find(
+    const playerRows = playerStatsData.filter(
       stat => String(stat.player_id) === String(playerId)
-    ) || null;
+    );
+
+    if (!playerRows.length) return null;
+
+    const currentSeasonRow = playerRows.find(
+      stat => String(stat.season || "").trim() === CURRENT_SEASON
+    );
+
+    return currentSeasonRow || playerRows[0];
+  }
+
+  function getPlayerGames(stats, player, isGoalie) {
+    const values = isGoalie
+      ? [
+          stats?.goalie_games,
+          stats?.games,
+          stats?.games_played,
+          stats?.matches_played,
+          stats?.matches,
+          player?.goalie_games,
+          player?.games,
+          player?.games_played,
+          player?.matches_played,
+          player?.matches
+        ]
+      : [
+          stats?.games,
+          stats?.games_played,
+          stats?.matches_played,
+          stats?.matches,
+          stats?.goalie_games,
+          player?.games,
+          player?.games_played,
+          player?.matches_played,
+          player?.matches
+        ];
+
+    const value = values.find(
+      item => item !== null && item !== undefined && item !== ""
+    );
+
+    return value === undefined ? "—" : value;
   }
 
   function renderPlayerCard(player, index) {
@@ -913,10 +963,13 @@
       }
 
       try {
+        // Загружаем записи всех сезонов.
+        // В профиле сначала выбирается текущий сезон.
         playerStatsData = await fetchRows("player_season_stats", {
-          filters: [
-            { column: "season", operator: "eq", value: CURRENT_SEASON }
-          ]
+          order: {
+            column: "season",
+            ascending: false
+          }
         });
       } catch (statsError) {
         console.warn(
@@ -978,11 +1031,11 @@
     const isGoalie = getPlayerGroup(player.position) === "goalies";
     const photo = getImageURL(player.photo_url);
 
-    const games = stats?.goalie_games ?? stats?.games ?? 0;
-    const goals = stats?.goals ?? 0;
-    const assists = stats?.assists ?? 0;
+    const games = getPlayerGames(stats, player, isGoalie);
+    const goals = stats?.goals ?? player.goals ?? 0;
+    const assists = stats?.assists ?? player.assists ?? 0;
     const points = stats?.points ?? (Number(goals) + Number(assists));
-    const pim = stats?.pim ?? 0;
+    const pim = stats?.pim ?? player.pim ?? 0;
     const plusMinus = stats?.plus_minus;
     const goalsAgainst = stats?.goals_against ?? 0;
     const gaa = stats?.gaa;
@@ -990,7 +1043,7 @@
     const statsMarkup = isGoalie
       ? `
         <div class="player-profile-stats">
-          ${renderPlayerStat("Игр", games)}
+          ${renderPlayerStat("Матчей", games)}
           ${renderPlayerStat("Пропущено", goalsAgainst)}
           ${renderPlayerStat("КН", gaa ?? "—")}
           ${renderPlayerStat("Штраф", pim)}
@@ -998,7 +1051,7 @@
       `
       : `
         <div class="player-profile-stats">
-          ${renderPlayerStat("Игр", games)}
+          ${renderPlayerStat("Матчей", games)}
           ${renderPlayerStat("Голы", goals)}
           ${renderPlayerStat("Передачи", assists)}
           ${renderPlayerStat("Очки", points)}
