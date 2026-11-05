@@ -1,3 +1,4 @@
+
 /* =========================================
    ХК ЧЕЛНЫ 2011 — PUBLIC APP
    File: js/app.js
@@ -693,11 +694,11 @@
           <td>${escapeHTML(row.team_name)}</td>
           <td>${Number(row.games || 0)}</td>
           <td>${Number(row.wins || 0)}</td>
-          <td>${Number(row.overtime_wins || 0)}</td>
-          <td>${Number(row.shootout_wins || 0)}</td>
+          <td>${Number(row.wins_ot || 0)}</td>
+          <td>${Number(row.wins_so || 0)}</td>
           <td>${Number(row.losses || 0)}</td>
-          <td>${Number(row.overtime_losses || 0)}</td>
-          <td>${Number(row.shootout_losses || 0)}</td>
+          <td>${Number(row.losses_ot || 0)}</td>
+          <td>${Number(row.losses_so || 0)}</td>
           <td><strong>${Number(row.points || 0)}</strong></td>
         </tr>
       `).join("");
@@ -718,6 +719,12 @@
     const container = $("#statsList");
     if (!container) return;
 
+    // Совместимость с текущим index.html:
+    // кнопка передаёт defenders, а база хранит defense_scorers.
+    const databaseType = type === "defenders"
+      ? "defense_scorers"
+      : type;
+
     $$(".stats-tab").forEach(button => {
       const active = button.dataset.statType === type;
 
@@ -729,10 +736,10 @@
       const rows = await fetchRows("player_stats", {
         order: {
           column: "value",
-          ascending: type === "plus_minus"
+          ascending: databaseType === "plus_minus"
         },
         filters: [
-          { column: "stat_type", operator: "eq", value: type }
+          { column: "stat_type", operator: "eq", value: databaseType }
         ],
         limit: 30
       });
@@ -742,7 +749,7 @@
         return;
       }
 
-      if (type === "plus_minus") {
+      if (databaseType === "plus_minus") {
         rows.sort((a, b) => Number(b.value) - Number(a.value));
       }
 
@@ -764,7 +771,7 @@
           </div>
 
           <span class="stat-value">
-            ${type === "plus_minus" && Number(player.value) > 0 ? "+" : ""}
+            ${databaseType === "plus_minus" && Number(player.value) > 0 ? "+" : ""}
             ${escapeHTML(player.value)}
           </span>
         </div>
@@ -963,8 +970,6 @@
       }
 
       try {
-        // Загружаем записи всех сезонов.
-        // В профиле сначала выбирается текущий сезон.
         playerStatsData = await fetchRows("player_season_stats", {
           order: {
             column: "season",
