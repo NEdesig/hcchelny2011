@@ -1,16 +1,10 @@
-
 (() => {
   "use strict";
 
   const db = window.supabaseClient;
   const BUCKET = window.STORAGE_BUCKET || "site-media";
   const root = document.getElementById("matchContent");
-
   const VOTER_KEY = "hcchelny_match_voter_token";
-
-  // =========================================
-  // ОСНОВНЫЕ ФУНКЦИИ
-  // =========================================
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -25,16 +19,13 @@
   function imageURL(path) {
     if (!path) return "";
     if (/^https?:\/\//i.test(path)) return path;
-
     return db.storage.from(BUCKET).getPublicUrl(path).data?.publicUrl || "";
   }
 
   function formatDate(value) {
     if (!value) return "";
-
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "";
-
     return new Intl.DateTimeFormat("ru-RU", {
       day: "numeric",
       month: "long",
@@ -79,9 +70,29 @@
     return side || "";
   }
 
-  // =========================================
-  // НАСТРОЙКИ САЙТА
-  // =========================================
+  function periodLabel(period) {
+    const value = Number(period || 1);
+    if (value === 4) return "ОТ";
+    if (value === 5) return "Б";
+    return `${value}-й период`;
+  }
+
+  function timeToSeconds(value) {
+    const match = String(value || "").match(/(\d{1,2}):(\d{2})/);
+    if (!match) return Number.MAX_SAFE_INTEGER;
+    return Number(match[1]) * 60 + Number(match[2]);
+  }
+
+  function sortEvents(events) {
+    return [...events].sort((a, b) => {
+      const periodA = Number(a.period || 1);
+      const periodB = Number(b.period || 1);
+
+      if (periodA !== periodB) return periodA - periodB;
+
+      return timeToSeconds(a.time) - timeToSeconds(b.time);
+    });
+  }
 
   async function loadSettings() {
     const { data, error } = await db
@@ -95,21 +106,10 @@
     const settings = data[0];
     const css = document.documentElement.style;
 
-    if (settings.primary_color) {
-      css.setProperty("--primary", settings.primary_color);
-    }
-
-    if (settings.accent_color) {
-      css.setProperty("--accent", settings.accent_color);
-    }
-
-    if (settings.gold_color) {
-      css.setProperty("--gold", settings.gold_color);
-    }
-
-    if (settings.white_color) {
-      css.setProperty("--white", settings.white_color);
-    }
+    if (settings.primary_color) css.setProperty("--primary", settings.primary_color);
+    if (settings.accent_color) css.setProperty("--accent", settings.accent_color);
+    if (settings.gold_color) css.setProperty("--gold", settings.gold_color);
+    if (settings.white_color) css.setProperty("--white", settings.white_color);
 
     setText("teamName", settings.team_name || "Челны 2011");
     setText("teamSubtitle", settings.subtitle || "хоккейный клуб");
@@ -132,18 +132,15 @@
   }
 
   // =========================================
-  // ИДЕНТИФИКАТОР УСТРОЙСТВА
+  // ГОЛОСОВАНИЕ ЗА ПОБЕДИТЕЛЯ
   // =========================================
 
   function createUUID() {
-    if (window.crypto?.randomUUID) {
-      return window.crypto.randomUUID();
-    }
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
 
     if (window.crypto?.getRandomValues) {
       const bytes = new Uint8Array(16);
       window.crypto.getRandomValues(bytes);
-
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
 
@@ -184,10 +181,6 @@
     }
   }
 
-  // =========================================
-  // СТИЛИ ГОЛОСОВАНИЯ
-  // =========================================
-
   function injectPollStyles() {
     if (document.getElementById("matchWinnerPollStyles")) return;
 
@@ -203,7 +196,6 @@
         color: #fff;
         text-align: center;
       }
-
       .winner-poll-title {
         margin: 0 0 8px;
         font-size: clamp(24px, 5vw, 34px);
@@ -211,20 +203,17 @@
         font-weight: 900;
         text-transform: uppercase;
       }
-
       .winner-poll-subtitle {
         margin: 0 0 22px;
         font-size: 16px;
         font-weight: 800;
         text-transform: uppercase;
       }
-
       .winner-poll-teams {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
       }
-
       .winner-poll-team {
         display: flex;
         flex-direction: column;
@@ -241,38 +230,31 @@
         cursor: pointer;
         transition: .2s ease;
       }
-
       .winner-poll-team:hover:not(:disabled) {
         border-color: #32c9ed;
         transform: translateY(-2px);
       }
-
       .winner-poll-team:disabled {
         cursor: default;
         opacity: .8;
       }
-
       .winner-poll-team img {
         width: 65px;
         height: 65px;
         object-fit: contain;
       }
-
       .winner-poll-team span {
         font-size: 15px;
         font-weight: 800;
         overflow-wrap: anywhere;
       }
-
       .winner-poll-team.selected {
         border-color: #32c9ed;
         background: #183b4c;
       }
-
       .winner-poll-results {
         margin-top: 22px;
       }
-
       .winner-poll-bar {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -280,7 +262,6 @@
         border: 3px solid #a2b0b4;
         overflow: hidden;
       }
-
       .winner-poll-result {
         display: flex;
         align-items: center;
@@ -290,22 +271,18 @@
         font-weight: 900;
         background: #151a25;
       }
-
       .winner-poll-result:first-child {
         border-right: 2px solid #a2b0b4;
       }
-
       .winner-poll-result.leading {
         background: #91a1a5;
         color: white;
       }
-
       .winner-poll-total {
         margin-top: 14px;
         font-size: 15px;
         font-weight: 800;
       }
-
       .winner-poll-message {
         min-height: 22px;
         margin-top: 14px;
@@ -313,36 +290,29 @@
         font-weight: 700;
         overflow-wrap: anywhere;
       }
-
       .winner-poll-closed {
         margin-top: 18px;
         color: #aab8c5;
         font-size: 14px;
         font-weight: 800;
       }
-
       .winner-poll-error {
         color: #ff8585;
       }
-
       @media (max-width: 480px) {
         .winner-poll {
           padding: 22px 12px;
         }
-
         .winner-poll-team {
           padding: 12px 6px;
         }
-
         .winner-poll-team img {
           width: 50px;
           height: 50px;
         }
-
         .winner-poll-team span {
           font-size: 13px;
         }
-
         .winner-poll-bar {
           min-height: 62px;
         }
@@ -352,22 +322,10 @@
     document.head.appendChild(style);
   }
 
-  // =========================================
-  // СОСТОЯНИЕ ГОЛОСОВАНИЯ
-  // =========================================
-
   function isPollEligible(match) {
-    if (
-      match.status === "live" ||
-      match.status === "in_progress"
-    ) {
-      return true;
-    }
+    if (["live", "in_progress"].includes(match.status)) return true;
 
-    if (
-      match.status === "scheduled" ||
-      match.status === "upcoming"
-    ) {
+    if (["scheduled", "upcoming"].includes(match.status)) {
       return match.match_date &&
         new Date(match.match_date).getTime() > Date.now();
     }
@@ -380,103 +338,48 @@
 
     const homeName = clubName(home);
     const awayName = clubName(away);
-
     const homeLogo = clubLogo(home);
     const awayLogo = clubLogo(away);
 
     return `
       <section class="winner-poll" id="winnerPoll">
-
         <h2 class="winner-poll-title">Кто победит?</h2>
-
         <div class="winner-poll-subtitle">
-          ${closed
-            ? "Итоги голосования"
-            : "Проголосуйте за свой клуб"
-          }
+          ${closed ? "Итоги голосования" : "Проголосуйте за свой клуб"}
         </div>
-
         <div class="winner-poll-teams" id="winnerPollButtons">
-
-          <button
-            class="winner-poll-team"
-            type="button"
-            data-side="home"
-            ${closed ? "disabled" : ""}
-          >
-            ${homeLogo
-              ? `<img src="${esc(homeLogo)}" alt="">`
-              : ""
-            }
+          <button class="winner-poll-team" type="button" data-side="home" ${closed ? "disabled" : ""}>
+            ${homeLogo ? `<img src="${esc(homeLogo)}" alt="">` : ""}
             <span>${esc(homeName)}</span>
           </button>
-
-          <button
-            class="winner-poll-team"
-            type="button"
-            data-side="away"
-            ${closed ? "disabled" : ""}
-          >
-            ${awayLogo
-              ? `<img src="${esc(awayLogo)}" alt="">`
-              : ""
-            }
+          <button class="winner-poll-team" type="button" data-side="away" ${closed ? "disabled" : ""}>
+            ${awayLogo ? `<img src="${esc(awayLogo)}" alt="">` : ""}
             <span>${esc(awayName)}</span>
           </button>
-
         </div>
-
         <div class="winner-poll-results" id="winnerPollResults" hidden>
-
           <div class="winner-poll-bar">
-
-            <div class="winner-poll-result" id="winnerPollHome">
-              0%
-            </div>
-
-            <div class="winner-poll-result" id="winnerPollAway">
-              0%
-            </div>
-
+            <div class="winner-poll-result" id="winnerPollHome">0%</div>
+            <div class="winner-poll-result" id="winnerPollAway">0%</div>
           </div>
-
           <div class="winner-poll-total" id="winnerPollTotal">
             Всего проголосовало: 0
           </div>
-
         </div>
-
         <div class="winner-poll-message" id="winnerPollMessage"></div>
-
         <div class="winner-poll-closed" id="winnerPollClosed" hidden>
           Голосование завершено. Результаты зафиксированы.
         </div>
-
       </section>
     `;
   }
 
-  // =========================================
-  // ПОЛУЧЕНИЕ РЕЗУЛЬТАТОВ
-  // =========================================
-
   async function getPollData(matchId) {
-    const response = await db.rpc(
-      "get_match_winner_poll",
-      { p_match_id: matchId }
-    );
+    const response = await db.rpc("get_match_winner_poll", {
+      p_match_id: matchId
+    });
 
-    if (response.error) {
-      console.error("Ошибка получения голосования:", {
-        message: response.error.message,
-        details: response.error.details,
-        hint: response.error.hint,
-        code: response.error.code
-      });
-
-      throw response.error;
-    }
-
+    if (response.error) throw response.error;
     return response.data;
   }
 
@@ -485,163 +388,93 @@
     const awayVotes = Number(result.away_votes || 0);
     const total = Number(result.total_votes || 0);
 
-    const homePercent = total
-      ? Math.round(homeVotes / total * 100)
-      : 0;
-
-    const awayPercent = total
-      ? 100 - homePercent
-      : 0;
+    const homePercent = total ? Math.round(homeVotes / total * 100) : 0;
+    const awayPercent = total ? 100 - homePercent : 0;
 
     const results = document.getElementById("winnerPollResults");
     const homeElement = document.getElementById("winnerPollHome");
     const awayElement = document.getElementById("winnerPollAway");
     const totalElement = document.getElementById("winnerPollTotal");
 
-    if (!results || !homeElement || !awayElement || !totalElement) {
-      return;
-    }
+    if (!results || !homeElement || !awayElement || !totalElement) return;
 
     results.hidden = false;
-
     homeElement.textContent = `${homePercent}%`;
     awayElement.textContent = `${awayPercent}%`;
 
-    homeElement.classList.toggle(
-      "leading",
-      total > 0 && homeVotes > awayVotes
-    );
-
-    awayElement.classList.toggle(
-      "leading",
-      total > 0 && awayVotes > homeVotes
-    );
-
-    totalElement.textContent =
-      `Всего проголосовало: ${total}`;
+    homeElement.classList.toggle("leading", total > 0 && homeVotes > awayVotes);
+    awayElement.classList.toggle("leading", total > 0 && awayVotes > homeVotes);
+    totalElement.textContent = `Всего проголосовало: ${total}`;
   }
-
-  // =========================================
-  // ОБНОВЛЕНИЕ РЕЗУЛЬТАТОВ
-  // =========================================
 
   async function refreshWinnerPoll(matchId) {
     try {
       const data = await getPollData(matchId);
-
       if (!data?.length) return;
 
       renderWinnerPollResults(data[0]);
 
       if (data[0].is_closed === true) {
         const closed = document.getElementById("winnerPollClosed");
-        const buttons = document.querySelectorAll(
-          "#winnerPollButtons button"
-        );
+        const buttons = document.querySelectorAll("#winnerPollButtons button");
 
         if (closed) closed.hidden = false;
-
-        buttons.forEach(button => {
-          button.disabled = true;
-        });
+        buttons.forEach(button => button.disabled = true);
       }
     } catch (error) {
       console.error("Не удалось обновить результаты:", error);
     }
   }
 
-  // =========================================
-  // ОТПРАВКА ГОЛОСА
-  // =========================================
-
   async function submitWinnerVote(matchId, side, token, buttons) {
     const message = document.getElementById("winnerPollMessage");
 
-    buttons.forEach(button => {
-      button.disabled = true;
-    });
-
+    buttons.forEach(button => button.disabled = true);
     message.classList.remove("winner-poll-error");
     message.textContent = "Сохраняем ваш голос…";
 
     try {
-      const { data, error } = await db.rpc(
-        "cast_match_winner_vote",
-        {
-          p_match_id: matchId,
-          p_team_side: side,
-          p_voter_token: token
-        }
-      );
+      const { data, error } = await db.rpc("cast_match_winner_vote", {
+        p_match_id: matchId,
+        p_team_side: side,
+        p_voter_token: token
+      });
 
       if (error) {
-        console.error("ОШИБКА ОТПРАВКИ ГОЛОСА:", {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-
         message.classList.add("winner-poll-error");
-
         message.textContent =
-          "Ошибка Supabase: " +
-          (error.message || "неизвестная ошибка") +
+          "Ошибка Supabase: " + (error.message || "неизвестная ошибка") +
           (error.code ? ` (код: ${error.code})` : "");
-
-        buttons.forEach(button => {
-          button.disabled = false;
-        });
-
+        buttons.forEach(button => button.disabled = false);
         return;
       }
 
       if (!data?.success) {
         message.classList.add("winner-poll-error");
-        message.textContent =
-          data?.message || "Голос не был принят.";
-
-        // Повторно проверяем состояние голосования
+        message.textContent = data?.message || "Голос не был принят.";
         await refreshWinnerPoll(matchId);
 
         const closed = document.getElementById("winnerPollClosed");
-
         if (!closed || closed.hidden) {
-          buttons.forEach(button => {
-            button.disabled = false;
-          });
+          buttons.forEach(button => button.disabled = false);
         }
-
         return;
       }
 
       message.textContent = "Ваш голос учтён!";
 
       buttons.forEach(button => {
-        if (button.dataset.side === side) {
-          button.classList.add("selected");
-        }
+        if (button.dataset.side === side) button.classList.add("selected");
       });
 
-      // Обновляем проценты
       await refreshWinnerPoll(matchId);
-
     } catch (error) {
       console.error("Критическая ошибка голосования:", error);
-
       message.classList.add("winner-poll-error");
-      message.textContent =
-        "Ошибка: " + (error?.message || String(error));
-
-      buttons.forEach(button => {
-        button.disabled = false;
-      });
+      message.textContent = "Ошибка: " + (error?.message || String(error));
+      buttons.forEach(button => button.disabled = false);
     }
   }
-
-  // =========================================
-  // ЗАГРУЗКА ГОЛОСОВАНИЯ
-  // =========================================
 
   async function loadWinnerPoll(match, home, away) {
     const eligible = isPollEligible(match);
@@ -654,18 +487,12 @@
 
     try {
       const data = await getPollData(match.id);
-
       if (!data?.length) return;
 
       const result = data[0];
       const closed = result.is_closed === true || finished;
 
-      pollContainer.innerHTML = pollMarkup(
-        home,
-        away,
-        closed
-      );
-
+      pollContainer.innerHTML = pollMarkup(home, away, closed);
       renderWinnerPollResults(result);
 
       if (closed) {
@@ -675,25 +502,17 @@
       }
 
       const token = getVoterToken();
-
       const buttons = Array.from(
         document.querySelectorAll("#winnerPollButtons button")
       );
 
       buttons.forEach(button => {
         button.addEventListener("click", () => {
-          submitWinnerVote(
-            match.id,
-            button.dataset.side,
-            token,
-            buttons
-          );
+          submitWinnerVote(match.id, button.dataset.side, token, buttons);
         });
       });
-
     } catch (error) {
       console.error("Ошибка загрузки голосования:", error);
-
       pollContainer.innerHTML = `
         <section class="winner-poll">
           <div class="winner-poll-title">Голосование</div>
@@ -707,6 +526,273 @@
   }
 
   // =========================================
+  // ХОККЕЙНАЯ ДОСКА И СОСТАВЫ
+  // =========================================
+
+  function playerRoleName(role) {
+    const names = {
+      Нападающий: "Нападающий",
+      Защитник: "Защитник",
+      Вратарь: "Вратарь"
+    };
+    return names[role] || role || "Позиция не указана";
+  }
+
+  function playerShortName(name) {
+    const parts = String(name || "").trim().split(/\s+/);
+    if (parts.length < 2) return parts[0] || "Игрок";
+    return `${parts[0]} ${parts[1].charAt(0)}.`;
+  }
+
+  function rinkPlayerMarkup(player, x, y, goalie = false) {
+    if (!player) return "";
+
+    return `
+      <div class="rink-player ${goalie ? "goalie" : ""}"
+           style="left:${x}%;top:${y}%"
+           title="${esc(player.player_name || "Игрок")}">
+        ${esc(player.player_number ?? "—")}
+        <span class="rink-player-label">
+          ${esc(playerShortName(player.player_name))}
+        </span>
+      </div>
+    `;
+  }
+
+  function rinkMarkup(players) {
+    const roles = {};
+    players.forEach(player => {
+      if (player.starting_role) roles[player.starting_role] = player;
+    });
+
+    return `
+      <div class="rink-board">
+        <div class="rink-center-circle"></div>
+        <div class="rink-blue-line left"></div>
+        <div class="rink-blue-line right"></div>
+        <div class="rink-goal-crease"></div>
+
+        ${rinkPlayerMarkup(roles.lw, 27, 28)}
+        ${rinkPlayerMarkup(roles.c, 50, 20)}
+        ${rinkPlayerMarkup(roles.rw, 73, 28)}
+
+        ${rinkPlayerMarkup(roles.ld, 37, 60)}
+        ${rinkPlayerMarkup(roles.rd, 63, 60)}
+
+        ${rinkPlayerMarkup(roles.starter_goalie, 50, 88, true)}
+      </div>
+    `;
+  }
+
+  function playerMarkup(player) {
+    return `
+      <div class="match-player">
+        <div class="match-player-number">
+          ${player.player_number !== null && player.player_number !== undefined
+            ? `#${esc(player.player_number)}`
+            : "—"}
+        </div>
+        <div>
+          ${esc(player.player_name || "Игрок")}
+          <div class="match-player-position">
+            ${esc(playerRoleName(player.position))}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function rosterTeamMarkup(title, players, coach) {
+    const forwards = players.filter(p => p.position === "Нападающий");
+    const defensemen = players.filter(p => p.position === "Защитник");
+    const goalies = players.filter(p => p.position === "Вратарь");
+
+    return `
+      <div class="match-lineup-team">
+        <div class="match-lineup-heading">
+          <h3>${esc(title)}</h3>
+          <span>${players.length} игроков</span>
+        </div>
+
+        <div class="rink-board-wrap">
+          ${rinkMarkup(players)}
+        </div>
+
+        <div class="match-coach">
+          <strong>Главный тренер:</strong>
+          ${esc(coach || "Не указан")}
+        </div>
+
+        <div class="match-roster-section">
+          <h4>Вратари</h4>
+          ${goalies.length
+            ? goalies.map(playerMarkup).join("")
+            : '<div class="match-page-state">Нет данных</div>'}
+        </div>
+
+        <div class="match-roster-section">
+          <h4>Защитники</h4>
+          ${defensemen.length
+            ? defensemen.map(playerMarkup).join("")
+            : '<div class="match-page-state">Нет данных</div>'}
+        </div>
+
+        <div class="match-roster-section">
+          <h4>Нападающие</h4>
+          ${forwards.length
+            ? forwards.map(playerMarkup).join("")
+            : '<div class="match-page-state">Нет данных</div>'}
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadRoster(matchId, home, away, match) {
+    const container = document.getElementById("matchRosters");
+
+    const { data, error } = await db
+      .from("match_roster")
+      .select("*")
+      .eq("match_id", matchId)
+      .order("player_number", { ascending: true });
+
+    if (error) {
+      console.error("Ошибка загрузки составов:", error);
+      container.innerHTML =
+        '<div class="match-page-state">Не удалось загрузить составы.</div>';
+      return;
+    }
+
+    if (!data?.length) {
+      container.innerHTML =
+        '<div class="match-page-state">Составы пока не опубликованы.</div>';
+      return;
+    }
+
+    const homePlayers = data.filter(player => player.team_side === "home");
+    const awayPlayers = data.filter(player => player.team_side === "away");
+
+    container.innerHTML = `
+      <div class="match-lineup">
+        <div class="match-roster-grid">
+          ${rosterTeamMarkup(
+            clubName(home),
+            homePlayers,
+            match.home_coach
+          )}
+          ${rosterTeamMarkup(
+            clubName(away),
+            awayPlayers,
+            match.away_coach
+          )}
+        </div>
+      </div>
+    `;
+  }
+
+  // =========================================
+  // ГОЛЫ И УДАЛЕНИЯ: ОБЩАЯ ХРОНОЛОГИЯ
+  // =========================================
+
+  async function loadEvents(matchId, home, away) {
+    const goalsContainer = document.getElementById("matchGoals");
+    const penaltiesContainer = document.getElementById("matchPenalties");
+
+    const [goalsResponse, penaltiesResponse] = await Promise.all([
+      db.from("match_goals").select("*").eq("match_id", matchId),
+      db.from("match_penalties").select("*").eq("match_id", matchId)
+    ]);
+
+    if (goalsResponse.error) {
+      console.error("Ошибка загрузки голов:", goalsResponse.error);
+      goalsContainer.innerHTML =
+        '<div class="match-page-state">Не удалось загрузить голы.</div>';
+    }
+
+    if (penaltiesResponse.error) {
+      console.error("Ошибка загрузки штрафов:", penaltiesResponse.error);
+      penaltiesContainer.innerHTML =
+        '<div class="match-page-state">Не удалось загрузить удаления.</div>';
+    }
+
+    const goals = goalsResponse.data || [];
+    const penalties = penaltiesResponse.data || [];
+
+    const homeName = displayTeam(home.name, "Хозяева");
+    const awayName = displayTeam(away.name, "Гости");
+
+    const events = [
+      ...goals.map(goal => ({
+        type: "goal",
+        side: goal.team_side,
+        period: Number(goal.period || 1),
+        time: goal.goal_time || "—",
+        data: goal
+      })),
+      ...penalties.map(penalty => ({
+        type: "penalty",
+        side: penalty.team_side,
+        period: Number(penalty.period || 1),
+        time: penalty.penalty_time || "—",
+        data: penalty
+      }))
+    ];
+
+    const sorted = sortEvents(events);
+
+    const goalEvents = sorted.filter(event => event.type === "goal");
+    const penaltyEvents = sorted.filter(event => event.type === "penalty");
+
+    function eventMarkup(event) {
+      const isGoal = event.type === "goal";
+      const item = event.data;
+      const team = teamLabel(event.side, homeName, awayName);
+
+      return `
+        <div class="match-event ${event.side === "home" ? "home" : event.side === "away" ? "away" : ""}">
+          <div class="match-event-time">
+            ${esc(event.time)}
+            <span class="match-event-period">${esc(periodLabel(event.period))}</span>
+          </div>
+
+          <div class="match-event-description">
+            <strong>
+              ${isGoal ? "ГОЛ · " : "УДАЛЕНИЕ · "}
+              ${esc(item.player_name || "Игрок не указан")}
+            </strong>
+
+            ${item.player_number !== null && item.player_number !== undefined
+              ? `<span> · №${esc(item.player_number)}</span>`
+              : ""}
+
+            ${isGoal
+              ? `<div>${esc({
+                  even: "Равные составы",
+                  power: "Большинство",
+                  short: "Меньшинство"
+                }[item.strength] || "Тип гола не указан")}</div>`
+              : `<div>
+                  ${esc(item.reason || "Причина не указана")}
+                  ${item.minutes ? ` · ${esc(item.minutes)} мин.` : ""}
+                </div>`
+            }
+          </div>
+
+          <div class="match-event-team">${esc(team)}</div>
+        </div>
+      `;
+    }
+
+    goalsContainer.innerHTML = goalEvents.length
+      ? goalEvents.map(eventMarkup).join("")
+      : '<div class="match-page-state">Информация о голах пока не добавлена.</div>';
+
+    penaltiesContainer.innerHTML = penaltyEvents.length
+      ? penaltyEvents.map(eventMarkup).join("")
+      : '<div class="match-page-state">Информация об удалениях пока не добавлена.</div>';
+  }
+
+  // =========================================
   // ЗАГРУЗКА МАТЧА
   // =========================================
 
@@ -714,8 +800,7 @@
     const id = new URLSearchParams(window.location.search).get("id");
 
     if (!id) {
-      root.innerHTML =
-        '<div class="match-page-state">Не указан матч.</div>';
+      root.innerHTML = '<div class="match-page-state">Не указан матч.</div>';
       return;
     }
 
@@ -731,17 +816,14 @@
 
     if (error) {
       console.error("Ошибка загрузки матча:", error);
-
       root.innerHTML =
         '<div class="match-page-state">Не удалось загрузить матч.</div>';
-
       return;
     }
 
     if (!match) {
       root.innerHTML =
         '<div class="match-page-state">Матч не найден.</div>';
-
       return;
     }
 
@@ -778,48 +860,34 @@
       `
       : `
         <div class="match-score">
-          <span>—</span>
-          <span>:</span>
-          <span>—</span>
+          <span>—</span><span>:</span><span>—</span>
         </div>
       `;
 
     root.innerHTML = `
       <section class="match-hero">
-
         ${match.competition
           ? `<div class="match-competition">${esc(match.competition)}</div>`
-          : ""
-        }
-
+          : ""}
         <div class="match-scoreboard">
           ${clubMarkup(home)}
           ${score}
           ${clubMarkup(away)}
         </div>
-
         <div class="match-status">
           ${esc(statusNames[match.status] || match.status || "Статус не указан")}
         </div>
-
         <div class="match-meta">
           ${match.match_date
             ? `<div>${esc(formatDate(match.match_date))}</div>`
-            : ""
-          }
-
-          ${match.venue
-            ? `<div>${esc(match.venue)}</div>`
-            : ""
-          }
+            : ""}
+          ${match.venue ? `<div>${esc(match.venue)}</div>` : ""}
         </div>
-
       </section>
 
       <div id="winnerPollContainer"></div>
 
       <section class="match-details">
-
         <div class="match-detail-card">
           <h2>Голы</h2>
           <div id="matchGoals">
@@ -840,226 +908,14 @@
             <div class="match-page-state">Загрузка составов…</div>
           </div>
         </div>
-
       </section>
     `;
 
     await Promise.all([
-      loadGoals(match.id, home, away),
-      loadPenalties(match.id, home, away),
-      loadRoster(match.id, home, away),
+      loadEvents(match.id, home, away),
+      loadRoster(match.id, home, away, match),
       loadWinnerPoll(match, home, away)
     ]);
-  }
-
-  // =========================================
-  // ГОЛЫ
-  // =========================================
-
-  async function loadGoals(matchId, home, away) {
-    const container = document.getElementById("matchGoals");
-
-    const { data, error } = await db
-      .from("match_goals")
-      .select("*")
-      .eq("match_id", matchId)
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      console.error("Ошибка загрузки голов:", error);
-
-      container.innerHTML =
-        '<div class="match-page-state">Не удалось загрузить голы.</div>';
-
-      return;
-    }
-
-    if (!data?.length) {
-      container.innerHTML =
-        '<div class="match-page-state">Информация о голах пока не добавлена.</div>';
-
-      return;
-    }
-
-    const homeName = displayTeam(home.name, "Хозяева");
-    const awayName = displayTeam(away.name, "Гости");
-
-    container.innerHTML = data.map(goal => `
-      <div class="match-event">
-
-        <div class="match-event-time">
-          ${esc(goal.goal_time || "—")}
-        </div>
-
-        <div class="match-event-description">
-          <strong>${esc(goal.player_name || "Автор не указан")}</strong>
-
-          ${goal.player_number !== null && goal.player_number !== undefined
-            ? `<span> · №${esc(goal.player_number)}</span>`
-            : ""
-          }
-
-          ${goal.strength
-            ? `<div>${esc(goal.strength)}</div>`
-            : ""
-          }
-        </div>
-
-        <div class="match-event-team">
-          ${esc(teamLabel(goal.team_side, homeName, awayName))}
-        </div>
-
-      </div>
-    `).join("");
-  }
-
-  // =========================================
-  // ШТРАФЫ
-  // =========================================
-
-  async function loadPenalties(matchId, home, away) {
-    const container = document.getElementById("matchPenalties");
-
-    const { data, error } = await db
-      .from("match_penalties")
-      .select("*")
-      .eq("match_id", matchId)
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      console.error("Ошибка загрузки штрафов:", error);
-
-      container.innerHTML =
-        '<div class="match-page-state">Не удалось загрузить штрафы.</div>';
-
-      return;
-    }
-
-    if (!data?.length) {
-      container.innerHTML =
-        '<div class="match-page-state">Информация об удалениях пока не добавлена.</div>';
-
-      return;
-    }
-
-    const homeName = displayTeam(home.name, "Хозяева");
-    const awayName = displayTeam(away.name, "Гости");
-
-    container.innerHTML = data.map(penalty => `
-      <div class="match-event">
-
-        <div class="match-event-time">
-          ${esc(penalty.penalty_time || "—")}
-        </div>
-
-        <div class="match-event-description">
-          <strong>${esc(penalty.player_name || "Игрок не указан")}</strong>
-
-          ${penalty.player_number !== null && penalty.player_number !== undefined
-            ? `<span> · №${esc(penalty.player_number)}</span>`
-            : ""
-          }
-
-          <div>
-            ${esc(penalty.reason || "Причина не указана")}
-            ${penalty.minutes
-              ? ` · ${esc(penalty.minutes)} мин.`
-              : ""
-            }
-          </div>
-        </div>
-
-        <div class="match-event-team">
-          ${esc(teamLabel(penalty.team_side, homeName, awayName))}
-        </div>
-
-      </div>
-    `).join("");
-  }
-
-  // =========================================
-  // СОСТАВЫ
-  // =========================================
-
-  async function loadRoster(matchId, home, away) {
-    const container = document.getElementById("matchRosters");
-
-    const { data, error } = await db
-      .from("match_roster")
-      .select("*")
-      .eq("match_id", matchId)
-      .order("player_number", { ascending: true });
-
-    if (error) {
-      console.error("Ошибка загрузки составов:", error);
-
-      container.innerHTML =
-        '<div class="match-page-state">Не удалось загрузить составы.</div>';
-
-      return;
-    }
-
-    if (!data?.length) {
-      container.innerHTML =
-        '<div class="match-page-state">Составы пока не опубликованы.</div>';
-
-      return;
-    }
-
-    const homeName = displayTeam(home.name, "Хозяева");
-    const awayName = displayTeam(away.name, "Гости");
-
-    const homePlayers = data.filter(player =>
-      player.team_side === "home"
-    );
-
-    const awayPlayers = data.filter(player =>
-      player.team_side === "away"
-    );
-
-    function rosterMarkup(title, players) {
-      return `
-        <div>
-
-          <div class="match-roster-title">
-            ${esc(title)}
-          </div>
-
-          ${players.length
-            ? players.map(player => `
-              <div class="match-player">
-
-                <div class="match-player-number">
-                  ${player.player_number !== null && player.player_number !== undefined
-                    ? `#${esc(player.player_number)}`
-                    : "—"
-                  }
-                </div>
-
-                <div>
-                  ${esc(player.player_name || "Игрок")}
-
-                  ${player.position
-                    ? `<div class="match-player-position">${esc(player.position)}</div>`
-                    : ""
-                  }
-                </div>
-
-              </div>
-            `).join("")
-            : '<div class="match-page-state">Состав не опубликован.</div>'
-          }
-
-        </div>
-      `;
-    }
-
-    container.innerHTML = `
-      <div class="match-roster-grid">
-        ${rosterMarkup(homeName, homePlayers)}
-        ${rosterMarkup(awayName, awayPlayers)}
-      </div>
-    `;
   }
 
   // =========================================
@@ -1075,7 +931,6 @@
     if (!db) {
       root.innerHTML =
         '<div class="match-page-state">Нет подключения к базе данных. Проверь js/config.js.</div>';
-
       return;
     }
 
