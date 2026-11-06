@@ -1,9 +1,16 @@
+
 (() => {
   "use strict";
 
   const db = window.supabaseClient;
   const BUCKET = window.STORAGE_BUCKET || "site-media";
   const root = document.getElementById("matchContent");
+
+  const VOTER_KEY = "hcchelny_match_voter_token";
+
+  // =========================================
+  // ОСНОВНЫЕ ФУНКЦИИ
+  // =========================================
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -41,6 +48,40 @@
     const element = document.getElementById(id);
     if (element) element.textContent = value;
   }
+
+  function clubName(club) {
+    return club?.name || "Команда";
+  }
+
+  function clubLogo(club) {
+    return imageURL(club?.logo_path);
+  }
+
+  function clubMarkup(club) {
+    const name = clubName(club);
+    const logo = clubLogo(club);
+
+    return `
+      <div class="match-club">
+        ${logo ? `<img src="${esc(logo)}" alt="${esc(name)}">` : ""}
+        <div class="match-club-name">${esc(name)}</div>
+      </div>
+    `;
+  }
+
+  function displayTeam(team, fallback) {
+    return team || fallback || "Команда";
+  }
+
+  function teamLabel(side, homeName, awayName) {
+    if (side === "home") return homeName;
+    if (side === "away") return awayName;
+    return side || "";
+  }
+
+  // =========================================
+  // НАСТРОЙКИ САЙТА
+  // =========================================
 
   async function loadSettings() {
     const { data, error } = await db
@@ -90,35 +131,445 @@
     });
   }
 
-  function clubName(club) {
-    return club?.name || "Команда";
+  // =========================================
+  // ГОЛОСОВАНИЕ ЗА ПОБЕДИТЕЛЯ
+  // =========================================
+
+  function getVoterToken() {
+    try {
+      let token = localStorage.getItem(VOTER_KEY);
+
+      if (!token) {
+        token = crypto.randomUUID();
+        localStorage.setItem(VOTER_KEY, token);
+      }
+
+      return token;
+    } catch (error) {
+      console.warn("Не удалось сохранить идентификатор устройства:", error);
+
+      if (!window.matchWinnerTemporaryToken) {
+        window.matchWinnerTemporaryToken =
+          crypto.randomUUID();
+      }
+
+      return window.matchWinnerTemporaryToken;
+    }
   }
 
-  function clubLogo(club) {
-    return imageURL(club?.logo_path);
+  function injectPollStyles() {
+    if (document.getElementById("matchWinnerPollStyles")) return;
+
+    const style = document.createElement("style");
+    style.id = "matchWinnerPollStyles";
+
+    style.textContent = `
+      .winner-poll {
+        margin: 26px 0 34px;
+        padding: 24px 20px;
+        border-radius: 12px;
+        background: #101522;
+        color: #fff;
+        text-align: center;
+      }
+
+      .winner-poll-title {
+        margin: 0 0 8px;
+        font-size: clamp(24px, 5vw, 34px);
+        line-height: 1.15;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .winner-poll-subtitle {
+        margin: 0 0 22px;
+        font-size: 16px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .winner-poll-teams {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .winner-poll-team {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-width: 0;
+        padding: 15px 10px;
+        border: 2px solid transparent;
+        border-radius: 9px;
+        background: #202b3b;
+        color: white;
+        font: inherit;
+        cursor: pointer;
+        transition: .2s ease;
+      }
+
+      .winner-poll-team:hover:not(:disabled) {
+        border-color: #32c9ed;
+        transform: translateY(-2px);
+      }
+
+      .winner-poll-team:disabled {
+        cursor: default;
+        opacity: .8;
+      }
+
+      .winner-poll-team img {
+        width: 65px;
+        height: 65px;
+        object-fit: contain;
+      }
+
+      .winner-poll-team span {
+        font-size: 15px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+      }
+
+      .winner-poll-team.selected {
+        border-color: #32c9ed;
+        background: #183b4c;
+      }
+
+      .winner-poll-results {
+        margin-top: 22px;
+      }
+
+      .winner-poll-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 76px;
+        border: 3px solid #a2b0b4;
+        overflow: hidden;
+      }
+
+      .winner-poll-result {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 6px;
+        font-size: clamp(22px, 5vw, 34px);
+        font-weight: 900;
+        background: #151a25;
+      }
+
+      .winner-poll-result:first-child {
+        border-right: 2px solid #a2b0b4;
+      }
+
+      .winner-poll-result.leading {
+        background: #91a1a5;
+        color: white;
+      }
+
+      .winner-poll-total {
+        margin-top: 14px;
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .winner-poll-message {
+        min-height: 22px;
+        margin-top: 14px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .winner-poll-closed {
+        margin-top: 18px;
+        color: #aab8c5;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .winner-poll-error {
+        color: #ff8585;
+      }
+
+      @media (max-width: 480px) {
+        .winner-poll {
+          padding: 22px 12px;
+        }
+
+        .winner-poll-team {
+          padding: 12px 6px;
+        }
+
+        .winner-poll-team img {
+          width: 50px;
+          height: 50px;
+        }
+
+        .winner-poll-team span {
+          font-size: 13px;
+        }
+
+        .winner-poll-bar {
+          min-height: 62px;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
   }
 
-  function clubMarkup(club) {
-    const name = clubName(club);
-    const logo = clubLogo(club);
+  function isPollEligible(match) {
+    const status = match.status;
+
+    if (status === "live" || status === "in_progress") {
+      return true;
+    }
+
+    if (status === "scheduled" || status === "upcoming") {
+      return match.match_date &&
+        new Date(match.match_date).getTime() > Date.now();
+    }
+
+    return false;
+  }
+
+  function pollMarkup(match, home, away, closed = false) {
+    injectPollStyles();
+
+    const homeName = clubName(home);
+    const awayName = clubName(away);
+
+    const homeLogo = clubLogo(home);
+    const awayLogo = clubLogo(away);
 
     return `
-      <div class="match-club">
-        ${logo ? `<img src="${esc(logo)}" alt="${esc(name)}">` : ""}
-        <div class="match-club-name">${esc(name)}</div>
-      </div>
+      <section class="winner-poll" id="winnerPoll">
+
+        <h2 class="winner-poll-title">Кто победит?</h2>
+
+        <div class="winner-poll-subtitle">
+          ${closed
+            ? "Итоги голосования"
+            : "Проголосуйте за свой клуб"
+          }
+        </div>
+
+        <div class="winner-poll-teams" id="winnerPollButtons">
+
+          <button
+            class="winner-poll-team"
+            type="button"
+            data-side="home"
+            ${closed ? "disabled" : ""}
+          >
+            ${homeLogo
+              ? `<img src="${esc(homeLogo)}" alt="">`
+              : ""
+            }
+            <span>${esc(homeName)}</span>
+          </button>
+
+          <button
+            class="winner-poll-team"
+            type="button"
+            data-side="away"
+            ${closed ? "disabled" : ""}
+          >
+            ${awayLogo
+              ? `<img src="${esc(awayLogo)}" alt="">`
+              : ""
+            }
+            <span>${esc(awayName)}</span>
+          </button>
+
+        </div>
+
+        <div class="winner-poll-results" id="winnerPollResults" hidden>
+
+          <div class="winner-poll-bar">
+
+            <div class="winner-poll-result" id="winnerPollHome">
+              0%
+            </div>
+
+            <div class="winner-poll-result" id="winnerPollAway">
+              0%
+            </div>
+
+          </div>
+
+          <div class="winner-poll-total" id="winnerPollTotal">
+            Всего проголосовало: 0
+          </div>
+
+        </div>
+
+        <div class="winner-poll-message" id="winnerPollMessage"></div>
+
+        <div class="winner-poll-closed" id="winnerPollClosed" hidden>
+          Голосование завершено. Результаты зафиксированы.
+        </div>
+
+      </section>
     `;
   }
 
-  function displayTeam(team, fallback) {
-    return team || fallback || "Команда";
+  async function loadWinnerPoll(match, home, away) {
+    if (!isPollEligible(match) &&
+        !["finished", "completed"].includes(match.status)) {
+      return;
+    }
+
+    const { data, error } = await db.rpc(
+      "get_match_winner_poll",
+      { p_match_id: match.id }
+    );
+
+    if (error) {
+      console.error("Ошибка загрузки голосования:", error);
+      return;
+    }
+
+    // Для старых матчей без созданного голосования
+    // ничего не показываем
+    if (!data?.length) return;
+
+    const result = data[0];
+    const closed = result.is_closed === true;
+
+    const pollContainer = document.getElementById("winnerPollContainer");
+    if (!pollContainer) return;
+
+    pollContainer.innerHTML = pollMarkup(
+      match,
+      home,
+      away,
+      closed
+    );
+
+    renderWinnerPollResults(result);
+
+    if (closed) {
+      document.getElementById("winnerPollClosed").hidden = false;
+      return;
+    }
+
+    const token = getVoterToken();
+
+    const buttons = document.querySelectorAll(
+      "#winnerPollButtons button"
+    );
+
+    buttons.forEach(button => {
+      button.addEventListener("click", async () => {
+        const side = button.dataset.side;
+
+        buttons.forEach(item => {
+          item.disabled = true;
+        });
+
+        const message = document.getElementById("winnerPollMessage");
+        message.classList.remove("winner-poll-error");
+        message.textContent = "Сохраняем ваш голос…";
+
+        const { data: voteResult, error: voteError } = await db.rpc(
+          "cast_match_winner_vote",
+          {
+            p_match_id: match.id,
+            p_team_side: side,
+            p_voter_token: token
+          }
+        );
+
+        if (voteError) {
+          console.error("Ошибка отправки голоса:", voteError);
+
+          message.classList.add("winner-poll-error");
+          message.textContent =
+            "Не удалось отправить голос. Попробуйте ещё раз.";
+
+          buttons.forEach(item => {
+            item.disabled = false;
+          });
+
+          return;
+        }
+
+        if (!voteResult?.success) {
+          message.classList.add("winner-poll-error");
+          message.textContent =
+            voteResult?.message || "Не удалось учесть голос.";
+
+          await refreshWinnerPoll(match.id);
+
+          return;
+        }
+
+        message.textContent = "Ваш голос учтён!";
+        button.classList.add("selected");
+
+        await refreshWinnerPoll(match.id);
+      });
+    });
   }
 
-  function teamLabel(side, homeName, awayName) {
-    if (side === "home") return homeName;
-    if (side === "away") return awayName;
-    return side || "";
+  function renderWinnerPollResults(result) {
+    const homeVotes = Number(result.home_votes || 0);
+    const awayVotes = Number(result.away_votes || 0);
+    const total = Number(result.total_votes || 0);
+
+    const homePercent = total
+      ? Math.round(homeVotes / total * 100)
+      : 0;
+
+    const awayPercent = total
+      ? 100 - homePercent
+      : 0;
+
+    const results = document.getElementById("winnerPollResults");
+    const homeElement = document.getElementById("winnerPollHome");
+    const awayElement = document.getElementById("winnerPollAway");
+    const totalElement = document.getElementById("winnerPollTotal");
+
+    if (!results || !homeElement || !awayElement || !totalElement) {
+      return;
+    }
+
+    results.hidden = false;
+
+    homeElement.textContent = `${homePercent}%`;
+    awayElement.textContent = `${awayPercent}%`;
+
+    homeElement.classList.toggle(
+      "leading",
+      total > 0 && homeVotes > awayVotes
+    );
+
+    awayElement.classList.toggle(
+      "leading",
+      total > 0 && awayVotes > homeVotes
+    );
+
+    totalElement.textContent =
+      `Всего проголосовало: ${total}`;
   }
+
+  async function refreshWinnerPoll(matchId) {
+    const { data, error } = await db.rpc(
+      "get_match_winner_poll",
+      { p_match_id: matchId }
+    );
+
+    if (error || !data?.length) return;
+
+    renderWinnerPollResults(data[0]);
+  }
+
+  // =========================================
+  // ЗАГРУЗКА МАТЧА
+  // =========================================
 
   async function loadMatch() {
     const id = new URLSearchParams(window.location.search).get("id");
@@ -226,6 +677,8 @@
 
       </section>
 
+      <div id="winnerPollContainer"></div>
+
       <section class="match-details">
 
         <div class="match-detail-card">
@@ -255,9 +708,14 @@
     await Promise.all([
       loadGoals(match.id, home, away),
       loadPenalties(match.id, home, away),
-      loadRoster(match.id, home, away)
+      loadRoster(match.id, home, away),
+      loadWinnerPoll(match, home, away)
     ]);
   }
+
+  // =========================================
+  // ГОЛЫ
+  // =========================================
 
   async function loadGoals(matchId, home, away) {
     const container = document.getElementById("matchGoals");
@@ -315,6 +773,10 @@
       </div>
     `).join("");
   }
+
+  // =========================================
+  // ШТРАФЫ
+  // =========================================
 
   async function loadPenalties(matchId, home, away) {
     const container = document.getElementById("matchPenalties");
@@ -375,6 +837,10 @@
       </div>
     `).join("");
   }
+
+  // =========================================
+  // СОСТАВЫ
+  // =========================================
 
   async function loadRoster(matchId, home, away) {
     const container = document.getElementById("matchRosters");
@@ -456,6 +922,10 @@
       </div>
     `;
   }
+
+  // =========================================
+  // ЗАПУСК
+  // =========================================
 
   async function init() {
     if (!root) {
