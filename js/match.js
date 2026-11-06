@@ -132,30 +132,61 @@
   }
 
   // =========================================
-  // ГОЛОСОВАНИЕ ЗА ПОБЕДИТЕЛЯ
+  // ИДЕНТИФИКАТОР УСТРОЙСТВА
   // =========================================
+
+  function createUUID() {
+    if (window.crypto?.randomUUID) {
+      return window.crypto.randomUUID();
+    }
+
+    if (window.crypto?.getRandomValues) {
+      const bytes = new Uint8Array(16);
+      window.crypto.getRandomValues(bytes);
+
+      bytes[6] = (bytes[6] & 0x0f) | 0x40;
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+      const hex = Array.from(bytes, b =>
+        b.toString(16).padStart(2, "0")
+      ).join("");
+
+      return [
+        hex.slice(0, 8),
+        hex.slice(8, 12),
+        hex.slice(12, 16),
+        hex.slice(16, 20),
+        hex.slice(20)
+      ].join("-");
+    }
+
+    throw new Error("Браузер не поддерживает генерацию UUID.");
+  }
 
   function getVoterToken() {
     try {
       let token = localStorage.getItem(VOTER_KEY);
 
       if (!token) {
-        token = crypto.randomUUID();
+        token = createUUID();
         localStorage.setItem(VOTER_KEY, token);
       }
 
       return token;
     } catch (error) {
-      console.warn("Не удалось сохранить идентификатор устройства:", error);
+      console.warn("Ошибка сохранения токена:", error);
 
       if (!window.matchWinnerTemporaryToken) {
-        window.matchWinnerTemporaryToken =
-          crypto.randomUUID();
+        window.matchWinnerTemporaryToken = createUUID();
       }
 
       return window.matchWinnerTemporaryToken;
     }
   }
+
+  // =========================================
+  // СТИЛИ ГОЛОСОВАНИЯ
+  // =========================================
 
   function injectPollStyles() {
     if (document.getElementById("matchWinnerPollStyles")) return;
@@ -280,6 +311,7 @@
         margin-top: 14px;
         font-size: 14px;
         font-weight: 700;
+        overflow-wrap: anywhere;
       }
 
       .winner-poll-closed {
@@ -320,14 +352,22 @@
     document.head.appendChild(style);
   }
 
-  function isPollEligible(match) {
-    const status = match.status;
+  // =========================================
+  // СОСТОЯНИЕ ГОЛОСОВАНИЯ
+  // =========================================
 
-    if (status === "live" || status === "in_progress") {
+  function isPollEligible(match) {
+    if (
+      match.status === "live" ||
+      match.status === "in_progress"
+    ) {
       return true;
     }
 
-    if (status === "scheduled" || status === "upcoming") {
+    if (
+      match.status === "scheduled" ||
+      match.status === "upcoming"
+    ) {
       return match.match_date &&
         new Date(match.match_date).getTime() > Date.now();
     }
@@ -335,7 +375,7 @@
     return false;
   }
 
-  function pollMarkup(match, home, away, closed = false) {
+  function pollMarkup(home, away, closed = false) {
     injectPollStyles();
 
     const homeName = clubName(home);
@@ -416,103 +456,28 @@
     `;
   }
 
-  async function loadWinnerPoll(match, home, away) {
-    if (!isPollEligible(match) &&
-        !["finished", "completed"].includes(match.status)) {
-      return;
-    }
+  // =========================================
+  // ПОЛУЧЕНИЕ РЕЗУЛЬТАТОВ
+  // =========================================
 
-    const { data, error } = await db.rpc(
+  async function getPollData(matchId) {
+    const response = await db.rpc(
       "get_match_winner_poll",
-      { p_match_id: match.id }
+      { p_match_id: matchId }
     );
 
-    if (error) {
-      console.error("Ошибка загрузки голосования:", error);
-      return;
-    }
-
-    // Для старых матчей без созданного голосования
-    // ничего не показываем
-    if (!data?.length) return;
-
-    const result = data[0];
-    const closed = result.is_closed === true;
-
-    const pollContainer = document.getElementById("winnerPollContainer");
-    if (!pollContainer) return;
-
-    pollContainer.innerHTML = pollMarkup(
-      match,
-      home,
-      away,
-      closed
-    );
-
-    renderWinnerPollResults(result);
-
-    if (closed) {
-      document.getElementById("winnerPollClosed").hidden = false;
-      return;
-    }
-
-    const token = getVoterToken();
-
-    const buttons = document.querySelectorAll(
-      "#winnerPollButtons button"
-    );
-
-    buttons.forEach(button => {
-      button.addEventListener("click", async () => {
-        const side = button.dataset.side;
-
-        buttons.forEach(item => {
-          item.disabled = true;
-        });
-
-        const message = document.getElementById("winnerPollMessage");
-        message.classList.remove("winner-poll-error");
-        message.textContent = "Сохраняем ваш голос…";
-
-        const { data: voteResult, error: voteError } = await db.rpc(
-          "cast_match_winner_vote",
-          {
-            p_match_id: match.id,
-            p_team_side: side,
-            p_voter_token: token
-          }
-        );
-
-        if (voteError) {
-          console.error("Ошибка отправки голоса:", voteError);
-
-          message.classList.add("winner-poll-error");
-          message.textContent =
-            "Не удалось отправить голос. Попробуйте ещё раз.";
-
-          buttons.forEach(item => {
-            item.disabled = false;
-          });
-
-          return;
-        }
-
-        if (!voteResult?.success) {
-          message.classList.add("winner-poll-error");
-          message.textContent =
-            voteResult?.message || "Не удалось учесть голос.";
-
-          await refreshWinnerPoll(match.id);
-
-          return;
-        }
-
-        message.textContent = "Ваш голос учтён!";
-        button.classList.add("selected");
-
-        await refreshWinnerPoll(match.id);
+    if (response.error) {
+      console.error("Ошибка получения голосования:", {
+        message: response.error.message,
+        details: response.error.details,
+        hint: response.error.hint,
+        code: response.error.code
       });
-    });
+
+      throw response.error;
+    }
+
+    return response.data;
   }
 
   function renderWinnerPollResults(result) {
@@ -556,15 +521,189 @@
       `Всего проголосовало: ${total}`;
   }
 
+  // =========================================
+  // ОБНОВЛЕНИЕ РЕЗУЛЬТАТОВ
+  // =========================================
+
   async function refreshWinnerPoll(matchId) {
-    const { data, error } = await db.rpc(
-      "get_match_winner_poll",
-      { p_match_id: matchId }
-    );
+    try {
+      const data = await getPollData(matchId);
 
-    if (error || !data?.length) return;
+      if (!data?.length) return;
 
-    renderWinnerPollResults(data[0]);
+      renderWinnerPollResults(data[0]);
+
+      if (data[0].is_closed === true) {
+        const closed = document.getElementById("winnerPollClosed");
+        const buttons = document.querySelectorAll(
+          "#winnerPollButtons button"
+        );
+
+        if (closed) closed.hidden = false;
+
+        buttons.forEach(button => {
+          button.disabled = true;
+        });
+      }
+    } catch (error) {
+      console.error("Не удалось обновить результаты:", error);
+    }
+  }
+
+  // =========================================
+  // ОТПРАВКА ГОЛОСА
+  // =========================================
+
+  async function submitWinnerVote(matchId, side, token, buttons) {
+    const message = document.getElementById("winnerPollMessage");
+
+    buttons.forEach(button => {
+      button.disabled = true;
+    });
+
+    message.classList.remove("winner-poll-error");
+    message.textContent = "Сохраняем ваш голос…";
+
+    try {
+      const { data, error } = await db.rpc(
+        "cast_match_winner_vote",
+        {
+          p_match_id: matchId,
+          p_team_side: side,
+          p_voter_token: token
+        }
+      );
+
+      if (error) {
+        console.error("ОШИБКА ОТПРАВКИ ГОЛОСА:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+
+        message.classList.add("winner-poll-error");
+
+        message.textContent =
+          "Ошибка Supabase: " +
+          (error.message || "неизвестная ошибка") +
+          (error.code ? ` (код: ${error.code})` : "");
+
+        buttons.forEach(button => {
+          button.disabled = false;
+        });
+
+        return;
+      }
+
+      if (!data?.success) {
+        message.classList.add("winner-poll-error");
+        message.textContent =
+          data?.message || "Голос не был принят.";
+
+        // Повторно проверяем состояние голосования
+        await refreshWinnerPoll(matchId);
+
+        const closed = document.getElementById("winnerPollClosed");
+
+        if (!closed || closed.hidden) {
+          buttons.forEach(button => {
+            button.disabled = false;
+          });
+        }
+
+        return;
+      }
+
+      message.textContent = "Ваш голос учтён!";
+
+      buttons.forEach(button => {
+        if (button.dataset.side === side) {
+          button.classList.add("selected");
+        }
+      });
+
+      // Обновляем проценты
+      await refreshWinnerPoll(matchId);
+
+    } catch (error) {
+      console.error("Критическая ошибка голосования:", error);
+
+      message.classList.add("winner-poll-error");
+      message.textContent =
+        "Ошибка: " + (error?.message || String(error));
+
+      buttons.forEach(button => {
+        button.disabled = false;
+      });
+    }
+  }
+
+  // =========================================
+  // ЗАГРУЗКА ГОЛОСОВАНИЯ
+  // =========================================
+
+  async function loadWinnerPoll(match, home, away) {
+    const eligible = isPollEligible(match);
+    const finished = ["finished", "completed"].includes(match.status);
+
+    if (!eligible && !finished) return;
+
+    const pollContainer = document.getElementById("winnerPollContainer");
+    if (!pollContainer) return;
+
+    try {
+      const data = await getPollData(match.id);
+
+      if (!data?.length) return;
+
+      const result = data[0];
+      const closed = result.is_closed === true || finished;
+
+      pollContainer.innerHTML = pollMarkup(
+        home,
+        away,
+        closed
+      );
+
+      renderWinnerPollResults(result);
+
+      if (closed) {
+        const closedMessage = document.getElementById("winnerPollClosed");
+        if (closedMessage) closedMessage.hidden = false;
+        return;
+      }
+
+      const token = getVoterToken();
+
+      const buttons = Array.from(
+        document.querySelectorAll("#winnerPollButtons button")
+      );
+
+      buttons.forEach(button => {
+        button.addEventListener("click", () => {
+          submitWinnerVote(
+            match.id,
+            button.dataset.side,
+            token,
+            buttons
+          );
+        });
+      });
+
+    } catch (error) {
+      console.error("Ошибка загрузки голосования:", error);
+
+      pollContainer.innerHTML = `
+        <section class="winner-poll">
+          <div class="winner-poll-title">Голосование</div>
+          <div class="winner-poll-message winner-poll-error">
+            Не удалось загрузить голосование:
+            ${esc(error?.message || "ошибка базы данных")}
+          </div>
+        </section>
+      `;
+    }
   }
 
   // =========================================
