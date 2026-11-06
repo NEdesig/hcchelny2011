@@ -124,6 +124,10 @@ textarea{min-height:90px}
 <div class="field"><label>Турнир</label><input id="comp"></div>
 <div class="field"><label>Арена</label><input id="venue"></div>
 </div>
+<div class="grid">
+<div class="field"><label>Главный тренер хозяев</label><input id="homeCoach" placeholder="Фамилия Имя"></div>
+<div class="field"><label>Главный тренер гостей</label><input id="awayCoach" placeholder="Фамилия Имя"></div>
+</div>
 <div class="field"><label>Ссылка на трансляцию</label><input id="stream" type="url" placeholder="https://..."></div>
 <button id="msave" class="btn">СОХРАНИТЬ МАТЧ</button>
 <button id="mreset" class="btn alt hide">Отмена</button>
@@ -149,9 +153,10 @@ textarea{min-height:90px}
 <input id="goalEditId" type="hidden">
 <div class="field"><label>Команда</label><select id="gteam"><option value="home">Хозяева</option><option value="away">Гости</option></select></div>
 <div class="grid">
+<div class="field"><label>Период</label><select id="gperiod"><option value="1">1-й период</option><option value="2">2-й период</option><option value="3">3-й период</option><option value="4">Овертайм</option><option value="5">Буллиты</option></select></div>
 <div class="field"><label>Время матча</label><input id="gminute" placeholder="12:34"></div>
-<div class="field"><label>Номер игрока</label><input id="gnum" type="number"></div>
 </div>
+<div class="field"><label>Номер игрока</label><input id="gnum" type="number"></div>
 <div class="field"><label>Автор гола</label><input id="gplayer"></div>
 <div class="field"><label>Тип гола</label><select id="gstrength"><option value="even">Равные составы</option><option value="power">Большинство</option><option value="short">Меньшинство</option></select></div>
 <button id="gadd" class="btn">ДОБАВИТЬ ГОЛ</button>
@@ -162,13 +167,14 @@ textarea{min-height:90px}
 <input id="penaltyEditId" type="hidden">
 <div class="field"><label>Команда</label><select id="pteam"><option value="home">Хозяева</option><option value="away">Гости</option></select></div>
 <div class="grid">
+<div class="field"><label>Период</label><select id="pperiod"><option value="1">1-й период</option><option value="2">2-й период</option><option value="3">3-й период</option><option value="4">Овертайм</option><option value="5">Буллиты</option></select></div>
 <div class="field"><label>Время</label><input id="ptime" placeholder="12:34"></div>
-<div class="field"><label>Номер игрока</label><input id="pnum" type="number"></div>
 </div>
 <div class="grid">
+<div class="field"><label>Номер игрока</label><input id="pnum" type="number"></div>
 <div class="field"><label>Игрок</label><input id="pplayer"></div>
-<div class="field"><label>Нарушение</label><input id="preason"></div>
 </div>
+<div class="field"><label>Нарушение</label><input id="preason"></div>
 <div class="field"><label>Минуты штрафа</label><select id="pminutes"><option value="2">2</option><option value="4">4</option><option value="5">5</option><option value="10">10</option><option value="20">20</option></select></div>
 <button id="padd" class="btn">ДОБАВИТЬ УДАЛЕНИЕ</button>
 <button id="pcancel" class="btn alt hide">Отмена</button>
@@ -191,7 +197,7 @@ textarea{min-height:90px}
 <section id="rosters" class="panel">
 <div class="card">
 <h2>Управление составами</h2>
-<p class="hint">Выбери матч, команду и игрока из общей базы профилей.</p>
+<p class="hint">Выбери матч, команду и игрока из общей базы профилей. Стартовые роли попадут на хоккейную доску.</p>
 <div class="field"><label>Матч</label><select id="rosterMatch"></select></div>
 <div class="field"><label>Команда</label><select id="rosterSide"><option value="home">Хозяева</option><option value="away">Гости</option></select></div>
 <input id="rosterEditId" type="hidden">
@@ -201,6 +207,13 @@ textarea{min-height:90px}
 <div class="field"><label>Позиция</label><select id="rosterPosition"><option value="Нападающий">Нападающий</option><option value="Защитник">Защитник</option><option value="Вратарь">Вратарь</option></select></div>
 </div>
 <div class="field"><label>Имя игрока в составе</label><input id="rosterName"></div>
+<div class="field">
+<label>Роль в стартовом составе</label>
+<select id="rosterRole">
+<option value="">Не в стартовом составе / запас</option>
+</select>
+<p class="hint">Для расстановки на доске назначь трёх нападающих, двух защитников и основного вратаря.</p>
+</div>
 <button id="rosterSave" class="btn">ДОБАВИТЬ В СОСТАВ</button>
 <button id="rosterCancel" class="btn alt hide">Отмена</button>
 </div>
@@ -255,7 +268,6 @@ textarea{min-height:90px}
 <div class="field"><label>Любимый клуб</label><input id="pfavoriteclub"></div>
 </div>
 <div class="field"><label>Интересная информация о игроке</label><textarea id="pinfo" placeholder="Факты о хоккеисте"></textarea></div>
-
 <div class="divider"></div>
 <h3>Сезонная статистика</h3>
 <div class="field"><label>Сезон</label><input id="pseason" value="2026/2027" placeholder="2026/2027"></div>
@@ -285,7 +297,6 @@ textarea{min-height:90px}
 <button id="monthAdd" class="btn">ДОБАВИТЬ КАНДИДАТА</button>
 <div id="monthCandidates"></div>
 </div>
-
 <div class="card"><h2>База игроков</h2><div id="plist">Загрузка…</div></div>
 </section>
 
@@ -456,20 +467,29 @@ let old=$("rosterMatch").value;
 $("rosterMatch").innerHTML=matches.map(m=>{
 let h=clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева";
 let a=clubs.find(c=>c.id===m.away_club_id)?.name||"Гости";
-return `<option value="${m.id}">${esc(h)} — ${esc(a)} · ${new Date(m.match_date).toLocaleDateString("ru-RU")}</option>`;
+return `<option value="${m.id}">${esc(h)} — ${esc(a)} · ${m.match_date?new Date(m.match_date).toLocaleDateString("ru-RU"):""}</option>`;
 }).join("");
-if(matches.some(m=>m.id===old))$("rosterMatch").value=old;
+if(matches.some(m=>String(m.id)===old))$("rosterMatch").value=old;
 }
 function resetM(){
 $("mid").value="";$("mh").textContent="Создать матч";$("msave").textContent="СОХРАНИТЬ МАТЧ";$("mreset").classList.add("hide");
-["mdate","hs","as","comp","venue","stream"].forEach(x=>$(x).value="");$("mstatus").value="scheduled";
+["mdate","hs","as","comp","venue","stream","homeCoach","awayCoach"].forEach(x=>$(x).value="");
+$("mstatus").value="scheduled";
 }
 $("mreset").onclick=resetM;
 $("msave").onclick=()=>safe(async()=>{
 if(!v("home")||!v("away"))throw Error("Сначала добавь команды");
 if(v("home")===v("away"))throw Error("Выбери разные команды");
 if(!v("mdate"))throw Error("Укажи дату");
-let r={home_club_id:v("home"),away_club_id:v("away"),match_date:new Date(v("mdate")).toISOString(),status:v("mstatus"),home_score:n("hs"),away_score:n("as"),competition:v("comp")||null,venue:v("venue")||null,stream_url:v("stream")||null};
+let r={
+home_club_id:v("home"),away_club_id:v("away"),
+match_date:new Date(v("mdate")).toISOString(),
+status:v("mstatus"),home_score:n("hs"),away_score:n("as"),
+competition:v("comp")||null,venue:v("venue")||null,
+stream_url:v("stream")||null,
+home_coach:v("homeCoach")||null,
+away_coach:v("awayCoach")||null
+};
 if(v("mid"))await q(db.from("matches").update(r).eq("id",v("mid")));else await q(db.from("matches").insert(r));
 resetM();await loadMatches();say("Матч сохранён");
 });
@@ -483,24 +503,54 @@ $("cname").value=$("ccity").value="";await loadMatches();say("Команда д�
 /* СОБЫТИЯ МАТЧА */
 function resetGoal(){
 $("goalEditId").value="";$("gminute").value=$("gnum").value=$("gplayer").value="";
-$("gteam").value="home";$("gstrength").value="even";$("gadd").textContent="ДОБАВИТЬ ГОЛ";$("gcancel").classList.add("hide");
+$("gteam").value="home";$("gperiod").value="1";$("gstrength").value="even";
+$("gadd").textContent="ДОБАВИТЬ ГОЛ";$("gcancel").classList.add("hide");
 }
 function resetPenalty(){
 $("penaltyEditId").value="";$("ptime").value=$("pnum").value=$("pplayer").value=$("preason").value="";
-$("pteam").value="home";$("pminutes").value="2";$("padd").textContent="ДОБАВИТЬ УДАЛЕНИЕ";$("pcancel").classList.add("hide");
+$("pteam").value="home";$("pperiod").value="1";$("pminutes").value="2";
+$("padd").textContent="ДОБАВИТЬ УДАЛЕНИЕ";$("pcancel").classList.add("hide");
 }
-$("gcancel").onclick=resetGoal;$("pcancel").onclick=resetPenalty;
+$("gcancel").onclick=resetGoal;
+$("pcancel").onclick=resetPenalty;
 
+function timeSeconds(value){
+let m=String(value||"").match(/(\d{1,2}):(\d{2})/);
+return m?Number(m[1])*60+Number(m[2]):Number.MAX_SAFE_INTEGER;
+}
+function sortMatchEvents(rows,timeKey){
+return [...rows].sort((a,b)=>{
+let periodA=Number(a.period||1),periodB=Number(b.period||1);
+if(periodA!==periodB)return periodA-periodB;
+return timeSeconds(a[timeKey])-timeSeconds(b[timeKey]);
+});
+}
+function periodText(p){
+p=Number(p||1);
+return p===4?"ОТ":p===5?"Буллиты":`${p}-й период`;
+}
 async function loadEvents(){
 let id=v("eventid");if(!id)return;
 let[g,p]=await Promise.all([
-q(db.from("match_goals").select("*").eq("match_id",id).order("created_at")),
-q(db.from("match_penalties").select("*").eq("match_id",id).order("created_at"))
+q(db.from("match_goals").select("*").eq("match_id",id)),
+q(db.from("match_penalties").select("*").eq("match_id",id))
 ]);
 let sideName=s=>s==="home"?"Хозяева":"Гости";
 let strengthName={even:"Равные составы",power:"Большинство",short:"Меньшинство"};
-let goals=g.map(x=>item(`Гол ${x.goal_time} · ${x.player_name}`,`${sideName(x.team_side)} · №${x.player_number??"—"} · ${strengthName[x.strength]||"Тип не указан"}`,"",act("Изменить","editgoal",x.id)+act("Удалить","delgoal",x.id,true)));
-let pens=p.map(x=>item(`Удаление ${x.penalty_time} · ${x.player_name}`,`${sideName(x.team_side)} · №${x.player_number??"—"} · ${x.minutes} мин · ${x.reason||"Нарушение не указано"}`,"",act("Изменить","editpen",x.id)+act("Удалить","delpen",x.id,true)));
+g=sortMatchEvents(g,"goal_time");
+p=sortMatchEvents(p,"penalty_time");
+let goals=g.map(x=>item(
+`Гол ${x.goal_time} · ${x.player_name}`,
+`${sideName(x.team_side)} · ${periodText(x.period)} · №${x.player_number??"—"} · ${strengthName[x.strength]||"Тип не указан"}`,
+"",
+act("Изменить","editgoal",x.id)+act("Удалить","delgoal",x.id,true)
+));
+let pens=p.map(x=>item(
+`Удаление ${x.penalty_time} · ${x.player_name}`,
+`${sideName(x.team_side)} · ${periodText(x.period)} · №${x.player_number??"—"} · ${x.minutes} мин · ${x.reason||"Нарушение не указано"}`,
+"",
+act("Изменить","editpen",x.id)+act("Удалить","delpen",x.id,true)
+));
 $("elist").innerHTML=`<h3>Голы</h3>${goals.join("")||"Голов пока нет"}<div class="divider"></div><h3>Удаления</h3>${pens.join("")||"Удалений пока нет"}`;
 await loadMatchCandidates();
 }
@@ -508,17 +558,29 @@ $("gadd").onclick=()=>safe(async()=>{
 if(!v("eventid"))throw Error("Сначала выбери матч");
 if(!v("gminute"))throw Error("Укажи время гола");
 if(!v("gplayer"))throw Error("Укажи автора гола");
-let strength=v("gstrength");if(!["even","power","short"].includes(strength))throw Error("Неизвестный тип гола");
-let row={match_id:v("eventid"),team_side:v("gteam"),goal_time:v("gminute"),player_number:n("gnum"),player_name:v("gplayer"),strength};
-if(v("goalEditId"))await q(db.from("match_goals").update(row).eq("id",v("goalEditId")));else await q(db.from("match_goals").insert(row));
+let strength=v("gstrength");
+if(!["even","power","short"].includes(strength))throw Error("Неизвестный тип гола");
+let row={
+match_id:v("eventid"),team_side:v("gteam"),
+period:Number(v("gperiod")||1),goal_time:v("gminute"),
+player_number:n("gnum"),player_name:v("gplayer"),strength
+};
+if(v("goalEditId"))await q(db.from("match_goals").update(row).eq("id",v("goalEditId")));
+else await q(db.from("match_goals").insert(row));
 resetGoal();await loadEvents();say("Гол сохранён");
 });
 $("padd").onclick=()=>safe(async()=>{
 if(!v("eventid"))throw Error("Сначала выбери матч");
 if(!v("ptime"))throw Error("Укажи время удаления");
 if(!v("pplayer"))throw Error("Укажи игрока");
-let row={match_id:v("eventid"),team_side:v("pteam"),penalty_time:v("ptime"),player_number:n("pnum"),player_name:v("pplayer"),reason:v("preason")||null,minutes:Number(v("pminutes"))};
-if(v("penaltyEditId"))await q(db.from("match_penalties").update(row).eq("id",v("penaltyEditId")));else await q(db.from("match_penalties").insert(row));
+let row={
+match_id:v("eventid"),team_side:v("pteam"),
+period:Number(v("pperiod")||1),penalty_time:v("ptime"),
+player_number:n("pnum"),player_name:v("pplayer"),
+reason:v("preason")||null,minutes:Number(v("pminutes"))
+};
+if(v("penaltyEditId"))await q(db.from("match_penalties").update(row).eq("id",v("penaltyEditId")));
+else await q(db.from("match_penalties").insert(row));
 resetPenalty();await loadEvents();say("Удаление сохранено");
 });
 
@@ -545,8 +607,10 @@ if(!v("candidatePlayer"))throw Error("Выбери игрока");
 let p=players.find(x=>String(x.id)===v("candidatePlayer"));
 if(!p)throw Error("Игрок не найден в базе");
 await q(db.from("match_player_candidates").insert({
-match_id:v("eventid"),player_id:p.id,display_name:p.name,player_number:p.number,
-player_position:p.position,statistics_text:v("candidateStats")||null,fact_text:v("candidateFact")||null
+match_id:v("eventid"),player_id:p.id,display_name:p.name,
+player_number:p.number,player_position:p.position,
+statistics_text:v("candidateStats")||null,
+fact_text:v("candidateFact")||null
 }));
 $("candidateStats").value=$("candidateFact").value="";
 await loadMatchCandidates();say("Кандидат добавлен");
@@ -554,33 +618,112 @@ await loadMatchCandidates();say("Кандидат добавлен");
 
 /* СОСТАВЫ */
 function rosterMatchInfo(){
-let m=matches.find(x=>x.id===v("rosterMatch"));if(!m)return null;
-return{home:clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева",away:clubs.find(c=>c.id===m.away_club_id)?.name||"Гости"};
+let m=matches.find(x=>String(x.id)===v("rosterMatch"));if(!m)return null;
+return{
+home:clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева",
+away:clubs.find(c=>c.id===m.away_club_id)?.name||"Гости"
+};
+}
+function updateRosterRoleOptions(selected=""){
+let position=v("rosterPosition");
+let options=[["","Не в стартовом составе / запас"]];
+if(position==="Нападающий"){
+options.push(["lw","Левый крайний"],["c","Центральный"],["rw","Правый крайний"]);
+}else if(position==="Защитник"){
+options.push(["ld","Левый защитник"],["rd","Правый защитник"]);
+}else if(position==="Вратарь"){
+options.push(["starter_goalie","Основной вратарь"]);
+}
+$("rosterRole").innerHTML=options.map(([value,label])=>
+`<option value="${value}">${label}</option>`
+).join("");
+$("rosterRole").value=options.some(x=>x[0]===selected)?selected:"";
 }
 function resetRoster(){
-$("rosterEditId").value="";$("rosterPlayer").value="";$("rosterNumber").value="";$("rosterName").value="";
-$("rosterPosition").value="Нападающий";$("rosterSave").textContent="ДОБАВИТЬ В СОСТАВ";$("rosterCancel").classList.add("hide");
+$("rosterEditId").value="";
+$("rosterPlayer").value="";
+$("rosterNumber").value="";
+$("rosterName").value="";
+$("rosterPosition").value="Нападающий";
+updateRosterRoleOptions("");
+$("rosterSave").textContent="ДОБАВИТЬ В СОСТАВ";
+$("rosterCancel").classList.add("hide");
 }
 $("rosterCancel").onclick=resetRoster;
+$("rosterPosition").onchange=()=>updateRosterRoleOptions("");
 $("rosterPlayer").onchange=()=>{
-let p=players.find(x=>String(x.id)===v("rosterPlayer"));if(!p)return;
-$("rosterNumber").value=p.number??"";$("rosterName").value=p.name||"";$("rosterPosition").value=p.position||"Нападающий";
+let p=players.find(x=>String(x.id)===v("rosterPlayer"));
+if(!p)return;
+$("rosterNumber").value=p.number??"";
+$("rosterName").value=p.name||"";
+$("rosterPosition").value=p.position||"Нападающий";
+updateRosterRoleOptions("");
 };
 $("rosterMatch").onchange=()=>safe(loadRosterAdmin);
 $("rosterSide").onchange=()=>safe(loadRosterAdmin);
+
 async function loadRosterAdmin(){
-if(!v("rosterMatch")){$("rosterList").textContent="Сначала создай или выбери матч";return}
+if(!v("rosterMatch")){
+$("rosterList").textContent="Сначала создай или выбери матч";
+return;
+}
 let info=rosterMatchInfo();if(!info)return;
-let side=v("rosterSide"),teamName=side==="home"?info.home:info.away;
-let rows=await q(db.from("match_roster").select("*").eq("match_id",v("rosterMatch")).eq("team_side",side).order("player_number",{ascending:true}));
-$("rosterList").innerHTML=`<p class="hint">${esc(teamName)} · ${rows.length} игроков</p>`+(rows.map(r=>item(`№${r.player_number??"—"} · ${r.player_name}`,r.position||"Позиция не указана","",act("Изменить","editroster",r.id)+act("Удалить","delroster",r.id,true))).join("")||"Состав пока не заполнен");
+let side=v("rosterSide");
+let teamName=side==="home"?info.home:info.away;
+let rows=await q(db.from("match_roster").select("*")
+.eq("match_id",v("rosterMatch"))
+.eq("team_side",side)
+.order("player_number",{ascending:true}));
+
+const roleNames={
+lw:"Левый крайний",c:"Центральный",rw:"Правый крайний",
+ld:"Левый защитник",rd:"Правый защитник",
+starter_goalie:"Основной вратарь"
+};
+
+$("rosterList").innerHTML=
+`<p class="hint">${esc(teamName)} · ${rows.length} игроков</p>`+
+(rows.map(r=>item(
+`№${r.player_number??"—"} · ${r.player_name}`,
+`${r.position||"Позиция не указана"}${r.starting_role?" · "+roleNames[r.starting_role]:" · Запас"}`,
+"",
+act("Изменить","editroster",r.id)+act("Удалить","delroster",r.id,true)
+)).join("")||"Состав пока не заполнен");
 }
 $("rosterSave").onclick=()=>safe(async()=>{
 if(!v("rosterMatch"))throw Error("Выбери матч");
 if(!v("rosterName"))throw Error("Выбери игрока из базы или введи имя");
-let row={match_id:v("rosterMatch"),team_side:v("rosterSide"),player_number:n("rosterNumber"),player_name:v("rosterName"),position:v("rosterPosition")||null};
-if(v("rosterEditId"))await q(db.from("match_roster").update(row).eq("id",v("rosterEditId")));else await q(db.from("match_roster").insert(row));
-resetRoster();await loadRosterAdmin();say("Состав сохранён");
+
+let role=v("rosterRole")||null;
+let position=v("rosterPosition");
+if(role==="lw"||role==="c"||role==="rw"){
+if(position!=="Нападающий")throw Error("Эта роль предназначена для нападающего");
+}
+if(role==="ld"||role==="rd"){
+if(position!=="Защитник")throw Error("Эта роль предназначена для защитника");
+}
+if(role==="starter_goalie"&&position!=="Вратарь"){
+throw Error("Основным вратарём может быть только вратарь");
+}
+
+let row={
+match_id:v("rosterMatch"),
+team_side:v("rosterSide"),
+player_number:n("rosterNumber"),
+player_name:v("rosterName"),
+position,
+starting_role:role
+};
+
+if(v("rosterEditId")){
+await q(db.from("match_roster").update(row).eq("id",v("rosterEditId")));
+}else{
+await q(db.from("match_roster").insert(row));
+}
+
+resetRoster();
+await loadRosterAdmin();
+say("Состав сохранён");
 });
 
 /* ТУРНИРНАЯ ТАБЛИЦА */
@@ -591,11 +734,16 @@ $("tlist").innerHTML=a.map(r=>`<div class="item"><div class="main"><b>#${r.place
 }
 $("tadd").onclick=()=>safe(async()=>{
 if(!v("tname"))throw Error("Введи команду");
-await q(db.from("standings").insert({place:n("tplace"),team_name:v("tname"),games:n("tgames")||0,wins:n("twins")||0,wins_ot:n("twins_ot")||0,wins_so:n("twins_so")||0,losses:n("tlosses")||0,losses_ot:n("tlosses_ot")||0,losses_so:n("tlosses_so")||0,points:n("tpoints")||0}));
+await q(db.from("standings").insert({
+place:n("tplace"),team_name:v("tname"),games:n("tgames")||0,
+wins:n("twins")||0,wins_ot:n("twins_ot")||0,wins_so:n("twins_so")||0,
+losses:n("tlosses")||0,losses_ot:n("tlosses_ot")||0,
+losses_so:n("tlosses_so")||0,points:n("tpoints")||0
+}));
 await loadTable();say("Строка добавлена");
 });
 
-/* ПРОФИЛИ ИГРОКОВ: ТАБЛИЦА players */
+/* ПРОФИЛИ ИГРОКОВ */
 async function loadPlayers(){
 players=await q(db.from("players").select("*").order("number",{ascending:true}));
 playerOptions();
@@ -623,8 +771,8 @@ let row={
 name:v("pname"),number:n("pnumber"),position:v("pposition"),
 birth_date:v("pbirth")||null,team:v("pteamname")||null,
 height_cm:n("pheight"),weight_kg:n("pweight"),
-favorite_hockey_player:v("pfavoriteplayer")||null,favorite_club:v("pfavoriteclub")||null,
-stats:v("pinfo")||null
+favorite_hockey_player:v("pfavoriteplayer")||null,
+favorite_club:v("pfavoriteclub")||null,stats:v("pinfo")||null
 };
 if(image)row.photo_url=image;
 let playerId;
@@ -641,9 +789,11 @@ playerId=created.id;
 }
 let seasonRow={
 player_id:playerId,season:v("pseason"),
-games:n("pgames")||0,goals:n("pgoals")||0,assists:n("passists")||0,points:n("ppoints")||0,
+games:n("pgames")||0,goals:n("pgoals")||0,
+assists:n("passists")||0,points:n("ppoints")||0,
 plus_minus:n("pplusminus")||0,pim:n("ppim")||0,
-goalie_games:n("pgoaliegames")||0,goals_against:n("pgoalsagainst")||0,gaa:n("pgaa")||0,
+goalie_games:n("pgoaliegames")||0,
+goals_against:n("pgoalsagainst")||0,gaa:n("pgaa")||0,
 updated_at:new Date().toISOString()
 };
 await q(db.from("player_season_stats").upsert(seasonRow,{onConflict:"player_id,season"}));
@@ -666,7 +816,10 @@ $("monthAdd").onclick=()=>safe(async()=>{
 if(!v("monthDate"))throw Error("Выбери месяц");
 if(!v("monthPlayer"))throw Error("Выбери игрока");
 let month=v("monthDate").slice(0,7)+"-01";
-await q(db.from("player_month_candidates").insert({month_start:month,player_id:Number(v("monthPlayer")),description:v("monthDescription")||null}));
+await q(db.from("player_month_candidates").insert({
+month_start:month,player_id:Number(v("monthPlayer")),
+description:v("monthDescription")||null
+}));
 $("monthDescription").value="";await loadMonthCandidates();say("Кандидат добавлен");
 });
 
@@ -677,7 +830,10 @@ $("statlist").innerHTML=a.map(r=>item(`${r.player_number??""} ${r.player_name}`,
 }
 $("statadd").onclick=()=>safe(async()=>{
 if(!v("sname"))throw Error("Введи имя игрока");
-await q(db.from("player_stats").insert({stat_type:v("stype"),player_name:v("sname"),player_number:n("snum"),position:v("spos")||null,value:n("svalue")||0}));
+await q(db.from("player_stats").insert({
+stat_type:v("stype"),player_name:v("sname"),
+player_number:n("snum"),position:v("spos")||null,value:n("svalue")||0
+}));
 await loadStats();say("Статистика сохранена");
 });
 
@@ -689,7 +845,10 @@ $("llist").innerHTML=a.map(r=>item(r.player_name,`${r.leader_type} · ${r.statis
 $("ladd").onclick=()=>safe(async()=>{
 if(!v("lname"))throw Error("Введи имя");
 let path=await up($("lfile").files[0],"leaders");
-await q(db.from("team_leaders").insert({leader_type:v("ltype"),player_name:v("lname"),player_number:n("lnum"),position:v("lpos")||null,statistic:v("lstat")||null,image_path:path}));
+await q(db.from("team_leaders").insert({
+leader_type:v("ltype"),player_name:v("lname"),player_number:n("lnum"),
+position:v("lpos")||null,statistic:v("lstat")||null,image_path:path
+}));
 await loadLeaders();say("Карточка сохранена");
 });
 
@@ -701,11 +860,15 @@ $("alist").innerHTML=a.map(r=>item(r.title,r.album_date||"",r.cover_path,act("Д
 $("aadd").onclick=()=>safe(async()=>{
 if(!v("atitle"))throw Error("Введи название");
 let cover=await up($("acover").files[0],"albums/covers");
-let a=await q(db.from("albums").insert({title:v("atitle"),album_date:v("adate")||null,cover_path:cover}).select().single());
+let a=await q(db.from("albums").insert({
+title:v("atitle"),album_date:v("adate")||null,cover_path:cover
+}).select().single());
 let fs=[...$("aphotos").files];
 for(let i=0;i<fs.length;i++){
 let path=await up(fs[i],"albums/photos");
-await q(db.from("album_photos").insert({album_id:a.id,image_path:path,sort_order:i}));
+await q(db.from("album_photos").insert({
+album_id:a.id,image_path:path,sort_order:i
+}));
 }
 await loadAlbums();say("Альбом создан");
 });
@@ -714,16 +877,24 @@ await loadAlbums();say("Альбом создан");
 async function loadSettings(){
 let a=await q(db.from("site_settings").select("*").order("updated_at",{ascending:false}).limit(1));
 let s=a[0];if(!s)return;
-$("setname").value=s.team_name||"ХК Челны 2011";$("setsubtitle").value=s.subtitle||"Набережные Челны";
-$("setcity").value=s.city||"Набережные Челны";$("setprimary").value=s.primary_color||"#000056";
-$("setaccent").value=s.accent_color||"#0875dc";$("setgold").value=s.gold_color||"#ffcd00";
+$("setname").value=s.team_name||"ХК Челны 2011";
+$("setsubtitle").value=s.subtitle||"Набережные Челны";
+$("setcity").value=s.city||"Набережные Челны";
+$("setprimary").value=s.primary_color||"#000056";
+$("setaccent").value=s.accent_color||"#0875dc";
+$("setgold").value=s.gold_color||"#ffcd00";
 }
 $("setsave").onclick=()=>safe(async()=>{
 let a=await q(db.from("site_settings").select("id").order("updated_at",{ascending:false}).limit(1));
 let logo=await up($("setlogo").files[0],"branding");
-let r={team_name:v("setname"),subtitle:v("setsubtitle"),city:v("setcity"),primary_color:v("setprimary"),accent_color:v("setaccent"),gold_color:v("setgold"),updated_at:new Date().toISOString()};
+let r={
+team_name:v("setname"),subtitle:v("setsubtitle"),city:v("setcity"),
+primary_color:v("setprimary"),accent_color:v("setaccent"),
+gold_color:v("setgold"),updated_at:new Date().toISOString()
+};
 if(logo)r.logo_path=logo;
-if(a.length)await q(db.from("site_settings").update(r).eq("id",a[0].id));else await q(db.from("site_settings").insert(r));
+if(a.length)await q(db.from("site_settings").update(r).eq("id",a[0].id));
+else await q(db.from("site_settings").insert(r));
 say("Настройки сохранены");
 });
 
@@ -735,19 +906,28 @@ let a=b.dataset.a,id=b.dataset.id;
 
 if(a==="editnews"){
 let r=await q(db.from("news").select("*").eq("id",id).single());
-$("nid").value=id;$("ntitle").value=r.title||"";$("ntag").value=r.tag||"Новость";$("ntext").value=r.text||"";
-$("ndate").value=dt(r.published_at);newsImg=r.image_path;$("nh").textContent="Редактировать новость";
-$("nsave").textContent="СОХРАНИТЬ";$("nreset").classList.remove("hide");document.querySelector('[data-tab="news"]').click();
+$("nid").value=id;$("ntitle").value=r.title||"";
+$("ntag").value=r.tag||"Новость";$("ntext").value=r.text||"";
+$("ndate").value=dt(r.published_at);newsImg=r.image_path;
+$("nh").textContent="Редактировать новость";
+$("nsave").textContent="СОХРАНИТЬ";$("nreset").classList.remove("hide");
+document.querySelector('[data-tab="news"]').click();
 }
 if(a==="delnews"){await q(db.from("news").delete().eq("id",id));await loadNews()}
 if(a==="delstory"){await q(db.from("stories").delete().eq("id",id));await loadStories()}
 
 if(a==="editmatch"){
-let r=matches.find(x=>x.id===id);if(!r)return;
-$("mid").value=id;$("home").value=r.home_club_id;$("away").value=r.away_club_id;$("mdate").value=dt(r.match_date);
-$("mstatus").value=r.status||"scheduled";$("hs").value=r.home_score??"";$("as").value=r.away_score??"";
-$("comp").value=r.competition||"";$("venue").value=r.venue||"";$("stream").value=r.stream_url||"";
-$("mh").textContent="Редактировать матч";$("mreset").classList.remove("hide");document.querySelector('[data-tab="matches"]').click();
+let r=matches.find(x=>String(x.id)===String(id));if(!r)return;
+$("mid").value=id;$("home").value=r.home_club_id;$("away").value=r.away_club_id;
+$("mdate").value=dt(r.match_date);$("mstatus").value=r.status||"scheduled";
+$("hs").value=r.home_score??"";$("as").value=r.away_score??"";
+$("comp").value=r.competition||"";$("venue").value=r.venue||"";
+$("stream").value=r.stream_url||"";
+$("homeCoach").value=r.home_coach||"";
+$("awayCoach").value=r.away_coach||"";
+$("mh").textContent="Редактировать матч";
+$("mreset").classList.remove("hide");
+document.querySelector('[data-tab="matches"]').click();
 }
 if(a==="delmatch"){
 await q(db.from("match_goals").delete().eq("match_id",id));
@@ -757,8 +937,9 @@ await q(db.from("matches").delete().eq("id",id));
 await loadMatches();say("Матч удалён");
 }
 if(a==="events"){
-document.querySelector('[data-tab="matches"]').click();$("eventbox").classList.remove("hide");$("eventid").value=id;
-let m=matches.find(x=>x.id===id);
+document.querySelector('[data-tab="matches"]').click();
+$("eventbox").classList.remove("hide");$("eventid").value=id;
+let m=matches.find(x=>String(x.id)===String(id));
 if(m){
 let h=clubs.find(c=>c.id===m.home_club_id)?.name||"Хозяева";
 let aw=clubs.find(c=>c.id===m.away_club_id)?.name||"Гости";
@@ -768,68 +949,109 @@ resetGoal();resetPenalty();await loadEvents();
 }
 if(a==="editgoal"){
 let r=await q(db.from("match_goals").select("*").eq("id",id).single());
-$("goalEditId").value=id;$("gteam").value=r.team_side;$("gminute").value=r.goal_time||"";
+$("goalEditId").value=id;$("gteam").value=r.team_side;
+$("gminute").value=r.goal_time||"";$("gperiod").value=String(r.period||1);
 $("gnum").value=r.player_number??"";$("gplayer").value=r.player_name||"";
 $("gstrength").value=["even","power","short"].includes(r.strength)?r.strength:"even";
-$("gadd").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";$("gcancel").classList.remove("hide");
+$("gadd").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";
+$("gcancel").classList.remove("hide");
 }
-if(a==="delgoal"){await q(db.from("match_goals").delete().eq("id",id));await loadEvents();say("Гол удалён")}
+if(a==="delgoal"){
+await q(db.from("match_goals").delete().eq("id",id));
+await loadEvents();say("Гол удалён");
+}
 if(a==="editpen"){
 let r=await q(db.from("match_penalties").select("*").eq("id",id).single());
-$("penaltyEditId").value=id;$("pteam").value=r.team_side;$("ptime").value=r.penalty_time||"";
-$("pnum").value=r.player_number??"";$("pplayer").value=r.player_name||"";$("preason").value=r.reason||"";
-$("pminutes").value=String(r.minutes);$("padd").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";$("pcancel").classList.remove("hide");
+$("penaltyEditId").value=id;$("pteam").value=r.team_side;
+$("ptime").value=r.penalty_time||"";$("pperiod").value=String(r.period||1);
+$("pnum").value=r.player_number??"";$("pplayer").value=r.player_name||"";
+$("preason").value=r.reason||"";$("pminutes").value=String(r.minutes);
+$("padd").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";
+$("pcancel").classList.remove("hide");
 }
-if(a==="delpen"){await q(db.from("match_penalties").delete().eq("id",id));await loadEvents();say("Удаление удалено")}
-if(a==="delcandidate"){await q(db.from("match_player_candidates").delete().eq("id",id));await loadMatchCandidates();say("Кандидат удалён")}
-if(a==="delmonthcandidate"){await q(db.from("player_month_candidates").delete().eq("id",id));await loadMonthCandidates();say("Кандидат удалён")}
+if(a==="delpen"){
+await q(db.from("match_penalties").delete().eq("id",id));
+await loadEvents();say("Удаление удалено");
+}
+if(a==="delcandidate"){
+await q(db.from("match_player_candidates").delete().eq("id",id));
+await loadMatchCandidates();say("Кандидат удалён");
+}
+if(a==="delmonthcandidate"){
+await q(db.from("player_month_candidates").delete().eq("id",id));
+await loadMonthCandidates();say("Кандидат удалён");
+}
 
 if(a==="delclub"){await q(db.from("clubs").delete().eq("id",id));await loadMatches()}
 if(a==="savetable"){
-let r={};document.querySelectorAll(`[data-tid="${id}"]`).forEach(x=>r[x.dataset.k]=Number(x.value)||0);
+let r={};
+document.querySelectorAll(`[data-tid="${id}"]`).forEach(x=>r[x.dataset.k]=Number(x.value)||0);
 await q(db.from("standings").update(r).eq("id",id));await loadTable();
 }
 if(a==="deltable"){await q(db.from("standings").delete().eq("id",id));await loadTable()}
 
 if(a==="editplayer"){
 let r=await q(db.from("players").select("*").eq("id",id).single());
-$("pid").value=r.id;$("pname").value=r.name||"";$("pnumber").value=r.number??"";
-$("pposition").value=r.position||"Нападающий";$("pbirth").value=r.birth_date||"";
-$("pteamname").value=r.team||"";$("pheight").value=r.height_cm??"";$("pweight").value=r.weight_kg??"";
-$("pfavoriteplayer").value=r.favorite_hockey_player||"";$("pfavoriteclub").value=r.favorite_club||"";
+$("pid").value=r.id;$("pname").value=r.name||"";
+$("pnumber").value=r.number??"";$("pposition").value=r.position||"Нападающий";
+$("pbirth").value=r.birth_date||"";$("pteamname").value=r.team||"";
+$("pheight").value=r.height_cm??"";$("pweight").value=r.weight_kg??"";
+$("pfavoriteplayer").value=r.favorite_hockey_player||"";
+$("pfavoriteclub").value=r.favorite_club||"";
 $("pinfo").value=r.stats||"";$("pfile").value="";
 let season=v("pseason")||currentSeason;
-let s=await q(db.from("player_season_stats").select("*").eq("player_id",id).eq("season",season).maybeSingle());
+let s=await q(db.from("player_season_stats").select("*")
+.eq("player_id",id).eq("season",season).maybeSingle());
 $("pseason").value=season;
-$("pgames").value=s?.games??0;$("pgoals").value=s?.goals??0;$("passists").value=s?.assists??0;
-$("ppoints").value=s?.points??0;$("pplusminus").value=s?.plus_minus??0;$("ppim").value=s?.pim??0;
-$("pgoaliegames").value=s?.goalie_games??0;$("pgoalsagainst").value=s?.goals_against??0;$("pgaa").value=s?.gaa??0;
-$("ph").textContent="Редактировать профиль";$("psave").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";$("preset").classList.remove("hide");
+$("pgames").value=s?.games??0;$("pgoals").value=s?.goals??0;
+$("passists").value=s?.assists??0;$("ppoints").value=s?.points??0;
+$("pplusminus").value=s?.plus_minus??0;$("ppim").value=s?.pim??0;
+$("pgoaliegames").value=s?.goalie_games??0;
+$("pgoalsagainst").value=s?.goals_against??0;$("pgaa").value=s?.gaa??0;
+$("ph").textContent="Редактировать профиль";
+$("psave").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";
+$("preset").classList.remove("hide");
 document.querySelector('[data-tab="players"]').click();
 }
 if(a==="delplayer"){
 if(!confirm("Удалить профиль игрока? Его сезонная статистика удалится вместе с ним."))return;
-await q(db.from("players").delete().eq("id",id));await loadPlayers();say("Игрок удалён");
+await q(db.from("players").delete().eq("id",id));
+await loadPlayers();say("Игрок удалён");
 }
 if(a==="editroster"){
 let r=await q(db.from("match_roster").select("*").eq("id",id).single());
-$("rosterEditId").value=r.id;$("rosterMatch").value=r.match_id;$("rosterSide").value=r.team_side;
-$("rosterPlayer").value="";$("rosterNumber").value=r.player_number??"";$("rosterName").value=r.player_name||"";
-$("rosterPosition").value=r.position||"Нападающий";$("rosterSave").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";
+$("rosterEditId").value=r.id;
+$("rosterMatch").value=r.match_id;
+$("rosterSide").value=r.team_side;
+$("rosterPlayer").value="";
+$("rosterNumber").value=r.player_number??"";
+$("rosterName").value=r.player_name||"";
+$("rosterPosition").value=r.position||"Нападающий";
+updateRosterRoleOptions(r.starting_role||"");
+$("rosterSave").textContent="СОХРАНИТЬ ИЗМЕНЕНИЯ";
 $("rosterCancel").classList.remove("hide");
+document.querySelector('[data-tab="rosters"]').click();
+await loadRosterAdmin();
 }
-if(a==="delroster"){await q(db.from("match_roster").delete().eq("id",id));await loadRosterAdmin();say("Игрок удалён из состава")}
+if(a==="delroster"){
+await q(db.from("match_roster").delete().eq("id",id));
+await loadRosterAdmin();say("Игрок удалён из состава");
+}
 if(a==="delstat"){await q(db.from("player_stats").delete().eq("id",id));await loadStats()}
 if(a==="delleader"){await q(db.from("team_leaders").delete().eq("id",id));await loadLeaders()}
 if(a==="delalbum"){
-await q(db.from("album_photos").delete().eq("album_id",id));await q(db.from("albums").delete().eq("id",id));await loadAlbums();
+await q(db.from("album_photos").delete().eq("album_id",id));
+await q(db.from("albums").delete().eq("id",id));await loadAlbums();
 }
 if(a==="addphotos"){
-let f=document.createElement("input");f.type="file";f.multiple=true;f.accept="image/*";
+let f=document.createElement("input");
+f.type="file";f.multiple=true;f.accept="image/*";
 f.onchange=()=>safe(async()=>{
 for(let i=0;i<f.files.length;i++){
 let path=await up(f.files[i],"albums/photos");
-await q(db.from("album_photos").insert({album_id:id,image_path:path,sort_order:Date.now()+i}));
+await q(db.from("album_photos").insert({
+album_id:id,image_path:path,sort_order:Date.now()+i
+}));
 }
 say("Фотографии добавлены");
 });
@@ -840,7 +1062,10 @@ f.click();
 
 /* ЗАПУСК */
 async function init(){
-if(!window.supabaseClient){$("loginErr").textContent="Не найден js/config.js или window.supabaseClient";return}
+if(!window.supabaseClient){
+$("loginErr").textContent="Не найден js/config.js или window.supabaseClient";
+return;
+}
 db=window.supabaseClient;
 let{data}=await db.auth.getSession();
 if(data.session)appView();else loginView();
