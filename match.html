@@ -161,10 +161,56 @@
       gap: 24px;
     }
 
-    .match-roster-title {
-      margin: 0 0 12px;
+    .match-lineup-team {
+      min-width: 0;
+      margin-bottom: 10px;
+    }
+
+    .match-lineup-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #edf0f5;
+    }
+
+    .match-lineup-heading h3 {
+      margin: 0;
       color: var(--primary, #000056);
-      font-weight: 800;
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .match-lineup-heading span {
+      color: #81899a;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .match-coach {
+      margin: 0 0 20px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #f2f4f8;
+      color: #303b54;
+      font-size: 13px;
+    }
+
+    .match-coach strong {
+      color: var(--primary, #000056);
+    }
+
+    .match-roster-section {
+      margin-top: 20px;
+    }
+
+    .match-roster-section h4 {
+      margin: 0 0 8px;
+      color: var(--primary, #000056);
+      font-size: 14px;
+      font-weight: 900;
     }
 
     .match-player {
@@ -186,192 +232,22 @@
       font-size: 12px;
     }
 
+    .match-roster-section .match-player:last-child {
+      border-bottom: 0;
+    }
+
     .match-page-state {
       padding: 45px 10px;
       text-align: center;
       color: #737b8d;
     }
 
-    /* =====================================
-       ХОККЕЙНАЯ ДОСКА
-    ===================================== */
-
-    .match-lineup {
-      margin-bottom: 28px;
-    }
-
-    .match-lineup-team {
-      margin-bottom: 30px;
-    }
-
-    .match-lineup-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .match-lineup-heading h3 {
-      margin: 0;
-      color: var(--primary, #000056);
-      font-size: 19px;
-    }
-
-    .match-lineup-heading span {
-      color: #81899a;
-      font-size: 12px;
-    }
-
-    .rink-board {
-      position: relative;
-      width: 100%;
-      max-width: 620px;
-      margin: 0 auto;
-      overflow: hidden;
-      border: 5px solid #d9e0e9;
-      border-radius: 48% / 8%;
-      background:
-        linear-gradient(
-          to bottom,
-          transparent 49.5%,
-          rgba(0, 0, 86, .18) 49.5%,
-          rgba(0, 0, 86, .18) 50.5%,
-          transparent 50.5%
-        ),
-        #f7fbff;
-      aspect-ratio: 1.18 / 1;
-      box-shadow: inset 0 0 0 2px #c5d1df;
-    }
-
-    .rink-board::before,
-    .rink-board::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: rgba(210, 35, 55, .45);
-    }
-
-    .rink-board::before {
-      top: 24%;
-    }
-
-    .rink-board::after {
-      bottom: 24%;
-    }
-
-    .rink-center-circle {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 27%;
-      aspect-ratio: 1;
-      border: 2px solid rgba(0, 0, 86, .2);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .rink-blue-line {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: rgba(0, 0, 86, .2);
-    }
-
-    .rink-blue-line.left {
-      left: 25%;
-    }
-
-    .rink-blue-line.right {
-      right: 25%;
-    }
-
-    .rink-goal-crease {
-      position: absolute;
-      left: 50%;
-      bottom: 3%;
-      width: 22%;
-      height: 13%;
-      border: 2px solid rgba(0, 0, 86, .35);
-      border-bottom: 0;
-      border-radius: 50% 50% 0 0;
-      transform: translateX(-50%);
-    }
-
-    .rink-player {
-      position: absolute;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: clamp(36px, 8vw, 48px);
-      height: clamp(36px, 8vw, 48px);
-      border: 2px solid #000056;
-      border-radius: 50%;
-      background: #000056;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 900;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 2px 7px rgba(0,0,0,.18);
-    }
-
-    .rink-player.goalie {
-      border-color: #e1a900;
-      background: #ffcd00;
-      color: #000056;
-    }
-
-    .rink-player-label {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 50%;
-      width: 90px;
-      color: #24304b;
-      font-size: 10px;
-      font-weight: 800;
-      line-height: 1.2;
-      text-align: center;
-      transform: translateX(-50%);
-      overflow-wrap: anywhere;
-    }
-
-    .rink-player.goalie .rink-player-label {
-      color: #24304b;
-    }
-
-    .match-coach {
-      margin-top: 15px;
-      padding: 12px 14px;
-      border-radius: 8px;
-      background: #f2f4f8;
-      color: #303b54;
-      font-size: 13px;
-    }
-
-    .match-coach strong {
-      color: var(--primary, #000056);
-    }
-
-    .match-roster-section {
-      margin-top: 22px;
-    }
-
-    .match-roster-section h4 {
-      margin: 0 0 8px;
-      color: var(--primary, #000056);
-      font-size: 14px;
-    }
-
-    .match-roster-section .match-player:last-child {
-      border-bottom: 0;
-    }
-
     @media (max-width: 600px) {
+      .match-page {
+        width: min(100% - 24px, 1000px);
+        margin-top: 22px;
+      }
+
       .match-hero {
         padding: 22px 12px;
       }
@@ -410,10 +286,6 @@
       .match-event-team {
         grid-column: 2;
         text-align: left;
-      }
-
-      .rink-board {
-        border-width: 3px;
       }
     }
   </style>
