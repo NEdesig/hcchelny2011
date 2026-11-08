@@ -1,10 +1,14 @@
+
 (() => {
   "use strict";
 
   const db = window.supabaseClient;
   const BUCKET = window.STORAGE_BUCKET || "site-media";
   const root = document.getElementById("matchContent");
+
   const VOTER_KEY = "hcchelny_match_voter_token";
+  const MVP_VOTER_KEY = "hcchelny_mvp_voter_token";
+  const MVP_VOTED_KEY = "hcchelny_mvp_voted_matches";
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -145,7 +149,7 @@
   }
 
   // =========================================
-  // ГОЛОСОВАНИЕ ЗА ПОБЕДИТЕЛЯ
+  // ОБЩИЕ ФУНКЦИИ ГОЛОСОВАНИЯ
   // =========================================
 
   function createUUID() {
@@ -176,26 +180,38 @@
     throw new Error("Браузер не поддерживает генерацию UUID.");
   }
 
-  function getVoterToken() {
+  function getStoredToken(key, temporaryName) {
     try {
-      let token = localStorage.getItem(VOTER_KEY);
+      let token = localStorage.getItem(key);
 
       if (!token) {
         token = createUUID();
-        localStorage.setItem(VOTER_KEY, token);
+        localStorage.setItem(key, token);
       }
 
       return token;
     } catch (error) {
       console.warn("Ошибка сохранения токена:", error);
 
-      if (!window.matchWinnerTemporaryToken) {
-        window.matchWinnerTemporaryToken = createUUID();
+      if (!window[temporaryName]) {
+        window[temporaryName] = createUUID();
       }
 
-      return window.matchWinnerTemporaryToken;
+      return window[temporaryName];
     }
   }
+
+  function getVoterToken() {
+    return getStoredToken(VOTER_KEY, "matchWinnerTemporaryToken");
+  }
+
+  function getMvpVoterToken() {
+    return getStoredToken(MVP_VOTER_KEY, "matchMvpTemporaryToken");
+  }
+
+  // =========================================
+  // ГОЛОСОВАНИЕ ЗА ПОБЕДИТЕЛЯ
+  // =========================================
 
   function injectPollStyles() {
     if (document.getElementById("matchWinnerPollStyles")) return;
@@ -641,6 +657,452 @@
   }
 
   // =========================================
+  // ГОЛОСОВАНИЕ ЗА ЛУЧШЕГО ИГРОКА
+  // =========================================
+
+  function injectMvpStyles() {
+    if (document.getElementById("matchMvpStyles")) return;
+
+    const style = document.createElement("style");
+    style.id = "matchMvpStyles";
+
+    style.textContent = `
+      .mvp-poll {
+        margin: 26px 0 34px;
+        padding: 24px 20px;
+        border-radius: 12px;
+        background: #101522;
+        color: #fff;
+      }
+
+      .mvp-poll-heading {
+        margin-bottom: 22px;
+        text-align: center;
+      }
+
+      .mvp-poll-title {
+        margin: 0 0 8px;
+        font-size: clamp(24px, 5vw, 34px);
+        line-height: 1.15;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .mvp-poll-subtitle {
+        margin: 0;
+        color: #aab8c5;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .mvp-candidates {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .mvp-candidate {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        padding: 17px;
+        border: 1px solid #303c50;
+        border-radius: 10px;
+        background: #192333;
+      }
+
+      .mvp-candidate-number {
+        margin-bottom: 9px;
+        color: #ffcd00;
+        font-size: 28px;
+        line-height: 1;
+        font-weight: 900;
+      }
+
+      .mvp-candidate-name {
+        margin: 0 0 5px;
+        font-size: 19px;
+        line-height: 1.2;
+        font-weight: 900;
+        overflow-wrap: anywhere;
+      }
+
+      .mvp-candidate-position {
+        margin-bottom: 14px;
+        color: #aab8c5;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .mvp-candidate-stat {
+        margin-bottom: 9px;
+        padding: 10px;
+        border-radius: 7px;
+        background: #253247;
+        font-size: 14px;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+      }
+
+      .mvp-candidate-fact {
+        margin-bottom: 15px;
+        color: #c4ced9;
+        font-size: 13px;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+      }
+
+      .mvp-candidate-stat strong,
+      .mvp-candidate-fact strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #ffcd00;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+      }
+
+      .mvp-vote-button {
+        width: 100%;
+        min-height: 43px;
+        margin-top: auto;
+        padding: 10px 12px;
+        border: 0;
+        border-radius: 6px;
+        background: #ffcd00;
+        color: #101522;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 900;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: .2s ease;
+      }
+
+      .mvp-vote-button:hover:not(:disabled) {
+        background: #ffe36a;
+        transform: translateY(-2px);
+      }
+
+      .mvp-vote-button:disabled {
+        opacity: .55;
+        cursor: default;
+      }
+
+      .mvp-vote-button.selected {
+        background: #263f36;
+        color: #b9f5ce;
+        opacity: 1;
+      }
+
+      .mvp-poll-message {
+        min-height: 20px;
+        margin-top: 18px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+      }
+
+      .mvp-poll-message.error {
+        color: #ff8585;
+      }
+
+      .mvp-poll-empty {
+        padding: 20px;
+        color: #aab8c5;
+        text-align: center;
+      }
+
+      @media (max-width: 600px) {
+        .mvp-poll {
+          padding: 22px 12px;
+        }
+
+        .mvp-candidates {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+
+        .mvp-candidate {
+          padding: 15px;
+        }
+
+        .mvp-candidate-name {
+          font-size: 18px;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  function getMvpVotedMatches() {
+    try {
+      const value = localStorage.getItem(MVP_VOTED_KEY);
+      const parsed = value ? JSON.parse(value) : [];
+
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function hasVotedForMvp(matchId) {
+    return getMvpVotedMatches().includes(String(matchId));
+  }
+
+  function saveMvpVote(matchId) {
+    try {
+      const voted = getMvpVotedMatches();
+      const id = String(matchId);
+
+      if (!voted.includes(id)) {
+        voted.push(id);
+        localStorage.setItem(MVP_VOTED_KEY, JSON.stringify(voted));
+      }
+    } catch (error) {
+      console.warn("Не удалось сохранить отметку о голосовании:", error);
+    }
+  }
+
+  function mvpCandidateMarkup(candidate, voted) {
+    const number =
+      candidate.player_number !== null &&
+      candidate.player_number !== undefined &&
+      candidate.player_number !== ""
+        ? `#${esc(candidate.player_number)}`
+        : "№ —";
+
+    const name = candidate.display_name || "Игрок";
+    const position = candidate.player_position || "Позиция не указана";
+    const statistics = candidate.statistics_text || "";
+    const fact = candidate.fact_text || "";
+
+    return `
+      <article class="mvp-candidate">
+
+        <div class="mvp-candidate-number">
+          ${number}
+        </div>
+
+        <h3 class="mvp-candidate-name">
+          ${esc(name)}
+        </h3>
+
+        <div class="mvp-candidate-position">
+          ${esc(position)}
+        </div>
+
+        ${
+          statistics
+            ? `
+              <div class="mvp-candidate-stat">
+                <strong>Статистика</strong>
+                ${esc(statistics)}
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          fact
+            ? `
+              <div class="mvp-candidate-fact">
+                <strong>Факт о матче</strong>
+                ${esc(fact)}
+              </div>
+            `
+            : ""
+        }
+
+        <button
+          class="mvp-vote-button ${voted ? "selected" : ""}"
+          type="button"
+          data-candidate-id="${esc(candidate.id)}"
+          ${voted ? "disabled" : ""}
+        >
+          ${voted ? "Вы уже проголосовали" : "Проголосовать"}
+        </button>
+
+      </article>
+    `;
+  }
+
+  async function submitMvpVote(matchId, candidateId, buttons) {
+    const message = document.getElementById("mvpPollMessage");
+
+    if (!message) return;
+
+    if (hasVotedForMvp(matchId)) {
+      message.textContent = "Вы уже голосовали в этом матче.";
+      message.classList.remove("error");
+
+      buttons.forEach(button => {
+        button.disabled = true;
+        button.textContent = "Вы уже проголосовали";
+        button.classList.add("selected");
+      });
+
+      return;
+    }
+
+    buttons.forEach(button => {
+      button.disabled = true;
+    });
+
+    message.classList.remove("error");
+    message.textContent = "Сохраняем ваш голос…";
+
+    try {
+      const { error } = await db
+        .from("match_player_votes")
+        .insert({
+          match_id: matchId,
+          candidate_id: candidateId,
+          device_id: getMvpVoterToken()
+        });
+
+      if (error) {
+        console.error("Ошибка записи MVP-голоса:", error);
+
+        message.classList.add("error");
+
+        if (error.code === "23505") {
+          message.textContent =
+            "С этого устройства уже голосовали за лучшего игрока матча.";
+        } else {
+          message.textContent =
+            "Не удалось сохранить голос: " +
+            (error.message || "ошибка базы данных");
+        }
+
+        buttons.forEach(button => {
+          button.disabled = false;
+        });
+
+        return;
+      }
+
+      saveMvpVote(matchId);
+
+      message.textContent = "Ваш голос за лучшего игрока учтён!";
+
+      buttons.forEach(button => {
+        button.disabled = true;
+        button.textContent = "Вы уже проголосовали";
+        button.classList.add("selected");
+      });
+
+    } catch (error) {
+      console.error("Критическая ошибка MVP-голосования:", error);
+
+      message.classList.add("error");
+      message.textContent =
+        "Ошибка: " + (error?.message || String(error));
+
+      buttons.forEach(button => {
+        button.disabled = false;
+      });
+    }
+  }
+
+  async function loadMvpPoll(matchId) {
+    const container = document.getElementById("mvpPollContainer");
+    if (!container) return;
+
+    injectMvpStyles();
+
+    try {
+      const { data, error } = await db
+        .from("match_player_candidates")
+        .select("*")
+        .eq("match_id", matchId)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Ошибка загрузки кандидатов MVP:", error);
+
+        container.innerHTML = `
+          <section class="mvp-poll">
+            <div class="mvp-poll-heading">
+              <h2 class="mvp-poll-title">Лучший игрок матча</h2>
+            </div>
+
+            <div class="mvp-poll-message error">
+              Не удалось загрузить кандидатов:
+              ${esc(error.message || "ошибка базы данных")}
+            </div>
+          </section>
+        `;
+
+        return;
+      }
+
+      if (!data?.length) {
+        container.innerHTML = "";
+        return;
+      }
+
+      const voted = hasVotedForMvp(matchId);
+
+      container.innerHTML = `
+        <section class="mvp-poll">
+
+          <div class="mvp-poll-heading">
+            <h2 class="mvp-poll-title">Лучший игрок матча</h2>
+
+            <p class="mvp-poll-subtitle">
+              Выберите хоккеиста, который проявил себя лучше остальных
+            </p>
+          </div>
+
+          <div class="mvp-candidates">
+            ${data.map(candidate =>
+              mvpCandidateMarkup(candidate, voted)
+            ).join("")}
+          </div>
+
+          <div
+            class="mvp-poll-message"
+            id="mvpPollMessage"
+            aria-live="polite"
+          >
+            ${voted ? "Вы уже проголосовали в этом матче." : ""}
+          </div>
+
+        </section>
+      `;
+
+      const buttons = Array.from(
+        container.querySelectorAll(".mvp-vote-button")
+      );
+
+      buttons.forEach(button => {
+        button.addEventListener("click", () => {
+          submitMvpVote(
+            matchId,
+            button.dataset.candidateId,
+            buttons
+          );
+        });
+      });
+
+    } catch (error) {
+      console.error("Ошибка MVP-голосования:", error);
+
+      container.innerHTML = `
+        <section class="mvp-poll">
+          <div class="mvp-poll-title">Лучший игрок матча</div>
+          <div class="mvp-poll-message error">
+            ${esc(error?.message || "Не удалось загрузить голосование.")}
+          </div>
+        </section>
+      `;
+    }
+  }
+
+  // =========================================
   // СОСТАВЫ КОМАНД
   // =========================================
 
@@ -1077,6 +1539,8 @@
 
       <div id="winnerPollContainer"></div>
 
+      <div id="mvpPollContainer"></div>
+
       <section class="match-details">
 
         <div class="match-detail-card">
@@ -1115,7 +1579,8 @@
     await Promise.all([
       loadEvents(match.id, home, away),
       loadRoster(match.id, home, away, match),
-      loadWinnerPoll(match, home, away)
+      loadWinnerPoll(match, home, away),
+      loadMvpPoll(match.id)
     ]);
   }
 
