@@ -795,6 +795,57 @@
         opacity: 1;
       }
 
+      .mvp-results {
+        margin: 0 0 15px;
+        padding-top: 13px;
+        border-top: 1px solid #303c50;
+      }
+
+      .mvp-results-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .mvp-votes-count {
+        color: #aab8c5;
+      }
+
+      .mvp-percent {
+        color: #ffcd00;
+        font-size: 21px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .mvp-progress {
+        width: 100%;
+        height: 9px;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #344154;
+      }
+
+      .mvp-progress-fill {
+        height: 100%;
+        width: 0;
+        border-radius: inherit;
+        background: #ffcd00;
+        transition: width .3s ease;
+      }
+
+      .mvp-poll-total {
+        margin-top: 19px;
+        color: #aab8c5;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
       .mvp-poll-message {
         min-height: 20px;
         margin-top: 18px;
@@ -866,7 +917,7 @@
     }
   }
 
-  function mvpCandidateMarkup(candidate, voted) {
+  function mvpCandidateMarkup(candidate, voted, result) {
     const number =
       candidate.player_number !== null &&
       candidate.player_number !== undefined &&
@@ -878,6 +929,13 @@
     const position = candidate.player_position || "Позиция не указана";
     const statistics = candidate.statistics_text || "";
     const fact = candidate.fact_text || "";
+
+    const votes = Number(result?.votes || 0);
+    const total = Number(result?.total_votes || 0);
+
+    const percent = total > 0
+      ? Math.round(votes / total * 100)
+      : 0;
 
     return `
       <article class="mvp-candidate">
@@ -916,6 +974,32 @@
             : ""
         }
 
+        <div class="mvp-results">
+          <div class="mvp-results-top">
+            <span class="mvp-votes-count">
+              ${votes} ${getVoteWord(votes)}
+            </span>
+
+            <span class="mvp-percent">
+              ${percent}%
+            </span>
+          </div>
+
+          <div
+            class="mvp-progress"
+            role="progressbar"
+            aria-label="Процент голосов ${esc(name)}"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="${percent}"
+          >
+            <div
+              class="mvp-progress-fill"
+              style="width: ${percent}%"
+            ></div>
+          </div>
+        </div>
+
         <button
           class="mvp-vote-button ${voted ? "selected" : ""}"
           type="button"
@@ -927,6 +1011,30 @@
 
       </article>
     `;
+  }
+
+  function getVoteWord(number) {
+    const n = Math.abs(Number(number)) % 100;
+    const last = n % 10;
+
+    if (n > 10 && n < 20) return "голосов";
+    if (last === 1) return "голос";
+    if (last >= 2 && last <= 4) return "голоса";
+
+    return "голосов";
+  }
+
+  async function getMvpResults(matchId) {
+    const { data, error } = await db.rpc(
+      "get_match_player_poll",
+      {
+        p_match_id: String(matchId)
+      }
+    );
+
+    if (error) throw error;
+
+    return data || [];
   }
 
   async function submitMvpVote(matchId, candidateId, buttons) {
@@ -988,11 +1096,8 @@
 
       message.textContent = "Ваш голос за лучшего игрока учтён!";
 
-      buttons.forEach(button => {
-        button.disabled = true;
-        button.textContent = "Вы уже проголосовали";
-        button.classList.add("selected");
-      });
+      // Обновляем проценты и количество голосов сразу после голосования.
+      await loadMvpPoll(matchId);
 
     } catch (error) {
       console.error("Критическая ошибка MVP-голосования:", error);
@@ -1044,6 +1149,23 @@
         return;
       }
 
+      // Получаем агрегированные результаты через RPC.
+      const pollData = await getMvpResults(matchId);
+
+      const resultsMap = new Map(
+        pollData.map(item => [
+          String(item.candidate_id),
+          {
+            votes: Number(item.votes || 0),
+            total_votes: Number(item.total_votes || 0)
+          }
+        ])
+      );
+
+      const totalVotes = pollData.length
+        ? Number(pollData[0].total_votes || 0)
+        : 0;
+
       const voted = hasVotedForMvp(matchId);
 
       container.innerHTML = `
@@ -1059,8 +1181,16 @@
 
           <div class="mvp-candidates">
             ${data.map(candidate =>
-              mvpCandidateMarkup(candidate, voted)
+              mvpCandidateMarkup(
+                candidate,
+                voted,
+                resultsMap.get(String(candidate.id))
+              )
             ).join("")}
+          </div>
+
+          <div class="mvp-poll-total">
+            Всего проголосовало: ${totalVotes}
           </div>
 
           <div
